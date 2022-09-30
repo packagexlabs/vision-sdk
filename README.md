@@ -19,7 +19,7 @@ import VisionSDK
 
 ### Add `Privacy - Camera Usage Description` to Info.plist file
 
-<img src="https://raw.githubusercontent.com/mercari/QRScanner/master/images/privacy_camera.png" width="500">
+<img src="https://github.com/packagexlabs/vision-sdk-sample-code/blob/main/Images/PermissionSettings.png" width="500">
 
 ### The Basis Of Usage
 
