@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "vision-sdk-sample-code",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/packagexlabs/vision-sdk-sample-code",
+      "state" : {
+        "branch" : "main",
+        "revision" : "4176c1d73511ed48d0e7acac76adccfb13c6c710"
+      }
+    }
+  ],
+  "version" : 2
+}

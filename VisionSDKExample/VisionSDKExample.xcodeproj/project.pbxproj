@@ -1,0 +1,447 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03378E5C28A320F600A1A6FF /* VisionSDKExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03378E5B28A320F600A1A6FF /* VisionSDKExampleApp.swift */; };
+		03378E5E28A320F600A1A6FF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03378E5D28A320F600A1A6FF /* ContentView.swift */; };
+		03378E6028A320F900A1A6FF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 03378E5F28A320F900A1A6FF /* Assets.xcassets */; };
+		03378E6328A320F900A1A6FF /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 03378E6228A320F900A1A6FF /* Preview Assets.xcassets */; };
+		03378E6C28A3216A00A1A6FF /* BarCodeViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03378E6928A3216A00A1A6FF /* BarCodeViewRepresentable.swift */; };
+		03378E6D28A3216A00A1A6FF /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03378E6A28A3216A00A1A6FF /* Models.swift */; };
+		03378E6E28A3216A00A1A6FF /* BarcodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03378E6B28A3216A00A1A6FF /* BarcodeViewController.swift */; };
+		03378E7428A3217800A1A6FF /* RoundButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03378E7128A3217800A1A6FF /* RoundButtonView.swift */; };
+		03378E7928A3218500A1A6FF /* ErrorSound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 03378E7628A3218400A1A6FF /* ErrorSound.mp3 */; };
+		03378E7A28A3218500A1A6FF /* SuccessSound.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 03378E7728A3218400A1A6FF /* SuccessSound.mp3 */; };
+		03378E7B28A3218500A1A6FF /* Scanner.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03378E7828A3218500A1A6FF /* Scanner.storyboard */; };
+		0349131328CA22B3001141B0 /* OCRResponseView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0349131128CA22B3001141B0 /* OCRResponseView.xib */; };
+		0349131428CA22B3001141B0 /* OCRResponseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0349131228CA22B3001141B0 /* OCRResponseView.swift */; };
+		0381D7FC2925467F00083BB5 /* VisionSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 0381D7FB2925467F00083BB5 /* VisionSDK */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0381D7F92925352900083BB5 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		03378E5828A320F600A1A6FF /* VisionSDKExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VisionSDKExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		03378E5B28A320F600A1A6FF /* VisionSDKExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionSDKExampleApp.swift; sourceTree = "<group>"; };
+		03378E5D28A320F600A1A6FF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		03378E5F28A320F900A1A6FF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		03378E6228A320F900A1A6FF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		03378E6928A3216A00A1A6FF /* BarCodeViewRepresentable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarCodeViewRepresentable.swift; sourceTree = "<group>"; };
+		03378E6A28A3216A00A1A6FF /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		03378E6B28A3216A00A1A6FF /* BarcodeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarcodeViewController.swift; sourceTree = "<group>"; };
+		03378E7128A3217800A1A6FF /* RoundButtonView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundButtonView.swift; sourceTree = "<group>"; };
+		03378E7628A3218400A1A6FF /* ErrorSound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = ErrorSound.mp3; sourceTree = "<group>"; };
+		03378E7728A3218400A1A6FF /* SuccessSound.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = SuccessSound.mp3; sourceTree = "<group>"; };
+		03378E7828A3218500A1A6FF /* Scanner.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Scanner.storyboard; sourceTree = "<group>"; };
+		0349131128CA22B3001141B0 /* OCRResponseView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = OCRResponseView.xib; sourceTree = "<group>"; };
+		0349131228CA22B3001141B0 /* OCRResponseView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OCRResponseView.swift; sourceTree = "<group>"; };
+		035F933028ABAC8B00A9E9F1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		03378E5528A320F600A1A6FF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0381D7FC2925467F00083BB5 /* VisionSDK in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03378E4F28A320F600A1A6FF = {
+			isa = PBXGroup;
+			children = (
+				03378E5A28A320F600A1A6FF /* VisionSDKExample */,
+				03378E5928A320F600A1A6FF /* Products */,
+				03378E8F28A3286900A1A6FF /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		03378E5928A320F600A1A6FF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				03378E5828A320F600A1A6FF /* VisionSDKExample.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		03378E5A28A320F600A1A6FF /* VisionSDKExample */ = {
+			isa = PBXGroup;
+			children = (
+				035F933028ABAC8B00A9E9F1 /* Info.plist */,
+				03378E5B28A320F600A1A6FF /* VisionSDKExampleApp.swift */,
+				03378E5D28A320F600A1A6FF /* ContentView.swift */,
+				03378E6B28A3216A00A1A6FF /* BarcodeViewController.swift */,
+				03378E6928A3216A00A1A6FF /* BarCodeViewRepresentable.swift */,
+				03378E6A28A3216A00A1A6FF /* Models.swift */,
+				03378E7628A3218400A1A6FF /* ErrorSound.mp3 */,
+				03378E7828A3218500A1A6FF /* Scanner.storyboard */,
+				03378E7728A3218400A1A6FF /* SuccessSound.mp3 */,
+				03378E6F28A3217800A1A6FF /* CustomViews */,
+				03378E5F28A320F900A1A6FF /* Assets.xcassets */,
+				03378E6128A320F900A1A6FF /* Preview Content */,
+			);
+			path = VisionSDKExample;
+			sourceTree = "<group>";
+		};
+		03378E6128A320F900A1A6FF /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				03378E6228A320F900A1A6FF /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		03378E6F28A3217800A1A6FF /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				0349131228CA22B3001141B0 /* OCRResponseView.swift */,
+				0349131128CA22B3001141B0 /* OCRResponseView.xib */,
+				03378E7128A3217800A1A6FF /* RoundButtonView.swift */,
+			);
+			path = CustomViews;
+			sourceTree = "<group>";
+		};
+		03378E8F28A3286900A1A6FF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		03378E5728A320F600A1A6FF /* VisionSDKExample */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03378E6628A320F900A1A6FF /* Build configuration list for PBXNativeTarget "VisionSDKExample" */;
+			buildPhases = (
+				03378E5428A320F600A1A6FF /* Sources */,
+				03378E5528A320F600A1A6FF /* Frameworks */,
+				03378E5628A320F600A1A6FF /* Resources */,
+				0381D7F92925352900083BB5 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VisionSDKExample;
+			packageProductDependencies = (
+				0381D7FB2925467F00083BB5 /* VisionSDK */,
+			);
+			productName = VisionSDKExample;
+			productReference = 03378E5828A320F600A1A6FF /* VisionSDKExample.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		03378E5028A320F600A1A6FF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1340;
+				LastUpgradeCheck = 1340;
+				TargetAttributes = {
+					03378E5728A320F600A1A6FF = {
+						CreatedOnToolsVersion = 13.4.1;
+					};
+				};
+			};
+			buildConfigurationList = 03378E5328A320F600A1A6FF /* Build configuration list for PBXProject "VisionSDKExample" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 03378E4F28A320F600A1A6FF;
+			packageReferences = (
+				0381D7FA2925467F00083BB5 /* XCRemoteSwiftPackageReference "vision-sdk-sample-code" */,
+			);
+			productRefGroup = 03378E5928A320F600A1A6FF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				03378E5728A320F600A1A6FF /* VisionSDKExample */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		03378E5628A320F600A1A6FF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03378E6328A320F900A1A6FF /* Preview Assets.xcassets in Resources */,
+				03378E6028A320F900A1A6FF /* Assets.xcassets in Resources */,
+				03378E7A28A3218500A1A6FF /* SuccessSound.mp3 in Resources */,
+				03378E7928A3218500A1A6FF /* ErrorSound.mp3 in Resources */,
+				0349131328CA22B3001141B0 /* OCRResponseView.xib in Resources */,
+				03378E7B28A3218500A1A6FF /* Scanner.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		03378E5428A320F600A1A6FF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03378E5E28A320F600A1A6FF /* ContentView.swift in Sources */,
+				0349131428CA22B3001141B0 /* OCRResponseView.swift in Sources */,
+				03378E7428A3217800A1A6FF /* RoundButtonView.swift in Sources */,
+				03378E6C28A3216A00A1A6FF /* BarCodeViewRepresentable.swift in Sources */,
+				03378E5C28A320F600A1A6FF /* VisionSDKExampleApp.swift in Sources */,
+				03378E6D28A3216A00A1A6FF /* Models.swift in Sources */,
+				03378E6E28A3216A00A1A6FF /* BarcodeViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		03378E6428A320F900A1A6FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		03378E6528A320F900A1A6FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		03378E6728A320F900A1A6FF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"VisionSDKExample/Preview Content\"";
+				DEVELOPMENT_TEAM = 3L6VABYTC6;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VisionSDKExample/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Vision SDk would like to access your camera";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.packagex.VisionSDK;
+				PRODUCT_NAME = VisionSDKExample;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		03378E6828A320F900A1A6FF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"VisionSDKExample/Preview Content\"";
+				DEVELOPMENT_TEAM = 3L6VABYTC6;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VisionSDKExample/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Vision SDk would like to access your camera";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.packagex.VisionSDK;
+				PRODUCT_NAME = VisionSDKExample;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03378E5328A320F600A1A6FF /* Build configuration list for PBXProject "VisionSDKExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03378E6428A320F900A1A6FF /* Debug */,
+				03378E6528A320F900A1A6FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		03378E6628A320F900A1A6FF /* Build configuration list for PBXNativeTarget "VisionSDKExample" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03378E6728A320F900A1A6FF /* Debug */,
+				03378E6828A320F900A1A6FF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0381D7FA2925467F00083BB5 /* XCRemoteSwiftPackageReference "vision-sdk-sample-code" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/packagexlabs/vision-sdk-sample-code";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0381D7FB2925467F00083BB5 /* VisionSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0381D7FA2925467F00083BB5 /* XCRemoteSwiftPackageReference "vision-sdk-sample-code" */;
+			productName = VisionSDK;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 03378E5028A320F600A1A6FF /* Project object */;
+}
