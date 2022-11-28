@@ -127,11 +127,24 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func recongizeTextFromImage(_ image: CoreGraphics.CGImage, _ completion: @escaping ((_ textStrings: [Swift.String]) -> Swift.Void))
 }
 @_inheritsConvenienceInitializers @objc(Constants) public class Constants : ObjectiveC.NSObject {
+  @objc public enum Environment : Swift.Int {
+    case dev
+    case qa
+    case staging
+    case production
+    case sandbox
+    public init?(rawValue: Swift.Int)
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
   public static var apiKey: Swift.String
+  public static var apiEnvironment: VisionSDK.Constants.Environment
   @objc override dynamic public init()
   @objc deinit
 }
@@ -150,3 +163,6 @@ extension VisionSDK.CaptureType : Swift.RawRepresentable {}
 extension VisionSDK.CaptureMode : Swift.Equatable {}
 extension VisionSDK.CaptureMode : Swift.Hashable {}
 extension VisionSDK.CaptureMode : Swift.RawRepresentable {}
+extension VisionSDK.Constants.Environment : Swift.Equatable {}
+extension VisionSDK.Constants.Environment : Swift.Hashable {}
+extension VisionSDK.Constants.Environment : Swift.RawRepresentable {}

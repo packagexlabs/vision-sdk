@@ -358,6 +358,14 @@ SWIFT_CLASS_NAMED("Constants")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+typedef SWIFT_ENUM(NSInteger, Environment, open) {
+  EnvironmentDev = 0,
+  EnvironmentQa = 1,
+  EnvironmentStaging = 2,
+  EnvironmentProduction = 3,
+  EnvironmentSandbox = 4,
+};
+
 typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOnline = 0,
   OCRModeOffline = 1,
@@ -378,7 +386,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @class NSError;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nonnull)apiKey :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 - (void)recongizeTextFromImage:(CGImageRef _Nonnull)image :(void (^ _Nonnull)(NSArray<NSString *> * _Nonnull))completion;
 @end
 
