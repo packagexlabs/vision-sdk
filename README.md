@@ -156,8 +156,10 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: Vision
 
 - delegate - Should be the class that confirms to the CodeScannerViewDelegate protocol
 - Input - Input struct defines the properties of scanner view. These properties are:
--- sdbnsdl
-
+  -   focusImage - bounding box drawn in center of view to use as a focused region. If not provided, VisionSDK will use the default image. Note that focus rectangle frame is subject to change with respect to different scan modes.
+  -   shouldDisplayFocusImage - set true if you need focused region to be drawn
+  -   shouldScanInFocusImageRect - set true if you want to detect codes visible in focused region only. This will discard the codes detected to be outside of the focus image
+.init(focusImage: nil, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single)
 
 ## License
 
