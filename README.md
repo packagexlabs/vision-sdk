@@ -7,8 +7,30 @@
 - Xcode Version: 13.0
 
 ## Installation
+
+### CocoaPods
+
+[CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate VisionSDK into your Xcode project using CocoaPods, specify it in your `Podfile`:
+
+```ruby
+pod 'VisionSDK'
+```
+
+### Swift Package Manager
+
+The [Swift Package Manager](https://swift.org/package-manager/) is a tool for automating the distribution of Swift code and is integrated into the `swift` compiler. 
+
+Once you have your Swift package set up, adding VisionSDK as a dependency is as easy as adding it to the `dependencies` value of your `Package.swift`.
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/packagexlabs/vision-sdk-sample-code.git", .upToNextMajor(from: "1.0.0"))
+]
+```
+### Manual Framework Integration
+
 - In Xcode, move to "General > Build Phase > Linked Frameworks and Libraries"
-- Add the framework to your project
+- Add the [VisionSDK.xcframework](https://github.com/packagexlabs/vision-sdk-sample-code/tree/main/Sources/VisionSDK.xcframework) from  to your project
 - Make sure to mark it "Embed and Sign"
 - Write Import statement on your source file
 ```swift
@@ -20,6 +42,15 @@ import VisionSDK
 ### Add `Privacy - Camera Usage Description` to Info.plist file
 
 <img src="https://github.com/packagexlabs/vision-sdk-sample-code/blob/main/Images/PermissionSettings.png" width="500">
+
+### Initialization
+
+In order to use the OCR API, you have to set Constants.apiKey to your API key. Also, you also need to specify the API environment that you have the API key for. Please note that these have to be set before using the API call.
+
+```swift
+Constants.apiKey = "your_api_key"
+Constants.apiEnvironment = .staging
+```
 
 ### The Basis Of Usage
 
@@ -53,7 +84,9 @@ final class ViewController: UIViewController {
     private func setupScannerView() {
         let scannerView = CodeScannerView(frame: view.bounds)
         view.addSubview(scannerView)
+        
         scannerView.configure(delegate: self, input: .init(focusImage: nil, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single), scanMode: .autoBarCodeOrQRCode)
+        
         scannerView.startRunning()
     }
 
@@ -109,6 +142,22 @@ override func viewDidLoad() {
 |Setup Custom Class|
 |-|
 |<img src="https://github.com/packagexlabs/vision-sdk-sample-code/blob/main/Images/ViewClass.png" width="350">
+
+## Functional Description
+
+### Configuration Methods
+
+```swift
+
+scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: VisionSDK.CodeScannerView.Input = .default, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+
+```
+#### Parameters
+
+- delegate - Should be the class that confirms to the CodeScannerViewDelegate protocol
+- Input - Input struct defines the properties of scanner view. These properties are:
+-- sdbnsdl
+
 
 ## License
 
