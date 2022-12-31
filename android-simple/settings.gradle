@@ -10,6 +10,15 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            def githubProperties = new Properties()
+            githubProperties.load(new FileInputStream(rootDir.getAbsolutePath() + "/github.properties"))
+            url = uri("https://maven.pkg.github.com/packagexlabs/vision-sdk-andriod")
+            credentials {
+                username = githubProperties.get("gpr.usr") as String ?: System.getenv("GPR_USER")
+                password = githubProperties.get("gpr.key") as String ?: System.getenv("GPR_API_KEY")
+            }
+        }
     }
 }
 rootProject.name = "vision-sdk-android"
