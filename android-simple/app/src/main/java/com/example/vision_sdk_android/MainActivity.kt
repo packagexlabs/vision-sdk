@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
         setCameraCaptureClickListener()
         setSettingClickListener()
         setMultipleBarcodeListener()
+        setFlashClickListener()
     }
 
     private fun startScanning() {
@@ -196,8 +197,7 @@ class MainActivity : AppCompatActivity() {
                                     isManualDetection = false
                                     showErrorDialogJob?.cancel()
                                     getMultiBarcodeFragmentInstance(
-                                        activity = this,
-                                        barcodeList = barcodes.map {
+                                        activity = this, barcodeList = barcodes.map {
                                             BarcodeModel(
                                                 it.displayValue ?: ""
                                             )
@@ -213,8 +213,7 @@ class MainActivity : AppCompatActivity() {
                                     isManualDetection = false
                                     showErrorDialogJob?.cancel()
                                     getMultiBarcodeFragmentInstance(
-                                        activity = this,
-                                        barcodeList = barcodes.map {
+                                        activity = this, barcodeList = barcodes.map {
                                             BarcodeModel(
                                                 it.displayValue ?: ""
                                             )
@@ -260,7 +259,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun restartScanning() {
         binding.customScannerView.stopScanning()
-
         when (screenState.windowSize) {
             WindowSize.Window -> {
                 when (screenState.selectedMode) {
@@ -328,6 +326,25 @@ class MainActivity : AppCompatActivity() {
                 renderState()
             }.show()
         }
+    }
+
+    private fun setFlashClickListener() {
+        binding.flashIcon.setOnClickListener {
+            screenState = screenState.copy(flashStatus = screenState.flashStatus.not())
+        }
+
+        if (screenState.flashStatus) {
+            binding.flashIcon.setImageResource(R.drawable.ic_flash_active)
+            binding.customScannerView.enableTorch()
+
+        } else {
+            binding.flashIcon.setImageResource(R.drawable.ic_flash_inactive)
+            binding.customScannerView.disableTorch()
+        }
+
+        binding.flashIcon.setImageResource(R.drawable.ic_flash_inactive)
+        binding.customScannerView.disableTorch()
+        false
     }
 
     private fun setCameraCaptureClickListener() {

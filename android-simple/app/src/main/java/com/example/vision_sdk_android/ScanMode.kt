@@ -4,7 +4,8 @@ package com.example.vision_sdk_android
 data class ScreenState(
     val scanningMode: ScanningMode = ScanningMode.Manual,
     val selectedMode: SelectedMode = SelectedMode.Barcode,
-    val windowSize: WindowSize = WindowSize.Window
+    val windowSize: WindowSize = WindowSize.Window,
+    val flashStatus: Boolean = false
 )
 
 
