@@ -1,14 +1,19 @@
 package com.example.vision_sdk_android
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.customscannerview.mlkit.enums.ViewType
+import com.example.customscannerview.mlkit.interfaces.OCRResult
+import com.example.customscannerview.mlkit.modelclasses.OCRResponseParent
+import com.example.customscannerview.mlkit.views.CaptureCallback
 import com.example.customscannerview.mlkit.views.Configuration
 import com.example.customscannerview.mlkit.views.ScanWindow
 import com.example.vision_sdk_android.databinding.ActivityMainBinding
+import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -23,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     private var isDialogShown = false
     private var isManualDetection = false
+    private var barcodeList: List<Barcode> = emptyList()
     private var resetDialogFlagCallback: (() -> Unit) = {
         isDialogShown = false
         isManualDetection = false
@@ -113,13 +119,13 @@ class MainActivity : AppCompatActivity() {
     private fun setBarcodeResultListener() {
         binding.customScannerView.barcodeResultSingle.observe(this) {
             Log.d("BarCd", "BarCode detected, ${it.displayValue}")
-            if (isDialogShown.not() || screenState.windowSize != WindowSize.FullScreen) {
+            if (isDialogShown.not() && screenState.windowSize != WindowSize.FullScreen) {
                 when (screenState.scanningMode) {
                     ScanningMode.Auto -> {
+                        isDialogShown = true
                         when (screenState.selectedMode) {
                             SelectedMode.Barcode -> {
                                 if (ONE_DIMENSIONAL_FORMATS.contains(it.format)) {
-                                    isDialogShown = true
                                     showSuccessDialog(
                                         message = it.displayValue.toString(),
                                         context = this,
@@ -186,6 +192,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setMultipleBarcodeListener() {
         binding.customScannerView.multipleBarcodes.observe(this) {
+            barcodeList = it
             if (isDialogShown.not()) {
                 if (screenState.scanningMode == ScanningMode.Manual && screenState.windowSize == WindowSize.FullScreen) {
                     if (isManualDetection) {
@@ -234,14 +241,25 @@ class MainActivity : AppCompatActivity() {
         binding.bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.barCode -> {
+                    if (screenState.windowSize == WindowSize.FullScreen) {
+                        binding.btnSwitch.visibility = View.GONE
+                    } else {
+                        binding.btnSwitch.visibility = View.VISIBLE
+                    }
                     screenState = screenState.copy(selectedMode = SelectedMode.Barcode)
                 }
 
                 R.id.qrCode -> {
+                    if (screenState.windowSize == WindowSize.FullScreen) {
+                        binding.btnSwitch.visibility = View.GONE
+                    } else {
+                        binding.btnSwitch.visibility = View.VISIBLE
+                    }
                     screenState = screenState.copy(selectedMode = SelectedMode.QRCode)
                 }
 
                 R.id.ocr -> {
+                    binding.btnSwitch.visibility = View.GONE
                     screenState = screenState.copy(
                         selectedMode = SelectedMode.OCR
                     )
@@ -299,26 +317,34 @@ class MainActivity : AppCompatActivity() {
                 if (it) {
                     binding.btnSwitch.visibility = View.GONE
                     screenState = screenState.copy(
-                        windowSize = WindowSize.FullScreen, scanningMode = ScanningMode.Manual
+                        windowSize = WindowSize.FullScreen,
                     )
                 } else {
+
                     binding.btnSwitch.visibility = View.VISIBLE
                     when (binding.bottomNav.selectedItemId) {
                         R.id.barCode -> {
                             screenState = screenState.copy(
-                                selectedMode = SelectedMode.Barcode, windowSize = WindowSize.Window
+                                selectedMode = SelectedMode.Barcode,
+                                windowSize = WindowSize.Window,
+                                scanningMode = ScanningMode.Manual
                             )
                         }
 
                         R.id.qrCode -> {
                             screenState = screenState.copy(
-                                selectedMode = SelectedMode.QRCode, windowSize = WindowSize.Window
+                                selectedMode = SelectedMode.QRCode,
+                                windowSize = WindowSize.Window,
+                                scanningMode = ScanningMode.Manual
                             )
                         }
 
                         R.id.ocr -> {
                             screenState = screenState.copy(
-                                selectedMode = SelectedMode.OCR, windowSize = WindowSize.Window
+                                selectedMode = SelectedMode.OCR,
+                                windowSize = WindowSize.Window,
+                                scanningMode = ScanningMode.Manual
+
                             )
                         }
                     }
@@ -331,20 +357,20 @@ class MainActivity : AppCompatActivity() {
     private fun setFlashClickListener() {
         binding.flashIcon.setOnClickListener {
             screenState = screenState.copy(flashStatus = screenState.flashStatus.not())
-        }
 
-        if (screenState.flashStatus) {
-            binding.flashIcon.setImageResource(R.drawable.ic_flash_active)
-            binding.customScannerView.enableTorch()
+            if (screenState.flashStatus) {
+                binding.flashIcon.setImageResource(R.drawable.ic_flash_active)
+                binding.customScannerView.enableTorch()
 
-        } else {
+            } else {
+                binding.flashIcon.setImageResource(R.drawable.ic_flash_inactive)
+                binding.customScannerView.disableTorch()
+            }
+
             binding.flashIcon.setImageResource(R.drawable.ic_flash_inactive)
             binding.customScannerView.disableTorch()
+            false
         }
-
-        binding.flashIcon.setImageResource(R.drawable.ic_flash_inactive)
-        binding.customScannerView.disableTorch()
-        false
     }
 
     private fun setCameraCaptureClickListener() {
@@ -356,10 +382,36 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 SelectedMode.OCR -> {
-
+                    binding.progressBarWithDimBg.visibility = View.VISIBLE
+                    captureImage()
                 }
             }
         }
+    }
+
+    private fun captureImage() {
+        binding.customScannerView.captureImage(object : CaptureCallback {
+            override fun onImageCaptured(bitmap: Bitmap, value: MutableList<Barcode>?) {
+                triggerOCRCalls(bitmap, value ?: mutableListOf())
+            }
+
+        })
+    }
+
+    private fun triggerOCRCalls(bitmap: Bitmap, list: MutableList<Barcode>) {
+        binding.customScannerView.makeOCRApiCall(bitmap = bitmap,
+            barcodeList = list,
+            onScanResult = object : OCRResult {
+                override fun onOCRResponse(ocrResponse: OCRResponseParent?) {
+                    binding.progressBarWithDimBg.visibility = View.GONE
+                    Log.d("MainActivity", "api responded with  ${ocrResponse.toString()}")
+                }
+
+                override fun onOCRResponseFailed(throwable: Throwable?) {
+                    binding.progressBarWithDimBg.visibility = View.GONE
+                    Log.d("MainActivity", "Something went wrong ${throwable?.message}")
+                }
+            })
     }
 
 
