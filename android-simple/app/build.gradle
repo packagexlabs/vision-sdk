@@ -46,7 +46,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
 
-    implementation 'com.packagexlabs:scanner-view:0.0.5'
+    implementation 'com.packagexlabs:scanner-view:0.0.7'
 
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
 
