@@ -11,16 +11,18 @@ import com.example.customscannerview.mlkit.VisionSDK
 import com.example.customscannerview.mlkit.enums.ViewType
 import com.example.customscannerview.mlkit.interfaces.OCRResult
 import com.example.customscannerview.mlkit.modelclasses.OCRResponse
-import com.example.customscannerview.mlkit.views.CaptureCallback
 import com.example.customscannerview.mlkit.views.Configuration
+import com.example.customscannerview.mlkit.views.DetectionMode
 import com.example.customscannerview.mlkit.views.ScanWindow
+import com.example.customscannerview.mlkit.views.ScannerCallbacks
+import com.example.customscannerview.mlkit.views.ScannerException
+import com.example.customscannerview.mlkit.views.ScanningMode
 import com.example.vision_sdk_android.databinding.ActivityMainBinding
 import com.google.mlkit.vision.barcode.common.Barcode
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ScannerCallbacks {
 
     lateinit var binding: ActivityMainBinding
 
@@ -29,18 +31,15 @@ class MainActivity : AppCompatActivity() {
     lateinit var mediaUtils: MediaUtils
 
     private var isDialogShown = false
-    private var isManualDetection = false
     private var barcodeList: List<Barcode> = emptyList()
     private var resetDialogFlagCallback: (() -> Unit) = {
         isDialogShown = false
-        isManualDetection = false
     }
-    var showErrorDialogJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         VisionSDK.getInstance().initialise(
-            apiKey = //TODO your api key,
+            apiKey = //TODO your api key here,
             environment = //TODO environment
         )
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -58,19 +57,22 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         startScanning()
         setBarcodeAndTextIndicatorObservers()
-        setBarcodeResultListener()
         setNavigationalListener()
         setRadioButtonListener()
         setCameraCaptureClickListener()
         setSettingClickListener()
-        setMultipleBarcodeListener()
         setFlashClickListener()
     }
 
     private fun startScanning() {
 
         //setting the scanning window configuration
-        binding.customScannerView.startScanning(viewType = ViewType.RECTANGLE)
+        binding.customScannerView.startScanning(
+            viewType = screenState.scanningWindow,
+            scanningMode = screenState.scanningMode,
+            detectionMode = screenState.detectionMode,
+            scannerCallbacks = this
+        )
 
         //Setting the Barcode and QR code scanning window sizes
         binding.customScannerView.setScanningWindowConfiguration(
@@ -78,11 +80,13 @@ class MainActivity : AppCompatActivity() {
                 barcodeWindow = ScanWindow(
                     width = ((binding.root.width * 0.9).toFloat()),
                     height = ((binding.root.width * 0.4).toFloat()),
-                    radius = 100f
+                    radius = 10f,
+                    verticalStartingPosition = (binding.root.height / 2) - ((binding.root.width * 0.4).toFloat())
                 ), qrCodeWindow = ScanWindow(
                     width = ((binding.root.width * 0.7).toFloat()),
                     height = ((binding.root.width * 0.7).toFloat()),
-                    radius = 20f
+                    radius = 10f,
+                    verticalStartingPosition = (binding.root.height / 2) - ((binding.root.width * 0.5).toFloat())
                 )
             )
         )
@@ -122,198 +126,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setBarcodeResultListener() {
-        binding.customScannerView.barcodeResultSingle.observe(this) {
-            Log.d("BarCd", "BarCode detected, ${it.displayValue}")
-            if (isDialogShown.not() && screenState.windowSize != WindowSize.FullScreen) {
-                when (screenState.scanningMode) {
-                    ScanningMode.Auto -> {
-                        isDialogShown = true
-                        when (screenState.selectedMode) {
-                            SelectedMode.Barcode -> {
-                                if (ONE_DIMENSIONAL_FORMATS.contains(it.format)) {
-                                    showSuccessDialog(
-                                        message = it.displayValue.toString(),
-                                        context = this,
-                                        mediaPlayer = mediaUtils.getMediaPlayer(),
-                                        callback = resetDialogFlagCallback
-                                    )
-                                }
-                            }
-
-                            SelectedMode.QRCode -> {
-                                if (TWO_DIMENSIONAL_FORMATS.contains(it.format)) {
-                                    showSuccessDialog(
-                                        message = it.displayValue.toString(),
-                                        context = this,
-                                        mediaPlayer = mediaUtils.getMediaPlayer(),
-                                        callback = resetDialogFlagCallback
-                                    )
-                                }
-                            }
-
-                            SelectedMode.OCR -> {}
-                        }
-                    }
-
-                    ScanningMode.Manual -> {
-                        if (isManualDetection) {
-                            when (screenState.selectedMode) {
-                                SelectedMode.Barcode -> {
-                                    if (ONE_DIMENSIONAL_FORMATS.contains(it.format)) {
-                                        isManualDetection = false
-                                        showErrorDialogJob?.cancel()
-                                        showSuccessDialog(
-                                            message = it.displayValue.toString(),
-                                            context = this,
-                                            mediaPlayer = mediaUtils.getMediaPlayer(),
-                                            callback = resetDialogFlagCallback
-                                        )
-                                    }
-                                }
-
-                                SelectedMode.QRCode -> {
-                                    if (TWO_DIMENSIONAL_FORMATS.contains(it.format)) {
-                                        isManualDetection = false
-                                        showErrorDialogJob?.cancel()
-                                        showSuccessDialog(
-                                            message = it.displayValue.toString(),
-                                            context = this,
-                                            mediaPlayer = mediaUtils.getMediaPlayer(),
-                                            callback = resetDialogFlagCallback
-                                        )
-                                    }
-                                }
-
-                                SelectedMode.OCR -> {}
-                            }
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
-        }
-    }
-
-    private fun setMultipleBarcodeListener() {
-        binding.customScannerView.multipleBarcodes.observe(this) {
-            barcodeList = it
-            if (isDialogShown.not()) {
-                if (screenState.scanningMode == ScanningMode.Manual && screenState.windowSize == WindowSize.FullScreen) {
-                    if (isManualDetection) {
-                        when (screenState.selectedMode) {
-                            SelectedMode.Barcode -> {
-                                val barcodes =
-                                    it.filter { ONE_DIMENSIONAL_FORMATS.contains(it.format) }
-                                if (barcodes.isNullOrEmpty().not()) {
-                                    isManualDetection = false
-                                    showErrorDialogJob?.cancel()
-                                    getMultiBarcodeFragmentInstance(
-                                        activity = this, barcodeList = barcodes.map {
-                                            BarcodeModel(
-                                                it.displayValue ?: ""
-                                            )
-                                        }.toMutableList()
-                                    )
-                                }
-                            }
-
-                            SelectedMode.QRCode -> {
-                                val barcodes =
-                                    it.filter { TWO_DIMENSIONAL_FORMATS.contains(it.format) }
-                                if (barcodes.isNullOrEmpty().not()) {
-                                    isManualDetection = false
-                                    showErrorDialogJob?.cancel()
-                                    getMultiBarcodeFragmentInstance(
-                                        activity = this, barcodeList = barcodes.map {
-                                            BarcodeModel(
-                                                it.displayValue ?: ""
-                                            )
-                                        }.toMutableList()
-                                    )
-                                }
-                            }
-
-                            SelectedMode.OCR -> {}
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private fun setNavigationalListener() {
         binding.bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.barCode -> {
-                    if (screenState.windowSize == WindowSize.FullScreen) {
-                        binding.btnSwitch.visibility = View.GONE
-                    } else {
-                        binding.btnSwitch.visibility = View.VISIBLE
-                    }
-                    screenState = screenState.copy(selectedMode = SelectedMode.Barcode)
+                    screenState = screenState.copy(
+                        detectionMode = DetectionMode.Barcode,
+                        scanningWindow = if (screenState.scanningWindow != ViewType.FULLSCRREN) ViewType.RECTANGLE else ViewType.FULLSCRREN
+                    )
                 }
 
                 R.id.qrCode -> {
-                    if (screenState.windowSize == WindowSize.FullScreen) {
-                        binding.btnSwitch.visibility = View.GONE
-                    } else {
-                        binding.btnSwitch.visibility = View.VISIBLE
-                    }
-                    screenState = screenState.copy(selectedMode = SelectedMode.QRCode)
+                    screenState = screenState.copy(
+                        detectionMode = DetectionMode.QR,
+                        scanningWindow = if (screenState.scanningWindow != ViewType.FULLSCRREN) ViewType.SQUARE else ViewType.FULLSCRREN
+                    )
                 }
 
                 R.id.ocr -> {
-                    binding.btnSwitch.visibility = View.GONE
                     screenState = screenState.copy(
-                        selectedMode = SelectedMode.OCR
+                        detectionMode = DetectionMode.OCR,
+                        scanningWindow = ViewType.RECTANGLE
                     )
                 }
             }
-            renderState()
-
+            restartScanning()
             return@setOnItemSelectedListener true
-        }
-    }
-
-    private fun renderState() {
-        restartScanning()
-    }
-
-    private fun restartScanning() {
-        binding.customScannerView.stopScanning()
-        when (screenState.windowSize) {
-            WindowSize.Window -> {
-                when (screenState.selectedMode) {
-                    SelectedMode.Barcode -> binding.customScannerView.startScanning(ViewType.RECTANGLE)
-                    SelectedMode.QRCode -> binding.customScannerView.startScanning(ViewType.SQUARE)
-                    SelectedMode.OCR -> binding.customScannerView.startScanning(ViewType.FULLSCRREN)
-                }
-            }
-
-            WindowSize.FullScreen -> {
-                binding.customScannerView.startScanning(ViewType.FULLSCRREN)
-            }
-        }
-
-    }
-
-    private fun setRadioButtonListener() {
-        binding.btnSwitch.setOnCheckedChangeListener { _, item ->
-            when (item) {
-                R.id.radioManual -> {
-                    binding.camIcon.visibility = View.VISIBLE
-                    screenState = screenState.copy(scanningMode = ScanningMode.Manual)
-                    restartScanning()
-                }
-
-                R.id.radioAuto -> {
-                    binding.camIcon.visibility = View.GONE
-                    screenState = screenState.copy(scanningMode = ScanningMode.Auto)
-                    restartScanning()
-                }
-            }
         }
     }
 
@@ -321,49 +159,85 @@ class MainActivity : AppCompatActivity() {
         binding.btnSettings.setOnClickListener {
             showSettingDialog(this) {
                 if (it) {
-                    binding.btnSwitch.visibility = View.GONE
-                    screenState = screenState.copy(
-                        windowSize = WindowSize.FullScreen,
-                    )
+                    screenState = screenState.copy(scanningWindow = ViewType.FULLSCRREN)
                 } else {
-
-                    binding.btnSwitch.visibility = View.VISIBLE
                     when (binding.bottomNav.selectedItemId) {
                         R.id.barCode -> {
                             screenState = screenState.copy(
-                                selectedMode = SelectedMode.Barcode,
-                                windowSize = WindowSize.Window,
-                                scanningMode = ScanningMode.Manual
+                                scanningWindow = ViewType.RECTANGLE,
+                                detectionMode = DetectionMode.Barcode
                             )
                         }
 
                         R.id.qrCode -> {
                             screenState = screenState.copy(
-                                selectedMode = SelectedMode.QRCode,
-                                windowSize = WindowSize.Window,
-                                scanningMode = ScanningMode.Manual
+                                scanningWindow = ViewType.SQUARE,
+                                detectionMode = DetectionMode.QR
                             )
                         }
 
                         R.id.ocr -> {
                             screenState = screenState.copy(
-                                selectedMode = SelectedMode.OCR,
-                                windowSize = WindowSize.Window,
-                                scanningMode = ScanningMode.Manual
-
+                                detectionMode = DetectionMode.OCR,
+                                scanningWindow = ViewType.RECTANGLE
                             )
                         }
                     }
                 }
-                renderState()
+                restartScanning()
             }.show()
         }
     }
 
+
+    private fun restartScanning() {
+        binding.customScannerView.stopScanning()
+        binding.customScannerView.startScanning(
+            viewType = screenState.scanningWindow,
+            scanningMode = screenState.scanningMode,
+            detectionMode = screenState.detectionMode,
+            this
+        )
+
+
+        if (screenState.scanningMode == ScanningMode.Manual || screenState.detectionMode == DetectionMode.OCR) {
+            binding.camIcon.visibility = View.VISIBLE
+        } else {
+            binding.camIcon.visibility = View.GONE
+        }
+
+        if (screenState.detectionMode == DetectionMode.OCR ||
+            screenState.detectionMode == DetectionMode.Auto ||
+            screenState.scanningWindow == ViewType.FULLSCRREN
+        ) {
+            binding.btnSwitch.visibility = View.GONE
+        } else {
+            binding.btnSwitch.visibility = View.VISIBLE
+        }
+
+
+    }
+
+    private fun setRadioButtonListener() {
+        binding.btnSwitch.setOnCheckedChangeListener { _, item ->
+            when (item) {
+                R.id.radioManual -> {
+                    screenState = screenState.copy(scanningMode = ScanningMode.Manual)
+                    restartScanning()
+                }
+
+                R.id.radioAuto -> {
+                    screenState = screenState.copy(scanningMode = ScanningMode.Auto)
+                    restartScanning()
+                }
+            }
+        }
+    }
+
+
     private fun setFlashClickListener() {
         binding.flashIcon.setOnClickListener {
             screenState = screenState.copy(flashStatus = screenState.flashStatus.not())
-
             if (screenState.flashStatus) {
                 binding.flashIcon.setImageResource(R.drawable.ic_flash_active)
                 binding.customScannerView.enableTorch()
@@ -372,36 +246,30 @@ class MainActivity : AppCompatActivity() {
                 binding.flashIcon.setImageResource(R.drawable.ic_flash_inactive)
                 binding.customScannerView.disableTorch()
             }
-
-            binding.flashIcon.setImageResource(R.drawable.ic_flash_inactive)
-            binding.customScannerView.disableTorch()
-            false
         }
     }
 
     private fun setCameraCaptureClickListener() {
         binding.camIcon.setOnClickListener {
-            when (screenState.selectedMode) {
-                SelectedMode.QRCode, SelectedMode.Barcode -> {
-                    isManualDetection = true
-                    showErrorDialogJob = showManualFailureDetectionDialog()
+            when (screenState.detectionMode) {
+                DetectionMode.QR, DetectionMode.Barcode -> {
+                    captureImage()
                 }
 
-                SelectedMode.OCR -> {
-                    binding.progressBarWithDimBg.visibility = View.VISIBLE
+                DetectionMode.OCR -> {
+                    binding.progressBar.visibility = View.VISIBLE
                     captureImage()
+                }
+
+                DetectionMode.Auto -> {
+
                 }
             }
         }
     }
 
     private fun captureImage() {
-        binding.customScannerView.captureImage(object : CaptureCallback {
-            override fun onImageCaptured(bitmap: Bitmap, value: MutableList<Barcode>?) {
-                triggerOCRCalls(bitmap, value ?: mutableListOf())
-            }
-
-        })
+        binding.customScannerView.capture()
     }
 
     private fun triggerOCRCalls(bitmap: Bitmap, list: MutableList<Barcode>) {
@@ -409,30 +277,62 @@ class MainActivity : AppCompatActivity() {
             barcodeList = list,
             onScanResult = object : OCRResult {
                 override fun onOCRResponse(ocrResponse: OCRResponse?) {
-                    binding.progressBarWithDimBg.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
                     Log.d("MainActivity", "api responded with  ${ocrResponse.toString()}")
                 }
 
                 override fun onOCRResponseFailed(throwable: Throwable?) {
-                    binding.progressBarWithDimBg.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
                     Log.d("MainActivity", "Something went wrong ${throwable?.message}")
                 }
             })
     }
 
 
-    private fun showManualFailureDetectionDialog(): Job {
-        return lifecycleScope.launch {
-            launch {
-                delay(1500)
-                isDialogShown = true
-                showErrorDialog(
-                    viewType = screenState.selectedMode,
-                    this@MainActivity,
-                    mediaUtils.getMediaPlayer(),
-                    resetDialogFlagCallback
+    override fun onImageCaptured(bitmap: Bitmap, value: MutableList<Barcode>?) {
+        triggerOCRCalls(bitmap, value ?: mutableListOf())
+    }
+
+    override fun onBarcodeDetected(barcode: Barcode) {
+        showSuccessDialog(
+            message = barcode.displayValue.toString(),
+            context = this,
+            mediaPlayer = mediaUtils.getMediaPlayer(),
+            callback = resetDialogFlagCallback
+        )
+    }
+
+    override fun onMultipleBarcodesDetected(barcodes: List<Barcode>) {
+        barcodeList = barcodes
+        if (isDialogShown.not()) {
+            val filteredList = barcodeList.filter { ONE_DIMENSIONAL_FORMATS.contains(it.format) }
+            if (barcodes.isNullOrEmpty().not()) {
+                getMultiBarcodeFragmentInstance(
+                    activity = this, barcodeList = filteredList.map {
+                        BarcodeModel(
+                            it.displayValue ?: ""
+                        )
+                    }.toMutableList()
                 )
             }
+        }
+    }
+
+    override fun onFailure(exception: ScannerException) {
+        when (exception) {
+            is ScannerException.BarCodeNotDetected -> showErrorDialog(
+                viewType = screenState.scanningWindow,
+                this@MainActivity,
+                mediaUtils.getMediaPlayer(),
+                resetDialogFlagCallback
+            )
+
+            is ScannerException.QRCodeNotDetected -> showErrorDialog(
+                viewType = screenState.scanningWindow,
+                this@MainActivity,
+                mediaUtils.getMediaPlayer(),
+                resetDialogFlagCallback
+            )
         }
     }
 }
