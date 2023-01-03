@@ -6,9 +6,11 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.customscannerview.mlkit.Environment
+import com.example.customscannerview.mlkit.VisionSDK
 import com.example.customscannerview.mlkit.enums.ViewType
 import com.example.customscannerview.mlkit.interfaces.OCRResult
-import com.example.customscannerview.mlkit.modelclasses.OCRResponseParent
+import com.example.customscannerview.mlkit.modelclasses.OCRResponse
 import com.example.customscannerview.mlkit.views.CaptureCallback
 import com.example.customscannerview.mlkit.views.Configuration
 import com.example.customscannerview.mlkit.views.ScanWindow
@@ -37,6 +39,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        VisionSDK.getInstance().initialise(
+            apiKey = //TODO your api key,
+            environment = //TODO environment
+        )
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -402,7 +408,7 @@ class MainActivity : AppCompatActivity() {
         binding.customScannerView.makeOCRApiCall(bitmap = bitmap,
             barcodeList = list,
             onScanResult = object : OCRResult {
-                override fun onOCRResponse(ocrResponse: OCRResponseParent?) {
+                override fun onOCRResponse(ocrResponse: OCRResponse?) {
                     binding.progressBarWithDimBg.visibility = View.GONE
                     Log.d("MainActivity", "api responded with  ${ocrResponse.toString()}")
                 }
