@@ -1,0 +1,278 @@
+<resources>
+    <string name="app_name">BarcodeScannerNew</string>
+    <string name="bottomSheetHeading">Settings</string>
+    <string name="textMultiScanHeading">Multiple Scan</string>
+    <string name="textDetailsSettings">Enabled Symbologies</string>
+    <string name="barcodeName">
+        Aztec, Codabar, Code 128, Code 39, Code39 Checksum, Code39 Full ASCII,Code 39 Full ASCII Checksum, Code 93,
+        Code 93 i, Data Matrix, EAN-8, EAN-13/UPC-A, Interleaved Two of Five, Interleaved Two of Five Checksum,
+        ITF14, PDF 417, QR Code, UPC-E, GS1, DataBar 14, GS1 DataBar Expanded, GS1 DataBar Limited, Micro QR, MicroPDF417
+    </string>
+    <string name="textMultiScanTEXT">Multiple scan provides all the codes detected based on scanning type</string>
+
+    <string-array name="carrier_list_value">
+        <item>USPS</item>
+        <item>UPS</item>
+        <item>Amazon</item>
+        <item>Purolator</item>
+        <item>FedEx</item>
+        <item>CANADA POST</item>
+        <item>Canpar</item>
+        <item>CDL</item>
+        <item>CHINA-EMS</item>
+        <item>CHINA-POST</item>
+        <item>DHL</item>
+        <item>DYNAMEX</item>
+        <item>Equick CN</item>
+        <item>fastway</item>
+        <item>AUSTRALIA POST</item>
+        <item>Hongkong Post</item>
+        <item>India Post</item>
+        <item>JP Post</item>
+        <item>JD</item>
+        <item>LaserShip</item>
+        <item>MARK 3</item>
+        <item>Max</item>
+        <item>OnTrac</item>
+        <item>PAKISTAN POST</item>
+        <item>Royal Mail</item>
+        <item>SF EXPRESS</item>
+        <item>Singapore POST</item>
+        <item>sto express</item>
+        <item>TNT</item>
+        <item>YTO EXPRESS</item>
+        <item>YunExpress</item>
+        <item>ZTO EXPRESS</item>
+        <item>dpd</item>
+        <item>STARTRACK</item>
+        <item>Hermes</item>
+        <item>PARCEL-FORCE</item>
+        <item>postnl</item>
+        <item>YODEL</item>
+        <item>GLS</item>
+        <item>colissimo</item>
+        <item>collect +</item>
+        <item>transworld</item>
+        <item>Crawfords</item>
+        <item>whistl</item>
+        <item>an post</item>
+        <item>wish POST</item>
+        <item>City Air Express</item>
+        <item>Sagawa Express</item>
+        <item>Fukuyama Transportation</item>
+        <item>Sky Worldwide</item>
+        <item>Toll Group</item>
+        <item>IDE Express</item>
+        <item>Road Express</item>
+        <item>endeavour</item>
+        <item>Overnight Express</item>
+        <item>Rhyme Express</item>
+        <item>Yuantong Express</item>
+        <item>Best Express</item>
+        <item>Deppon</item>
+        <item>tmall</item>
+        <item>Netease</item>
+        <item>Unitop</item>
+        <item>Chrono Post</item>
+        <item>New Zealand Post</item>
+        <item>ninja van</item>
+        <item>POS LAJU</item>
+        <item>City Link</item>
+        <item>LEL Express</item>
+        <item>GDEX</item>
+        <item>Blibli</item>
+        <item>Tokopedia</item>
+        <item>tiki</item>
+        <item>J&amp;T Express</item>
+        <item>JNE</item>
+        <item>Surpostal</item>
+        <item>Espana</item>
+        <item>Mercado</item>
+        <item>Webpack</item>
+        <item>Andreani</item>
+        <item>Correro Argentino</item>
+        <item>Urbano</item>
+        <item>Correos</item>
+        <item>Yamato Transport</item>
+        <item>247 Express</item>
+        <item>Chilexpress</item>
+        <item>Flash Express</item>
+        <item>Kerry Express</item>
+        <item>Shopee Express</item>
+        <item>Thailand Post</item>
+        <item>Viettel Post</item>
+        <item>WSP Express</item>
+        <item>Zoom Express</item>
+        <item>inpost</item>
+        <item>Poczta Polska</item>
+        <item>Blue Express</item>
+        <item>Olva</item>
+        <item>Aramex</item>
+        <item>Nhat Tin Logistics</item>
+        <item>BPost</item>
+        <item>Vietnam Post</item>
+        <item>OCS</item>
+        <item>Dawn Wing</item>
+        <item>The Courier Guy</item>
+        <item>CCD Courier</item>
+        <item>BEX Express</item>
+        <item>Postnard</item>
+        <item>2GO Express</item>
+        <item>JRS Express</item>
+        <item>Geodis</item>
+        <item>LSO</item>
+        <item>statovernight</item>
+        <item>Bring</item>
+        <item>SR Group</item>
+        <item>Pentagon Freight</item>
+        <item>Loomis Express</item>
+        <item>Transferd</item>
+        <item>Logi Trans</item>
+        <item>jetpak</item>
+        <item>DB-SCHENKER</item>
+        <item>merkesdal</item>
+        <item>KUEHNE+NAGEL</item>
+        <item>postnord</item>
+        <item>Nor Lines</item>
+        <item>envialia</item>
+        <item>NACEX</item>
+        <item>MRW</item>
+        <item>Correos Express</item>
+        <item>RUDUR</item>
+        <item>ctt Express</item>
+        <item>sending</item>
+    </string-array>
+    <string-array name="carrier_list_key">
+        <item>usps</item>
+        <item>ups</item>
+        <item>amazon</item>
+        <item>purolator</item>
+        <item>fedex</item>
+        <item>canada-post</item>
+        <item>canpar</item>
+        <item>cdl</item>
+        <item>china-ems</item>
+        <item>china-post</item>
+        <item>dhl</item>
+        <item>dynamex</item>
+        <item>equick-cn</item>
+        <item>fastway</item>
+        <item>australia-post</item>
+        <item>hongkong-post</item>
+        <item>india-post</item>
+        <item>japan-post</item>
+        <item>jd</item>
+        <item>lasership</item>
+        <item>mark3</item>
+        <item>maxx</item>
+        <item>ontrac</item>
+        <item>pakistan-post</item>
+        <item>royal-mail</item>
+        <item>sf-express</item>
+        <item>singapore-post</item>
+        <item>sto-express</item>
+        <item>tnt</item>
+        <item>yto-express</item>
+        <item>yun-express</item>
+        <item>zto-express</item>
+        <item>dpd</item>
+        <item>star-track</item>
+        <item>hermes</item>
+        <item>parcel-force</item>
+        <item>postnl</item>
+        <item>yodel</item>
+        <item>gls</item>
+        <item>colissimo</item>
+        <item>collect-plus</item>
+        <item>transworld</item>
+        <item>crawfords-delivery-services</item>
+        <item>whistl</item>
+        <item>an-post</item>
+        <item>wish-post</item>
+        <item>city-air-express</item>
+        <item>sagawa-express</item>
+        <item>fukuyama-transportation</item>
+        <item>skyworldwide</item>
+        <item>toll-group</item>
+        <item>ide-express</item>
+        <item>road-express</item>
+        <item>endeavour</item>
+        <item>overnight-express</item>
+        <item>rhyme-express</item>
+        <item>yuantong-express</item>
+        <item>best-express</item>
+        <item>deppon</item>
+        <item>tmall</item>
+        <item>netease</item>
+        <item>unitop</item>
+        <item>chronopost</item>
+        <item>newzealand-post</item>
+        <item>ninja-van</item>
+        <item>pos-laju</item>
+        <item>city-link</item>
+        <item>lel-express</item>
+        <item>gdex</item>
+        <item>blibli</item>
+        <item>tokopedia</item>
+        <item>tiki</item>
+        <item>j&amp;t-express</item>
+        <item>jne</item>
+        <item>surpostal</item>
+        <item>espana</item>
+        <item>mercado</item>
+        <item>webpack</item>
+        <item>andreani</item>
+        <item>correo-argentino</item>
+        <item>urbano</item>
+        <item>correos</item>
+        <item>yamato-transport</item>
+        <item>247-express</item>
+        <item>chilexpress</item>
+        <item>flash-express</item>
+        <item>kerry-express</item>
+        <item>shopee-xpress</item>
+        <item>thailand-post</item>
+        <item>viettel-post</item>
+        <item>wsp-express</item>
+        <item>zoom-express</item>
+        <item>inpost</item>
+        <item>poczta_polska</item>
+        <item>blue-express</item>
+        <item>olva</item>
+        <item>aramex</item>
+        <item>nhat-tin-logistics</item>
+        <item>bpost</item>
+        <item>vietnam-post</item>
+        <item>ocs</item>
+        <item>dawan-wing</item>
+        <item>the-courier-guy</item>
+        <item>ccd-courier</item>
+        <item>bex-express</item>
+        <item>postnard</item>
+        <item>2go-express</item>
+        <item>jrs-express</item>
+        <item>geodis</item>
+        <item>lso</item>
+        <item>statovernight</item>
+        <item>bring</item>
+        <item>sr-group</item>
+        <item>pentagon-freight</item>
+        <item>loomis-express</item>
+        <item>transferd</item>
+        <item>logi-trans</item>
+        <item>jetpak</item>
+        <item>db-schenker</item>
+        <item>merkesdal</item>
+        <item>keuhne-nagel</item>
+        <item>postnord</item>
+        <item>nor-lines</item>
+        <item>envialia</item>
+        <item>nacex</item>
+        <item>mrw</item>
+        <item>correos-express</item>
+        <item>redur</item>
+        <item>ctt</item>
+        <item>sending</item>
+    </string-array>
+
+</resources>
