@@ -51,8 +51,7 @@ import VisionSDK
 ## Usage
 
 ### Add `Privacy - Camera Usage Description` to Info.plist file
-
-<img src="https://github.com/packagexlabs/vision-sdk-sample-code/blob/main/Images/PermissionSettings.png" width="500">
+<img width="500" alt="PermissionSettings" src="https://user-images.githubusercontent.com/33172684/210703473-6c2b3cc8-2b8f-41d5-9f66-22f7244db759.png">
 
 ### Initialization
 
@@ -155,7 +154,7 @@ override func viewDidLoad() {
 
 |Setup Custom Class|
 |-|
-|<img src="https://github.com/packagexlabs/vision-sdk-sample-code/blob/main/Images/ViewClass.png" width="350">
+<img width="350" alt="ViewClass" src="https://user-images.githubusercontent.com/33172684/210703616-ecbb951b-3e99-4b5c-8953-bb8c77ff0886.png">
 
 ## Functional Description
 
