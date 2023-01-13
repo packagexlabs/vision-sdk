@@ -39,8 +39,8 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         VisionSDK.getInstance().initialise(
-            apiKey = "//TODO your api key here",
-            environment = Environment.STAGING
+            apiKey = //TODO your api key here,
+            environment = //TODO environment
         )
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
