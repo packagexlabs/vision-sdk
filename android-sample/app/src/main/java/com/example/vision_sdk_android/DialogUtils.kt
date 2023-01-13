@@ -18,7 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.FragmentActivity
-import com.example.customscannerview.mlkit.enums.ViewType
+import com.example.customscannerview.mlkit.views.DetectionMode
 
 
 fun showSuccessDialog(
@@ -65,18 +65,16 @@ fun showSuccessDialog(
 
 
 fun showErrorDialog(
-    viewType: ViewType, context: Context, mediaPlayer: MediaPlayer, callback: () -> Unit,
+    viewType: DetectionMode, context: Context, mediaPlayer: MediaPlayer, callback: () -> Unit,
 ) {
     val failureDialog =
         AlertDialog.Builder(context).setCancelable(false).setTitle("SCAN FAILED").create()
 
     var name = when (viewType) {
-        ViewType.SQUARE -> " QR Code"
-        ViewType.RECTANGLE -> "Barcode"
-        ViewType.FULLSCRREN -> "Something"
-        else -> {
-            "Somethinh"
-        }
+        DetectionMode.QR -> "QR Code"
+        DetectionMode.Barcode -> "Barcode"
+        DetectionMode.QRAndBarcode -> "QR Code & Barcode"
+        DetectionMode.OCR -> "Something"
     }
 
     val subView =

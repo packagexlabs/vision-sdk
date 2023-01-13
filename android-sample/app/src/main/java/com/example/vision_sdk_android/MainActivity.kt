@@ -39,8 +39,8 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         VisionSDK.getInstance().initialise(
-            apiKey = //TODO your api key here,
-            environment = //TODO environment
+            apiKey = "//TODO your api key here",
+            environment = Environment.STAGING
         )
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -132,21 +132,21 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
                 R.id.barCode -> {
                     screenState = screenState.copy(
                         detectionMode = DetectionMode.Barcode,
-                        scanningWindow = if (screenState.scanningWindow != ViewType.FULLSCRREN) ViewType.RECTANGLE else ViewType.FULLSCRREN
+                        scanningWindow = if (screenState.scanningWindow != ViewType.FULLSCRREN) ViewType.WINDOW else ViewType.FULLSCRREN
                     )
                 }
 
                 R.id.qrCode -> {
                     screenState = screenState.copy(
                         detectionMode = DetectionMode.QR,
-                        scanningWindow = if (screenState.scanningWindow != ViewType.FULLSCRREN) ViewType.SQUARE else ViewType.FULLSCRREN
+                        scanningWindow = if (screenState.scanningWindow != ViewType.FULLSCRREN) ViewType.WINDOW else ViewType.FULLSCRREN
                     )
                 }
 
                 R.id.ocr -> {
                     screenState = screenState.copy(
                         detectionMode = DetectionMode.OCR,
-                        scanningWindow = ViewType.RECTANGLE
+                        scanningWindow = ViewType.FULLSCRREN
                     )
                 }
             }
@@ -164,14 +164,14 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
                     when (binding.bottomNav.selectedItemId) {
                         R.id.barCode -> {
                             screenState = screenState.copy(
-                                scanningWindow = ViewType.RECTANGLE,
+                                scanningWindow = ViewType.WINDOW,
                                 detectionMode = DetectionMode.Barcode
                             )
                         }
 
                         R.id.qrCode -> {
                             screenState = screenState.copy(
-                                scanningWindow = ViewType.SQUARE,
+                                scanningWindow = ViewType.WINDOW,
                                 detectionMode = DetectionMode.QR
                             )
                         }
@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
                         R.id.ocr -> {
                             screenState = screenState.copy(
                                 detectionMode = DetectionMode.OCR,
-                                scanningWindow = ViewType.RECTANGLE
+                                scanningWindow = ViewType.WINDOW
                             )
                         }
                     }
@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
         }
 
         if (screenState.detectionMode == DetectionMode.OCR ||
-            screenState.detectionMode == DetectionMode.Auto ||
+            screenState.detectionMode == DetectionMode.QRAndBarcode ||
             screenState.scanningWindow == ViewType.FULLSCRREN
         ) {
             binding.btnSwitch.visibility = View.GONE
@@ -261,7 +261,7 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
                     captureImage()
                 }
 
-                DetectionMode.Auto -> {
+                DetectionMode.QRAndBarcode -> {
 
                 }
             }
@@ -321,14 +321,14 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
     override fun onFailure(exception: ScannerException) {
         when (exception) {
             is ScannerException.BarCodeNotDetected -> showErrorDialog(
-                viewType = screenState.scanningWindow,
+                viewType = screenState.detectionMode,
                 this@MainActivity,
                 mediaUtils.getMediaPlayer(),
                 resetDialogFlagCallback
             )
 
             is ScannerException.QRCodeNotDetected -> showErrorDialog(
-                viewType = screenState.scanningWindow,
+                viewType = screenState.detectionMode,
                 this@MainActivity,
                 mediaUtils.getMediaPlayer(),
                 resetDialogFlagCallback
