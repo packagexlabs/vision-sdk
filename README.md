@@ -379,11 +379,10 @@ private fun startScanning() {
 
 #### View Types
 
-There are 3 types of scanning windows:
+There are 2 types of scanning windows:
 
-1. `ViewType.RECTANGLE` by default show a rectangular window
-2. `ViewType.SQUARE` by default show a square window
-3. `ViewType.FULLSCREEN` whole screen
+1. `ViewType.WINDOW` by default show a square window for QR detection mode and rectangle for Barcode
+2. `ViewType.FULLSCREEN` whole screen
 
 #### Scanning Modes
 
@@ -396,7 +395,7 @@ There are 2 types of scanning mode
 
 Detection mode will tell which codes to detect
 
-1. `Auto` detects Barcode and QR Codes collectively
+1. `QrAndBarcode` detects Barcode and QR Codes collectively
 2. `Barcode` detects only barcode
 3. `QR` detects only QR codes
 4. `OCR` for OCR detection. This mode will call OCR api
@@ -458,7 +457,7 @@ It will be detecting the Barcode manually with in a rectangular area
 
 ```kotlin
 binding.customScannerView.startScanning(
-    viewType = ViewType.RECTANGLE,
+    viewType = ViewType.WINDOW,
     scanningMode = ScanningMode.Manual,
     detectionMode = DetectionMode.Barcode,
     this
