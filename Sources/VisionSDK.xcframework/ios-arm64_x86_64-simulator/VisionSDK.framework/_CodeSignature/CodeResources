@@ -10,7 +10,7 @@
 		</data>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<data>
-		PAMMIoSorWtYXBUOe5+M9UVcQNU=
+		cdpwOrOe3XHxOt71GFTR7q2dD48=
 		</data>
 		<key>Headers/VisionSDK.h</key>
 		<data>
@@ -18,15 +18,15 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		TQwYJvx9m6oMmcgGO9bvkKOEp/Q=
+		DTTrOgZMeGqx0x6KzfXTAsvlYTE=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		AsgXRC97Se3BiDP1/GzowyTZzFM=
+		sm54tUUAfmA+hAtmlGcK6KPMMs4=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		TK8MTbOkvaXomrtYel13GjwsfVc=
+		eXM62oMGRkbnnQVaw+V18kn2lcc=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -34,19 +34,19 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		TK8MTbOkvaXomrtYel13GjwsfVc=
+		eXM62oMGRkbnnQVaw+V18kn2lcc=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		QnRTfMF7sbYqw7PRsoGA/dgPsTE=
+		gKaZ7pwLF/3Xi7R7UFyM/UKBjgA=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		AsgXRC97Se3BiDP1/GzowyTZzFM=
+		sm54tUUAfmA+hAtmlGcK6KPMMs4=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		UUwN5FKDAcLR6C5WNOcEGMo6yUc=
+		0/90dAaPv8OxRHIfvRZC1+YHH74=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -54,11 +54,11 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		UUwN5FKDAcLR6C5WNOcEGMo6yUc=
+		0/90dAaPv8OxRHIfvRZC1+YHH74=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		EDxox5WuIBE0En4HlABJgyQsqRM=
+		/Nlfj6mEhof3vbnP5iFpW70HQi4=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -78,7 +78,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			tNWFk7JcgbUmHmrjuDZxoqExbGbAa1ZFMCYA4Tprmus=
+			jMiLlbP9vicvAudIH2q4a5ilO6M/k9KvB1haQik59oI=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK.h</key>
@@ -92,14 +92,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			/CA4tNx6WeYAd5uBMITM8LOU46JdxS7wWwV6X3AAFn4=
+			vZIkYaGy0WGJaGCXKViN+dqC5h5xG55Pp4+IXrHBdUI=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			cKdO94NRtzuNmQpqP+IUta+mFWcnw5XId0TQ689uhIk=
+			PBwIO47Q6aFb9h9QSOQNuK3PE+ZzHkpKtQIziaNcQs8=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
@@ -113,28 +113,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			cKdO94NRtzuNmQpqP+IUta+mFWcnw5XId0TQ689uhIk=
+			PBwIO47Q6aFb9h9QSOQNuK3PE+ZzHkpKtQIziaNcQs8=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			QrMFUL6gh/zyRz3g4Ezf5IGctFa+/DyK1pjDxYhrwMY=
+			QpdnFJeo0fRrMhtsi2ea8/g3uzy64H0uTUGdPeb2JE4=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			/CA4tNx6WeYAd5uBMITM8LOU46JdxS7wWwV6X3AAFn4=
+			vZIkYaGy0WGJaGCXKViN+dqC5h5xG55Pp4+IXrHBdUI=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			IGSaVjYt1RwCmqtWXY3GfwktX7YUvcTty9Q/3cixLxQ=
+			Iiio5Aczpjo2oF3ZaP71KvrO3yh3u8NESLuzsgiQsJI=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
@@ -148,14 +148,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			IGSaVjYt1RwCmqtWXY3GfwktX7YUvcTty9Q/3cixLxQ=
+			Iiio5Aczpjo2oF3ZaP71KvrO3yh3u8NESLuzsgiQsJI=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			NuSph+DJzCG3IFuVT8bwYu9Z+v0PsC6IMVvhYLOWXzs=
+			XTKhoBPnBEmx3qYLTBmcjVTsreto4DLS0Q01PZttTFo=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

@@ -303,7 +303,7 @@ SWIFT_CLASS_NAMED("Input")
 @interface Input : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) Input * _Nonnull default_;)
 + (Input * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect isTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn sessionPreset:(AVCaptureSessionPreset _Nullable)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect isTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn sessionPreset:(AVCaptureSessionPreset _Nullable)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -386,7 +386,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @class NSError;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nonnull)apiKey :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 - (void)recongizeTextFromImage:(CGImageRef _Nonnull)image :(void (^ _Nonnull)(NSArray<NSString *> * _Nonnull))completion;
 @end
 
@@ -703,7 +703,7 @@ SWIFT_CLASS_NAMED("Input")
 @interface Input : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) Input * _Nonnull default_;)
 + (Input * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect isTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn sessionPreset:(AVCaptureSessionPreset _Nullable)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect isTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn sessionPreset:(AVCaptureSessionPreset _Nullable)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -786,7 +786,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @class NSError;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nonnull)apiKey :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 - (void)recongizeTextFromImage:(CGImageRef _Nonnull)image :(void (^ _Nonnull)(NSArray<NSString *> * _Nonnull))completion;
 @end
 

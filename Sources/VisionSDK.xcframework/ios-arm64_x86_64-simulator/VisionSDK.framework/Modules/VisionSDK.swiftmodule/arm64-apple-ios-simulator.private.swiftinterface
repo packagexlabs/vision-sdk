@@ -82,7 +82,7 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public static var `default`: VisionSDK.CodeScannerView.Input {
       @objc get
     }
-    @objc public init(focusImage: UIKit.UIImage?, shouldDisplayFocusImage: Swift.Bool, shouldScanInFocusImageRect: Swift.Bool, isTextIndicationOn: Swift.Bool, isBarCodeOrQRCodeIndicationOn: Swift.Bool, sessionPreset: AVFoundation.AVCaptureSession.Preset? = nil, nthFrameToProcess: Swift.Int64, captureMode: VisionSDK.CaptureMode, captureType: VisionSDK.CaptureType)
+    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, sessionPreset: AVFoundation.AVCaptureSession.Preset? = .high, nthFrameToProcess: Swift.Int64 = 10, captureMode: VisionSDK.CaptureMode, captureType: VisionSDK.CaptureType)
     @objc deinit
   }
   @_Concurrency.MainActor(unsafe) public var focusImage: UIKit.UIImage?
@@ -94,6 +94,9 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) public var nthFrameToProcess: Swift.Int64
   @_Concurrency.MainActor(unsafe) public var captureMode: VisionSDK.CaptureMode
   @_Concurrency.MainActor(unsafe) public var captureType: VisionSDK.CaptureType
+  @_Concurrency.MainActor(unsafe) public var focusImageRect: CoreFoundation.CGRect {
+    get
+  }
   @_Concurrency.MainActor(unsafe) public var scanMode: VisionSDK.CodeScannerMode {
     get
   }
@@ -127,7 +130,7 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func recongizeTextFromImage(_ image: CoreGraphics.CGImage, _ completion: @escaping ((_ textStrings: [Swift.String]) -> Swift.Void))
 }
 @objc public enum Environment : Swift.Int {
