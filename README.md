@@ -334,12 +334,19 @@ Some key features of the VisionSDK Android Integration include:
 - Capture image and OCR API capabilities
 
 ## Installation
+Vision SDK is hosted on JitPack.io
 
-To install the VisionSDK Android Integration, add the following dependency to
+First add JitPack to your root project
+
+```kotlin
+maven { url "https://jitpack.io" }
+```
+
+Then add the following dependency to
 your project's build.gradle file:
 
 ```
-implementation 'com.packagexlabs:scanner-view:0.0.2'
+implementation 'com.github.packagexlabs:vision-sdk-android:v1.0'
 ```
 
 ## Usage
