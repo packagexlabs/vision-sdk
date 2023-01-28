@@ -6,17 +6,12 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.customscannerview.mlkit.Authentication
 import com.example.customscannerview.mlkit.Environment
 import com.example.customscannerview.mlkit.VisionSDK
 import com.example.customscannerview.mlkit.enums.ViewType
 import com.example.customscannerview.mlkit.interfaces.OCRResult
-import com.example.customscannerview.mlkit.modelclasses.OCRResponse
-import com.example.customscannerview.mlkit.views.Configuration
-import com.example.customscannerview.mlkit.views.DetectionMode
-import com.example.customscannerview.mlkit.views.ScanWindow
-import com.example.customscannerview.mlkit.views.ScannerCallbacks
-import com.example.customscannerview.mlkit.views.ScannerException
-import com.example.customscannerview.mlkit.views.ScanningMode
+import com.example.customscannerview.mlkit.views.*
 import com.example.vision_sdk_android.databinding.ActivityMainBinding
 import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.delay
@@ -39,8 +34,8 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         VisionSDK.getInstance().initialise(
-            apiKey = //TODO your api key here,
-            environment = //TODO environment
+            apiKey = Authentication.BearerToken("eyJhbGciOiJSUzI1NiIsImtpZCI6ImQwNWI0MDljNmYyMmM0MDNlMWY5MWY5ODY3YWM0OTJhOTA2MTk1NTgiLCJ0eXAiOiJKV1QifQ.eyJvcmciOiJvcmdfYnJDODd0eVBUOGZwbW9KUk5tVEVGYSIsInJvbGUiOiJvd25lciIsImVudW1zIjoiYToyfGI6MnxjOjJ8ZDoyfGU6MnxmOjJ8ZzoyfGg6MnxpOjJ8ajoyfHE6MnxrOjJ8bzoyfHA6MnxsOjJ8bToyfG46MnxyOjJ8czoyIiwiaXNzIjoiaHR0cHM6Ly9zZWN1cmV0b2tlbi5nb29nbGUuY29tL3B4LXBsYXRmb3JtLXN0YWdpbmciLCJhdWQiOiJweC1wbGF0Zm9ybS1zdGFnaW5nIiwiYXV0aF90aW1lIjoxNjc0MTk2OTU4LCJ1c2VyX2lkIjoiQlBXWnNKVDQxRFVhT2VIb1A2WFo3RVpITXNZMiIsInN1YiI6IkJQV1pzSlQ0MURVYU9lSG9QNlhaN0VaSE1zWTIiLCJpYXQiOjE2NzQ3OTU2NzIsImV4cCI6MTY3NDc5OTI3MiwiZW1haWwiOiJ6YWluLmFsaUBwYWNrYWdleC5pbyIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbInphaW4uYWxpQHBhY2thZ2V4LmlvIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.stGbWgd2pZmOd8ZWLTHMDB_rbbnAUfx-KZvjXAOyOCkQT4Ng6KIixV4cYE6lxsb2kr27Be8ymI1bTf1jerP_itks98OtRuYA8xB75qKIBn5vOkXoPKUOmcwsV3pQ8Uu6BY3an4Mno5BShBZ6U4hPT_nFOoI3I5xhdoi8VtecRzUfNWR6-A84fFIJCbTitPQynK16PLXhiWreuII9yMjERC72qpKhUVTeGHxVGPst9pBVrkxhArJOnkmiEgv8ZwLXVj1uu9DW2x_uX_3zo8AqSqCuj7gvuFokrHFRzmeenP7RUe41A4x6ZNQzphIekf64BVln369oTtAY9xxBUWwYXQ"),
+            environment = Environment.STAGING
         )
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -276,7 +271,7 @@ class MainActivity : AppCompatActivity(), ScannerCallbacks {
         binding.customScannerView.makeOCRApiCall(bitmap = bitmap,
             barcodeList = list,
             onScanResult = object : OCRResult {
-                override fun onOCRResponse(ocrResponse: OCRResponse?) {
+                override fun onOCRResponse(ocrResponse: String?) {
                     binding.progressBar.visibility = View.GONE
                     Log.d("MainActivity", "api responded with  ${ocrResponse.toString()}")
                 }
