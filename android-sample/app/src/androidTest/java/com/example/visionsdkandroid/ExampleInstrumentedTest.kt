@@ -1,4 +1,4 @@
-package com.example.vision_sdk_android
+package com.example.visionsdkandroid
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

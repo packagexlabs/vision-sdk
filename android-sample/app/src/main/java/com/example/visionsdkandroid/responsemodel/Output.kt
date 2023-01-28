@@ -1,4 +1,4 @@
-package com.example.customscannerview.mlkit.modelclasses.ocr_response_demo
+package com.example.visionsdkandroid.responsemodel
 
 
 import com.google.gson.annotations.SerializedName

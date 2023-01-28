@@ -1,7 +1,6 @@
-package com.example.customscannerview.mlkit.modelclasses
+package com.example.visionsdkandroid.responsemodel
 
 
-import com.example.customscannerview.mlkit.modelclasses.ocr_response_demo.Data
 import com.google.gson.annotations.SerializedName
 
 data class OCRResponse(

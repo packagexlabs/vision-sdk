@@ -1,13 +1,13 @@
-package com.example.customscannerview.mlkit.modelclasses.ocr_response_demo
+package com.example.visionsdkandroid.responsemodel
 
 
 import com.google.gson.annotations.SerializedName
 
-data class Sender(
+data class Recipient(
     @SerializedName("address")
     val address: Address?,
     @SerializedName("email")
-    val email: Any?,
+    val email: String?,
     @SerializedName("name")
     val name: String?,
     @SerializedName("phone")

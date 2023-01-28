@@ -1,4 +1,4 @@
-package com.example.vision_sdk_android
+package com.example.visionsdkandroid
 
 import android.content.DialogInterface
 import android.graphics.Color

@@ -1,4 +1,4 @@
-package com.example.vision_sdk_android
+package com.example.visionsdkandroid
 
 import com.google.mlkit.vision.barcode.common.Barcode
 

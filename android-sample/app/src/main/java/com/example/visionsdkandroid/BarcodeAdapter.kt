@@ -1,4 +1,4 @@
-package com.example.vision_sdk_android
+package com.example.visionsdkandroid
 
 import android.view.LayoutInflater
 import android.view.View

@@ -1,4 +1,4 @@
-package com.example.vision_sdk_android
+package com.example.visionsdkandroid
 
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -12,7 +12,7 @@ import com.example.customscannerview.mlkit.VisionSDK
 import com.example.customscannerview.mlkit.enums.ViewType
 import com.example.customscannerview.mlkit.interfaces.OCRResult
 import com.example.customscannerview.mlkit.views.*
-import com.example.vision_sdk_android.databinding.ActivityMainBinding
+import com.example.visionsdkandroid.databinding.ActivityMainBinding
 import com.google.mlkit.vision.barcode.common.Barcode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

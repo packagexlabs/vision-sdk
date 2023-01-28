@@ -1,4 +1,4 @@
-package com.example.vision_sdk_android
+package com.example.visionsdkandroid
 
 import com.example.customscannerview.mlkit.enums.ViewType
 import com.example.customscannerview.mlkit.views.DetectionMode
