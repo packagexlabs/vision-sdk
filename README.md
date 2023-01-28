@@ -360,12 +360,25 @@ guide [here](https://docs.packagex.io/docs/getting-started/welcome).
 
 Initialise the SDK first:
 
+There are 2 ways for authentication
+1. Via API key
+2. Via Token
+
 ```kotlin
 VisionSDK.getInstance().initialise(
-    apiKey = //TODO your api key here,
+    apiKey = Authentication.APIKey(),
     environment = //TODO environment
 )
 ```
+
+```kotlin
+VisionSDK.getInstance().initialise(
+    apiKey = Authentication.BearerToken(/*Yoru token here*/),
+    environment = Environment.STAGING
+)
+```
+
+
 
 ### Basic Usage
 
