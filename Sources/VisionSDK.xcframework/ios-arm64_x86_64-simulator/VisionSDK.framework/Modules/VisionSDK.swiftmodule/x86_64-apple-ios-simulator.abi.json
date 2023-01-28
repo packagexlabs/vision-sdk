@@ -3638,7 +3638,7 @@
           {
             "kind": "Function",
             "name": "callScanAPIWith",
-            "printedName": "callScanAPIWith(_:andBarcodes:andApiKey:_:)",
+            "printedName": "callScanAPIWith(_:andBarcodes:andApiKey:andToken:andLocationId:andOptions:_:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -3667,9 +3667,68 @@
               },
               {
                 "kind": "TypeNominal",
-                "name": "String",
-                "printedName": "Swift.String",
-                "usr": "s:SS"
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Swift.String]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:SD"
               },
               {
                 "kind": "TypeFunc",
@@ -3734,8 +3793,8 @@
               }
             ],
             "declKind": "Func",
-            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callScanAPIWith:andBarcodes:andApiKey::",
-            "mangledName": "$s9VisionSDK0A10APIManagerC15callScanAPIWith_11andBarcodes0G6ApiKey_ySo7UIImageC_SaySSGSSy10Foundation4DataVSg_So13NSURLResponseCSgSo7NSErrorCSgtctF",
+            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callScanAPIWith:andBarcodes:andApiKey:andToken:andLocationId:andOptions::",
+            "mangledName": "$s9VisionSDK0A10APIManagerC15callScanAPIWith_11andBarcodes0G6ApiKey0G5Token0G10LocationId0G7Options_ySo7UIImageC_SaySSGSSSgA2MSDyS2SGy10Foundation4DataVSg_So13NSURLResponseCSgSo7NSErrorCSgtctF",
             "moduleName": "VisionSDK",
             "declAttributes": [
               "Dynamic",
@@ -5158,56 +5217,56 @@
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 905,
+      "offset": 896,
       "length": 4,
       "value": "0.65"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 912,
+      "offset": 903,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 993,
+      "offset": 984,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 1125,
+      "offset": 1116,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1265,
+      "offset": 1256,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Dictionary",
-      "offset": 1366,
+      "offset": 1357,
       "length": 7659,
       "value": "[(\"rejectBarcode\", \"^(?:420|421 ?\\d{3}|410|411|412) ?(\\d{5}|\\d{9}|\\d{11})$\"), (\"ups-1\", \"\\b(1Z ?[0-9A-Z]{3} ?[0-9A-Z]{3} ?[0-9A-Z]{2} ?[0-9A-Z]{4} ?[0-9A-Z]{3} ?[0-9A-Z])\\b\"), (\"ups-2\", \"\\b[kKJj]{1}[0-9]{10}\\b\"), (\"usps-1\", \"\\b(9\\d{3} \\d{4} \\d{4} \\d{4} \\d{4} \\d{2})\\b\"), (\"usps-2\", \"(^420|^C1420)(?P<zipcode>[\\d]{5,11})[^\\d]*(?:[\\x1d]+|[\\u001d]+)?(?P<tracking_no>\\d{22,26})$\"), (\"usps-3\", \"^\\bC1(?P<tracking_no>\\d{22})\"), (\"usps-4\", \"(?i)\\b[A-Z]{2} *( *[\\d]){9} *US\\b\"), (\"amazon-fba-us-1\", \"(TB|TE)(?:[A-Z])[\\d]{12}\"), (\"amazon-fba-us-2\", \"\\b(BA)[\\d]{10}\\b\"), (\"fedex-1\", \"^\\d{22}(?P<tracking_no>\\d{12})[\\x1d]?($|\\b)\"), (\"fedex-2\", \"^96\\d{5}(?P<tracking_no>\\d{15})[\\x1d]?($|\\b)\"), (\"fedex-3\", \"^\\[\\)\\>[\\x1e](01)[\\x1d](?P<zipcode>[^\\x1d]+)?[\\x1d](?P<receiver_country>[^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d](?P<tracking_no>[^\\x1d]+)?[\\x1d](?P<shipment_type>[^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d](?P<weight_info>[^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d](?P<receiver_address_line1>[^\\x1d]+)?[\\x1d](?P<receiver_city>[^\\x1d]+)?[\\x1d](?P<receiver_state>[^\\x1d]+)?[\\x1d](?P<receiver_name>[^\\x1d\\x1e]+)?[\\x1e]([^\\x1d\\x1e]+)?[\\x1d]([^\\x1d]+)?[\\x1d]\"), (\"australia-post\", \"(?i)ap article id[: ]*([A-Za-z0-9]*)\"), (\"bring\", \"\\(?00\\)?(\\s*3707\\s*\\d{14})($|\\b)\"), (\"canada-post\", \"(?i)^\\d([A-Z]{3}\\d{3})(?P<tracking_no>\\d{16})\\d{5}$\"), (\"canpar-1\", \"^(?i)(D|S)4\\d{2}\\d{3}\\d{2}(\\d{3}\\d{3}\\d{3}\\d{3})$\"), (\"canpar-2\", \"^\\*\\d{16}$\"), (\"china-post1\", \"(?i)(^|\\b)(?P<courier_tag>[A-Z]{2}) *( *[\\d]){9} *CN($|\\b)\"), (\"dhl-1\", \"(GM\\d{18})\"), (\"dhl-2\", \"^(\\d[A-Z])?US\\d{5,11}\\+\\d+$\"), (\"dhl-3\", \"^JJD\\d+\"), (\"dynamex\", \"(^|\\b)DX[A-Z]{4}\\d{7}(\\b|$)\"), (\"equick-cn\", \"^EQK[A-Z]{2}( *\\d *){10}YQ\"), (\"fastway-1\", \"^FA\\d{10}$\"), (\"fastway-2\", \"^(?P<name>[^|]*)\\|([^|]*)\\|(?P<building>[^|]*)\\|(?P<address_line1>[^|]*)\\|(?P<city>[^|]*)\\|(?P<state>[^|]*)\\|(?P<zipcode>[^|]*)\\|(?P<phone_number>[^|]*)\\|(?P<instructions>[^|]*)\\|([^|]*)$\"), (\"hongkong-post1\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *HK($|\\b)\"), (\"india-post\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *IN($|\\b)\"), (\"japan-post\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *JP($|\\b)\"), (\"lasership-1\", \"(?i)^.*lasership\\.com\\\/track\\\/.*\"), (\"lasership-2\", \"^(L[A-Z]\\d{8}|1L[A-Z][\\d\\-]{12,17})$\"), (\"lasership-3\", \"(?i)^.*lasership\\.com\\\/track\\\/(?P<tracking_no>L[A-Z]\\d{8}|1L[A-Z][\\d\\-]{12,17})\"), (\"mark3-1\", \"(?i)mark ?3[^\\$]*international\"), (\"maxx\", \"(?i)(^|\\b)maxx(\\b|\\$)\"), (\"maxx-1\", \"(?i)(?:tracking[^\\d]{,6})(?P<tracking_no>\\d{8})\"), (\"ontrac1\", \"\\b(?i)(OnTrac)\\b\"), (\"pakistan-post1\", \"(?i)^[A-Z]{2} *( *[\\d]){9} *PK$\"), (\"royal-mail\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *GB($|\\b)\"), (\"sf-express\", \"^[M]{6,}={'.*\"), (\"sr-group\", \"\\(?00\\)?(\\s*3707\\s*\\d{14})($|\\b)\"), (\"singapore-post\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *SG($|\\b)\"), (\"tnt1\", \"(?i)^(GD|GE) *( *[\\d]){9} *WW$\"), (\"jd\", \"^(\\d{11})\\-\\d{,2}\\-\\d{,2}\\-\\d{,2}$\"), (\"yunexpress\", \"^YT( *\\d *){16}$\"), (\"ytoexpress\", \"^G( *\\d *){11}$\"), (\"lone-star-overnight\", \"\\b[A-Z]{2}[A-Z0-9]{6}\\b\"), (\"loomis-express\", \"(?i)LQM4W3K3AANET\\s*\\d{8}\\s*\"), (\"logi-trans-1\", \"\\b40170726205192\\d{6}\\b|40170726205192\\d{6}\"), (\"logi-trans-2\", \"\\b401707\\d{14}\\b|401707\\d{14}\"), (\"logi-trans-3\", \"\\b40170703\\d{12}\\b|40170703\\d{12}\"), (\"jetpak\", \"\\b0005\\d{10}\\b\"), (\"db-schenker-1\", \"00373316833002\\d{6}\\b\"), (\"db-schenker-2\", \"\\(00\\)[\\s\\.\\,]*373316833002\\d{6}\"), (\"db-schenker-3\", \"401733\\d{14}\\b\"), (\"purolator-1\", \"\\b33\\d{10}\\b\"), (\"purolator-2\", \"^\\d{11}(33\\d{10})\\d{11}$\"), (\"purolator-3\", \"^V01~(.*)\\|D01~(.*)\\|R01~(.*)\\|R02~(.*)\\|R03~(.*)\\|R04~(.*)\\|R05~(.*)\\|R06~(.*)\\|R07~(.*)\\|S01~(.*)\\|S02~(.*)\\|S03~(.*)\\|S04~(.*)\\|S05~(.*)\\|S06~(.*)\\|S08~(.*)\\|S09~(.*)\\|S10~(.*)\\|S11~(.*)\\|S12~(.*)\\|S13~(.*)\\|S14~(.*)\\|S15~(.*)\\|B01~(.*)\\|B02~(.*)$\")]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 9058,
+      "offset": 9049,
       "length": 1483,
       "value": "[\"rejectBarcode\", \"ups-1\", \"ups-2\", \"usps-1\", \"usps-2\", \"usps-3\", \"usps-4\", \"amazon-fba-us-1\", \"amazon-fba-us-2\", \"fedex-1\", \"fedex-2\", \"fedex-3\", \"australia-post\", \"bring\", \"canada-post\", \"canpar-1\", \"canpar-2\", \"dhl-1\", \"dhl-2\", \"dhl-3\", \"dynamex\", \"equick-cn\", \"fastway-1\", \"fastway-2\", \"hongkong-post1\", \"india-post\", \"japan-post\", \"lasership-1\", \"lasership-2\", \"lasership-3\", \"mark3-1\", \"maxx\", \"maxx-1\", \"ontrac1\", \"pakistan-post1\", \"royal-mail\", \"sf-express\", \"singapore-post\", \"tnt1\", \"jd\", \"yunexpress\", \"ytoexpress\", \"lone-star-overnight\", \"loomis-express\", \"logi-trans-1\", \"logi-trans-2\", \"logi-trans-3\", \"jetpak\", \"db-schenker-1\", \"db-schenker-2\", \"db-schenker-3\", \"purolator-1\", \"purolator-2\", \"purolator-3\"]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 10577,
+      "offset": 10568,
       "length": 2770,
       "value": "[\"usps\", \"ups\", \"amazon\", \"purolator\", \"fedex\", \"canada-post\", \"canpar\", \"cdl\", \"china-ems\", \"china-post\", \"dhl\", \"dynamex\", \"equick-cn\", \"fastway\", \"australia-post\", \"hongkong-post\", \"india-post\", \"japan-post\", \"jd\", \"lasership\", \"mark3\", \"maxx\", \"ontrac\", \"pakistan-post\", \"royal-mail\", \"sf-express\", \"singapore-post\", \"sto-express\", \"tnt\", \"yto-express\", \"yun-express\", \"zto-express\", \"dpd\", \"star-track\", \"hermes\", \"parcel-force\", \"postnl\", \"yodel\", \"gls\", \"colissimo\", \"collect-plus\", \"transworld\", \"crawfords-delivery-services\", \"whistl\", \"an-post\", \"wish-post\", \"city-air-express\", \"sagawa-express\", \"fukuyama-transportation\", \"skyworldwide\", \"toll-group\", \"ide-express\", \"road-express\", \"endeavour\", \"overnight-express\", \"rhyme-express\", \"yuantong-express\", \"best-express\", \"deppon\", \"tmall\", \"netease\", \"unitop\", \"chronopost\", \"newzealand-post\", \"ninja-van\", \"pos-laju\", \"city-link\", \"lel-express\", \"gdex\", \"blibli\", \"tokopedia\", \"tiki\", \"j&t-express\", \"jne\", \"surpostal\", \"espana\", \"mercado\", \"webpack\", \"andreani\", \"correo-argentino\", \"urbano\", \"correos\", \"yamato-transport\", \"247-express\", \"chilexpress\", \"flash-express\", \"kerry-express\", \"shopee-xpress\", \"thailand-post\", \"viettel-post\", \"wsp-express\", \"zoom-express\", \"inpost\", \"poczta_polska\", \"blue-express\", \"olva\", \"aramex\", \"nhat-tin-logistics\", \"bpost\", \"vietnam-post\", \"ocs\", \"dawn-wing\", \"the-courier-guy\", \"ccd-courier\", \"bex-express\", \"postnard\", \"2go-express\", \"jrs-express\", \"geodis\", \"lso\", \"statovernight\", \"bring\", \"sr-group\", \"pentagon-freight\", \"loomis-express\", \"transferd\", \"logi-trans\", \"jetpak\", \"db-schenker\", \"merkesdal\", \"kuehne-nagel\", \"postnord\", \"nor-lines\", \"envialia\", \"nacex\", \"mrw\", \"correos-express\", \"redur\", \"ctt\", \"sending\"]"
     },

@@ -312,12 +312,12 @@ detected.
 
 ```swift
 
-func callScanAPIWith(_ image: UIImage, andApiKey apiKey: String, _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?) -> Void))
+func callScanAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, andLocationId locationId: String? = nil, andOptions options: [String: String], _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?)-> Void))
 
 ```
 
 This method is called on the shared instance of `VisionAPIManager`. It can be accessed using `VisionAPIManager.shared`
-syntax. This method recieves the captured image and the API Key as parameters. It returns with the OCR Response from
+syntax. This method recieves the captured image and the API Key or AuthToken as parameters. It returns with the OCR Response from
 PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
 
 # VisionSDK Android Integration
