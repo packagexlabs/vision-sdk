@@ -366,7 +366,7 @@ There are 2 ways for authentication
 
 ```kotlin
 VisionSDK.getInstance().initialise(
-    apiKey = Authentication.APIKey(),
+    authentication = //TODO authentication,
     environment = //TODO environment
 )
 ```
