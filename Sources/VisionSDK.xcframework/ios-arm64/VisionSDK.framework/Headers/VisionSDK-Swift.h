@@ -232,7 +232,6 @@ using UInt = size_t;
 #endif
 @import AVFoundation;
 @import CoreFoundation;
-@import CoreGraphics;
 @import CoreMedia;
 @import Foundation;
 @import ObjectiveC;
@@ -308,6 +307,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
+
 @class AVCapturePhotoOutput;
 @class AVCapturePhoto;
 @class AVCaptureResolvedPhotoSettings;
@@ -349,7 +349,7 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(enum CodeScannerError)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
 @end
 
 
@@ -381,13 +381,19 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
+@class CIImage;
+
+@interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
+- (void)recongizeTextFromImage:(CIImage * _Nonnull)image :(void (^ _Nonnull)(NSArray<NSString *> * _Nonnull))completion;
+@end
+
 @class NSData;
 @class NSURLResponse;
 @class NSError;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
 - (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, NSString *> * _Nonnull)options :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
-- (void)recongizeTextFromImage:(CGImageRef _Nonnull)image :(void (^ _Nonnull)(NSArray<NSString *> * _Nonnull))completion;
+- (void)callManifestAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 @end
 
 #endif

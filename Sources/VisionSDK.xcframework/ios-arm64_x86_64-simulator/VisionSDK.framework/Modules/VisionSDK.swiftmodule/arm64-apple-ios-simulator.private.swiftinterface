@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
-// swift-module-flags: -target arm64-apple-ios14.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name VisionSDK
+// swift-module-flags: -target arm64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name VisionSDK
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
 import Foundation
@@ -8,6 +8,7 @@ import Swift
 import SwiftUI
 import UIKit
 import Vision
+import VisionKit
 @_exported import VisionSDK
 import _Concurrency
 import _StringProcessing
@@ -71,11 +72,11 @@ import _StringProcessing
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: VisionSDK.CodeScannerError)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool)
-  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withbarCodes barcodes: [Swift.String])
+  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool)
-  public func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withbarCodes barcodes: [Swift.String])
+  public func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
 }
 @_inheritsConvenienceInitializers @objc(CodeScannerView) @_Concurrency.MainActor(unsafe) public class CodeScannerView : UIKit.UIView {
   @objc(Input) public class Input : ObjectiveC.NSObject {
@@ -131,7 +132,10 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
 }
 extension VisionSDK.VisionAPIManager {
   @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Swift.String], _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func recongizeTextFromImage(_ image: CoreGraphics.CGImage, _ completion: @escaping ((_ textStrings: [Swift.String]) -> Swift.Void))
+  @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+}
+extension VisionSDK.VisionAPIManager {
+  @objc dynamic public func recongizeTextFromImage(_ image: CoreImage.CIImage, _ completion: @escaping ((_ textStrings: [Swift.String]) -> Swift.Void))
 }
 @objc public enum Environment : Swift.Int {
   case dev
