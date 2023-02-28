@@ -98,7 +98,7 @@ final class ViewController: UIViewController {
         let scannerView = CodeScannerView(frame: view.bounds)
         view.addSubview(scannerView)
         
-        scannerView.configure(delegate: self, input: .init(focusImage: nil, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single), scanMode: .autoBarCodeOrQRCode)
+        scannerView.configure(delegate: self, input: .init(focusImage: nil, focusImageRect: .zero, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single), scanMode: .autoBarCodeOrQRCode)
         
         scannerView.startRunning()
     }
@@ -173,6 +173,8 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: Vision
 
     - `focusImage: UIImage` - Image to be displayed in the centre if the view. If not provided, VisionSDK will use the
       default image. Note that focus rectangle frame is subject to change with respect to different scan modes.
+      
+    - `focusImageRect: CGRECT` - Custom rect for the focus image. You can provide your preferred rect or use .zero for default. Note that default focus rectangle frame is subject to change with respect to different scan modes.
 
     - `shouldDisplayFocusImage: Bool` - set true if you need focused region to be drawn.
 
