@@ -6,8 +6,8 @@ with Restful API) modes. Written in Swift.
 
 ## Development Requirements
 
-- iOS 13.0+
-- Swift: 5.4.2
+- iOS 15.0+
+- Swift: 5.7
 - Xcode Version: 13.0
 
 ## Installation
@@ -294,12 +294,12 @@ code indication is enabled while configuring the scanner view.
 
 ```swift
 
-func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withbarCodes barcodes: [String])
+func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String])
 
 ```
 
-This method is called when `capturePhoto()` method is called in OCR Mode. It return with the captured image and all the
-detected codes in it.
+This method is called when `capturePhoto()` method is called in OCR Mode. It return with the captured image from camera stream, all the
+detected codes in it, and an optional cropped document image if a document is detected with in the captured image.
 
 ```swift
 
