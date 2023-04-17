@@ -95,6 +95,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) public var nthFrameToProcess: Swift.Int64
   @_Concurrency.MainActor(unsafe) public var captureMode: VisionSDK.CaptureMode
   @_Concurrency.MainActor(unsafe) public var captureType: VisionSDK.CaptureType
+  @_Concurrency.MainActor(unsafe) public var codeDetectionConfidence: Swift.Float
   @_Concurrency.MainActor(unsafe) public var focusImageRect: CoreFoundation.CGRect {
     get
   }

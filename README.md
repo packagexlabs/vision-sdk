@@ -201,6 +201,9 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: Vision
 
     - `captureType` - Set it to `.multiple` if you want to allow multiple results from scan. In `.manual` case, you will
       have to manually trigger scanning using `capturePhoto()` method.
+      
+    - `codeDetectionConfidence: Float` - You can set the minimum confidence level for codes detected. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.9`.
+
 
 - `scanMode` - Defines the scan mode. It has following options
     - `.barCode` - Detects barcodes only in this mode
