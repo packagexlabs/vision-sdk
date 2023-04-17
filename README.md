@@ -98,7 +98,7 @@ final class ViewController: UIViewController {
         let scannerView = CodeScannerView(frame: view.bounds)
         view.addSubview(scannerView)
         
-        scannerView.configure(delegate: self, input: .init(focusImage: nil, focusImageRect: .zero, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single), scanMode: .autoBarCodeOrQRCode)
+        scannerView.configure(delegate: self, input: .init(focusImage: nil, focusImageRect: .zero, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single, codeDetectionConfidence: 0.8), scanMode: .autoBarCodeOrQRCode)
         
         scannerView.startRunning()
     }
@@ -127,7 +127,7 @@ extension ViewController: CodeScannerViewDelegate {
     }
     
     // returns captured image with all barcodes detected in it
-    func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withbarCodes barcodes: [String]) {
+    func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String]) {
     
     }
 }
@@ -202,7 +202,7 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: Vision
     - `captureType` - Set it to `.multiple` if you want to allow multiple results from scan. In `.manual` case, you will
       have to manually trigger scanning using `capturePhoto()` method.
       
-    - `codeDetectionConfidence: Float` - You can set the minimum confidence level for codes detected. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.9`.
+    - `codeDetectionConfidence: Float` - You can set the minimum confidence level for codes detected. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.8`.
 
 
 - `scanMode` - Defines the scan mode. It has following options

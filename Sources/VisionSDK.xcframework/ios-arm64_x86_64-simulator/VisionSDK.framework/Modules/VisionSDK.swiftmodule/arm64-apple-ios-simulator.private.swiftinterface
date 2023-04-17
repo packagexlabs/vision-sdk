@@ -83,7 +83,7 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public static var `default`: VisionSDK.CodeScannerView.Input {
       @objc get
     }
-    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, sessionPreset: AVFoundation.AVCaptureSession.Preset? = .high, nthFrameToProcess: Swift.Int64 = 10, captureMode: VisionSDK.CaptureMode, captureType: VisionSDK.CaptureType)
+    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, sessionPreset: AVFoundation.AVCaptureSession.Preset? = .high, nthFrameToProcess: Swift.Int64 = 10, captureMode: VisionSDK.CaptureMode, captureType: VisionSDK.CaptureType, codeDetectionConfidence: Swift.Float = 0.8)
     @objc deinit
   }
   @_Concurrency.MainActor(unsafe) public var focusImage: UIKit.UIImage?
