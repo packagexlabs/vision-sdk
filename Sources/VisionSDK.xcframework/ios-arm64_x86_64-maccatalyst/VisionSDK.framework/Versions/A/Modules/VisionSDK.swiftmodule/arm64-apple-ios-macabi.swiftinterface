@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
+// swift-compiler-version: Apple Swift version 5.8 (swiftlang-5.8.0.124.2 clang-1403.0.22.11.100)
 // swift-module-flags: -target arm64-apple-ios15.0-macabi -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name VisionSDK
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
@@ -106,7 +106,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 extension VisionSDK.CodeScannerView {
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func configure(delegate: VisionSDK.CodeScannerViewDelegate, input: VisionSDK.CodeScannerView.Input = .default, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+  @objc @_Concurrency.MainActor(unsafe) dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, input: VisionSDK.CodeScannerView.Input = .default, scanMode: VisionSDK.CodeScannerMode = .qrCode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
@@ -123,8 +123,11 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCaptureVideoDataOutputSampl
   @_Concurrency.MainActor(unsafe) @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
 extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate {
-  @_Concurrency.MainActor(unsafe) @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: Swift.Error?)
+  @_Concurrency.MainActor(unsafe) @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: (any Swift.Error)?)
   @_Concurrency.MainActor(unsafe) @objc dynamic public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
+}
+extension Swift.String {
+  public func searchUsingRegex(_ regex: Swift.String) -> Swift.String?
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
@@ -134,10 +137,7 @@ extension VisionSDK.VisionAPIManager {
   @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Swift.String], _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
 }
-extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func recongizeTextFromImage(_ image: CoreImage.CIImage, _ completion: @escaping ((_ textStrings: [Swift.String]) -> Swift.Void))
-}
-@objc public enum Environment : Swift.Int {
+@objc public enum AppEnvironment : Swift.Int {
   case dev
   case qa
   case staging
@@ -151,7 +151,7 @@ extension VisionSDK.VisionAPIManager {
 }
 @_inheritsConvenienceInitializers @objc(Constants) public class Constants : ObjectiveC.NSObject {
   public static var apiKey: Swift.String
-  public static var apiEnvironment: VisionSDK.Environment
+  public static var apiEnvironment: VisionSDK.AppEnvironment
   @objc override dynamic public init()
   @objc deinit
 }
@@ -170,6 +170,6 @@ extension VisionSDK.CaptureType : Swift.RawRepresentable {}
 extension VisionSDK.CaptureMode : Swift.Equatable {}
 extension VisionSDK.CaptureMode : Swift.Hashable {}
 extension VisionSDK.CaptureMode : Swift.RawRepresentable {}
-extension VisionSDK.Environment : Swift.Equatable {}
-extension VisionSDK.Environment : Swift.Hashable {}
-extension VisionSDK.Environment : Swift.RawRepresentable {}
+extension VisionSDK.AppEnvironment : Swift.Equatable {}
+extension VisionSDK.AppEnvironment : Swift.Hashable {}
+extension VisionSDK.AppEnvironment : Swift.RawRepresentable {}
