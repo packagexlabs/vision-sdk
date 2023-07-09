@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.8 (swiftlang-5.8.0.124.2 clang-1403.0.22.11.100)
+// swift-compiler-version: Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)
 // swift-module-flags: -target arm64-apple-ios15.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name VisionSDK
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
@@ -83,10 +83,9 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public static var `default`: VisionSDK.CodeScannerView.Input {
       @objc get
     }
-    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, sessionPreset: AVFoundation.AVCaptureSession.Preset? = .high, nthFrameToProcess: Swift.Int64 = 10, captureMode: VisionSDK.CaptureMode, captureType: VisionSDK.CaptureType, codeDetectionConfidence: Swift.Float = 0.8)
+    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, imageTintColor: UIKit.UIColor = .white, selectionTintColor: UIKit.UIColor = .white, isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, sessionPreset: AVFoundation.AVCaptureSession.Preset? = .high, nthFrameToProcess: Swift.Int64 = 10, captureMode: VisionSDK.CaptureMode, captureType: VisionSDK.CaptureType, codeDetectionConfidence: Swift.Float = 0.5)
     @objc deinit
   }
-  @_Concurrency.MainActor(unsafe) public var focusImage: UIKit.UIImage?
   @_Concurrency.MainActor(unsafe) public var isTextIndicationOn: Swift.Bool
   @_Concurrency.MainActor(unsafe) public var isBarCodeOrQRCodeIndicationOn: Swift.Bool
   @_Concurrency.MainActor(unsafe) public var shouldScanInFocusImageRect: Swift.Bool
@@ -96,6 +95,9 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) public var captureMode: VisionSDK.CaptureMode
   @_Concurrency.MainActor(unsafe) public var captureType: VisionSDK.CaptureType
   @_Concurrency.MainActor(unsafe) public var codeDetectionConfidence: Swift.Float
+  @_Concurrency.MainActor(unsafe) public var focusImage: UIKit.UIImage? {
+    get
+  }
   @_Concurrency.MainActor(unsafe) public var focusImageRect: CoreFoundation.CGRect {
     get
   }
@@ -127,16 +129,19 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
   @_Concurrency.MainActor(unsafe) @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: (any Swift.Error)?)
   @_Concurrency.MainActor(unsafe) @objc dynamic public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
 }
+extension AVFoundation.AVCaptureDevice {
+  public func set(frameRate: Swift.Double)
+}
 extension Swift.String {
-  public func searchUsingRegex(_ regex: Swift.String) -> Swift.String?
+  public func search(_ inString: Swift.String, at groupNumber: Swift.Int = 0, name groupName: Swift.String? = nil) -> Swift.String?
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Swift.String], _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Swift.String], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 @objc public enum AppEnvironment : Swift.Int {
   case dev

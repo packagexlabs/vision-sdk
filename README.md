@@ -31,7 +31,7 @@ value of your `Package.swift`.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/packagexlabs/vision-sdk-sample-code.git", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/packagexlabs/vision-sdk.git", .upToNextMajor(from: "1.0.0"))
 ]
 ```
 
@@ -98,7 +98,7 @@ final class ViewController: UIViewController {
         let scannerView = CodeScannerView(frame: view.bounds)
         view.addSubview(scannerView)
         
-        scannerView.configure(delegate: self, input: .init(focusImage: nil, focusImageRect: .zero, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single, codeDetectionConfidence: 0.8), scanMode: .autoBarCodeOrQRCode)
+        scannerView.configure(delegate: self, input: .init(focusImage: nil, focusImageRect: .zero, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, imageTintColor: .white, selectionTintColor: .white, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single, codeDetectionConfidence: 0.8), scanMode: .autoBarCodeOrQRCode)
         
         scannerView.startRunning()
     }
@@ -178,9 +178,12 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: Vision
 
     - `shouldDisplayFocusImage: Bool` - set true if you need focused region to be drawn.
 
-    - `shouldScanInFocusImageRect: Bool` - set true if you want to detect codes visible in focused region only. This
-      will discard the codes detected to be outside of the focus image.
+    - `shouldScanInFocusImageRect: Bool` - set true if you want to detect codes visible in focused region only. This will discard the codes detected to be outside of the focus image.
 
+    - `imageTintColor: UIColor` - Set the tint color of the focus image. Note that the image that you may provide in `focusImage: UIImage` property is loaded with rendering mode of `.alwaysTemplate`. So you need to provide the color of the focus image. Default value is `UIColor.white`
+    
+    - `selectionTintColor: UIColor` - Set the tint color of the focus image to use when code is detected. Depending on the properties `scanMode` and `shouldScanInFocusImageRect`, the focus image displayed can change the tint color  when a code is detected. Default value is `UIColor.white`
+    
     - `isTextIndicationOn: Bool` - Set false if you do not want to detect text in live camera feed. If set
       false `codeScannerViewDidDetect(_ text: Bool, barCode: Bool, qrCode: Bool)` method will send `text` parameter as
       false.
@@ -202,7 +205,7 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: Vision
     - `captureType` - Set it to `.multiple` if you want to allow multiple results from scan. In `.manual` case, you will
       have to manually trigger scanning using `capturePhoto()` method.
       
-    - `codeDetectionConfidence: Float` - You can set the minimum confidence level for codes detected. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.8`.
+    - `codeDetectionConfidence: Float` - You can set the minimum confidence level for codes detected. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.5`.
 
 
 - `scanMode` - Defines the scan mode. It has following options
@@ -317,7 +320,7 @@ detected.
 
 ```swift
 
-func callScanAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, andLocationId locationId: String? = nil, andOptions options: [String: String], _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?)-> Void))
+func callScanAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, andLocationId locationId: String? = nil, andOptions options: [String: String], withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?)-> Void))
 
 ```
 
