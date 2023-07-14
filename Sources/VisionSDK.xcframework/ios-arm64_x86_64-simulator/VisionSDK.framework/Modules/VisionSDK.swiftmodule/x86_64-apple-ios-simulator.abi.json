@@ -3900,7 +3900,7 @@
           {
             "kind": "Function",
             "name": "callManifestAPIWith",
-            "printedName": "callManifestAPIWith(_:andApiKey:withImageResizing:_:)",
+            "printedName": "callManifestAPIWith(_:andBarcodes:andApiKey:withImageResizing:_:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -3912,6 +3912,20 @@
                 "name": "UIImage",
                 "printedName": "UIKit.UIImage",
                 "usr": "c:objc(cs)UIImage"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Swift.String]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sa"
               },
               {
                 "kind": "TypeNominal",
@@ -3998,8 +4012,8 @@
               }
             ],
             "declKind": "Func",
-            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callManifestAPIWith:andApiKey:withImageResizing::",
-            "mangledName": "$s9VisionSDK0A10APIManagerC19callManifestAPIWith_9andApiKey17withImageResizing_ySo7UIImageC_SSSgSby10Foundation4DataVSg_So13NSURLResponseCSgSo7NSErrorCSgtctF",
+            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callManifestAPIWith:andBarcodes:andApiKey:withImageResizing::",
+            "mangledName": "$s9VisionSDK0A10APIManagerC19callManifestAPIWith_11andBarcodes0G6ApiKey17withImageResizing_ySo7UIImageC_SaySSGSSSgSby10Foundation4DataVSg_So13NSURLResponseCSgSo7NSErrorCSgtctF",
             "moduleName": "VisionSDK",
             "declAttributes": [
               "Dynamic",
@@ -6953,140 +6967,154 @@
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 6785,
+      "offset": 6817,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7321,
+      "offset": 7077,
       "length": 15,
       "value": "\"VisonSDKError\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 7344,
+      "offset": 7100,
       "length": 3,
       "value": "303"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7360,
+      "offset": 7116,
       "length": 17,
       "value": "\"API Key Failure\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7379,
+      "offset": 7135,
       "length": 30,
       "value": "\"Please provide valid API key\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7653,
+      "offset": 7409,
       "length": 11,
       "value": "\"x-api-key\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7736,
+      "offset": 7492,
       "length": 10,
       "value": "\"callType\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7758,
-      "length": 9,
-      "value": "\"extract\""
+      "offset": 7514,
+      "length": 16,
+      "value": "\"bill_of_lading\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7781,
-      "length": 10,
-      "value": "\"callTime\""
+      "offset": 7544,
+      "length": 13,
+      "value": "\"extractTime\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7803,
+      "offset": 7566,
       "length": 26,
       "value": "\"2022-12-16T07:46:03.122Z\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7843,
-      "length": 6,
-      "value": "\"uuid\""
+      "offset": 7606,
+      "length": 10,
+      "value": "\"platform\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 7896,
+      "offset": 7628,
+      "length": 5,
+      "value": "\"API\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "StringLiteral",
+      "offset": 7702,
       "length": 9,
       "value": "\"orgUuid\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 8135,
+      "offset": 7755,
+      "length": 9,
+      "value": "\"barcode\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "StringLiteral",
+      "offset": 8030,
       "length": 7,
       "value": "\"image\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 8146,
+      "offset": 8041,
       "length": 79,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "FloatLiteral",
-      "offset": 8190,
+      "offset": 8085,
       "length": 3,
       "value": "0.9"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 8221,
+      "offset": 8116,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 8224,
+      "offset": 8119,
       "length": 13,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 8306,
-      "length": 69,
-      "value": "\"https:\/\/r7oemey3f9.execute-api.us-east-1.amazonaws.com\/DEV\/manifest\""
+      "offset": 8201,
+      "length": 40,
+      "value": "\"https:\/\/v1.packagex.io\/iex\/api\/extract\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 8396,
+      "offset": 8262,
       "length": 2,
       "value": "20"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "StringLiteral",
-      "offset": 8564,
+      "offset": 8430,
       "length": 6,
       "value": "\"POST\""
     },
