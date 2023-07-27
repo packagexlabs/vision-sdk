@@ -346,7 +346,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-
 @class AVCapturePhotoOutput;
 @class AVCapturePhoto;
 @class AVCaptureResolvedPhotoSettings;
@@ -355,6 +354,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output didFinishProcessingPhoto:(AVCapturePhoto * _Nonnull)photo error:(NSError * _Nullable)error;
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output willCapturePhotoForResolvedSettings:(AVCaptureResolvedPhotoSettings * _Nonnull)resolvedSettings;
 @end
+
 
 @class AVCaptureOutput;
 @class AVCaptureConnection;
@@ -777,7 +777,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-
 @class AVCapturePhotoOutput;
 @class AVCapturePhoto;
 @class AVCaptureResolvedPhotoSettings;
@@ -786,6 +785,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output didFinishProcessingPhoto:(AVCapturePhoto * _Nonnull)photo error:(NSError * _Nullable)error;
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output willCapturePhotoForResolvedSettings:(AVCaptureResolvedPhotoSettings * _Nonnull)resolvedSettings;
 @end
+
 
 @class AVCaptureOutput;
 @class AVCaptureConnection;

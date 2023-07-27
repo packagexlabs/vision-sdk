@@ -104,6 +104,9 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) public var scanMode: VisionSDK.CodeScannerMode {
     get
   }
+  @_Concurrency.MainActor(unsafe) public static var videoDevice: AVFoundation.AVCaptureDevice {
+    get
+  }
   @objc deinit
   @_Concurrency.MainActor(unsafe) @objc override dynamic public init(frame: CoreFoundation.CGRect)
   @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)

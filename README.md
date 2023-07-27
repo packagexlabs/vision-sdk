@@ -158,6 +158,11 @@ override func viewDidLoad() {
 
 ## Functional Description
 
+### Static Properties
+
+- `videoDevice: AVCaptureDevice` - It is the video device that is being used by the CodeScannerView. Camera zoom, torch or other device based operations must be carried out on this property. It can be accessed using `CodeScannerView.videoDevice` syntax
+
+
 ### Configuration Methods
 
 ```swift
