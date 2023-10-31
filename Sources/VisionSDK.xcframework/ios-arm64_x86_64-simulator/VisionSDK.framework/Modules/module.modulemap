@@ -1,7 +1,7 @@
 framework module VisionSDK {
   umbrella header "VisionSDK.h"
-
   export *
+
   module * { export * }
 }
 
