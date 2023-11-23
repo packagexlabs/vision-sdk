@@ -328,12 +328,13 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorNoBarCodeDetected = 2,
   CodeScannerErrorNoQRCodeDetected = 3,
   CodeScannerErrorNoBarCodeORQRCodeDetected = 4,
-  CodeScannerErrorReadFailure = 5,
-  CodeScannerErrorUnknowns = 6,
-  CodeScannerErrorVideoUnavailable = 7,
-  CodeScannerErrorInputInvalid = 8,
-  CodeScannerErrorMetadataOutputFailure = 9,
-  CodeScannerErrorVideoDataOutputFailure = 10,
+  CodeScannerErrorNoDocumentDetected = 5,
+  CodeScannerErrorReadFailure = 6,
+  CodeScannerErrorUnknowns = 7,
+  CodeScannerErrorVideoUnavailable = 8,
+  CodeScannerErrorInputInvalid = 9,
+  CodeScannerErrorMetadataOutputFailure = 10,
+  CodeScannerErrorVideoDataOutputFailure = 11,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -354,13 +355,40 @@ SWIFT_CLASS_NAMED("CodeScannerView")
 @class UIImage;
 @class UIColor;
 
-SWIFT_CLASS_NAMED("Input")
-@interface Input : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) Input * _Nonnull default_;)
-+ (Input * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect imageTintColor:(UIColor * _Nonnull)imageTintColor selectionTintColor:(UIColor * _Nonnull)selectionTintColor isTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn sessionPreset:(AVCaptureSessionPreset _Nullable)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType codeDetectionConfidence:(float)codeDetectionConfidence OBJC_DESIGNATED_INITIALIZER;
+SWIFT_CLASS_NAMED("FocusSettings")
+@interface FocusSettings : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) FocusSettings * _Nonnull default_;)
++ (FocusSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+
+SWIFT_CLASS_NAMED("ObjectDetectionConfiguration")
+@interface ObjectDetectionConfiguration : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) ObjectDetectionConfiguration * _Nonnull default_;)
++ (ObjectDetectionConfiguration * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithIsTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn isDocumentIndicationOn:(BOOL)isDocumentIndicationOn codeDetectionConfidence:(float)codeDetectionConfidence documentDetectionConfidence:(float)documentDetectionConfidence OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+
+SWIFT_CLASS_NAMED("CameraSettings")
+@interface CameraSettings : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) CameraSettings * _Nonnull default_;)
++ (CameraSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithSessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess shouldAutoSaveCapturedImage:(BOOL)shouldAutoSaveCapturedImage OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+@class AVCaptureOutput;
+@class AVCaptureConnection;
+
+@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
+- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
 @end
 
 @class AVCapturePhotoOutput;
@@ -373,17 +401,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @end
 
 
-@class AVCaptureOutput;
-@class AVCaptureConnection;
 
-@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
-- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
-@end
 
 @protocol CodeScannerViewDelegate;
+@class NSString;
+@class NSURL;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
-- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate input:(Input * _Nonnull)input scanMode:(enum CodeScannerMode)scanMode;
+- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate focusSettings:(FocusSettings * _Nonnull)focusSettings objectDetectionConfiguration:(ObjectDetectionConfiguration * _Nonnull)objectDetectionConfiguration cameraSettings:(CameraSettings * _Nonnull)cameraSettings captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
 - (void)setScanModeTo:(enum CodeScannerMode)mode;
 - (void)setCaptureModeTo:(enum CaptureMode)mode;
 - (void)setCaptureTypeTo:(enum CaptureType)type;
@@ -391,21 +416,18 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)startRunning;
 - (void)stopRunning;
 - (void)rescan;
-@end
-
-
-@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
 - (void)deConfigure;
+- (NSURL * _Nullable)saveImageToVisionSDKWithImage:(UIImage * _Nonnull)image withName:(NSString * _Nonnull)imageName SWIFT_WARN_UNUSED_RESULT;
+- (void)removeAllSavedImages;
 @end
 
-@class NSString;
 
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(enum CodeScannerError)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
-- (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
+- (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
 @end
 
 
@@ -438,7 +460,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @class NSError;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, NSString *> * _Nonnull)options withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 - (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 @end
 
@@ -780,12 +802,13 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorNoBarCodeDetected = 2,
   CodeScannerErrorNoQRCodeDetected = 3,
   CodeScannerErrorNoBarCodeORQRCodeDetected = 4,
-  CodeScannerErrorReadFailure = 5,
-  CodeScannerErrorUnknowns = 6,
-  CodeScannerErrorVideoUnavailable = 7,
-  CodeScannerErrorInputInvalid = 8,
-  CodeScannerErrorMetadataOutputFailure = 9,
-  CodeScannerErrorVideoDataOutputFailure = 10,
+  CodeScannerErrorNoDocumentDetected = 5,
+  CodeScannerErrorReadFailure = 6,
+  CodeScannerErrorUnknowns = 7,
+  CodeScannerErrorVideoUnavailable = 8,
+  CodeScannerErrorInputInvalid = 9,
+  CodeScannerErrorMetadataOutputFailure = 10,
+  CodeScannerErrorVideoDataOutputFailure = 11,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -806,13 +829,40 @@ SWIFT_CLASS_NAMED("CodeScannerView")
 @class UIImage;
 @class UIColor;
 
-SWIFT_CLASS_NAMED("Input")
-@interface Input : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) Input * _Nonnull default_;)
-+ (Input * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect imageTintColor:(UIColor * _Nonnull)imageTintColor selectionTintColor:(UIColor * _Nonnull)selectionTintColor isTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn sessionPreset:(AVCaptureSessionPreset _Nullable)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType codeDetectionConfidence:(float)codeDetectionConfidence OBJC_DESIGNATED_INITIALIZER;
+SWIFT_CLASS_NAMED("FocusSettings")
+@interface FocusSettings : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) FocusSettings * _Nonnull default_;)
++ (FocusSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+
+SWIFT_CLASS_NAMED("ObjectDetectionConfiguration")
+@interface ObjectDetectionConfiguration : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) ObjectDetectionConfiguration * _Nonnull default_;)
++ (ObjectDetectionConfiguration * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithIsTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn isDocumentIndicationOn:(BOOL)isDocumentIndicationOn codeDetectionConfidence:(float)codeDetectionConfidence documentDetectionConfidence:(float)documentDetectionConfidence OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+
+SWIFT_CLASS_NAMED("CameraSettings")
+@interface CameraSettings : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) CameraSettings * _Nonnull default_;)
++ (CameraSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithSessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess shouldAutoSaveCapturedImage:(BOOL)shouldAutoSaveCapturedImage OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+@class AVCaptureOutput;
+@class AVCaptureConnection;
+
+@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
+- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
 @end
 
 @class AVCapturePhotoOutput;
@@ -825,17 +875,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @end
 
 
-@class AVCaptureOutput;
-@class AVCaptureConnection;
 
-@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
-- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
-@end
 
 @protocol CodeScannerViewDelegate;
+@class NSString;
+@class NSURL;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
-- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate input:(Input * _Nonnull)input scanMode:(enum CodeScannerMode)scanMode;
+- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate focusSettings:(FocusSettings * _Nonnull)focusSettings objectDetectionConfiguration:(ObjectDetectionConfiguration * _Nonnull)objectDetectionConfiguration cameraSettings:(CameraSettings * _Nonnull)cameraSettings captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
 - (void)setScanModeTo:(enum CodeScannerMode)mode;
 - (void)setCaptureModeTo:(enum CaptureMode)mode;
 - (void)setCaptureTypeTo:(enum CaptureType)type;
@@ -843,21 +890,18 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)startRunning;
 - (void)stopRunning;
 - (void)rescan;
-@end
-
-
-@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
 - (void)deConfigure;
+- (NSURL * _Nullable)saveImageToVisionSDKWithImage:(UIImage * _Nonnull)image withName:(NSString * _Nonnull)imageName SWIFT_WARN_UNUSED_RESULT;
+- (void)removeAllSavedImages;
 @end
 
-@class NSString;
 
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(enum CodeScannerError)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
-- (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
+- (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
 @end
 
 
@@ -890,7 +934,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @class NSError;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, NSString *> * _Nonnull)options withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 - (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 @end
 

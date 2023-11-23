@@ -10,7 +10,7 @@
 		</data>
 		<key>Resources/Info.plist</key>
 		<data>
-		QRItRXWAGkXxyNsyEW5hYUmr2GI=
+		D/wuvt/J510zrZR9ZRVAlDJskPU=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -19,7 +19,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			N578Ltu/aV4snjrGExyHgNG98fanDylj7s7QNkKb3og=
+			xlsjfzgblXo1KiWuG8FtHAYSB/GhQareInzljqQN0Ow=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK.h</key>
@@ -33,14 +33,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			IYWEbBOWP8DbXXzncsDekNx6wiRHw1XlCVbui6bIqLU=
+			RoBzV4h4LnTagm/v9y3jdvzrzozpZHerctc/ajetRkM=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-macabi.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			MKNoEvIFqNVtnzRwy8DMr/OST8l4KJFNYe3RUEiU7/I=
+			gF19Mxz5dv7ybInAKEGWudoFqKCFEo2Y4kEDIBYMh6w=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-macabi.swiftdoc</key>
@@ -54,28 +54,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			MKNoEvIFqNVtnzRwy8DMr/OST8l4KJFNYe3RUEiU7/I=
+			gF19Mxz5dv7ybInAKEGWudoFqKCFEo2Y4kEDIBYMh6w=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-macabi.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			9GE0Wj6Wqs1/40qqNMR5AJwETVrWxesr+t+fpkkX3/M=
+			3quhsS0Pjr2218h1sMCzov1rH8TQrqlrULH2uv7U6ps=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-macabi.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			IYWEbBOWP8DbXXzncsDekNx6wiRHw1XlCVbui6bIqLU=
+			RoBzV4h4LnTagm/v9y3jdvzrzozpZHerctc/ajetRkM=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-macabi.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			N9Hb35gFVdnC/ScWwwDXbswcF+kCc2VfyND4+mtT7F0=
+			Z5TAe6O4bCZ6i3PehvrIc7kVGRilsv7mZXBrc/lKQ1A=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-macabi.swiftdoc</key>
@@ -89,14 +89,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			N9Hb35gFVdnC/ScWwwDXbswcF+kCc2VfyND4+mtT7F0=
+			Z5TAe6O4bCZ6i3PehvrIc7kVGRilsv7mZXBrc/lKQ1A=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-macabi.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			epTFRjs8eFzUvORNraVV2b4fgkRzRGiu7hpyMXKaBsg=
+			ZKCaxQ61aakWm+6byEuRgqmaVhlFxu8JB8wxuRAWG2E=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
@@ -117,7 +117,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			vv3Wh9g5SxtizNXQ5nnfvSKOY7KhI0CaILcfv+u9MAA=
+			kMSR79Tq0f1EXoQXQPCcJPRgMSypzU6RdhYffvh8EBc=
 			</data>
 		</dict>
 	</dict>

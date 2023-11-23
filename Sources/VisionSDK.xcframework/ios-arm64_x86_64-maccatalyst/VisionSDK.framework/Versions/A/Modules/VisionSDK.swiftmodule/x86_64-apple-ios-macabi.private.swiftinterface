@@ -21,6 +21,7 @@ import _SwiftConcurrencyShims
   case noBarCodeDetected
   case noQRCodeDetected
   case noBarCodeORQRCodeDetected
+  case noDocumentDetected
   case readFailure
   case unknowns
   case videoUnavailable
@@ -74,36 +75,57 @@ import _SwiftConcurrencyShims
 @objc(CodeScannerViewDelegate) public protocol CodeScannerViewDelegate {
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: VisionSDK.CodeScannerError)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
-  @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool)
-  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
+  @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
+  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
 }
 extension VisionSDK.CodeScannerViewDelegate {
-  public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool)
-  public func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
+  public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
+  public func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
 }
 @_inheritsConvenienceInitializers @objc(CodeScannerView) @_Concurrency.MainActor(unsafe) public class CodeScannerView : UIKit.UIView {
-  @objc(Input) public class Input : ObjectiveC.NSObject {
-    @objc public static var `default`: VisionSDK.CodeScannerView.Input {
+  @objc(FocusSettings) public class FocusSettings : ObjectiveC.NSObject {
+    public var focusImage: UIKit.UIImage?
+    public var focusImageRect: CoreFoundation.CGRect
+    public var shouldDisplayFocusImage: Swift.Bool
+    public var shouldScanInFocusImageRect: Swift.Bool
+    public var showDocumentBoundries: Swift.Bool
+    public var documentBoundryBorderColor: UIKit.UIColor
+    public var documentBoundryFillColor: UIKit.UIColor
+    public var focusImageTintColor: UIKit.UIColor
+    public var focusImageHighlightedColor: UIKit.UIColor
+    @objc public static var `default`: VisionSDK.CodeScannerView.FocusSettings {
       @objc get
     }
-    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, imageTintColor: UIKit.UIColor = .white, selectionTintColor: UIKit.UIColor = .white, isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, sessionPreset: AVFoundation.AVCaptureSession.Preset? = .high, nthFrameToProcess: Swift.Int64 = 10, captureMode: VisionSDK.CaptureMode, captureType: VisionSDK.CaptureType, codeDetectionConfidence: Swift.Float = 0.5)
+    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, showDocumentBoundries: Swift.Bool = true, documentBoundryBorderColor: UIKit.UIColor = .orange, documentBoundryFillColor: UIKit.UIColor = .orange.withAlphaComponent(0.3), focusImageTintColor: UIKit.UIColor = .white, focusImageHighlightedColor: UIKit.UIColor = .white)
     @objc deinit
   }
-  @_Concurrency.MainActor(unsafe) public var isTextIndicationOn: Swift.Bool
-  @_Concurrency.MainActor(unsafe) public var isBarCodeOrQRCodeIndicationOn: Swift.Bool
-  @_Concurrency.MainActor(unsafe) public var shouldScanInFocusImageRect: Swift.Bool
-  @_Concurrency.MainActor(unsafe) public var shouldDisplayFocusImage: Swift.Bool
-  @_Concurrency.MainActor(unsafe) public var sessionPreset: AVFoundation.AVCaptureSession.Preset
-  @_Concurrency.MainActor(unsafe) public var nthFrameToProcess: Swift.Int64
+  @objc(ObjectDetectionConfiguration) public class ObjectDetectionConfiguration : ObjectiveC.NSObject {
+    public var isTextIndicationOn: Swift.Bool
+    public var isBarCodeOrQRCodeIndicationOn: Swift.Bool
+    public var isDocumentIndicationOn: Swift.Bool
+    public var codeDetectionConfidence: Swift.Float
+    public var documentDetectionConfidence: Swift.Float
+    @objc public static var `default`: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
+      @objc get
+    }
+    @objc public init(isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, isDocumentIndicationOn: Swift.Bool = true, codeDetectionConfidence: Swift.Float = 0.5, documentDetectionConfidence: Swift.Float = 0.9)
+    @objc deinit
+  }
+  @objc(CameraSettings) public class CameraSettings : ObjectiveC.NSObject {
+    public var sessionPreset: AVFoundation.AVCaptureSession.Preset
+    public var nthFrameToProcess: Swift.Int64
+    public var shouldAutoSaveCapturedImage: Swift.Bool
+    @objc public static var `default`: VisionSDK.CodeScannerView.CameraSettings {
+      @objc get
+    }
+    @objc public init(sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, nthFrameToProcess: Swift.Int64 = 10, shouldAutoSaveCapturedImage: Swift.Bool = false)
+    @objc deinit
+  }
+  @_Concurrency.MainActor(unsafe) public var focusSettings: VisionSDK.CodeScannerView.FocusSettings
+  @_Concurrency.MainActor(unsafe) public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration
+  @_Concurrency.MainActor(unsafe) public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings
   @_Concurrency.MainActor(unsafe) public var captureMode: VisionSDK.CaptureMode
   @_Concurrency.MainActor(unsafe) public var captureType: VisionSDK.CaptureType
-  @_Concurrency.MainActor(unsafe) public var codeDetectionConfidence: Swift.Float
-  @_Concurrency.MainActor(unsafe) public var focusImage: UIKit.UIImage? {
-    get
-  }
-  @_Concurrency.MainActor(unsafe) public var focusImageRect: CoreFoundation.CGRect {
-    get
-  }
   @_Concurrency.MainActor(unsafe) public var scanMode: VisionSDK.CodeScannerMode {
     get
   }
@@ -115,7 +137,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 extension VisionSDK.CodeScannerView {
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, input: VisionSDK.CodeScannerView.Input = .default, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+  @objc @_Concurrency.MainActor(unsafe) dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, focusSettings: VisionSDK.CodeScannerView.FocusSettings = .default, objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration = .default, cameraSettings: VisionSDK.CodeScannerView.CameraSettings = .default, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
@@ -123,10 +145,10 @@ extension VisionSDK.CodeScannerView {
   @objc @_Concurrency.MainActor(unsafe) dynamic public func startRunning()
   @objc @_Concurrency.MainActor(unsafe) dynamic public func stopRunning()
   @objc @_Concurrency.MainActor(unsafe) dynamic public func rescan()
-  @_Concurrency.MainActor(unsafe) public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
-}
-extension VisionSDK.CodeScannerView {
   @objc @_Concurrency.MainActor(unsafe) dynamic public func deConfigure()
+  @_Concurrency.MainActor(unsafe) public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
+  @objc @_Concurrency.MainActor(unsafe) dynamic public func saveImageToVisionSDK(image: UIKit.UIImage, withName imageName: Swift.String) -> Foundation.URL?
+  @objc @_Concurrency.MainActor(unsafe) dynamic public func removeAllSavedImages()
 }
 extension VisionSDK.CodeScannerView : AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegate {
   @_Concurrency.MainActor(unsafe) @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
@@ -146,7 +168,7 @@ extension Swift.String {
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Swift.String], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 @objc public enum AppEnvironment : Swift.Int {
