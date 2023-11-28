@@ -369,7 +369,7 @@ SWIFT_CLASS_NAMED("ObjectDetectionConfiguration")
 @interface ObjectDetectionConfiguration : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) ObjectDetectionConfiguration * _Nonnull default_;)
 + (ObjectDetectionConfiguration * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithIsTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn isDocumentIndicationOn:(BOOL)isDocumentIndicationOn codeDetectionConfidence:(float)codeDetectionConfidence documentDetectionConfidence:(float)documentDetectionConfidence OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithIsTextIndicationOn:(BOOL)isTextIndicationOn isBarCodeOrQRCodeIndicationOn:(BOOL)isBarCodeOrQRCodeIndicationOn isDocumentIndicationOn:(BOOL)isDocumentIndicationOn codeDetectionConfidence:(float)codeDetectionConfidence documentDetectionConfidence:(float)documentDetectionConfidence secondsToWaitBeforeDocumentCapture:(double)secondsToWaitBeforeDocumentCapture OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -435,6 +435,9 @@ SWIFT_CLASS_NAMED("Constants")
 @interface Constants : NSObject
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+
+
 
 typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOnline = 0,

@@ -3402,6 +3402,92 @@
               },
               {
                 "kind": "Var",
+                "name": "secondsToWaitBeforeDocumentCapture",
+                "printedName": "secondsToWaitBeforeDocumentCapture",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "usr": "s:Sd"
+                  }
+                ],
+                "declKind": "Var",
+                "usr": "s:9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvp",
+                "mangledName": "$s9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvp",
+                "moduleName": "VisionSDK",
+                "declAttributes": [
+                  "HasInitialValue",
+                  "HasStorage",
+                  "AccessControl"
+                ],
+                "hasStorage": true,
+                "accessors": [
+                  {
+                    "kind": "Accessor",
+                    "name": "Get",
+                    "printedName": "Get()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Double",
+                        "printedName": "Swift.Double",
+                        "usr": "s:Sd"
+                      }
+                    ],
+                    "declKind": "Accessor",
+                    "usr": "s:9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvg",
+                    "mangledName": "$s9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvg",
+                    "moduleName": "VisionSDK",
+                    "implicit": true,
+                    "accessorKind": "get"
+                  },
+                  {
+                    "kind": "Accessor",
+                    "name": "Set",
+                    "printedName": "Set()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Double",
+                        "printedName": "Swift.Double",
+                        "usr": "s:Sd"
+                      }
+                    ],
+                    "declKind": "Accessor",
+                    "usr": "s:9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvs",
+                    "mangledName": "$s9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvs",
+                    "moduleName": "VisionSDK",
+                    "implicit": true,
+                    "accessorKind": "set"
+                  },
+                  {
+                    "kind": "Accessor",
+                    "name": "Modify",
+                    "printedName": "Modify()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      }
+                    ],
+                    "declKind": "Accessor",
+                    "usr": "s:9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvM",
+                    "mangledName": "$s9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC34secondsToWaitBeforeDocumentCaptureSdvM",
+                    "moduleName": "VisionSDK",
+                    "implicit": true,
+                    "accessorKind": "_modify"
+                  }
+                ]
+              },
+              {
+                "kind": "Var",
                 "name": "default",
                 "printedName": "default",
                 "children": [
@@ -3451,7 +3537,7 @@
               {
                 "kind": "Constructor",
                 "name": "init",
-                "printedName": "init(isTextIndicationOn:isBarCodeOrQRCodeIndicationOn:isDocumentIndicationOn:codeDetectionConfidence:documentDetectionConfidence:)",
+                "printedName": "init(isTextIndicationOn:isBarCodeOrQRCodeIndicationOn:isDocumentIndicationOn:codeDetectionConfidence:documentDetectionConfidence:secondsToWaitBeforeDocumentCapture:)",
                 "children": [
                   {
                     "kind": "TypeNominal",
@@ -3493,13 +3579,20 @@
                     "printedName": "Swift.Float",
                     "hasDefaultArg": true,
                     "usr": "s:Sf"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Double",
+                    "printedName": "Swift.Double",
+                    "hasDefaultArg": true,
+                    "usr": "s:Sd"
                   }
                 ],
                 "declKind": "Constructor",
-                "usr": "s:9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC18isTextIndicationOn0i3Barc8OrQRCodekL00i8DocumentkL004codeG10Confidence08documentgR0AESb_S2bS2ftcfc",
-                "mangledName": "$s9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC18isTextIndicationOn0i3Barc8OrQRCodekL00i8DocumentkL004codeG10Confidence08documentgR0AESb_S2bS2ftcfc",
+                "usr": "s:9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC18isTextIndicationOn0i3Barc8OrQRCodekL00i8DocumentkL004codeG10Confidence08documentgR0019secondsToWaitBeforeP7CaptureAESb_S2bS2fSdtcfc",
+                "mangledName": "$s9VisionSDK15CodeScannerViewC28ObjectDetectionConfigurationC18isTextIndicationOn0i3Barc8OrQRCodekL00i8DocumentkL004codeG10Confidence08documentgR0019secondsToWaitBeforeP7CaptureAESb_S2bS2fSdtcfc",
                 "moduleName": "VisionSDK",
-                "objc_name": "initWithIsTextIndicationOn:isBarCodeOrQRCodeIndicationOn:isDocumentIndicationOn:codeDetectionConfidence:documentDetectionConfidence:",
+                "objc_name": "initWithIsTextIndicationOn:isBarCodeOrQRCodeIndicationOn:isDocumentIndicationOn:codeDetectionConfidence:documentDetectionConfidence:secondsToWaitBeforeDocumentCapture:",
                 "declAttributes": [
                   "AccessControl",
                   "ObjC"
@@ -5269,6 +5362,16 @@
       },
       {
         "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
         "name": "UIKit",
         "printedName": "UIKit",
         "declKind": "Import",
@@ -6361,6 +6464,23 @@
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "CoreML",
+        "printedName": "CoreML",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
         "moduleName": "VisionSDK"
       },
       {
@@ -6542,6 +6662,100 @@
             "declKind": "Func",
             "usr": "s:SS9VisionSDKE6search_2at4nameSSSgSS_SiAEtF",
             "mangledName": "$sSS9VisionSDKE6search_2at4nameSSSgSS_SiAEtF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "trimPunctuation",
+            "printedName": "trimPunctuation()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:SS9VisionSDKE15trimPunctuationSSyF",
+            "mangledName": "$sSS9VisionSDKE15trimPunctuationSSyF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "removeSpecialCharacters",
+            "printedName": "removeSpecialCharacters()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:SS9VisionSDKE23removeSpecialCharactersSSyF",
+            "mangledName": "$sSS9VisionSDKE23removeSpecialCharactersSSyF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "levenshtein",
+            "printedName": "levenshtein(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:SS9VisionSDKE11levenshteinySiSSF",
+            "mangledName": "$sSS9VisionSDKE11levenshteinySiSSF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "capitalizeWithOrdinalNumbers",
+            "printedName": "capitalizeWithOrdinalNumbers()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:SS9VisionSDKE28capitalizeWithOrdinalNumbersSSyF",
+            "mangledName": "$sSS9VisionSDKE28capitalizeWithOrdinalNumbersSSyF",
             "moduleName": "VisionSDK",
             "declAttributes": [
               "AccessControl"
@@ -7464,38 +7678,52 @@
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "FloatLiteral",
+      "offset": 4671,
+      "length": 3,
+      "value": "3.0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 4781,
+      "offset": 4849,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 4825,
+      "offset": 4893,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 4862,
+      "offset": 4930,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 4901,
+      "offset": 4969,
       "length": 3,
       "value": "0.5"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 4943,
+      "offset": 5011,
       "length": 3,
       "value": "0.9"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "FloatLiteral",
+      "offset": 5061,
+      "length": 3,
+      "value": "3.0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
@@ -7507,1094 +7735,1269 @@
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5505,
+      "offset": 5623,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 5563,
+      "offset": 5681,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5777,
+      "offset": 5895,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 5817,
+      "offset": 5935,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 5357,
+      "offset": 5475,
       "length": 14,
       "value": "\"VisionSDK.CameraSettings\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 7109,
+      "offset": 7227,
       "length": 38,
       "value": "\"Missing expected back camera device.\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 7312,
+      "offset": 7430,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 7368,
+      "offset": 7486,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 7417,
+      "offset": 7535,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 7465,
+      "offset": 7583,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 7512,
+      "offset": 7630,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 7561,
+      "offset": 7679,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 7827,
+      "offset": 7945,
       "length": 17,
       "value": "\"VideoDataOutput\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 7879,
+      "offset": 7997,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 8384,
+      "offset": 8502,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 8540,
+      "offset": 8658,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 9786,
+      "offset": 9904,
       "length": 30,
       "value": "\"VNRecognizeTextRequest Error\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 10344,
+      "offset": 10462,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 10705,
+      "offset": 10823,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 11401,
+      "offset": 11519,
       "length": 15,
       "value": "\"error occured\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 11877,
+      "offset": 11995,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 12432,
+      "offset": 12550,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 12866,
+      "offset": 12984,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "IntegerLiteral",
-      "offset": 13402,
-      "length": 1,
-      "value": "3"
-    },
-    {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 13512,
+      "offset": 13697,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 15272,
+      "offset": 15457,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 15279,
+      "offset": 15464,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 15320,
+      "offset": 15505,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 15553,
+      "offset": 15738,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 16297,
+      "offset": 16482,
       "length": 15,
       "value": "\"error occured\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 16388,
+      "offset": 16573,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 16431,
+      "offset": 16616,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 16552,
+      "offset": 16737,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 18274,
+      "offset": 18459,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 18562,
+      "offset": 18747,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 18634,
+      "offset": 18819,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 18999,
+      "offset": 19184,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 20157,
+      "offset": 20342,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 20172,
+      "offset": 20357,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 20282,
+      "offset": 20467,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 20591,
+      "offset": 20776,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 20606,
+      "offset": 20791,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 20878,
+      "offset": 21063,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 20920,
+      "offset": 21105,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 21822,
+      "offset": 22007,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 21829,
+      "offset": 22014,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 21870,
+      "offset": 22055,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 22479,
+      "offset": 22664,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 22661,
+      "offset": 22846,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 23500,
+      "offset": 23685,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 23973,
+      "offset": 24158,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 24904,
+      "offset": 25089,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 25377,
+      "offset": 25562,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 26464,
+      "offset": 26649,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 26937,
+      "offset": 27122,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 30384,
+      "offset": 30569,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 30580,
-      "length": 4,
-      "value": "true"
-    },
-    {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "IntegerLiteral",
-      "offset": 30650,
-      "length": 1,
-      "value": "1"
-    },
-    {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 31184,
+      "offset": 30765,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 31254,
+      "offset": 30835,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 31989,
+      "offset": 31369,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 32059,
+      "offset": 31439,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32460,
+      "offset": 32174,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "IntegerLiteral",
+      "offset": 32244,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 32645,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32501,
+      "offset": 32686,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32635,
+      "offset": 32820,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32651,
+      "offset": 32836,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32666,
+      "offset": 32851,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32683,
+      "offset": 32868,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32966,
+      "offset": 33151,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32982,
+      "offset": 33167,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 32997,
+      "offset": 33182,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33014,
+      "offset": 33199,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33101,
+      "offset": 33286,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33142,
+      "offset": 33327,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33253,
+      "offset": 33438,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33269,
+      "offset": 33454,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33284,
+      "offset": 33469,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33301,
+      "offset": 33486,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33634,
+      "offset": 33819,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33650,
+      "offset": 33835,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33665,
+      "offset": 33850,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 33682,
+      "offset": 33867,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 35324,
+      "offset": 35509,
       "length": 49,
       "value": "\"Image does not have PNG data, thus not writable\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 35483,
+      "offset": 35668,
       "length": 51,
       "value": "\"Error saving image: \""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 35533,
+      "offset": 35718,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 35887,
+      "offset": 36072,
       "length": 61,
       "value": "\"Error removing stored Images: \""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 35947,
+      "offset": 36132,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 36839,
+      "offset": 37024,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 37012,
+      "offset": 37197,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 40308,
+      "offset": 40420,
       "length": 4,
       "value": "0.85"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 40335,
+      "offset": 40447,
       "length": 5,
       "value": "0.309"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 40384,
+      "offset": 40496,
       "length": 5,
       "value": "0.618"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 40412,
+      "offset": 40524,
       "length": 5,
       "value": "0.618"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 40458,
+      "offset": 40570,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 40482,
+      "offset": 40594,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 40540,
+      "offset": 40652,
       "length": 4,
       "value": "0.85"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 40567,
+      "offset": 40679,
       "length": 5,
       "value": "0.618"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 40617,
+      "offset": 40729,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 40709,
+      "offset": 40821,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 41329,
+      "offset": 41501,
       "length": 18,
       "value": "\"barcodeFocusIcon\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 41350,
+      "offset": 41522,
       "length": 11,
       "value": "\"focusIcon\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 42967,
+      "offset": 43222,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 43603,
+      "offset": 43858,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 44849,
+      "offset": 45104,
       "length": 57,
       "value": "\"Error configuring camera: \""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 44905,
+      "offset": 45160,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 45169,
+      "offset": 45424,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 45271,
+      "offset": 45526,
       "length": 54,
       "value": "\"Error configuring OIS: \""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 45324,
+      "offset": 45579,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 45376,
+      "offset": 45631,
       "length": 62,
       "value": "\"Optical image stabilization is not supported on this device.\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 45848,
+      "offset": 46103,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 46620,
+      "offset": 46875,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 47239,
+      "offset": 47494,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 47254,
+      "offset": 47509,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 47810,
+      "offset": 48065,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 47890,
+      "offset": 48145,
       "length": 20,
       "value": "\"VisionSDKOCRImages\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 48153,
+      "offset": 48408,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 48794,
+      "offset": 49049,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 50468,
+      "offset": 50723,
       "length": 4,
       "value": "1108"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 55989,
+      "offset": 56244,
       "length": 28,
       "value": "\"invalid detected rectangle\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 56560,
+      "offset": 56815,
       "length": 25,
       "value": "\"CIPerspectiveCorrection\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 56617,
+      "offset": 56872,
       "length": 14,
       "value": "\"inputTopLeft\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 56677,
+      "offset": 56932,
       "length": 15,
       "value": "\"inputTopRight\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 56739,
+      "offset": 56994,
       "length": 17,
       "value": "\"inputBottomLeft\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 56805,
+      "offset": 57060,
       "length": 18,
       "value": "\"inputBottomRight\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 57678,
+      "offset": 57933,
       "length": 3,
       "value": "0.9"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 59307,
+      "offset": 59562,
       "length": 63,
       "value": "\"Requested FPS is not supported by the device's activeFormat !\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 59490,
+      "offset": 59745,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 59578,
+      "offset": 59833,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 59671,
+      "offset": 59926,
       "length": 71,
       "value": "\"LockForConfiguration failed with error: \""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 59741,
+      "offset": 59996,
       "length": 2,
       "value": "\"\""
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "BooleanLiteral",
       "offset": 580,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 739,
       "length": 1,
       "value": "2"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 760,
       "length": 1,
       "value": "2"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 920,
       "length": 1,
       "value": "2"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 944,
       "length": 1,
       "value": "2"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 1909,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "FloatLiteral",
       "offset": 1964,
       "length": 3,
       "value": "2.0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2056,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "FloatLiteral",
       "offset": 2133,
       "length": 3,
       "value": "2.0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2333,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2382,
       "length": 2,
       "value": "-1"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2389,
       "length": 1,
       "value": "1"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2507,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2556,
       "length": 2,
       "value": "-1"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2563,
       "length": 1,
       "value": "1"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 2909,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 3694,
       "length": 4,
       "value": "1000"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "BooleanLiteral",
       "offset": 4150,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "FloatLiteral",
       "offset": 4157,
       "length": 3,
       "value": "0.0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 4896,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "Array",
       "offset": 5037,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "Array",
       "offset": 5108,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 5137,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "IntegerLiteral",
       "offset": 5450,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "StringLiteral",
       "offset": 5727,
       "length": 44,
       "value": "\"Regex error: \""
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/UIImageExtension.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/UIImageExtension.swift",
       "kind": "StringLiteral",
       "offset": 5770,
       "length": 2,
       "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "StringLiteral",
+      "offset": 266,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "StringLiteral",
+      "offset": 766,
+      "length": 28,
+      "value": "\"!()[]{};:'\",<>.?@#$%^&*_~\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "StringLiteral",
+      "offset": 888,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1343,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1413,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1504,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1523,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1593,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1614,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1646,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1681,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1710,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1748,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1782,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1823,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1839,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1884,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1891,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1995,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2003,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2066,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2071,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2132,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2139,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2144,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "Dictionary",
+      "offset": 2488,
+      "length": 374,
+      "value": "[(\"1St \", \"1st \"), (\"2Nd \", \"2nd \"), (\"3Rd \", \"3rd \"), (\"4Th \", \"4th \"), (\"5Th \", \"5th \"), (\"6Th \", \"6th \"), (\"7Th \", \"7th \"), (\"8Th \", \"8th \"), (\"9Th \", \"9th \"), (\"0Th \", \"0th \"), (\"1Th \", \"1th \"), (\"2Th \", \"2th \"), (\"3Th \", \"3th \")]"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
@@ -9304,25 +9707,291 @@
       "value": "\"\""
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 358,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 416,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 460,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 898,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 956,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1000,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1556,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1668,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1932,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2045,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2240,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 2352,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3016,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3699,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
       "kind": "Dictionary",
-      "offset": 2006,
-      "length": 7659,
-      "value": "[(\"rejectBarcode\", \"^(?:420|421 ?\\d{3}|410|411|412) ?(\\d{5}|\\d{9}|\\d{11})$\"), (\"ups-1\", \"\\b(1Z ?[0-9A-Z]{3} ?[0-9A-Z]{3} ?[0-9A-Z]{2} ?[0-9A-Z]{4} ?[0-9A-Z]{3} ?[0-9A-Z])\\b\"), (\"ups-2\", \"\\b[kKJj]{1}[0-9]{10}\\b\"), (\"usps-1\", \"\\b(9\\d{3} \\d{4} \\d{4} \\d{4} \\d{4} \\d{2})\\b\"), (\"usps-2\", \"(^420|^C1420)(?P<zipcode>[\\d]{5,11})[^\\d]*(?:[\\x1d]+|[\\u001d]+)?(?P<tracking_no>\\d{22,26})$\"), (\"usps-3\", \"^\\bC1(?P<tracking_no>\\d{22})\"), (\"usps-4\", \"(?i)\\b[A-Z]{2} *( *[\\d]){9} *US\\b\"), (\"amazon-fba-us-1\", \"(TB|TE)(?:[A-Z])[\\d]{12}\"), (\"amazon-fba-us-2\", \"\\b(BA)[\\d]{10}\\b\"), (\"fedex-1\", \"^\\d{22}(?P<tracking_no>\\d{12})[\\x1d]?($|\\b)\"), (\"fedex-2\", \"^96\\d{5}(?P<tracking_no>\\d{15})[\\x1d]?($|\\b)\"), (\"fedex-3\", \"^\\[\\)\\>[\\x1e](01)[\\x1d](?P<zipcode>[^\\x1d]+)?[\\x1d](?P<receiver_country>[^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d](?P<tracking_no>[^\\x1d]+)?[\\x1d](?P<shipment_type>[^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d](?P<weight_info>[^\\x1d]+)?[\\x1d]([^\\x1d]+)?[\\x1d](?P<receiver_address_line1>[^\\x1d]+)?[\\x1d](?P<receiver_city>[^\\x1d]+)?[\\x1d](?P<receiver_state>[^\\x1d]+)?[\\x1d](?P<receiver_name>[^\\x1d\\x1e]+)?[\\x1e]([^\\x1d\\x1e]+)?[\\x1d]([^\\x1d]+)?[\\x1d]\"), (\"australia-post\", \"(?i)ap article id[: ]*([A-Za-z0-9]*)\"), (\"bring\", \"\\(?00\\)?(\\s*3707\\s*\\d{14})($|\\b)\"), (\"canada-post\", \"(?i)^\\d([A-Z]{3}\\d{3})(?P<tracking_no>\\d{16})\\d{5}$\"), (\"canpar-1\", \"^(?i)(D|S)4\\d{2}\\d{3}\\d{2}(\\d{3}\\d{3}\\d{3}\\d{3})$\"), (\"canpar-2\", \"^\\*\\d{16}$\"), (\"china-post1\", \"(?i)(^|\\b)(?P<courier_tag>[A-Z]{2}) *( *[\\d]){9} *CN($|\\b)\"), (\"dhl-1\", \"(GM\\d{18})\"), (\"dhl-2\", \"^(\\d[A-Z])?US\\d{5,11}\\+\\d+$\"), (\"dhl-3\", \"^JJD\\d+\"), (\"dynamex\", \"(^|\\b)DX[A-Z]{4}\\d{7}(\\b|$)\"), (\"equick-cn\", \"^EQK[A-Z]{2}( *\\d *){10}YQ\"), (\"fastway-1\", \"^FA\\d{10}$\"), (\"fastway-2\", \"^(?P<name>[^|]*)\\|([^|]*)\\|(?P<building>[^|]*)\\|(?P<address_line1>[^|]*)\\|(?P<city>[^|]*)\\|(?P<state>[^|]*)\\|(?P<zipcode>[^|]*)\\|(?P<phone_number>[^|]*)\\|(?P<instructions>[^|]*)\\|([^|]*)$\"), (\"hongkong-post1\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *HK($|\\b)\"), (\"india-post\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *IN($|\\b)\"), (\"japan-post\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *JP($|\\b)\"), (\"lasership-1\", \"(?i)^.*lasership\\.com\\\/track\\\/.*\"), (\"lasership-2\", \"^(L[A-Z]\\d{8}|1L[A-Z][\\d\\-]{12,17})$\"), (\"lasership-3\", \"(?i)^.*lasership\\.com\\\/track\\\/(?P<tracking_no>L[A-Z]\\d{8}|1L[A-Z][\\d\\-]{12,17})\"), (\"mark3-1\", \"(?i)mark ?3[^\\$]*international\"), (\"maxx\", \"(?i)(^|\\b)maxx(\\b|\\$)\"), (\"maxx-1\", \"(?i)(?:tracking[^\\d]{,6})(?P<tracking_no>\\d{8})\"), (\"ontrac1\", \"\\b(?i)(OnTrac)\\b\"), (\"pakistan-post1\", \"(?i)^[A-Z]{2} *( *[\\d]){9} *PK$\"), (\"royal-mail\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *GB($|\\b)\"), (\"sf-express\", \"^[M]{6,}={'.*\"), (\"sr-group\", \"\\(?00\\)?(\\s*3707\\s*\\d{14})($|\\b)\"), (\"singapore-post\", \"(?i)(^|\\b)[A-Z]{2} *( *[\\d]){9} *SG($|\\b)\"), (\"tnt1\", \"(?i)^(GD|GE) *( *[\\d]){9} *WW$\"), (\"jd\", \"^(\\d{11})\\-\\d{,2}\\-\\d{,2}\\-\\d{,2}$\"), (\"yunexpress\", \"^YT( *\\d *){16}$\"), (\"ytoexpress\", \"^G( *\\d *){11}$\"), (\"lone-star-overnight\", \"\\b[A-Z]{2}[A-Z0-9]{6}\\b\"), (\"loomis-express\", \"(?i)LQM4W3K3AANET\\s*\\d{8}\\s*\"), (\"logi-trans-1\", \"\\b40170726205192\\d{6}\\b|40170726205192\\d{6}\"), (\"logi-trans-2\", \"\\b401707\\d{14}\\b|401707\\d{14}\"), (\"logi-trans-3\", \"\\b40170703\\d{12}\\b|40170703\\d{12}\"), (\"jetpak\", \"\\b0005\\d{10}\\b\"), (\"db-schenker-1\", \"00373316833002\\d{6}\\b\"), (\"db-schenker-2\", \"\\(00\\)[\\s\\.\\,]*373316833002\\d{6}\"), (\"db-schenker-3\", \"401733\\d{14}\\b\"), (\"purolator-1\", \"\\b33\\d{10}\\b\"), (\"purolator-2\", \"^\\d{11}(33\\d{10})\\d{11}$\"), (\"purolator-3\", \"^V01~(.*)\\|D01~(.*)\\|R01~(.*)\\|R02~(.*)\\|R03~(.*)\\|R04~(.*)\\|R05~(.*)\\|R06~(.*)\\|R07~(.*)\\|S01~(.*)\\|S02~(.*)\\|S03~(.*)\\|S04~(.*)\\|S05~(.*)\\|S06~(.*)\\|S08~(.*)\\|S09~(.*)\\|S10~(.*)\\|S11~(.*)\\|S12~(.*)\\|S13~(.*)\\|S14~(.*)\\|S15~(.*)\\|B01~(.*)\\|B02~(.*)$\")]"
+      "offset": 3748,
+      "length": 3,
+      "value": "[]"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "Array",
-      "offset": 9698,
-      "length": 1483,
-      "value": "[\"rejectBarcode\", \"ups-1\", \"ups-2\", \"usps-1\", \"usps-2\", \"usps-3\", \"usps-4\", \"amazon-fba-us-1\", \"amazon-fba-us-2\", \"fedex-1\", \"fedex-2\", \"fedex-3\", \"australia-post\", \"bring\", \"canada-post\", \"canpar-1\", \"canpar-2\", \"dhl-1\", \"dhl-2\", \"dhl-3\", \"dynamex\", \"equick-cn\", \"fastway-1\", \"fastway-2\", \"hongkong-post1\", \"india-post\", \"japan-post\", \"lasership-1\", \"lasership-2\", \"lasership-3\", \"mark3-1\", \"maxx\", \"maxx-1\", \"ontrac1\", \"pakistan-post1\", \"royal-mail\", \"sf-express\", \"singapore-post\", \"tnt1\", \"jd\", \"yunexpress\", \"ytoexpress\", \"lone-star-overnight\", \"loomis-express\", \"logi-trans-1\", \"logi-trans-2\", \"logi-trans-3\", \"jetpak\", \"db-schenker-1\", \"db-schenker-2\", \"db-schenker-3\", \"purolator-1\", \"purolator-2\", \"purolator-3\"]"
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4458,
+      "length": 1,
+      "value": "1"
     },
     {
-      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 4536,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5021,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
       "kind": "Array",
-      "offset": 11217,
-      "length": 2770,
-      "value": "[\"usps\", \"ups\", \"amazon\", \"purolator\", \"fedex\", \"canada-post\", \"canpar\", \"cdl\", \"china-ems\", \"china-post\", \"dhl\", \"dynamex\", \"equick-cn\", \"fastway\", \"australia-post\", \"hongkong-post\", \"india-post\", \"japan-post\", \"jd\", \"lasership\", \"mark3\", \"maxx\", \"ontrac\", \"pakistan-post\", \"royal-mail\", \"sf-express\", \"singapore-post\", \"sto-express\", \"tnt\", \"yto-express\", \"yun-express\", \"zto-express\", \"dpd\", \"star-track\", \"hermes\", \"parcel-force\", \"postnl\", \"yodel\", \"gls\", \"colissimo\", \"collect-plus\", \"transworld\", \"crawfords-delivery-services\", \"whistl\", \"an-post\", \"wish-post\", \"city-air-express\", \"sagawa-express\", \"fukuyama-transportation\", \"skyworldwide\", \"toll-group\", \"ide-express\", \"road-express\", \"endeavour\", \"overnight-express\", \"rhyme-express\", \"yuantong-express\", \"best-express\", \"deppon\", \"tmall\", \"netease\", \"unitop\", \"chronopost\", \"newzealand-post\", \"ninja-van\", \"pos-laju\", \"city-link\", \"lel-express\", \"gdex\", \"blibli\", \"tokopedia\", \"tiki\", \"j&t-express\", \"jne\", \"surpostal\", \"espana\", \"mercado\", \"webpack\", \"andreani\", \"correo-argentino\", \"urbano\", \"correos\", \"yamato-transport\", \"247-express\", \"chilexpress\", \"flash-express\", \"kerry-express\", \"shopee-xpress\", \"thailand-post\", \"viettel-post\", \"wsp-express\", \"zoom-express\", \"inpost\", \"poczta_polska\", \"blue-express\", \"olva\", \"aramex\", \"nhat-tin-logistics\", \"bpost\", \"vietnam-post\", \"ocs\", \"dawn-wing\", \"the-courier-guy\", \"ccd-courier\", \"bex-express\", \"postnard\", \"2go-express\", \"jrs-express\", \"geodis\", \"lso\", \"statovernight\", \"bring\", \"sr-group\", \"pentagon-freight\", \"loomis-express\", \"transferd\", \"logi-trans\", \"jetpak\", \"db-schenker\", \"merkesdal\", \"kuehne-nagel\", \"postnord\", \"nor-lines\", \"envialia\", \"nacex\", \"mrw\", \"correos-express\", \"redur\", \"ctt\", \"sending\"]"
+      "offset": 5068,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5092,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "Array",
+      "offset": 5506,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 5730,
+      "length": 3,
+      "value": "\" \""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "Array",
+      "offset": 5932,
+      "length": 3,
+      "value": "[0]"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5977,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6111,
+      "length": 3,
+      "value": "\"[\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6206,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6347,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6376,
+      "length": 5,
+      "value": "\",\n\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6395,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6528,
+      "length": 3,
+      "value": "\" \""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6553,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6613,
+      "length": 32,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6644,
+      "length": 1,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6674,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6739,
+      "length": 4,
+      "value": "\", \""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6771,
+      "length": 2,
+      "value": "11"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6777,
+      "length": 2,
+      "value": "10"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6841,
+      "length": 5,
+      "value": "\"\n \""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "IntegerLiteral",
+      "offset": 6860,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6934,
+      "length": 3,
+      "value": "\" \""
+    },
+    {
+      "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",
+      "kind": "StringLiteral",
+      "offset": 6967,
+      "length": 3,
+      "value": "\"]\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Library\/Developer\/Xcode\/DerivedData\/VisionSDK-gkmeqgohgtvhvngxcxgychpbqrhj\/Build\/Intermediates.noindex\/ArchiveIntermediates\/VisionSDK\/IntermediateBuildFilesPath\/VisionSDK.build\/Release-iphonesimulator\/VisionSDK.build\/DerivedSources\/GeneratedAssetSymbols.swift",

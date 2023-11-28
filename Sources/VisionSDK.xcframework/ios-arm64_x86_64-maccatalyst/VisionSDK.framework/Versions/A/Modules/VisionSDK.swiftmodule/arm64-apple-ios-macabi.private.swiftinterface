@@ -4,6 +4,7 @@
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
 import AppKit
+import CoreML
 import DeveloperToolsSupport
 import Foundation
 import Swift
@@ -105,10 +106,11 @@ extension VisionSDK.CodeScannerViewDelegate {
     public var isDocumentIndicationOn: Swift.Bool
     public var codeDetectionConfidence: Swift.Float
     public var documentDetectionConfidence: Swift.Float
+    public var secondsToWaitBeforeDocumentCapture: Swift.Double
     @objc public static var `default`: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
       @objc get
     }
-    @objc public init(isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, isDocumentIndicationOn: Swift.Bool = true, codeDetectionConfidence: Swift.Float = 0.5, documentDetectionConfidence: Swift.Float = 0.9)
+    @objc public init(isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, isDocumentIndicationOn: Swift.Bool = true, codeDetectionConfidence: Swift.Float = 0.5, documentDetectionConfidence: Swift.Float = 0.9, secondsToWaitBeforeDocumentCapture: Swift.Double = 3.0)
     @objc deinit
   }
   @objc(CameraSettings) public class CameraSettings : ObjectiveC.NSObject {
@@ -162,6 +164,18 @@ extension AVFoundation.AVCaptureDevice {
 }
 extension Swift.String {
   public func search(_ inString: Swift.String, at groupNumber: Swift.Int = 0, name groupName: Swift.String? = nil) -> Swift.String?
+}
+extension Swift.String {
+  public func trimPunctuation() -> Swift.String
+}
+extension Swift.String {
+  public func removeSpecialCharacters() -> Swift.String
+}
+extension Swift.String {
+  public func levenshtein(_ other: Swift.String) -> Swift.Int
+}
+extension Swift.String {
+  public func capitalizeWithOrdinalNumbers() -> Swift.String
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
