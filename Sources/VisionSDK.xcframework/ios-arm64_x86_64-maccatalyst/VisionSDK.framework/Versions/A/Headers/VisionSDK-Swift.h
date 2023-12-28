@@ -340,8 +340,9 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
   CodeScannerModeBarCode = 0,
   CodeScannerModeQrCode = 1,
-  CodeScannerModeOcr = 2,
-  CodeScannerModeAutoBarCodeOrQRCode = 3,
+  CodeScannerModeAutoBarCodeOrQRCode = 2,
+  CodeScannerModeOcr = 3,
+  CodeScannerModePhoto = 4,
 };
 
 @class NSCoder;
@@ -817,8 +818,9 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
   CodeScannerModeBarCode = 0,
   CodeScannerModeQrCode = 1,
-  CodeScannerModeOcr = 2,
-  CodeScannerModeAutoBarCodeOrQRCode = 3,
+  CodeScannerModeAutoBarCodeOrQRCode = 2,
+  CodeScannerModeOcr = 3,
+  CodeScannerModePhoto = 4,
 };
 
 @class NSCoder;

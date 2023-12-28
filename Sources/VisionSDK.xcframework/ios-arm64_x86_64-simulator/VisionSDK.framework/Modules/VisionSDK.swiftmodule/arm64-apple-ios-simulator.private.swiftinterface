@@ -37,8 +37,9 @@ import _SwiftConcurrencyShims
 @objc public enum CodeScannerMode : Swift.Int {
   case barCode
   case qrCode
-  case ocr
   case autoBarCodeOrQRCode
+  case ocr
+  case photo
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -168,7 +169,10 @@ extension Swift.String {
   public func trimPunctuation() -> Swift.String
 }
 extension Swift.String {
-  public func removeSpecialCharacters() -> Swift.String
+  public func removeSpecialCharacters(specialCharacterSet: Swift.String = "!()[]{};:'\",<>.?@#$%^&*_~") -> Swift.String
+}
+extension Swift.String {
+  public func removeSpaces() -> Swift.String
 }
 extension Swift.String {
   public func levenshtein(_ other: Swift.String) -> Swift.Int
