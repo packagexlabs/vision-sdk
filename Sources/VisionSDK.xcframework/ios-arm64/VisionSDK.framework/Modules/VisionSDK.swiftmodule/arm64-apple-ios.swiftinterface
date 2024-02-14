@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.9 (swiftlang-5.9.0.128.108 clang-1500.0.40.1)
+// swift-compiler-version: Apple Swift version 5.9.2 (swiftlang-5.9.2.2.56 clang-1500.1.0.2.5)
 // swift-module-flags: -target arm64-apple-ios15.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name VisionSDK
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
@@ -16,7 +16,7 @@ import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
 @objc public enum CodeScannerError : Swift.Int {
-  case unauthorized
+  case cameraUsageNotAuthorized
   case noTextDetected
   case noBarCodeDetected
   case noQRCodeDetected
@@ -28,6 +28,7 @@ import _SwiftConcurrencyShims
   case inputInvalid
   case metadataOutputFailure
   case videoDataOutputFailure
+  case notAuthenticated
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -40,6 +41,7 @@ import _SwiftConcurrencyShims
   case autoBarCodeOrQRCode
   case ocr
   case photo
+  case priceTag
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -78,6 +80,7 @@ import _SwiftConcurrencyShims
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
+  @objc func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String) -> Swift.Bool
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
@@ -123,9 +126,20 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public init(sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, nthFrameToProcess: Swift.Int64 = 10, shouldAutoSaveCapturedImage: Swift.Bool = false)
     @objc deinit
   }
+  @objc(PriceTagDetectionSettings) public class PriceTagDetectionSettings : ObjectiveC.NSObject {
+    public var shouldDisplayOnScreenIndicators: Swift.Bool
+    public var validTagImage: UIKit.UIImage
+    public var invalidTagImage: UIKit.UIImage
+    @objc public static var `default`: VisionSDK.CodeScannerView.PriceTagDetectionSettings {
+      @objc get
+    }
+    @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage = UIImage(named: "vsdkValidTag")!, invalidTagImage: UIKit.UIImage = UIImage(named: "vsdkInvalidTag")!)
+    @objc deinit
+  }
   @_Concurrency.MainActor(unsafe) public var focusSettings: VisionSDK.CodeScannerView.FocusSettings
   @_Concurrency.MainActor(unsafe) public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration
   @_Concurrency.MainActor(unsafe) public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings
+  @_Concurrency.MainActor(unsafe) public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings
   @_Concurrency.MainActor(unsafe) public var captureMode: VisionSDK.CaptureMode
   @_Concurrency.MainActor(unsafe) public var captureType: VisionSDK.CaptureType
   @_Concurrency.MainActor(unsafe) public var scanMode: VisionSDK.CodeScannerMode {
@@ -159,33 +173,19 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
   @_Concurrency.MainActor(unsafe) @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: (any Swift.Error)?)
   @_Concurrency.MainActor(unsafe) @objc dynamic public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
 }
+extension VisionSDK.CodeScannerView {
+  @_Concurrency.MainActor(unsafe) public func detectPriceLabelFromBuffer(_ buffer: CoreVideo.CVImageBuffer)
+}
 extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)
 }
-extension Swift.String {
-  public func search(_ inString: Swift.String, at groupNumber: Swift.Int = 0, name groupName: Swift.String? = nil) -> Swift.String?
-}
-extension Swift.String {
-  public func trimPunctuation() -> Swift.String
-}
-extension Swift.String {
-  public func removeSpecialCharacters(specialCharacterSet: Swift.String = "!()[]{};:'\",<>.?@#$%^&*_~") -> Swift.String
-}
-extension Swift.String {
-  public func removeSpaces() -> Swift.String
-}
-extension Swift.String {
-  public func levenshtein(_ other: Swift.String) -> Swift.Int
-}
-extension Swift.String {
-  public func capitalizeWithOrdinalNumbers() -> Swift.String
-}
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
+  @objc public func checkPriceTagAuthenticationWithKey(_ apiKey: Swift.String?, _ completion: @escaping ((_ error: Foundation.NSError?) -> Swift.Void))
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 @objc public enum AppEnvironment : Swift.Int {
