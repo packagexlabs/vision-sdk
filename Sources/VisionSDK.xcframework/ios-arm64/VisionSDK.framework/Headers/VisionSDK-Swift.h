@@ -335,7 +335,8 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorInputInvalid = 9,
   CodeScannerErrorMetadataOutputFailure = 10,
   CodeScannerErrorVideoDataOutputFailure = 11,
-  CodeScannerErrorNotAuthenticated = 12,
+  CodeScannerErrorAuthenticationNeededForPriceTagScanning = 12,
+  CodeScannerErrorPriceTagDelegateNotImplemented = 13,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -442,6 +443,7 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
+@optional
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
 @end
 

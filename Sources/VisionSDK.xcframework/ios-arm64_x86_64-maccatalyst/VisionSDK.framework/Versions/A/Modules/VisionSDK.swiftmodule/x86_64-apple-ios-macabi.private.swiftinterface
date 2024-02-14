@@ -29,7 +29,8 @@ import _SwiftConcurrencyShims
   case inputInvalid
   case metadataOutputFailure
   case videoDataOutputFailure
-  case notAuthenticated
+  case authenticationNeededForPriceTagScanning
+  case priceTagDelegateNotImplemented
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -81,7 +82,7 @@ import _SwiftConcurrencyShims
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
-  @objc func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String) -> Swift.Bool
+  @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String) -> Swift.Bool
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
@@ -134,7 +135,7 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public static var `default`: VisionSDK.CodeScannerView.PriceTagDetectionSettings {
       @objc get
     }
-    @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage = UIImage(named: "vsdkValidTag")!, invalidTagImage: UIKit.UIImage = UIImage(named: "vsdkInvalidTag")!)
+    @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage = UIImage(named: "vsdkValidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!, invalidTagImage: UIKit.UIImage = UIImage(named: "vsdkInvalidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!)
     @objc deinit
   }
   @_Concurrency.MainActor(unsafe) public var focusSettings: VisionSDK.CodeScannerView.FocusSettings
