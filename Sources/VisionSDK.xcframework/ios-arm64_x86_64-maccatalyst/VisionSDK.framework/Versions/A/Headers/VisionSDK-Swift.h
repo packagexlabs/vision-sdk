@@ -466,6 +466,7 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
 
 
 
+
 @class NSError;
 
 SWIFT_CLASS_NAMED("VisionAPIManager")
@@ -957,6 +958,7 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOnline = 0,
   OCRModeOffline = 1,
 };
+
 
 
 
