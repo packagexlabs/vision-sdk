@@ -33,7 +33,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			+Vpvd8fxvByj3siewwrs5CUZsSyOpDT7471Tf7EFsZ0=
+			uRqV9CY6d4ec8O36XJD8uNeIh47iugNjpB7ZF3zCpRw=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-macabi.private.swiftinterface</key>
@@ -61,14 +61,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			/iV+15cVQfgESdRXKajuLOwqefPuJRzZvP+N95dHRx8=
+			m3397eB6z0w9X6Td/wCed1anD80C2cyh66qzk2psN0I=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-macabi.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			+Vpvd8fxvByj3siewwrs5CUZsSyOpDT7471Tf7EFsZ0=
+			uRqV9CY6d4ec8O36XJD8uNeIh47iugNjpB7ZF3zCpRw=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-macabi.private.swiftinterface</key>
@@ -96,7 +96,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			elZE1mnDGhinTPU00mG7Bd6z4ky0gpI/BBAVuWvtg58=
+			rghhp5JdYsoS9exbkP1sjY9tou0ZZwCCibBf2U8KI2o=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
