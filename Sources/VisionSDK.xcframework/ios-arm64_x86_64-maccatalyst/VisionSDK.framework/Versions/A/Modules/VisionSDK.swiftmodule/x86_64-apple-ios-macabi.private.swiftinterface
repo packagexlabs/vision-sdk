@@ -187,7 +187,7 @@ extension AVFoundation.AVCaptureDevice {
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 @objc public enum AppEnvironment : Swift.Int {

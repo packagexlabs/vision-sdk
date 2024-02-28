@@ -480,7 +480,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @class NSURLResponse;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 - (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 @end
 
@@ -974,7 +974,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @class NSURLResponse;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 - (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
 @end
 
