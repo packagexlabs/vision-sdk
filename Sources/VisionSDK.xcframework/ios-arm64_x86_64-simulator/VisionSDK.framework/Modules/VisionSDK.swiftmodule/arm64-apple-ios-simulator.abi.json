@@ -10468,76 +10468,76 @@
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
       "offset": 796,
-      "length": 34,
-      "value": "\"https:\/\/api.packagex.io\/v1\/scans\""
+      "length": 62,
+      "value": "\"https:\/\/api.packagex.io\/v1\/inferences\/images\/shipping-labels\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 956,
+      "offset": 984,
       "length": 47,
       "value": "\"https:\/\/v1.dev.packagex.xyz\/iex\/vision-models\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1041,
+      "offset": 1069,
       "length": 46,
       "value": "\"https:\/\/v1.qa.packagex.xyz\/iex\/vision-models\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1130,
+      "offset": 1158,
       "length": 47,
       "value": "\"https:\/\/v1.uat.packagex.xyz\/iex\/vision-models\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1223,
+      "offset": 1251,
       "length": 42,
       "value": "\"https:\/\/v1.packagex.io\/iex\/vision-models\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1308,
+      "offset": 1336,
       "length": 46,
       "value": "\"https:\/\/v1.qa.packagex.xyz\/iex\/vision-models\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1480,
+      "offset": 1508,
       "length": 37,
       "value": "\"https:\/\/dev--api.packagex.io\/v1\/org\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1555,
+      "offset": 1583,
       "length": 41,
       "value": "\"https:\/\/staging--api.packagex.io\/v1\/org\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1639,
+      "offset": 1667,
       "length": 41,
       "value": "\"https:\/\/staging--api.packagex.io\/v1\/org\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1723,
+      "offset": 1751,
       "length": 41,
       "value": "\"https:\/\/sandbox--api.packagex.io\/v1\/org\""
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 1810,
+      "offset": 1838,
       "length": 32,
       "value": "\"https:\/\/api.packagex.io\/v1\/org\""
     },
@@ -10572,35 +10572,35 @@
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 2063,
+      "offset": 2091,
       "length": 4,
       "value": "0.65"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 2070,
+      "offset": 2098,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 2151,
+      "offset": 2179,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 2283,
+      "offset": 2311,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/muzamil.mughal\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 2423,
+      "offset": 2451,
       "length": 2,
       "value": "\"\""
     },
