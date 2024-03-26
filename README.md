@@ -97,8 +97,22 @@ final class ViewController: UIViewController {
     private func setupScannerView() {
         let scannerView = CodeScannerView(frame: view.bounds)
         view.addSubview(scannerView)
+
+        // You can modify FocusSettings properties
+        let focusSettings = CodeScannerView.FocusSettings()
+
+        // You can modify focus ObjectDetectionConfiguration properties
+        let objectDetectionConfiguration = CodeScannerView.ObjectDetectionConfiguration()
+
+        // You can modify focus CameraSettings properties
+        let cameraSettings = CodeScannerView.CameraSettings()
         
-        scannerView.configure(delegate: self, input: .init(focusImage: nil, focusImageRect: .zero, shouldDisplayFocusImage: true, shouldScanInFocusImageRect: true, imageTintColor: .white, selectionTintColor: .white, isTextIndicationOn: true, isBarCodeOrQRCodeIndicationOn: true, sessionPreset: .high, nthFrameToProcess: 10, captureMode: .auto, captureType: .single, codeDetectionConfidence: 0.8), scanMode: .autoBarCodeOrQRCode)
+        // For price Tag mode you can use this
+        let priceTagDetectionSettings = CodeScannerView.PriceTagDetectionSettings()
+        scannerView.priceTagDetectionSettings = priceTagDetectionSettings
+        
+        
+        scannerView.configure(delegate: self, focusSettings: focusSettings, objectDetectionConfiguration: objectDetectionConfiguration, cameraSettings: cameraSettings, captureMode: .auto, captureType: .single, scanMode: .autoBarCodeOrQRCode)
         
         scannerView.startRunning()
     }
@@ -113,22 +127,28 @@ final class ViewController: UIViewController {
 }
 
 extension ViewController: CodeScannerViewDelegate {
+
     func codeScannerView(_ scannerView: CodeScannerView, didFailure error: CodeScannerError) {
         print(error)
     }
-    
+
     func codeScannerView(_ scannerView: CodeScannerView, didSuccess codes: [String]) {
         print(codes)
     }
-    
-    // called when text, barcode, or qr code is detected in camera stream, Depends on configuration of scanner view e.g. isTextIndicationOn, isBarCodeOrQRCodeIndicationOn
-    func codeScannerViewDidDetect(_ text: Bool, barCode: Bool, qrCode: Bool) {
+
+    // called when text, barcode, or qr code is detected in camera stream, Depends on configuration of scanner view in ObjectDetectionConfiguration e.g. isTextIndicationOn, isBarCodeOrQRCodeIndicationOn
+    func codeScannerViewDidDetect(_ text: Bool, barCode: Bool, qrCode: Bool, document: Bool) {
+        
+    }
+
+    // returns captured image with all barcodes detected in it, cropped image only document is detected in the image, and savedImageURL only if CameraSettings.shouldAutoSaveCapturedImage is set to true in scanner view configuration
+    func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String], savedImageURL: URL?) {
     
     }
-    
-    // returns captured image with all barcodes detected in it
-    func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String]) {
-    
+
+    // This function is called only in Price Tag mode and requires boolean return value to display verification success on camera view. Please note that .priceTag mode works only if you are authenticated user. For authentication, use VisionAPIManager.checkPriceTagAuthenticationWithKey method
+    func codeScannerViewDidCapturePrice(_ price: String, withSKU sKU: String) -> Bool {
+        
     }
 }
 ```
@@ -167,34 +187,52 @@ override func viewDidLoad() {
 
 ```swift
 
-scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: VisionSDK.CodeScannerView.Input = .default, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, focusSettings: VisionSDK.CodeScannerView.FocusSettings = .default, objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration = .default, cameraSettings: VisionSDK.CodeScannerView.CameraSettings = .default, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
 
 ```
 
 #### Parameters
 
 - `delegate` - Should be the class that confirms to the `CodeScannerViewDelegate` protocol
-- `Input` - Input struct defines the properties of scanner view. These properties are:
+- `FocusSettings` - FocusSettings struct defines the focus related properties of scanner view. These properties are:
 
-    - `focusImage: UIImage` - Image to be displayed in the centre if the view. If not provided, VisionSDK will use the
+    - `focusImage: UIImage?` - Image to be displayed in the centre if the view. If not provided, VisionSDK will use the
       default image. Note that focus rectangle frame is subject to change with respect to different scan modes.
       
-    - `focusImageRect: CGRECT` - Custom rect for the focus image. You can provide your preferred rect or use .zero for default. Note that default focus rectangle frame is subject to change with respect to different scan modes.
+    - `focusImageRect: CGRect` - Custom rect for the focus image. You can provide your preferred rect or use .zero for default. Note that default focus rectangle frame is subject to change with respect to different scan modes.
 
     - `shouldDisplayFocusImage: Bool` - set true if you need focused region to be drawn.
 
-    - `shouldScanInFocusImageRect: Bool` - set true if you want to detect codes visible in focused region only. This will discard the codes detected to be outside of the focus image.
+    - `shouldScanInFocusImageRect: Bool` - set true if you want to detect codes visible in focused region only. This will discard the codes detected to be outside of the focus image. This applies only in barcode, qr and autoBarCodeOrQRCode modes.
+      
+    - `showDocumentBoundries: Bool` - Set true if you want to display boundaries around document detected in camera view.
 
-    - `imageTintColor: UIColor` - Set the tint color of the focus image. Note that the image that you may provide in `focusImage: UIImage` property is loaded with rendering mode of `.alwaysTemplate`. So you need to provide the color of the focus image. Default value is `UIColor.white`
-    
-    - `selectionTintColor: UIColor` - Set the tint color of the focus image to use when code is detected. Depending on the properties `scanMode` and `shouldScanInFocusImageRect`, the focus image displayed can change the tint color  when a code is detected. Default value is `UIColor.white`
-    
+    - `documentBoundryBorderColor: UIColor` - Set the border color of boundaries drawn around detected document in camera stream.
+      
+    - `documentBoundryFillColor: UIColor` - Set the fill color of boundaries drawn around detected document in camera stream.
+      
+    - `focusImageTintColor: UIColor` - Set the color you want the focus image to be displayed in when no code is detected.
+      
+    - `focusImageHighlightedColor: UIColor` - Set the color you want the focus image to be displayed in when code is detected.
+      
+- `ObjectDetectionConfiguration` - ObjectDetectionConfiguration struct defines the object detection properties of scanner view. These properties are:
+
     - `isTextIndicationOn: Bool` - Set false if you do not want to detect text in live camera feed. If set
-      false `codeScannerViewDidDetect(_ text: Bool, barCode: Bool, qrCode: Bool)` method will send `text` parameter as
+      false `codeScannerViewDidDetect(_ text: Bool, barCode: Bool, qrCode: Bool, document: Bool)` method will send `text` parameter as
       false.
 
     - `isBarCodeOrQRCodeIndicationOn: Bool` - Set false if you do not want to detect bar codes or qrcodes in live camera
       feed. Using this proerty my be helpful in cases if you want to perform manual capture based on code detection.
+      
+    - `isDocumentIndicationOn: Bool` - Set false if you do not want to detect document in live camera feed.
+
+    - `codeDetectionConfidence: Float` - You can set the minimum confidence level for codes detected. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.5`.
+      
+    - `documentDetectionConfidence: Float` - You can set the minimum confidence level for document detection. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.9`.
+      
+    - `secondsToWaitBeforeDocumentCapture: Double` - Time threshold to wait before capturing a document automatically in OCR mode. VisionSDK only captures the document if it is continuously detected for the n(value of this property) seconds. Default is `3.0`.
+
+- `CameraSettings` - CameraSettings struct defines the camera related properties of scanner view. These properties are:
 
     - `sessionPreset: Session.Preset` - You can set session preset as per your requirement. Default is `.high`.
 
@@ -203,21 +241,30 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, input: Vision
       every single frame may be costly in terms of CPU usage and battery consumption. Default value is `10` which means
       that from camera stream of usual 30 fps, every 10 frame is processed. Its value should be set between 1 - 30.
 
-    - `captureMode` - Defines whether the VisionSDK should capture codes automatically or not. If you want to capture
+    - `shouldAutoSaveCapturedImage: Bool` - Set true if you want captured image to be saved and get its URL. Upon true ` func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String], savedImageURL: URL?)` will respond with URL of the saved image as well. To clear stored images, you can use `CodeScannerView.removeAllSavedImages()` instance method.
+      
+- `PriceTagDetectionSettings` - PriceTagDetectionSettings struct defines the price tag related properties of scanner view. These properties are:
+
+    - `shouldDisplayOnScreenIndicators: Bool` - Set true if you want to display price tag verification indicators on screen after detection.
+
+    - `validTagImage: UIImage` - Set the image you want to be dispayed on camera stream when a price tag has been detected and verified as valid.
+
+    - `invalidTagImage: UIImage` - Set the image you want to be dispayed on camera stream when a price tag has been detected and is invalid.
+      
+- `captureMode` - Defines whether the VisionSDK should capture codes automatically or not. If you want to capture
       code on user action, then set it to `.manual`. Default value is `.auto`. If otherwise, you will have to manually
       trigger scanning using `capturePhoto()` method.
 
-    - `captureType` - Set it to `.multiple` if you want to allow multiple results from scan. In `.manual` case, you will
+- `captureType` - Set it to `.multiple` if you want to allow multiple results from scan. In `.manual` case, you will
       have to manually trigger scanning using `capturePhoto()` method.
-      
-    - `codeDetectionConfidence: Float` - You can set the minimum confidence level for codes detected. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.5`.
-
-
+ 
 - `scanMode` - Defines the scan mode. It has following options
     - `.barCode` - Detects barcodes only in this mode
     - `.qrCode` - Detects qr codes only in this mode
-    - `.ocr` - Use this mode to capture photos for later user in OCR API call.
     - `.autoBarCodeOrQRCode` - Detects both bar codes and qr codes
+    - `.ocr` - Use this mode to capture photos for later user in OCR API call.
+    - `.photo` - Use this mode to capture regular photos without the need for OCR
+    - `.priceTag` - Use this mode for scanning price tags. This mode is only available for authenticated users.
 
 ```swift
 
@@ -281,8 +328,24 @@ scannerView.capturePhoto()
 
 ```
 
-Use this method to trigger code scan or photo capture when you are scanning for multiple codes, in manual capture or OCR
+Use this method to trigger code scan or photo capture when you are scanning for multiple codes, in manual capture, OCR, or Photo
 mode.
+
+```swift
+
+scannerView.saveImageToVisionSDK(image: UIImage, withName imageName: String) -> URL?
+
+```
+
+Use this method to save an image to VisionSDK internal storage and obtain its URL. Note that VisionSDK saves those images on device storage.
+
+```swift
+
+scannerView.removeAllSavedImages()
+
+```
+
+Use this method to delete all images saved internally by VisionSDK. Saving too many images might consume significant storage space, so you can use this method to free up space.
 
 ### Delegate Methods
 
@@ -296,7 +359,7 @@ This method returns with the codes scanned after successful scan
 
 ```swift
 
-func codeScannerViewDidDetect(_ text: Bool, barCode: Bool, qrCode: Bool)
+func codeScannerViewDidDetect(_ text: Bool, barCode: Bool, qrCode: Bool, document: Bool)
 
 ```
 
@@ -305,12 +368,12 @@ code indication is enabled while configuring the scanner view.
 
 ```swift
 
-func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String])
+func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String], savedImageURL: URL?)
 
 ```
 
-This method is called when `capturePhoto()` method is called in OCR Mode. It return with the captured image from camera stream, all the
-detected codes in it, and an optional cropped document image if a document is detected with in the captured image.
+This method is called when `capturePhoto()` method is called in OCR or Photo Mode. It return with the captured image from camera stream, all the
+detected codes in it, and an optional cropped document image if a document is detected with in the captured image. `savedImageURL` parameter provides with the on device image url if `CameraSettings.shouldAutoSaveCapturedImage` is set to `true` while configuring the scanner view.
 
 ```swift
 
@@ -325,13 +388,23 @@ detected.
 
 ```swift
 
+func checkPriceTagAuthenticationWithKey(_ apiKey: String?, _ completion: @escaping ((_ error: NSError?) -> Void))
+
 func callScanAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, andLocationId locationId: String? = nil, andOptions options: [String: String], withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?)-> Void))
+
+func callManifestAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?) -> Void))
 
 ```
 
-This method is called on the shared instance of `VisionAPIManager`. It can be accessed using `VisionAPIManager.shared`
-syntax. This method recieves the captured image and the API Key or AuthToken as parameters. It returns with the OCR Response from
+These methods are called on the shared instance of `VisionAPIManager`. It can be accessed using `VisionAPIManager.shared`
+syntax. 
+
+To use price tag scanning, you need to authenticate first using `checkPriceTagAuthenticationWithKey` method. Upon successful completion block calling without error, you can use price tag mode of scanner view.
+
+`callScanAPIWith` method recieves the captured image and the API Key or AuthToken as parameters. It returns with the OCR Response from
 PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
+
+`callManifestAPIWith` method recieves the captured image and the API Key as parameters.
 
 # VisionSDK Android Integration
 
