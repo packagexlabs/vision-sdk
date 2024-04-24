@@ -80,12 +80,11 @@ import _SwiftConcurrencyShims
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: VisionSDK.CodeScannerError)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
-  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
+  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String) -> Swift.Bool
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
-  public func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
 }
 @_inheritsConvenienceInitializers @objc(CodeScannerView) @_Concurrency.MainActor(unsafe) public class CodeScannerView : UIKit.UIView {
   @objc(FocusSettings) public class FocusSettings : ObjectiveC.NSObject {
@@ -93,15 +92,23 @@ extension VisionSDK.CodeScannerViewDelegate {
     public var focusImageRect: CoreFoundation.CGRect
     public var shouldDisplayFocusImage: Swift.Bool
     public var shouldScanInFocusImageRect: Swift.Bool
+    public var showCodeBoundariesInMultipleScan: Swift.Bool
+    public var validCodeBoundryBorderColor: UIKit.UIColor
+    public var validCodeBoundryBorderWidth: CoreFoundation.CGFloat
+    public var validCodeBoundryFillColor: UIKit.UIColor
+    public var inValidCodeBoundryBorderColor: UIKit.UIColor
+    public var inValidCodeBoundryBorderWidth: CoreFoundation.CGFloat
+    public var inValidCodeBoundryFillColor: UIKit.UIColor
     public var showDocumentBoundries: Swift.Bool
     public var documentBoundryBorderColor: UIKit.UIColor
+    public var documentBoundryBorderWidth: CoreFoundation.CGFloat
     public var documentBoundryFillColor: UIKit.UIColor
     public var focusImageTintColor: UIKit.UIColor
     public var focusImageHighlightedColor: UIKit.UIColor
     @objc public static var `default`: VisionSDK.CodeScannerView.FocusSettings {
       @objc get
     }
-    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, showDocumentBoundries: Swift.Bool = true, documentBoundryBorderColor: UIKit.UIColor = .orange, documentBoundryFillColor: UIKit.UIColor = .orange.withAlphaComponent(0.3), focusImageTintColor: UIKit.UIColor = .white, focusImageHighlightedColor: UIKit.UIColor = .white)
+    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, showCodeBoundariesInMultipleScan: Swift.Bool = true, validCodeBoundryBorderColor: UIKit.UIColor = .green, validCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, validCodeBoundryFillColor: UIKit.UIColor = .green.withAlphaComponent(0.3), inValidCodeBoundryBorderColor: UIKit.UIColor = .red, inValidCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, inValidCodeBoundryFillColor: UIKit.UIColor = .red.withAlphaComponent(0.3), showDocumentBoundries: Swift.Bool = true, documentBoundryBorderColor: UIKit.UIColor = .orange, documentBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, documentBoundryFillColor: UIKit.UIColor = .orange.withAlphaComponent(0.3), focusImageTintColor: UIKit.UIColor = .white, focusImageHighlightedColor: UIKit.UIColor = .white)
     @objc deinit
   }
   @objc(ObjectDetectionConfiguration) public class ObjectDetectionConfiguration : ObjectiveC.NSObject {
@@ -149,6 +156,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) public static var videoDevice: AVFoundation.AVCaptureDevice {
     get
   }
+  @_Concurrency.MainActor(unsafe) @objc override dynamic public func layoutSubviews()
   @objc deinit
   @_Concurrency.MainActor(unsafe) @objc override dynamic public init(frame: CoreFoundation.CGRect)
   @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
@@ -182,12 +190,12 @@ extension AVFoundation.AVCaptureDevice {
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
-  @objc public func checkPriceTagAuthenticationWithKey(_ apiKey: Swift.String?, _ completion: @escaping ((_ error: Foundation.NSError?) -> Swift.Void))
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ response: Foundation.URLResponse?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func checkPriceTagAuthenticationWithKey(_ apiKey: Swift.String?, _ completion: @escaping ((_ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 @objc public enum AppEnvironment : Swift.Int {
   case dev

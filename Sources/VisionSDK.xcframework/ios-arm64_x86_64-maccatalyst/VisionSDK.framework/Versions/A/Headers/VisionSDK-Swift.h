@@ -352,6 +352,7 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
 
 SWIFT_CLASS_NAMED("CodeScannerView")
 @interface CodeScannerView : UIView
+- (void)layoutSubviews;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
@@ -363,7 +364,7 @@ SWIFT_CLASS_NAMED("FocusSettings")
 @interface FocusSettings : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) FocusSettings * _Nonnull default_;)
 + (FocusSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showCodeBoundariesInMultipleScan:(BOOL)showCodeBoundariesInMultipleScan validCodeBoundryBorderColor:(UIColor * _Nonnull)validCodeBoundryBorderColor validCodeBoundryBorderWidth:(CGFloat)validCodeBoundryBorderWidth validCodeBoundryFillColor:(UIColor * _Nonnull)validCodeBoundryFillColor inValidCodeBoundryBorderColor:(UIColor * _Nonnull)inValidCodeBoundryBorderColor inValidCodeBoundryBorderWidth:(CGFloat)inValidCodeBoundryBorderWidth inValidCodeBoundryFillColor:(UIColor * _Nonnull)inValidCodeBoundryFillColor showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryBorderWidth:(CGFloat)documentBoundryBorderWidth documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -417,7 +418,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 
 
 
-
 @protocol CodeScannerViewDelegate;
 @class NSString;
 @class NSURL;
@@ -437,13 +437,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @end
 
 
+
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(enum CodeScannerError)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
 @optional
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -467,7 +468,6 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
 
 
 
-@class NSError;
 
 SWIFT_CLASS_NAMED("VisionAPIManager")
 @interface VisionAPIManager : NSObject
@@ -475,15 +475,15 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 + (VisionAPIManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
 @end
 
+@class NSError;
 @class NSData;
-@class NSURLResponse;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
-- (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 #endif
@@ -848,6 +848,7 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
 
 SWIFT_CLASS_NAMED("CodeScannerView")
 @interface CodeScannerView : UIView
+- (void)layoutSubviews;
 - (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
 @end
@@ -859,7 +860,7 @@ SWIFT_CLASS_NAMED("FocusSettings")
 @interface FocusSettings : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) FocusSettings * _Nonnull default_;)
 + (FocusSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showCodeBoundariesInMultipleScan:(BOOL)showCodeBoundariesInMultipleScan validCodeBoundryBorderColor:(UIColor * _Nonnull)validCodeBoundryBorderColor validCodeBoundryBorderWidth:(CGFloat)validCodeBoundryBorderWidth validCodeBoundryFillColor:(UIColor * _Nonnull)validCodeBoundryFillColor inValidCodeBoundryBorderColor:(UIColor * _Nonnull)inValidCodeBoundryBorderColor inValidCodeBoundryBorderWidth:(CGFloat)inValidCodeBoundryBorderWidth inValidCodeBoundryFillColor:(UIColor * _Nonnull)inValidCodeBoundryFillColor showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryBorderWidth:(CGFloat)documentBoundryBorderWidth documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -913,7 +914,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 
 
 
-
 @protocol CodeScannerViewDelegate;
 @class NSString;
 @class NSURL;
@@ -933,13 +933,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @end
 
 
+
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(enum CodeScannerError)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
 @optional
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -963,7 +964,6 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
 
 
 
-@class NSError;
 
 SWIFT_CLASS_NAMED("VisionAPIManager")
 @interface VisionAPIManager : NSObject
@@ -971,15 +971,15 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 + (VisionAPIManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
 @end
 
+@class NSError;
 @class NSData;
-@class NSURLResponse;
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
-- (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSURLResponse * _Nullable, NSError * _Nullable))completion;
+- (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
+- (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 #endif
