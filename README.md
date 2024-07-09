@@ -204,6 +204,20 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, focusSettings
     - `shouldDisplayFocusImage: Bool` - set true if you need focused region to be drawn.
 
     - `shouldScanInFocusImageRect: Bool` - set true if you want to detect codes visible in focused region only. This will discard the codes detected to be outside of the focus image. This applies only in barcode, qr and autoBarCodeOrQRCode modes.
+    
+    - `showCodeBoundariesInMultipleScan: Bool` - set true if you want to display boundaries around detetcted codes in multiple code scan. Default value is 'true'
+    
+    - `validCodeBoundryBorderColor: UIColor` - Color of border drawn around detected valid code. Default value is '.green'
+        
+    - `validCodeBoundryBorderWidth: CGFloat` - Width of border drawn around detected valid code. Default value is '1.0'
+            
+    - `validCodeBoundryFillColor: UIColor` - Fill color of border drawn around detected valid code. Default value is '.green.withAlphaComponent(0.3)'
+    
+    - `inValidCodeBoundryBorderColor: UIColor` - Color of border drawn around detected invalid code. Default value is '.red'
+        
+    - `inValidCodeBoundryBorderWidth: CGFloat` - Width of border drawn around detected invalid code. Default value is '1.0'
+            
+    - `inValidCodeBoundryFillColor: UIColor` - Fill color of border drawn around detected invalid code. Default value is '.red.withAlphaComponent(0.3)'
       
     - `showDocumentBoundries: Bool` - Set true if you want to display boundaries around document detected in camera view.
 
@@ -231,6 +245,8 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, focusSettings
     - `documentDetectionConfidence: Float` - You can set the minimum confidence level for document detection. Those below the given value will be dicarded. Value must be set on the scale of 0 - 1. Default is `0.9`.
       
     - `secondsToWaitBeforeDocumentCapture: Double` - Time threshold to wait before capturing a document automatically in OCR mode. VisionSDK only captures the document if it is continuously detected for the n(value of this property) seconds. Default is `3.0`.
+    
+    - `selectedTemplateId: String?` - Set this value using the template id if you want to detect multiple codes using a specific template. To use a specific template, set the captureType to .multiple as well.
 
 - `CameraSettings` - CameraSettings struct defines the camera related properties of scanner view. These properties are:
 
@@ -384,6 +400,91 @@ func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error:
 This method is called when an error occurs in any stage of initializing or capturing the codes when there is none
 detected.
 
+### Custom Template Scanning Methods
+
+In order to use custom templates for code scanning. It is necessary to create a template first. You can create templates using the following code
+
+```swift
+
+    func openTemplateController() {
+    
+        let scanController = GenerateTemplateController.instantiate()
+        scanController.delegate = self
+        
+        if let sheet = scanController.sheetPresentationController {
+            sheet.prefersGrabberVisible = true
+        }
+        
+        self.present(scanController, animated: true)
+    }
+    
+```
+
+Listen to the `GenerateTemplateControllerDelegate` methods to get response.
+
+```swift
+
+    extension BarcodeViewController: GenerateTemplateControllerDelegate {
+    
+        // This function provides you with the ID of the template that has been created
+        func templateScanController(_ controller: GenerateTemplateController, didFinishWith result: String) {
+            print(result)
+        }
+    
+        func templateScanController(_ controller: GenerateTemplateController, didFailWithError error: any Error) {
+            controller.dismiss(animated: true)
+        }
+    
+        func templateScanControllerDidCancel(_ controller: GenerateTemplateController) {
+            print("Template creation cancelled")
+        }
+    }
+    
+```
+
+
+NOTE: VisionSDK automatically saves created templates into its secure storage. You can access those saved template using methods below
+
+```swift
+    
+    // This method returns all the ids of the saved templates
+    CodeScannerView.getAllTemplates()
+
+    // This method deletes the template with the specified ID
+    CodeScannerView.deleteTemplateWithId(_ id: String)
+    
+    // This method deletes all saved templates
+    CodeScannerView.deleteAllTemplates()
+    
+```
+
+### On-Device OCR Methods
+
+This method must be called first before using offline device OCR. Preparation should complete first without any errors. For that, listen to completion block in the params.
+
+```swift
+
+    // This method must be provided with `apiKey` or `token`.
+    // modelClass: VSDKModelClass - Select required Model Class. Currently supported is .shippingLabel only
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. Currently supported sizes are .micro and .large only.
+    
+    func prepareOfflineOCR(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelClass, withModelSize modelSize: VSDKModelSize = .micro, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float)->())?, withCompletion completion:((_ error: NSError?)->())?)
+
+```    
+
+For extraction of data using Offline OCR use the following method.
+
+```swift
+
+    func extractDataFromImage(_ image: CIImage, withBarcodes barcodes: [String], _ completion: @escaping ((Data?, NSError?) -> Void))
+
+```   
+
+It returns with the OCR Response based on PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
+ 
+These methods are called on the shared instance of `OnDeviceOCRManager`. It can be accessed using `OnDeviceOCRManager.shared`
+syntax.
+    
 ### OCR Methods
 
 ```swift
