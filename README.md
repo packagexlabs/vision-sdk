@@ -4,6 +4,8 @@ Barcode and QR Code scanner framework for iOS. VisionSDK provides a way to detec
 and auto capturing modes. It also provides OCR for text detection in offline(without internet) and online(label scanning
 with Restful API) modes. Written in Swift.
 
+![Example1](ReadMeContent/Videos/Sample/VisionSDKSample.gif)
+
 ## Development Requirements
 
 - iOS 15.0+
@@ -507,18 +509,24 @@ PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
 
 `callManifestAPIWith` method recieves the captured image and the API Key as parameters.
 
+
 # VisionSDK Android Integration
 
 The VisionSDK Android Integration is a barcode and QR code scanner framework for Android that
 provides a simple and efficient way to detect barcodes and QR codes in both manual and
-automatic capturing modes. It also includes OCR (Optical Character Recognition) capabilities
-for text detection (label scanning with a Restful API) modes.
+automatic capturing modes. It also includes AI capabilites to extract information from logistic
+documents.
 
 Some key features of the VisionSDK Android Integration include:
 
-- Support for multiple view types (rectangular, square, fullscreen) for the scanning window
-- Customization options for the scanning window size, shape, and border style
-- Capture image and OCR API capabilities
+- Barcode and QR code scanning
+- Focus on a specific area of camera preview
+- Document detection
+- Capturing of image
+- Information extraction from logistic documents (via both local ML models (offline) and REST API)
+    - Shipping Label
+    - Bill of Lading
+    - Price Tag (under progress)
 
 ## Installation
 Vision SDK is hosted on JitPack.io
@@ -526,14 +534,14 @@ Vision SDK is hosted on JitPack.io
 First add JitPack to your root project
 
 ```kotlin
-maven { url "https://jitpack.io" }
+maven { url = uri("https://jitpack.io") }
 ```
 
 Then add the following dependency to
 your project's build.gradle file:
 
-```
-implementation 'com.github.packagexlabs:vision-sdk-android:v1.0'
+```kotlin
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.1")
 ```
 
 ## Usage
@@ -552,16 +560,10 @@ There are 2 ways for authentication
 2. Via Token
 
 ```kotlin
-VisionSDK.getInstance().initialise(
+VisionSDK.getInstance().initialize(
+    environment = //TODO environment,
     authentication = //TODO authentication,
-    environment = //TODO environment
-)
-```
-
-```kotlin
-VisionSDK.getInstance().initialise(
-    apiKey = Authentication.BearerToken(/*Yoru token here*/),
-    environment = Environment.STAGING
+    manifest = //TODO manifest
 )
 ```
 
@@ -569,27 +571,58 @@ VisionSDK.getInstance().initialise(
 
 ### Basic Usage
 
-To start scanning for barcodes and QR codes, use the startScanning method and specify the view type:
+Set initial setting/configurations of the camera:
+
+```kotlin
+    visionCameraView.setStateAndFocusSettings(ScreenState(), FocusSettings())
+
+    val nthFrameToProcess = 15
+    visionCameraView.shouldOnlyProcessNthFrame(nthFrameToProcess)
+```
+
+To start scanning for barcodes, QR codes, text or documents, use the startCamera method after it is initialized. See the code below for example:
 
 ```kotlin
 private fun startScanning() {
 
-    //setting the scanning window configuration
-    binding.customScannerView.startScanning(
-        viewType = screenState.scanningWindow,
-        scanningMode = screenState.scanningMode,
-        detectionMode = screenState.detectionMode,
-        scannerCallbacks = this
+    visionCameraView.setObjectDetectionConfiguration(
+        ObjectDetectionConfiguration(
+           isTextIndicationOn = true,
+           isBarcodeOrQRCodeIndicationOn = true,
+           isDocumentIndicationOn = true,
+           secondsToWaitBeforeDocumentCapture = 3
+        )
     )
+    visionCameraView.setScannerCallback(object : ScannerCallback {
+      fun detectionCallbacks(barcodeDetected: Boolean, qrCodeDetected: Boolean, textDetected: Boolean, documentDetected: Boolean) {
+
+      }
+
+      fun onBarcodesDetected(barcodeList: List<Barcode>) {
+
+      }
+
+      fun onFailure(exception: ScannerException) {
+
+      }
+
+      fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<Barcode>) {
+         // bitmap: The bitmap of captured image
+         // imageFile: Optional image file if user requested the image to be saved as file also.
+         // value: List of barcodes that were detected in the given image.
+      }
+    })
+
+    visionCameraView.setCameraLifecycleCallback(object : CameraLifecycleCallback {
+      fun onCameraStarted()
+      fun onCameraStopped()
+    })
+
+    visionCameraView.initialize {
+        visionCameraView.startCamera()
+    }
 }
   ```
-
-#### View Types
-
-There are 2 types of scanning windows:
-
-1. `ViewType.WINDOW` by default show a square window for QR detection mode and rectangle for Barcode
-2. `ViewType.FULLSCREEN` whole screen
 
 #### Scanning Modes
 
@@ -600,116 +633,27 @@ There are 2 types of scanning mode
 
 #### Detection Modes
 
-Detection mode will tell which codes to detect
+Detection mode is used to specify what the user is trying to detect
 
-1. `QrAndBarcode` detects Barcode and QR Codes collectively
-2. `Barcode` detects only barcode
-3. `QR` detects only QR codes
-4. `OCR` for OCR detection. This mode will call OCR api
-
-#### Callback
-
-There is also Scanner Callback that we need to provide while starting scanning. This is an interface,
-and it will be giving different callbacks based on the detection mode.
-
-1. `onBarcodeDetected` whenever a Barcode or QR code is detected in Single model
-2. `onImageCaptured` whenever image is capture in OCR mode
-3. `onMultipleBarcodesDetected` when multiple barcodes are detected in multiple mode
-4. `onFailure` when some exception is thrown or unable to detect any Barcode/QRCode in manual mode
-
-#### Common Exception Classes
-
-When there is no Barcode or QRCode detected with in a specific time window then SDK
-will throw an exception. There are custom exceptions
-
-1. `BarCodeNotDetected` when no barcode detected in manual mode
-2. `QRCodeNotDetected` when QR code not detected in manual mode
-
-### Customizing the Scanning Window
-
-To customize the appearance and behavior of the scanning window, you can use the setScanningWindowConfiguration method
-and provide a configuration object with your desired settings.
-
-For example:
-
-As `ViewType.RECTANGLE` and `ViewType.SQUARE` have a window, you can configure the scanning window according to yours
-requirements. There is also option for setting the scanning window radius along with vertical starting point.
-
-  ```kotlin
-//Setting the Barcode and QR code scanning window sizes
-binding.customScannerView.setScanningWindowConfiguration(
-    Configuration(
-        barcodeWindow = ScanWindow(
-            width = ((binding.root.width * 0.9).toFloat()),
-            height = ((binding.root.width * 0.4).toFloat()),
-            radius = 10f,
-            verticalStartingPosition = (binding.root.height / 2) - ((binding.root.width * 0.4).toFloat())
-        ), qrCodeWindow = ScanWindow(
-            width = ((binding.root.width * 0.7).toFloat()),
-            height = ((binding.root.width * 0.7).toFloat()),
-            radius = 10f,
-
-            //you can set the vertical position of the scanning window
-            verticalStartingPosition = (binding.root.height / 2) - ((binding.root.width * 0.5).toFloat())
-        )
-    )
-)
-```
-
-### Example
-
-Following are some example of initialise the Scanner with the above-mentioned configuration
-
-It will be detecting the Barcode manually with in a rectangular area
-
-```kotlin
-binding.customScannerView.startScanning(
-    viewType = ViewType.WINDOW,
-    scanningMode = ScanningMode.Manual,
-    detectionMode = DetectionMode.Barcode,
-    this
-)
-
-```
-
-It will be using full screen for QR code detection and will auto capture barcodes
-
-```kotlin
-binding.customScannerView.startScanning(
-    viewType = ViewType.FULLSCRREN,
-    scanningMode = ScanningMode.Auto,
-    detectionMode = DetectionMode.QR,
-    this
-)
-```
-
-### Listening to the Barcode and Text Detection
-
-For the barcode and indicator there are different live data that you can observe
-
-1. `customScannerView.barcodeIndicators` will post a new value whenever a new barcode or QR code is detected. To
-   distinguish between Barcode and QR Code you can use the format field
-   e.g `TWO_DIMENSIONAL_FORMATS.contains(it.format)`
-2. `customScannerView.textIndicator` will post a new value whenever a text is detected on the screen
+1. `Barcode` detects only barcode
+2. `QRCode` detects only QR codes
+3. `OCR` for OCR detection. This mode will capture an image for the user. User can then decide to extract logistic data from it using either API call or on-device OCR capabilities.
+4. `PriceTag` is underprogress
+5. `Photo` is used to take images without any processing
 
 ### Trigger Manual Capture
 
-As mentioned above that we have a manual mode. For manual mode trigger, you can call `customScannerView.capture()`,
+As mentioned above that we have a manual mode. For manual mode trigger, you can call `visionCameraView.capture()`,
 based on the mode
 it will be giving different callbacks
 
-if detection mode is
+If detection mode is
 
-1. `DetectionMode.Barcode` then it will trigger the `onBarcodeDetected` callback in case of barcode
-   detection or throw an exception `QRCodeNotDetected` if barcode not detected with in specific time frame.
-2. `DetectionMode.QR` will return QR code or throw Exception of `BarCodeNotDetected`
+1. `DetectionMode.Barcode` then it will trigger the `onBarcodeDetected` callback in case of barcode detection or throw an exception.
+2. `DetectionMode.QRCode` will return QR code or throw exception.
 3. `DetectionMode.OCR` will capture an image along with the current barcode and return in `onImageCaptured`
 
 > __Make sure that when calling capture, scan mode should be manual__
-
-### Capturing Image and OCR API
-
-With the above live data options, the SDK also provide option to Capture Image and call OCR Api.
 
 #### Capturing image:
 
@@ -717,14 +661,12 @@ You can capture an image when mode is OCR. In OCR mode when `capture` is called,
 it will return an image.
 
 ```kotlin
-customScannerView.captureImage()
+visionCameraView.captureImage()
 ```
 
-#### Callback
-
 ```kotlin
-fun onImageCaptured(bitmap: Bitmap, value: MutableList<Barcode>?) {
-    //Image along with the barcodes
+fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<Barcode>) {
+   //Image along with the barcodes
 }
 ```
 
@@ -732,34 +674,125 @@ In the callback, it will return the image bitmap along with the barcodes list in
 
 ### Making OCR Call:
 
-For the OCR Api call, you need to set the Environment, there are multiple environment,
-plus the Api key. You can call `makeOCRApiCall` for the ocr analysis on a bitmap. Bitmap and barcodes needs to be
-provided. If there are no barcodes,
-then provide an empty list.
+To make an API call, first thing that the user needs to make sure is that `VisionSDK` is initialized. See [Initialization](#initialization) for details.
 
-Below is an example:
+Once the user has successfully initialized `VisionSDK`, the they can use class `ApiManager` for making API calls.
 
+Following are the APIs that are available for our users through VisionSDK:
+1. Shipping Label (both online and on-device)
+2. Bill of Lading (only online)
+
+Logistic information can be extracted from image in these two contexts. Users can post these images using the following suspended functions from `ApiManager` class.
+
+#### Shipping Label
 ```kotlin
-customScannerView.makeOCRApiCall(
-    bitmap = bitmap,
-    barcodeList = list,
-    onScanResult = object : OCRResult {
-        override fun onOCRResponse(ocrResponse: OCRResponse?) {
-            //Successful result
-        }
-
-        override fun onOCRResponseFailed(throwable: Throwable?) {
-            //Some issue occurred
-        }
-    })
+val jsonResponse = ApiManager().shippingLabelApiCallSync(
+   bitmap = bitmap,
+   barcodeList = list,
+   locationId = "OPTIONAL_LOCATION_ID"
+   recipient = mapOf(
+      "contact_id" to "CONTACT_ID_HERE"
+   ),
+   sender = mapOf(
+      "contact_id" to "CONTACT_ID_HERE"
+   ),
+   options = mapOf(
+      "match" to mapOf(
+         "search" to listOf("recipients"),
+         "location" to true
+      ),
+      "postprocess" to mapOf(
+         "require_unique_hash" to false
+      ),
+      "transform" to mapOf(
+         "tracker" to "outbound",
+         "use_existing_tracking_number" to false
+      )
+   ),
+   metadata = mapOf(
+      "Test" to "Pass"
+   )
+)
 ```
 
-In the callbacks, Success or error will be returned.
-It returns with the OCR Response from PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
+#### Bill of Lading
+```Kotlin
+val jsonResponse = ApiManager().manifestApiCallSync(
+   bitmap = bitmap,
+   barcodeList = list
+)
+```
+
+### Making On-Device Shipping Label Call (usage without internet):
+
+You need internet to download the important files for the first time. These files are used for processing and extracting data from the images.
+In order to do that, you need to use `configure()` function of the class `OnDeviceOCRManager`.
+
+```kotlin
+val onDeviceOCRManager = OnDeviceOCRManager(
+   context: Context,
+   platformType: PlatformType,
+   modelClass: ModelClass,
+   modelSize: ModelSize
+)
+```
+
+`PlatformType` is an enum with following values:
+```kotlin
+Native // For Android native apps
+Flutter // For Flutter apps
+ReactNative // For React Native apps
+```
+
+`ModelClass` is an enum that is used to inform the VisionSDK of the kind of OCR capabilities you require in your app.
+Following are its option:
+```kotlin
+ShippingLabel
+BillOfLading
+PriceTag
+```
+`PriceTag` is not currently supported.
+
+`ModelSize` is another enum (an optional parameter here) that is used to inform the VisionSDK about the type of files that it should download. Following are the types of model:
+```kotlin
+Nano
+Micro
+Small
+Medium
+Large
+XLarge
+```
+Currently, only `Micro` and `Large` are supported.
+
+After creating the instance of `OnDeviceOCRManager`, you need to call its `configure()` function. This suspend function will download the important files, if needed, and then load them in memory.
+
+```kotlin
+onDeviceOCRManager.configure(
+   executionProvider: ExecutionProvider = ExecutionProvider.NNAPI,
+   progressListener: (suspend (Float) -> Unit)? = null
+)
+```
+
+`ExecutionProvider` parameter is optional and usually the default value works fine.
+
+The `progressListener` (also optional) parameter can be used to track the progress of downloading and loading of files. Its value is from 0.0 to 1.0.
+
+After configuring it successfully, you need to call the function `getPredictions()` and pass it the bitmap of the image you want to perform OCR operations on and list of barcodes to try to extract information using regex.
+
+```kotlin
+onDeviceOCRManager.getPredictions(bitmap: Bitmap, barcodes: List<Barcode>): String
+```
+
+The result of `getPredictions()` function is a JSON response in `String` form.
+
+Once you are done with the `OnDeviceOCRManager`, make sure that you destroy its instance by calling the following method:
+
+```kotlin
+onDeviceOCRManager.destroy()
+```
 
 ## License
 
-Copyright 2022 PackageX Labs.
+Copyright © 2024 PackageX Labs.
 
 Licensed under the MIT License.
-
