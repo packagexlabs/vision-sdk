@@ -12,6 +12,6 @@ spec.author			= { "Muzamil Mughal" => "muzamilmughal81@gmail.com" }
 spec.swift_version		= "5.0"
 spec.ios.deployment_target 	= "15.0"
 spec.source			= { :git => "https://github.com/packagexlabs/vision-sdk.git", :tag => spec.version }
-spec.vendored_frameworks	= 'Sources/VisionSDK.xcframework'
+spec.vendored_frameworks	= ['Sources/VisionSDK.xcframework', 'Sources/TensorFlowLiteC.xcframework']
 
 end
