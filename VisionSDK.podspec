@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
 spec.name			= "VisionSDK"
-spec.version			= "1.3.4"
+spec.version			= "1.3.5"
 spec.summary			= "Barcode and QR Code scanner framework for iOS."
 spec.description		=  <<-DESC
 Barcode and QR Code scanner framework for iOS. VisionSDK provides a way to detect barcodes and qr codes with both manual and auto capturing modes. It also provides OCR for text detection in offline(without internet) and online(label scanning with Restful API) modes. Written in Swift.
@@ -14,4 +14,8 @@ spec.ios.deployment_target 	= "15.0"
 spec.source			= { :git => "https://github.com/packagexlabs/vision-sdk.git", :tag => spec.version }
 spec.vendored_frameworks	= ['Sources/VisionSDK.xcframework', 'Sources/TensorFlowLiteC.xcframework']
 
+spec.pod_target_xcconfig = {
+    'OTHER_LDFLAGS' => '-lc++'
+}
+  
 end
