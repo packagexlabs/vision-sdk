@@ -509,7 +509,6 @@ PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
 
 `callManifestAPIWith` method recieves the captured image and the API Key as parameters.
 
-
 # VisionSDK Android Integration
 
 The VisionSDK Android Integration is a barcode and QR code scanner framework for Android that
@@ -527,6 +526,8 @@ Some key features of the VisionSDK Android Integration include:
     - Shipping Label
     - Bill of Lading
     - Price Tag (under progress)
+
+![Example1](ReadMeContent/Videos/Sample/VisionSDKSample.gif)
 
 ## Installation
 Vision SDK is hosted on JitPack.io
@@ -623,6 +624,13 @@ private fun startScanning() {
     }
 }
   ```
+
+Note that, once `onBarcodesDetected` or `onImageCaptured` callbacks are called, VisionSDK will stop analysing camera feed for text or barcodes/QR codes.
+This is to prevent extra processing and battery consumption. When client wants to start analysing camera feed again, after consuming the results of previous scan, client needs to call the following function:
+
+```kotlin
+  visionCameraView.rescan()
+```
 
 #### Scanning Modes
 
@@ -790,6 +798,9 @@ Once you are done with the `OnDeviceOCRManager`, make sure that you destroy its 
 ```kotlin
 onDeviceOCRManager.destroy()
 ```
+
+## Attribution
+https://www.flaticon.com/free-icon/browser_9892390?term=template&page=1&position=10&origin=search&related_id=9892390
 
 ## License
 
