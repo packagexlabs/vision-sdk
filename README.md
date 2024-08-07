@@ -527,8 +527,6 @@ Some key features of the VisionSDK Android Integration include:
     - Bill of Lading
     - Price Tag (under progress)
 
-![Example1](ReadMeContent/Videos/Sample/VisionSDKSample.gif)
-
 ## Installation
 Vision SDK is hosted on JitPack.io
 
@@ -542,7 +540,7 @@ Then add the following dependency to
 your project's build.gradle file:
 
 ```kotlin
-implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.1")
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.2")
 ```
 
 ## Usage
