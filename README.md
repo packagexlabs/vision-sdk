@@ -541,6 +541,7 @@ your project's build.gradle file:
 
 ```kotlin
 implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.2")
+implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 ```
 
 ## Usage
