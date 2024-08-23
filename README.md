@@ -540,8 +540,7 @@ Then add the following dependency to
 your project's build.gradle file:
 
 ```kotlin
-implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.5")
-implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.6")
 ```
 Check the [latest version](https://jitpack.io/#packagexlabs/vision-sdk-android) here
 
@@ -599,7 +598,7 @@ private fun startScanning() {
 
       }
 
-      fun onBarcodesDetected(barcodeList: List<Barcode>) {
+      fun onBarcodesDetected(barcodeList: List<String>) {
 
       }
 
@@ -607,7 +606,7 @@ private fun startScanning() {
 
       }
 
-      fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<Barcode>) {
+      fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<String>) {
          // bitmap: The bitmap of captured image
          // imageFile: Optional image file if user requested the image to be saved as file also.
          // value: List of barcodes that were detected in the given image.
@@ -687,7 +686,7 @@ visionCameraView.capture()
 ```
 
 ```kotlin
-fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<Barcode>) {
+fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<String>) {
    //Image along with the barcodes
 }
 ```
