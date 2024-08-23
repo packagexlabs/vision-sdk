@@ -540,9 +540,10 @@ Then add the following dependency to
 your project's build.gradle file:
 
 ```kotlin
-implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.2")
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.5")
 implementation("com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1")
 ```
+Check the [latest version](https://jitpack.io/#packagexlabs/vision-sdk-android) here
 
 ## Usage
 
@@ -574,10 +575,10 @@ VisionSDK.getInstance().initialize(
 Set initial setting/configurations of the camera:
 
 ```kotlin
-    visionCameraView.setStateAndFocusSettings(ScreenState(), FocusSettings())
+    visionCameraView.setVisionViewState(visionViewState = VisionViewState())
 
     val nthFrameToProcess = 15
-    visionCameraView.shouldOnlyProcessNthFrame(nthFrameToProcess)
+    visionCameraView.shouldOnlyProcessNthFrame(nthFrameToProcess) // Optional
 ```
 
 To start scanning for barcodes, QR codes, text or documents, use the startCamera method after it is initialized. See the code below for example:
@@ -614,13 +615,14 @@ private fun startScanning() {
     })
 
     visionCameraView.setCameraLifecycleCallback(object : CameraLifecycleCallback {
-      fun onCameraStarted()
-      fun onCameraStopped()
+      override fun onCameraStarted() {
+          // If you want to apply Focus Settings, you can do that here, after camera is started.
+          visionCameraView.getFocusRegionManager().setFocusSettings(focusSettings = FocusSettings())
+      }
+      override fun onCameraStopped() {}
     })
 
-    visionCameraView.initialize {
-        visionCameraView.startCamera()
-    }
+    visionCameraView.startCamera()
 }
   ```
 
@@ -631,12 +633,25 @@ This is to prevent extra processing and battery consumption. When client wants t
   visionCameraView.rescan()
 ```
 
+### Zoom Options
+After camera is started, client can request all the zoom levels and can set zoom in camera. There are two ways to set zoom.
+#### Linear Zoom
+```kotlin
+    val zoomLevel: Float = 0.0F // Linear zoom levels range from 0.0F to 1.0F
+    visionCameraView.setLinearZoom(zoomLevel)
+```
+#### Ratio Zoom
+```kotlin
+    val zoomRatio: Float = visionCameraView.getMinZoomRatioAvailable() // Ratio zoom levels range from visionCameraView.getMinZoomRatioAvailable() to visionCameraView.getMaxZoomRatioAvailable()
+    visionCameraView.setZoomRatio(zoomRatio)
+```
+
 #### Scanning Modes
 
 There are 2 types of scanning mode
 
 1. `Auto` mode will auto-detect any Barcode or QR code based on the detection mode
-2. `Manual` mode will detect Barcode or QR code upon calling `Capture`
+2. `Manual` mode will detect Barcode or QR code upon calling `visionCameraView.capture()`
 
 #### Detection Modes
 
@@ -668,7 +683,7 @@ You can capture an image when mode is OCR. In OCR mode when `capture` is called,
 it will return an image.
 
 ```kotlin
-visionCameraView.captureImage()
+visionCameraView.capture()
 ```
 
 ```kotlin
@@ -696,7 +711,7 @@ Logistic information can be extracted from image in these two contexts. Users ca
 val jsonResponse = ApiManager().shippingLabelApiCallSync(
    bitmap = bitmap,
    barcodeList = list,
-   locationId = "OPTIONAL_LOCATION_ID"
+   locationId = "OPTIONAL_LOCATION_ID",
    recipient = mapOf(
       "contact_id" to "CONTACT_ID_HERE"
    ),
@@ -776,7 +791,7 @@ After creating the instance of `OnDeviceOCRManager`, you need to call its `confi
 ```kotlin
 onDeviceOCRManager.configure(
    executionProvider: ExecutionProvider = ExecutionProvider.NNAPI,
-   progressListener: (suspend (Float) -> Unit)? = null
+   progressListener: ((Float) -> Unit)? = null
 )
 ```
 
