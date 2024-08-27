@@ -372,29 +372,11 @@ detected codes in it, and an optional cropped document image if a document is de
 
 ```swift
 
-@objc
-public enum CodeScannerError: Int {
-    case cameraUsageNotAuthorized = 0
-    case noTextDetected = 1
-    case noBarCodeDetected = 2
-    case noQRCodeDetected = 3
-    case noBarCodeORQRCodeDetected = 4
-    case noDocumentDetected = 5
-    case readFailure = 6
-    case unknowns = 7
-    case videoUnavailable = 8
-    case inputInvalid = 9
-    case metadataOutputFailure = 10
-    case videoDataOutputFailure = 11
-    case authenticationNeededForPriceTagScanning = 12
-    case priceTagDelegateNotImplemented = 13
-    case templateNotFound = 14
-    case noTemplateCodesFound = 15
-}
-
 func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: VisionSDK.CodeScannerError)
 
 ```
+This method is called when an error occurs in any stage of initializing or capturing the codes when there is none
+detected.
 
 ```swift
 
