@@ -191,22 +191,17 @@ public protocol Delegate : AnyObject {
   var cDelegate: Self.CDelegate { get }
 }
 @objc public enum CodeScannerError : Swift.Int {
-  case cameraUsageNotAuthorized
-  case noTextDetected
-  case noBarCodeDetected
-  case noQRCodeDetected
-  case noBarCodeORQRCodeDetected
-  case noDocumentDetected
-  case readFailure
-  case unknowns
-  case videoUnavailable
-  case inputInvalid
-  case metadataOutputFailure
-  case videoDataOutputFailure
-  case authenticationNeededForPriceTagScanning
-  case priceTagDelegateNotImplemented
-  case templateNotFound
-  case noTemplateCodesFound
+  case cameraUsageNotAuthorized = 0
+  case noTextDetected = 1
+  case noBarCodeDetected = 2
+  case noQRCodeDetected = 3
+  case noBarCodeORQRCodeDetected = 4
+  case noDocumentDetected = 5
+  case videoUnavailable = 6
+  case authenticationNeededForPriceTagScanning = 7
+  case priceTagDelegateNotImplemented = 8
+  case templateNotFound = 9
+  case noTemplateCodesFound = 10
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -254,7 +249,7 @@ public protocol Delegate : AnyObject {
   }
 }
 @objc(CodeScannerViewDelegate) public protocol CodeScannerViewDelegate {
-  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: VisionSDK.CodeScannerError)
+  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: Foundation.NSError)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
@@ -376,7 +371,9 @@ extension Swift.String {
 extension VisionSDK.VisionAPIManager {
   @objc dynamic public func checkPriceTagAuthenticationWithKey(_ apiKey: Swift.String?, _ completion: @escaping ((_ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callScanAPIWith(url imageURL: Foundation.URL, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  public func callManifestAPIWith(url imageURL: Foundation.URL, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 @_hasMissingDesignatedInitializers final public class SignatureRunner {
   final public let signatureKey: Swift.String

@@ -322,16 +322,11 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorNoQRCodeDetected = 3,
   CodeScannerErrorNoBarCodeORQRCodeDetected = 4,
   CodeScannerErrorNoDocumentDetected = 5,
-  CodeScannerErrorReadFailure = 6,
-  CodeScannerErrorUnknowns = 7,
-  CodeScannerErrorVideoUnavailable = 8,
-  CodeScannerErrorInputInvalid = 9,
-  CodeScannerErrorMetadataOutputFailure = 10,
-  CodeScannerErrorVideoDataOutputFailure = 11,
-  CodeScannerErrorAuthenticationNeededForPriceTagScanning = 12,
-  CodeScannerErrorPriceTagDelegateNotImplemented = 13,
-  CodeScannerErrorTemplateNotFound = 14,
-  CodeScannerErrorNoTemplateCodesFound = 15,
+  CodeScannerErrorVideoUnavailable = 6,
+  CodeScannerErrorAuthenticationNeededForPriceTagScanning = 7,
+  CodeScannerErrorPriceTagDelegateNotImplemented = 8,
+  CodeScannerErrorTemplateNotFound = 9,
+  CodeScannerErrorNoTemplateCodesFound = 10,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -435,10 +430,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 + (void)deleteAllTemplates;
 @end
 
+@class NSError;
 
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(enum CodeScannerError)error;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(NSError * _Nonnull)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 @optional
@@ -484,6 +480,7 @@ SWIFT_PROTOCOL_NAMED("GenerateTemplateControllerDelegate")
 
 
 
+
 typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOnline = 0,
   OCRModeOffline = 1,
@@ -491,7 +488,6 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
 
 enum VSDKModelClass : NSInteger;
 enum VSDKModelSize : NSInteger;
-@class NSError;
 @class CIImage;
 @class NSData;
 
@@ -553,6 +549,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
 - (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
 - (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callScanAPIWithUrl:(NSURL * _Nonnull)imageURL andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 

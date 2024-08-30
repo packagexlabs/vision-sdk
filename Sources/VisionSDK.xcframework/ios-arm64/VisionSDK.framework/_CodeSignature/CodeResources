@@ -14,7 +14,7 @@
 		</data>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<data>
-		gcoT93eDNZSu2H26Mp3bt3iZ9Dw=
+		IeEzTZmGFpwCX0q3H9GABl9DVNM=
 		</data>
 		<key>Headers/VisionSDK.h</key>
 		<data>
@@ -22,15 +22,15 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		GZkuOMVdpxlngY5qfNzZoTjOBMw=
+		2U06hRDGIk2sJ3fqVERywFtsdgs=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		G1lCiMxEM+aPwhu4fw/Tw1WGFhQ=
+		kacIuFdrC3YU0qZa50craWTBE8w=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		ep/Y7ADfZ3dbqYpowApD0VJkNb4=
+		3AiYn333j8Vwz31xDKIypm+FEJI=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
@@ -38,11 +38,11 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		ep/Y7ADfZ3dbqYpowApD0VJkNb4=
+		3AiYn333j8Vwz31xDKIypm+FEJI=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		ndENT5R0tTjx4Hjn5RXjxE/7VIQ=
+		bgPvJBvCq2E5BNVk2IGnAW0xc6U=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -1997,7 +1997,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			k+QMSo0aQS00uikLfY1cX10CTU5HdbIevl7WIZ1W9B4=
+			/Uif6BQnXx2dEwWe9srtFp4rhpXKEOCcHEJAGvY/w60=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK.h</key>
@@ -2011,14 +2011,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			39AMJY6N37cQRqvP0ZGfLhX/SWSG/W/tjXwn50SUHAA=
+			Zmc58MLdntaNrtzFcdsThPqcEFHU98p80V3t26rSiy8=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			YYQPN2YHlWuJ1qiT17HqCh/fgFUVI5aEs5opNYcfC64=
+			CPPU++JZDP124euboNwPvRkOW9PLlKboFLb0TaUkXoQ=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
@@ -2032,14 +2032,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			YYQPN2YHlWuJ1qiT17HqCh/fgFUVI5aEs5opNYcfC64=
+			CPPU++JZDP124euboNwPvRkOW9PLlKboFLb0TaUkXoQ=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			C/ZK+hplV31k2YXg2OS59mMU06WgQRx+yoL9vlH7nyc=
+			WPK9yYo74/97iVK9qpz8bVQphhi2q2T9HBpajtWTNTs=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
