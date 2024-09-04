@@ -77,21 +77,27 @@ final class ViewController: UIViewController {
         let scannerView = CodeScannerView(frame: view.bounds)
         view.addSubview(scannerView)
 
-        // You can modify FocusSettings properties
-        let focusSettings = CodeScannerView.FocusSettings()
-
-        // You can modify focus ObjectDetectionConfiguration properties
-        let objectDetectionConfiguration = CodeScannerView.ObjectDetectionConfiguration()
-
-        // You can modify focus CameraSettings properties
-        let cameraSettings = CodeScannerView.CameraSettings()
+        scannerView.configure(delegate: self, sessionPreset: .high, captureMode: .auto, captureType: .single, scanMode: .autoBarCodeOrQRCode)
         
+        
+        //Please note that if you want default settings then you can ignore setting focusSettings, cameraSettings etc.
+        
+        // You can modify FocusSettings properties if needed
+        let focusSettings = CodeScannerView.FocusSettings()
+        scannerView.focusSettings = focusSettings
+                
+        // You can modify focus ObjectDetectionConfiguration properties if needed
+        let objectDetectionConfiguration = CodeScannerView.ObjectDetectionConfiguration()
+        scannerView.objectDetectionConfiguration = objectDetectionConfiguration
+                
+        // You can modify focus CameraSettings properties if needed
+        let cameraSettings = CodeScannerView.CameraSettings()
+        scannerView.cameraSettings = cameraSettings
+        
+                
         // For price Tag mode you can use this
         let priceTagDetectionSettings = CodeScannerView.PriceTagDetectionSettings()
         scannerView.priceTagDetectionSettings = priceTagDetectionSettings
-        
-        
-        scannerView.configure(delegate: self, focusSettings: focusSettings, objectDetectionConfiguration: objectDetectionConfiguration, cameraSettings: cameraSettings, captureMode: .auto, captureType: .single, scanMode: .autoBarCodeOrQRCode)
         
         scannerView.startRunning()
     }
@@ -120,8 +126,8 @@ extension ViewController: CodeScannerViewDelegate {
         
     }
 
-    // returns captured image with all barcodes detected in it, cropped image only document is detected in the image, and savedImageURL only if CameraSettings.shouldAutoSaveCapturedImage is set to true in scanner view configuration
-    func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String], savedImageURL: URL?) {
+    // returns captured image with all barcodes detected in it, cropped image only if document is detected in the image
+    func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String]) {
     
     }
 
@@ -166,7 +172,7 @@ override func viewDidLoad() {
 
 ```swift
 
-scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, focusSettings: VisionSDK.CodeScannerView.FocusSettings = .default, objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration = .default, cameraSettings: VisionSDK.CodeScannerView.CameraSettings = .default, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, sessionPreset: AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
 
 ```
 
@@ -229,14 +235,10 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, focusSettings
 
 - `CameraSettings` - CameraSettings struct defines the camera related properties of scanner view. These properties are:
 
-    - `sessionPreset: Session.Preset` - You can set session preset as per your requirement. Default is `.high`.
-
     - `nthFrameToProcess: Int` - This is the nth number of the frame that is processed for detection of text, barcodes,
       and qrcodes in live camera feed if enabled by `isTextIndicationOn` or `isBarCodeOrQRCodeIndicationOn`. Processing
       every single frame may be costly in terms of CPU usage and battery consumption. Default value is `10` which means
       that from camera stream of usual 30 fps, every 10 frame is processed. Its value should be set between 1 - 30.
-
-    - `shouldAutoSaveCapturedImage: Bool` - Set true if you want captured image to be saved and get its URL. Upon true ` func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String], savedImageURL: URL?)` will respond with URL of the saved image as well. To clear stored images, you can use `CodeScannerView.removeAllSavedImages()` instance method.
       
 - `PriceTagDetectionSettings` - PriceTagDetectionSettings struct defines the price tag related properties of scanner view. These properties are:
 
@@ -326,22 +328,6 @@ scannerView.capturePhoto()
 Use this method to trigger code scan or photo capture when you are scanning for multiple codes, in manual capture, OCR, or Photo
 mode.
 
-```swift
-
-scannerView.saveImageToVisionSDK(image: UIImage, withName imageName: String) -> URL?
-
-```
-
-Use this method to save an image to VisionSDK internal storage and obtain its URL. Note that VisionSDK saves those images on device storage.
-
-```swift
-
-scannerView.removeAllSavedImages()
-
-```
-
-Use this method to delete all images saved internally by VisionSDK. Saving too many images might consume significant storage space, so you can use this method to free up space.
-
 ### Delegate Methods
 
 ```swift
@@ -372,7 +358,7 @@ detected codes in it, and an optional cropped document image if a document is de
 
 ```swift
 
-func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: VisionSDK.CodeScannerError)
+func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: NSError)
 
 ```
 This method is called when an error occurs in any stage of initializing or capturing the codes when there is none
@@ -388,16 +374,11 @@ public enum CodeScannerError: Int {
     case noQRCodeDetected = 3
     case noBarCodeORQRCodeDetected = 4
     case noDocumentDetected = 5
-    case readFailure = 6
-    case unknowns = 7
-    case videoUnavailable = 8
-    case inputInvalid = 9
-    case metadataOutputFailure = 10
-    case videoDataOutputFailure = 11
-    case authenticationNeededForPriceTagScanning = 12
-    case priceTagDelegateNotImplemented = 13
-    case templateNotFound = 14
-    case noTemplateCodesFound = 15
+    case videoUnavailable = 6
+    case authenticationNeededForPriceTagScanning = 7
+    case priceTagDelegateNotImplemented = 8
+    case templateNotFound = 9
+    case noTemplateCodesFound = 10
 }
 
 ```
