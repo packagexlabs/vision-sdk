@@ -252,7 +252,7 @@ public protocol Delegate : AnyObject {
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: Foundation.NSError)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
-  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
+  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String) -> Swift.Bool
 }
 extension VisionSDK.CodeScannerViewDelegate {
@@ -298,13 +298,11 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc deinit
   }
   @objc(CameraSettings) public class CameraSettings : ObjectiveC.NSObject {
-    public var sessionPreset: AVFoundation.AVCaptureSession.Preset
     public var nthFrameToProcess: Swift.Int64
-    public var shouldAutoSaveCapturedImage: Swift.Bool
     @objc public static var `default`: VisionSDK.CodeScannerView.CameraSettings {
       @objc get
     }
-    @objc public init(sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, nthFrameToProcess: Swift.Int64 = 10, shouldAutoSaveCapturedImage: Swift.Bool = false)
+    @objc public init(nthFrameToProcess: Swift.Int64 = 10)
     @objc deinit
   }
   @objc(PriceTagDetectionSettings) public class PriceTagDetectionSettings : ObjectiveC.NSObject {
@@ -321,6 +319,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration
   @_Concurrency.MainActor(unsafe) public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings
   @_Concurrency.MainActor(unsafe) public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings
+  @_Concurrency.MainActor(unsafe) public var sessionPreset: AVFoundation.AVCaptureSession.Preset
   @_Concurrency.MainActor(unsafe) public var captureMode: VisionSDK.CaptureMode
   @_Concurrency.MainActor(unsafe) public var captureType: VisionSDK.CaptureType
   @_Concurrency.MainActor(unsafe) public var scanMode: VisionSDK.CodeScannerMode {
@@ -335,7 +334,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 extension VisionSDK.CodeScannerView {
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, focusSettings: VisionSDK.CodeScannerView.FocusSettings = .default, objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration = .default, cameraSettings: VisionSDK.CodeScannerView.CameraSettings = .default, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+  @objc @_Concurrency.MainActor(unsafe) dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
   @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
@@ -345,8 +344,6 @@ extension VisionSDK.CodeScannerView {
   @objc @_Concurrency.MainActor(unsafe) dynamic public func rescan()
   @objc @_Concurrency.MainActor(unsafe) dynamic public func deConfigure()
   @_Concurrency.MainActor(unsafe) public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func saveImageToVisionSDK(image: UIKit.UIImage, withName imageName: Swift.String) -> Foundation.URL?
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func removeAllSavedImages()
   @objc @_Concurrency.MainActor(unsafe) public static func getAllTemplates() -> [Swift.String]
   @objc @_Concurrency.MainActor(unsafe) public static func deleteTemplateWithId(_ id: Swift.String)
   @objc @_Concurrency.MainActor(unsafe) public static func deleteAllTemplates()
