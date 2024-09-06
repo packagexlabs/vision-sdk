@@ -375,7 +375,7 @@ SWIFT_CLASS_NAMED("CameraSettings")
 @interface CameraSettings : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) CameraSettings * _Nonnull default_;)
 + (CameraSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithNthFrameToProcess:(int64_t)nthFrameToProcess OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithSessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset nthFrameToProcess:(int64_t)nthFrameToProcess shouldAutoSaveCapturedImage:(BOOL)shouldAutoSaveCapturedImage OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -411,9 +411,10 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 
 
 @protocol CodeScannerViewDelegate;
+@class NSURL;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
-- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
+- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate focusSettings:(FocusSettings * _Nonnull)focusSettings objectDetectionConfiguration:(ObjectDetectionConfiguration * _Nonnull)objectDetectionConfiguration cameraSettings:(CameraSettings * _Nonnull)cameraSettings captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
 - (void)setScanModeTo:(enum CodeScannerMode)mode;
 - (void)setCaptureModeTo:(enum CaptureMode)mode;
 - (void)setCaptureTypeTo:(enum CaptureType)type;
@@ -422,20 +423,21 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)stopRunning;
 - (void)rescan;
 - (void)deConfigure;
+- (NSURL * _Nullable)saveImageToVisionSDKWithImage:(UIImage * _Nonnull)image withName:(NSString * _Nonnull)imageName SWIFT_WARN_UNUSED_RESULT;
+- (void)removeAllSavedImages;
 + (NSArray<NSString *> * _Nonnull)getAllTemplates SWIFT_WARN_UNUSED_RESULT;
 + (void)deleteTemplateWithId:(NSString * _Nonnull)id;
 + (void)deleteAllTemplates;
 @end
 
-@class NSError;
 
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(NSError * _Nonnull)error;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(enum CodeScannerError)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 @optional
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes savedImageURL:(NSURL * _Nullable)savedImageURL;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
 @end
 
@@ -477,7 +479,6 @@ SWIFT_PROTOCOL_NAMED("GenerateTemplateControllerDelegate")
 
 
 
-
 typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOnline = 0,
   OCRModeOffline = 1,
@@ -485,6 +486,7 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
 
 enum VSDKModelClass : NSInteger;
 enum VSDKModelSize : NSInteger;
+@class NSError;
 @class CIImage;
 @class NSData;
 
