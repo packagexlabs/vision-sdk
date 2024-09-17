@@ -1,6 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.10 (swiftlang-5.10.0.13 clang-1500.3.9.4)
+// swift-compiler-version: Apple Swift version 6.0 effective-5.10 (swiftlang-6.0.0.9.10 clang-1600.0.26.2)
 // swift-module-flags: -target arm64-apple-ios15.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name VisionSDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface
 import AVFoundation
 import Accelerate
 import CommonCrypto
@@ -249,16 +250,16 @@ public protocol Delegate : AnyObject {
   }
 }
 @objc(CodeScannerViewDelegate) public protocol CodeScannerViewDelegate {
-  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: VisionSDK.CodeScannerError)
+  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: Foundation.NSError)
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
-  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String], savedImageURL: Foundation.URL?)
+  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String) -> Swift.Bool
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
 }
-@_inheritsConvenienceInitializers @objc(CodeScannerView) @_Concurrency.MainActor(unsafe) public class CodeScannerView : UIKit.UIView {
+@_inheritsConvenienceInitializers @objc(CodeScannerView) @_Concurrency.MainActor @preconcurrency public class CodeScannerView : UIKit.UIView {
   @objc(FocusSettings) public class FocusSettings : ObjectiveC.NSObject {
     public var focusImage: UIKit.UIImage?
     public var focusImageRect: CoreFoundation.CGRect
@@ -298,13 +299,11 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc deinit
   }
   @objc(CameraSettings) public class CameraSettings : ObjectiveC.NSObject {
-    public var sessionPreset: AVFoundation.AVCaptureSession.Preset
     public var nthFrameToProcess: Swift.Int64
-    public var shouldAutoSaveCapturedImage: Swift.Bool
     @objc public static var `default`: VisionSDK.CodeScannerView.CameraSettings {
       @objc get
     }
-    @objc public init(sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, nthFrameToProcess: Swift.Int64 = 10, shouldAutoSaveCapturedImage: Swift.Bool = false)
+    @objc public init(nthFrameToProcess: Swift.Int64 = 10)
     @objc deinit
   }
   @objc(PriceTagDetectionSettings) public class PriceTagDetectionSettings : ObjectiveC.NSObject {
@@ -317,46 +316,45 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage = UIImage(named: "vsdkValidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!, invalidTagImage: UIKit.UIImage = UIImage(named: "vsdkInvalidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!)
     @objc deinit
   }
-  @_Concurrency.MainActor(unsafe) public var focusSettings: VisionSDK.CodeScannerView.FocusSettings
-  @_Concurrency.MainActor(unsafe) public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration
-  @_Concurrency.MainActor(unsafe) public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings
-  @_Concurrency.MainActor(unsafe) public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings
-  @_Concurrency.MainActor(unsafe) public var captureMode: VisionSDK.CaptureMode
-  @_Concurrency.MainActor(unsafe) public var captureType: VisionSDK.CaptureType
-  @_Concurrency.MainActor(unsafe) public var scanMode: VisionSDK.CodeScannerMode {
+  @_Concurrency.MainActor @preconcurrency public var focusSettings: VisionSDK.CodeScannerView.FocusSettings
+  @_Concurrency.MainActor @preconcurrency public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration
+  @_Concurrency.MainActor @preconcurrency public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings
+  @_Concurrency.MainActor @preconcurrency public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings
+  @_Concurrency.MainActor @preconcurrency public var sessionPreset: AVFoundation.AVCaptureSession.Preset
+  @_Concurrency.MainActor @preconcurrency public var captureMode: VisionSDK.CaptureMode
+  @_Concurrency.MainActor @preconcurrency public var captureType: VisionSDK.CaptureType
+  @_Concurrency.MainActor @preconcurrency public var scanMode: VisionSDK.CodeScannerMode {
     get
   }
-  @_Concurrency.MainActor(unsafe) public static var videoDevice: AVFoundation.AVCaptureDevice {
+  @_Concurrency.MainActor @preconcurrency public static var videoDevice: AVFoundation.AVCaptureDevice {
     get
   }
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public func layoutSubviews()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func layoutSubviews()
   @objc deinit
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public init(frame: CoreFoundation.CGRect)
-  @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(frame: CoreFoundation.CGRect)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 extension VisionSDK.CodeScannerView {
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, focusSettings: VisionSDK.CodeScannerView.FocusSettings = .default, objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration = .default, cameraSettings: VisionSDK.CodeScannerView.CameraSettings = .default, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func capturePhoto()
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func startRunning()
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func stopRunning()
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func rescan()
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func deConfigure()
-  @_Concurrency.MainActor(unsafe) public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func saveImageToVisionSDK(image: UIKit.UIImage, withName imageName: Swift.String) -> Foundation.URL?
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func removeAllSavedImages()
-  @objc @_Concurrency.MainActor(unsafe) public static func getAllTemplates() -> [Swift.String]
-  @objc @_Concurrency.MainActor(unsafe) public static func deleteTemplateWithId(_ id: Swift.String)
-  @objc @_Concurrency.MainActor(unsafe) public static func deleteAllTemplates()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func capturePhoto()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func startRunning()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func stopRunning()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func rescan()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func deConfigure()
+  @_Concurrency.MainActor @preconcurrency public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
+  @objc @_Concurrency.MainActor @preconcurrency public static func getAllTemplates() -> [Swift.String]
+  @objc @_Concurrency.MainActor @preconcurrency public static func deleteTemplateWithId(_ id: Swift.String)
+  @objc @_Concurrency.MainActor @preconcurrency public static func deleteAllTemplates()
 }
 extension VisionSDK.CodeScannerView : AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegate {
-  @_Concurrency.MainActor(unsafe) @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
+  @_Concurrency.MainActor @preconcurrency @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
 extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate {
-  @_Concurrency.MainActor(unsafe) @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: (any Swift.Error)?)
-  @_Concurrency.MainActor(unsafe) @objc dynamic public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
+  @_Concurrency.MainActor @preconcurrency @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: (any Swift.Error)?)
+  @_Concurrency.MainActor @preconcurrency @objc dynamic public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
 }
 extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)
@@ -507,6 +505,7 @@ extension VisionSDK.Connectivity {
 @_inheritsConvenienceInitializers @objc(Constants) public class VSDKConstants : ObjectiveC.NSObject {
   public static var apiKey: Swift.String
   public static var apiEnvironment: VisionSDK.VSDKAppEnvironment
+  public static var modelUrl: Foundation.URL!
   @objc override dynamic public init()
   @objc deinit
 }
@@ -515,24 +514,24 @@ extension VisionSDK.Connectivity {
   @objc func templateScanController(_ controller: VisionSDK.GenerateTemplateController, didFailWithError error: any Swift.Error)
   @objc func templateScanControllerDidCancel(_ controller: VisionSDK.GenerateTemplateController)
 }
-@_inheritsConvenienceInitializers @objc(GenerateTemplateController) @_Concurrency.MainActor(unsafe) public class GenerateTemplateController : UIKit.UIViewController {
-  @_Concurrency.MainActor(unsafe) weak public var delegate: (any VisionSDK.GenerateTemplateControllerDelegate)?
-  @objc @_Concurrency.MainActor(unsafe) public static func instantiate() -> VisionSDK.GenerateTemplateController
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public func viewDidLoad()
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public func viewDidLayoutSubviews()
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public func viewDidAppear(_ animated: Swift.Bool)
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public func viewWillDisappear(_ animated: Swift.Bool)
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public func viewDidDisappear(_ animated: Swift.Bool)
-  @_Concurrency.MainActor(unsafe) @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
-  @_Concurrency.MainActor(unsafe) @objc required dynamic public init?(coder: Foundation.NSCoder)
+@_inheritsConvenienceInitializers @objc(GenerateTemplateController) @_Concurrency.MainActor @preconcurrency public class GenerateTemplateController : UIKit.UIViewController {
+  @_Concurrency.MainActor @preconcurrency weak public var delegate: (any VisionSDK.GenerateTemplateControllerDelegate)?
+  @objc @_Concurrency.MainActor @preconcurrency public static func instantiate() -> VisionSDK.GenerateTemplateController
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLoad()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidLayoutSubviews()
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidAppear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewWillDisappear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidDisappear(_ animated: Swift.Bool)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
   @objc deinit
 }
 extension VisionSDK.GenerateTemplateController {
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func startRunning()
-  @objc @_Concurrency.MainActor(unsafe) dynamic public func stopRunning()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func startRunning()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func stopRunning()
 }
 extension VisionSDK.GenerateTemplateController : AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegate {
-  @_Concurrency.MainActor(unsafe) @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
+  @_Concurrency.MainActor @preconcurrency @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
 extension VisionSDK.CodeScannerError : Swift.Equatable {}
 extension VisionSDK.CodeScannerError : Swift.Hashable {}

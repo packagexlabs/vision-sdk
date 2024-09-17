@@ -10,11 +10,11 @@
 		</data>
 		<key>Assets.car</key>
 		<data>
-		6lCYoFPSAAlNSZtS5TosnXLhmlM=
+		1L4foZeNmRUUvAuO2fn08+Z5Fao=
 		</data>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<data>
-		skIxBbvHdkLXcg2WWWVvQbX1mm4=
+		GHulvjOd3Jx8Owv8+JtDjmSXEyM=
 		</data>
 		<key>Headers/VisionSDK.h</key>
 		<data>
@@ -22,27 +22,27 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		2U06hRDGIk2sJ3fqVERywFtsdgs=
+		7cJESRLPPHj9W9klTY8rb1LsT5E=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		QAvQNEXBfpt4tu5o+LycvaDqCwY=
+		H98zvaoxvF+rZoZXi6OIDbMlYQA=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		MfKgqC2KXM9wc7S4sTr/H8wOps4=
+		LCf9wIsP2gMUauc+l68A1uXc4p4=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		gFy4XVvLhYhRx02VSwued13lRSI=
+		d3mO7QJfQUa0Drz0cMbcCoZSX6E=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		MfKgqC2KXM9wc7S4sTr/H8wOps4=
+		LCf9wIsP2gMUauc+l68A1uXc4p4=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		16Gpr9s2Zi+M12LR9Mpo8DA4taQ=
+		M3q6b50b+h5tplp3rtCOH2In7Qw=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -62,7 +62,7 @@
 		</data>
 		<key>VSDKStoryboard.storyboardc/Y6W-OH-hqX-view-5EZ-qb-Rvc.nib</key>
 		<data>
-		mIeJKL/h01kQgMYeuKOG9Ik5+PA=
+		QOUBrtGRnu2UbdmhPdgCPCGG1mQ=
 		</data>
 		<key>cityNameStartsWithAA.json</key>
 		<data>
@@ -1990,14 +1990,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			K8bmDqNREqw8sP/s/2nHFwZfXeWoChCv0bCt3hG8IZs=
+			8vW5PCPWLan+9fm+/zBc/jcYaqkFnRL5DtZBW3w1R24=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ZYnjj4GLQpSC/O48v7M2rdDGpX+0Bo2UzTpLiV5u2WM=
+			vWE76gkqeLxWi1gIra5p3LQD1SqhTHo2A+fBYIdXC1g=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK.h</key>
@@ -2011,35 +2011,35 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			BhRoL4GL60CBRbw9Hw2JFZ9j7pqDVKq7YreIHnVLAnE=
+			wa8P1np1fQjSmG0jmtMl6+WuOBwWy+SqoTBb1MPcwgo=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			x7OmGyEc7ndBzpnD/Cepj1mVWqCE1xMSv2Yt0/Rf97E=
+			hklyfxS1wyjjeCAmM1O+w0fRtj2Qvmwtu08E7jpcBf8=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			PuwfA2YQj6k3YdYSo012STUuQXs7N9vgU6i/V4u4pYk=
+			gMBaX3sSHpbAt2xDQmRVvyqMkGGiZzNHRRtjHQObMlM=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			x7OmGyEc7ndBzpnD/Cepj1mVWqCE1xMSv2Yt0/Rf97E=
+			hklyfxS1wyjjeCAmM1O+w0fRtj2Qvmwtu08E7jpcBf8=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			LNVMt6YpxwsnRZr9aQqYcpcaTsTy0p92/zRFT0SuiY0=
+			bjSumwlZ1znBrkBsi9nGVH6tIykenuYIoJN3eKhrv/I=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
@@ -2074,7 +2074,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			+gg9PGDanloCg+HSu/G5w/q45H8l44tgMqOiF0bpHhs=
+			pug3mrcNPHHfCO7VWLQmJK63DRFheLpEgKo0K4vqNv4=
 			</data>
 		</dict>
 		<key>cityNameStartsWithAA.json</key>
