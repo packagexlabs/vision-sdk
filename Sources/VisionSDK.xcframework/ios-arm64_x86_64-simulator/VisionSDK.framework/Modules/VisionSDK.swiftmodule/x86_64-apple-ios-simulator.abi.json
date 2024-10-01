@@ -36,33 +36,6 @@
       },
       {
         "kind": "Import",
-        "name": "Accelerate",
-        "printedName": "Accelerate",
-        "declKind": "Import",
-        "moduleName": "VisionSDK",
-        "declAttributes": [
-          "RawDocComment"
-        ]
-      },
-      {
-        "kind": "Import",
-        "name": "Foundation",
-        "printedName": "Foundation",
-        "declKind": "Import",
-        "moduleName": "VisionSDK"
-      },
-      {
-        "kind": "Import",
-        "name": "os",
-        "printedName": "os",
-        "declKind": "Import",
-        "moduleName": "VisionSDK",
-        "declAttributes": [
-          "RawDocComment"
-        ]
-      },
-      {
-        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -1756,6 +1729,23 @@
       },
       {
         "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -2176,8 +2166,7 @@
             "objc_name": "prepareOfflineOCRWithApiKey:andToken:forModelClass:withModelSize:withProgressTracking:withCompletion:",
             "declAttributes": [
               "AccessControl",
-              "ObjC",
-              "RawDocComment"
+              "ObjC"
             ],
             "funcSelfKind": "NonMutating"
           },
@@ -3520,6 +3509,50 @@
         "kind": "Import",
         "name": "CoreML",
         "printedName": "CoreML",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
         "declKind": "Import",
         "moduleName": "VisionSDK"
       },
@@ -13213,6 +13246,475 @@
             ],
             "isFromExtension": true,
             "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "callDocumentClassificationAPIWith",
+            "printedName": "callDocumentClassificationAPIWith(_:andApiKey:andToken:withImageResizing:_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIImage",
+                "printedName": "UIKit.UIImage",
+                "usr": "c:objc(cs)UIImage"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Foundation.Data?, Foundation.NSError?) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Tuple",
+                    "printedName": "(Foundation.Data?, Foundation.NSError?)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.Data?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Data",
+                            "printedName": "Foundation.Data",
+                            "usr": "s:10Foundation4DataV"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.NSError?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "NSError",
+                            "printedName": "Foundation.NSError",
+                            "usr": "c:objc(cs)NSError"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callDocumentClassificationAPIWith:andApiKey:andToken:withImageResizing::",
+            "mangledName": "$s9VisionSDK0A10APIManagerC33callDocumentClassificationAPIWith_9andApiKey0H5Token17withImageResizing_ySo7UIImageC_SSSgAJSby10Foundation4DataVSg_So7NSErrorCSgtctF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "Dynamic",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "callItemLabelsAPIWith",
+            "printedName": "callItemLabelsAPIWith(_:andApiKey:andToken:withImageResizing:_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIImage",
+                "printedName": "UIKit.UIImage",
+                "usr": "c:objc(cs)UIImage"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Foundation.Data?, Foundation.NSError?) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Tuple",
+                    "printedName": "(Foundation.Data?, Foundation.NSError?)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.Data?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Data",
+                            "printedName": "Foundation.Data",
+                            "usr": "s:10Foundation4DataV"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.NSError?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "NSError",
+                            "printedName": "Foundation.NSError",
+                            "usr": "c:objc(cs)NSError"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callItemLabelsAPIWith:andApiKey:andToken:withImageResizing::",
+            "mangledName": "$s9VisionSDK0A10APIManagerC21callItemLabelsAPIWith_9andApiKey0H5Token17withImageResizing_ySo7UIImageC_SSSgAJSby10Foundation4DataVSg_So7NSErrorCSgtctF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "Dynamic",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "callMatchingAPIWith",
+            "printedName": "callMatchingAPIWith(_:andBarcodes:andApiKey:andToken:withResponseData:andLocationId:andOptions:andMetaData:andRecipient:andSender:withImageResizing:_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UIImage",
+                "printedName": "UIKit.UIImage",
+                "usr": "c:objc(cs)UIImage"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Swift.String]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Data",
+                "printedName": "Foundation.Data",
+                "usr": "s:10Foundation4DataV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "usr": "s:SD"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:SD"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "[Swift.String : Any]?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Dictionary",
+                    "printedName": "[Swift.String : Any]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "String",
+                        "printedName": "Swift.String",
+                        "usr": "s:SS"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "ProtocolComposition",
+                        "printedName": "Any"
+                      }
+                    ],
+                    "usr": "s:SD"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(Foundation.Data?, Foundation.NSError?) -> ()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Tuple",
+                    "printedName": "(Foundation.Data?, Foundation.NSError?)",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.Data?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Data",
+                            "printedName": "Foundation.Data",
+                            "usr": "s:10Foundation4DataV"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Optional",
+                        "printedName": "Foundation.NSError?",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "NSError",
+                            "printedName": "Foundation.NSError",
+                            "usr": "c:objc(cs)NSError"
+                          }
+                        ],
+                        "usr": "s:Sq"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callMatchingAPIWith:andBarcodes:andApiKey:andToken:withResponseData:andLocationId:andOptions:andMetaData:andRecipient:andSender:withImageResizing::",
+            "mangledName": "$s9VisionSDK0A10APIManagerC19callMatchingAPIWith_11andBarcodes0G6ApiKey0G5Token16withResponseData0G10LocationId0G7Options0g4MetaN00G9Recipient0G6Sender0L13ImageResizing_ySo7UIImageC_SaySSGSSSgAR10Foundation0N0VARSDySSypGA2VSgAWSbyAUSg_So7NSErrorCSgtctF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "Dynamic",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
           }
         ],
         "declKind": "Class",
@@ -15391,6 +15893,47 @@
             "fixedbinaryorder": 2
           },
           {
+            "kind": "Var",
+            "name": "documentClassification",
+            "printedName": "documentClassification",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDK.VSDKModelClass.Type) -> VisionSDK.VSDKModelClass",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKModelClass",
+                    "printedName": "VisionSDK.VSDKModelClass",
+                    "usr": "c:@M@VisionSDK@E@VSDKModelClass"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDK.VSDKModelClass.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKModelClass",
+                        "printedName": "VisionSDK.VSDKModelClass",
+                        "usr": "c:@M@VisionSDK@E@VSDKModelClass"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "c:@M@VisionSDK@E@VSDKModelClass@VSDKModelClassDocumentClassification",
+            "mangledName": "$s9VisionSDK14VSDKModelClassO22documentClassificationyA2CmF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "ObjC"
+            ],
+            "fixedbinaryorder": 3
+          },
+          {
             "kind": "Constructor",
             "name": "init",
             "printedName": "init(rawValue:)",
@@ -16452,130 +16995,6 @@
                 "declKind": "Accessor",
                 "usr": "s:9VisionSDK13VSDKConstantsC14apiEnvironmentAA07VSDKAppE0OvMZ",
                 "mangledName": "$s9VisionSDK13VSDKConstantsC14apiEnvironmentAA07VSDKAppE0OvMZ",
-                "moduleName": "VisionSDK",
-                "static": true,
-                "implicit": true,
-                "declAttributes": [
-                  "Final"
-                ],
-                "accessorKind": "_modify"
-              }
-            ]
-          },
-          {
-            "kind": "Var",
-            "name": "modelUrl",
-            "printedName": "modelUrl",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "ImplicitlyUnwrappedOptional",
-                "printedName": "Foundation.URL?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "URL",
-                    "printedName": "Foundation.URL",
-                    "usr": "s:10Foundation3URLV"
-                  }
-                ],
-                "usr": "s:Sq"
-              }
-            ],
-            "declKind": "Var",
-            "usr": "s:9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvpZ",
-            "mangledName": "$s9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvpZ",
-            "moduleName": "VisionSDK",
-            "static": true,
-            "declAttributes": [
-              "HasInitialValue",
-              "Final",
-              "HasStorage",
-              "AccessControl"
-            ],
-            "hasStorage": true,
-            "accessors": [
-              {
-                "kind": "Accessor",
-                "name": "Get",
-                "printedName": "Get()",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "ImplicitlyUnwrappedOptional",
-                    "printedName": "Foundation.URL?",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "URL",
-                        "printedName": "Foundation.URL",
-                        "usr": "s:10Foundation3URLV"
-                      }
-                    ],
-                    "usr": "s:Sq"
-                  }
-                ],
-                "declKind": "Accessor",
-                "usr": "s:9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvgZ",
-                "mangledName": "$s9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvgZ",
-                "moduleName": "VisionSDK",
-                "static": true,
-                "implicit": true,
-                "declAttributes": [
-                  "Final"
-                ],
-                "accessorKind": "get"
-              },
-              {
-                "kind": "Accessor",
-                "name": "Set",
-                "printedName": "Set()",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Void",
-                    "printedName": "()"
-                  },
-                  {
-                    "kind": "TypeNominal",
-                    "name": "ImplicitlyUnwrappedOptional",
-                    "printedName": "Foundation.URL?",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "URL",
-                        "printedName": "Foundation.URL",
-                        "usr": "s:10Foundation3URLV"
-                      }
-                    ],
-                    "usr": "s:Sq"
-                  }
-                ],
-                "declKind": "Accessor",
-                "usr": "s:9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvsZ",
-                "mangledName": "$s9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvsZ",
-                "moduleName": "VisionSDK",
-                "static": true,
-                "implicit": true,
-                "declAttributes": [
-                  "Final"
-                ],
-                "accessorKind": "set"
-              },
-              {
-                "kind": "Accessor",
-                "name": "Modify",
-                "printedName": "Modify()",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Void",
-                    "printedName": "()"
-                  }
-                ],
-                "declKind": "Accessor",
-                "usr": "s:9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvMZ",
-                "mangledName": "$s9VisionSDK13VSDKConstantsC8modelUrl10Foundation3URLVSgvMZ",
                 "moduleName": "VisionSDK",
                 "static": true,
                 "implicit": true,
@@ -17703,6 +18122,33 @@
       },
       {
         "kind": "Import",
+        "name": "Accelerate",
+        "printedName": "Accelerate",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "os",
+        "printedName": "os",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -17911,6 +18357,23 @@
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
         "moduleName": "VisionSDK"
       },
       {
@@ -17990,6 +18453,64 @@
             "declKind": "Func",
             "usr": "s:SS9VisionSDKE6search_2at4nameSSSgSS_SiAEtF",
             "mangledName": "$sSS9VisionSDKE6search_2at4nameSSSgSS_SiAEtF",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "isFromExtension": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "searchAll",
+            "printedName": "searchAll(_:at:name:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[Swift.String]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sa"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:SS9VisionSDKE9searchAll_2at4nameSaySSGSS_SiSSSgtF",
+            "mangledName": "$sSS9VisionSDKE9searchAll_2at4nameSaySSGSS_SiSSSgtF",
             "moduleName": "VisionSDK",
             "declAttributes": [
               "AccessControl"
@@ -18956,20 +19477,6 @@
   },
   "ConstValues": [
     {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/LayoutModel\/LayoutLMv3Tokenizer\/LayoutLMv3ForTokenClassification.swift",
-      "kind": "Array",
-      "offset": 15118,
-      "length": 310,
-      "value": "[\"S-R_ADDRESS_CITY\", \"S-R_ADDRESS_STATE\", \"S-R_ADDRESS_ZIP_CODE\", \"S-R_PERSON_BUSINESS_NAME\", \"S-R_PERSON_NAME\", \"S-S_ADDRESS_CITY\", \"S-S_ADDRESS_STATE\", \"S-S_ADDRESS_ZIP_CODE\", \"S-S_PERSON_BUSINESS_NAME\", \"S-S_PERSON_NAME\"]"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/LayoutModel\/LayoutLMv3Tokenizer\/LayoutLMv3ForTokenClassification.swift",
-      "kind": "Array",
-      "offset": 15467,
-      "length": 68,
-      "value": "[\"S-O_PURCHASE_ORDER\", \"S-O_REFERENCE_NUMBER\"]"
-    },
-    {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/Couriers In Order\/Chronopost.swift",
       "kind": "StringLiteral",
       "offset": 206,
@@ -19203,7 +19710,7 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseModel.swift",
       "kind": "Dictionary",
-      "offset": 33822,
+      "offset": 33818,
       "length": 4590,
       "value": "[(\"usps\", \"USPS\"), (\"ups\", \"UPS\"), (\"amazon\", \"Amazon\"), (\"amazon-fba-us\", \"Amazon\"), (\"purolator\", \"Purolator\"), (\"fedex\", \"FedEx\"), (\"canada-post\", \"CANADA POST\"), (\"canpar\", \"Canpar\"), (\"cdl\", \"CDL\"), (\"china-ems\", \"CHINA-EMS\"), (\"china-post\", \"CHINA-POST\"), (\"dhl\", \"DHL\"), (\"dynamex\", \"DYNAMEX\"), (\"equick-cn\", \"Equick CN\"), (\"fastway\", \"fastway\"), (\"australia-post\", \"AUSTRALIA POST\"), (\"hongkong-post\", \"Hongkong Post\"), (\"india-post\", \"India Post\"), (\"japan-post\", \"JP Post\"), (\"jd\", \"JD\"), (\"lasership\", \"LaserShip\"), (\"mark3\", \"MARK 3\"), (\"maxx\", \"Max\"), (\"ontrac\", \"OnTrac\"), (\"pakistan-post\", \"PAKISTAN POST\"), (\"royal-mail\", \"Royal Mail\"), (\"sf-express\", \"SF EXPRESS\"), (\"singapore-post\", \"Singapore POST\"), (\"sto-express\", \"sto express\"), (\"tnt\", \"TNT\"), (\"yto-express\", \"YTO EXPRESS\"), (\"yun-express\", \"YunExpress\"), (\"zto-express\", \"ZTO EXPRESS\"), (\"dpd\", \"dpd\"), (\"star-track\", \"STARTRACK\"), (\"hermes\", \"Hermes\"), (\"parcel-force\", \"PARCEL-FORCE\"), (\"postnl\", \"postnl\"), (\"yodel\", \"YODEL\"), (\"gls\", \"GLS\"), (\"colissimo\", \"Colissimo\"), (\"collect-plus\", \"collect +\"), (\"transworld\", \"transworld\"), (\"crawfords-delivery-services\", \"Crawfords\"), (\"whistl\", \"whistl\"), (\"an-post\", \"an post\"), (\"wish-post\", \"wish POST\"), (\"city-air-express\", \"City Air Express\"), (\"sagawa-express\", \"Sagawa Express\"), (\"fukuyama-transportation\", \"Fukuyama Transportation\"), (\"skyworldwide\", \"Sky Worldwide\"), (\"toll-group\", \"Toll Group\"), (\"ide-express\", \"IDE Express\"), (\"road-express\", \"Road Express\"), (\"endeavour\", \"endeavour\"), (\"overnight-express\", \"Overnight Express\"), (\"rhyme-express\", \"Rhyme Express\"), (\"yuantong-express\", \"Yuantong Express\"), (\"best-express\", \"Best Express\"), (\"deppon\", \"Deppon\"), (\"tmall\", \"tmall\"), (\"netease\", \"Netease\"), (\"unitop\", \"Unitop\"), (\"chronopost\", \"Chrono Post\"), (\"newzealand-post\", \"New Zealand Post\"), (\"ninja-van\", \"ninja van\"), (\"pos-laju\", \"POS LAJU\"), (\"city-link\", \"City Link\"), (\"lel-express\", \"LEL Express\"), (\"gdex\", \"GDEX\"), (\"blibli\", \"Blibli\"), (\"tokopedia\", \"Tokopedia\"), (\"tiki\", \"tiki\"), (\"j&t-express\", \"J&T Express\"), (\"jne\", \"JNE\"), (\"surpostal\", \"Surpostal\"), (\"espana\", \"Espana\"), (\"mercado\", \"Mercado\"), (\"webpack\", \"Webpack\"), (\"andreani\", \"Andreani\"), (\"correo-argentino\", \"Correo Argentino\"), (\"urbano\", \"Urbano\"), (\"correos\", \"Correos\"), (\"yamato-transport\", \"Yamato Transport\"), (\"247-express\", \"247 Express\"), (\"chilexpress\", \"Chilexpress\"), (\"flash-express\", \"Flash Express\"), (\"kerry-express\", \"Kerry Express\"), (\"shopee-xpress\", \"Shopee Express\"), (\"thailand-post\", \"Thailand Post\"), (\"viettel-post\", \"Viettel Post\"), (\"wsp-express\", \"WSP Express\"), (\"zoom-express\", \"Zoom Express\"), (\"inpost\", \"inpost\"), (\"poczta_polska\", \"Poczta Polska\"), (\"blue-express\", \"Blue Express\"), (\"olva\", \"Olva\"), (\"aramex\", \"Aramex\"), (\"nhat-tin-logistics\", \"Nhat Tin Logistics\"), (\"bpost\", \"BPost\"), (\"vietnam-post\", \"Vietnam Post\"), (\"ocs\", \"OCS\"), (\"dawn-wing\", \"Dawn Wing\"), (\"the-courier-guy\", \"The Courier Guy\"), (\"ccd-courier\", \"CCD Courier\"), (\"bex-express\", \"BEX Express\"), (\"postnard\", \"Postnard\"), (\"2go-express\", \"2GO Express\"), (\"jrs-express\", \"JRS Express\"), (\"geodis\", \"Geodis\"), (\"lso\", \"LSO\"), (\"statovernight\", \"statovernight\"), (\"bring\", \"Bring\"), (\"sr-group\", \"SR Group\"), (\"pentagon-freight\", \"Pentagon Freight\"), (\"loomis-express\", \"Loomis Express\"), (\"transferd\", \"Transferd\"), (\"logi-trans\", \"Logi Trans\"), (\"jetpak\", \"jetpak\"), (\"db-schenker\", \"DB-SCHENKER\"), (\"merkesdal\", \"merkesdal\"), (\"kuehne-nagel\", \"KUEHNE+NAGEL\"), (\"postnord\", \"postnord\"), (\"nor-lines\", \"Nor Lines\"), (\"envialia\", \"envialia\"), (\"nacex\", \"NACEX\"), (\"mrw\", \"MRW\"), (\"correos-express\", \"Correos Express\"), (\"redur\", \"REDUR\"), (\"ctt\", \"ctt Express\"), (\"sending\", \"sending\")]"
     },
@@ -19306,6 +19813,160 @@
       "value": "\"\""
     },
     {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 363,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 420,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 479,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9116,
+      "length": 4,
+      "value": "\"_i\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9153,
+      "length": 5,
+      "value": "\"_mv\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9346,
+      "length": 4,
+      "value": "\"_i\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9440,
+      "length": 22,
+      "value": "\"price_tag_extraction\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9502,
+      "length": 27,
+      "value": "\"shipping_label_extraction\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9567,
+      "length": 25,
+      "value": "\"shipping_label_matching\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9621,
+      "length": 27,
+      "value": "\"bill_of_lading_extraction\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9684,
+      "length": 23,
+      "value": "\"item_label_extraction\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9742,
+      "length": 11,
+      "value": "\"telemetry\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 9834,
+      "length": 27,
+      "value": "\"shipping_label_extraction\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10177,
+      "length": 4,
+      "value": "\"_i\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10212,
+      "length": 4,
+      "value": "\"_a\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10245,
+      "length": 4,
+      "value": "\"_u\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10275,
+      "length": 4,
+      "value": "\"_m\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10310,
+      "length": 4,
+      "value": "\"_t\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10341,
+      "length": 5,
+      "value": "\"_rt\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10372,
+      "length": 5,
+      "value": "\"_et\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10408,
+      "length": 6,
+      "value": "\"_o_1\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "StringLiteral",
+      "offset": 10442,
+      "length": 4,
+      "value": "\"_b\""
+    },
+    {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/Couriers In Order\/BPost.swift",
       "kind": "StringLiteral",
       "offset": 307,
@@ -19385,7 +20046,7 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 13177,
+      "offset": 14992,
       "length": 4,
       "value": "true"
     },
@@ -22073,21 +22734,21 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKUserDefaultsHandler.swift",
       "kind": "StringLiteral",
-      "offset": 2198,
+      "offset": 3201,
       "length": 24,
       "value": "\"com.packageX.VisionSDK\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKUserDefaultsHandler.swift",
       "kind": "StringLiteral",
-      "offset": 2443,
+      "offset": 3446,
       "length": 64,
       "value": "\"Could not create UserDefaults with suite name: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKUserDefaultsHandler.swift",
       "kind": "StringLiteral",
-      "offset": 2506,
+      "offset": 3509,
       "length": 2,
       "value": "\"\""
     },
@@ -22402,107 +23063,247 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 29976,
+      "offset": 12660,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30086,
+      "offset": 12770,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "Array",
-      "offset": 30398,
+      "offset": 12916,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 30429,
+      "offset": 12947,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30530,
+      "offset": 13048,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30569,
+      "offset": 13087,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30610,
+      "offset": 13128,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30648,
+      "offset": 13166,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 32244,
+      "offset": 14762,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33114,
+      "offset": 15632,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33155,
+      "offset": 15673,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33199,
+      "offset": 15717,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33243,
+      "offset": 15761,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33775,
+      "offset": 16293,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ModelDownloadManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33937,
+      "offset": 16455,
       "length": 5,
       "value": "false"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalDocumentClassificationResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 244,
+      "length": 35,
+      "value": "\"document_classification_inference\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalDocumentClassificationResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 302,
+      "length": 29,
+      "value": "\"inf_dc_\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalDocumentClassificationResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 330,
+      "length": 1,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalDocumentClassificationResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 432,
+      "length": 10,
+      "value": "\"inferred\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalItemLabelResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 280,
+      "length": 22,
+      "value": "\"item_label_inference\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalItemLabelResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 325,
+      "length": 29,
+      "value": "\"inf_il_\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalItemLabelResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 353,
+      "length": 1,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalItemLabelResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 455,
+      "length": 10,
+      "value": "\"inferred\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalItemLabelResponseModel.swift",
+      "kind": "StringLiteral",
+      "offset": 810,
+      "length": 9,
+      "value": "\"address\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 495,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "IntegerLiteral",
+      "offset": 13366,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "Array",
+      "offset": 15163,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 16487,
+      "length": 4,
+      "value": "\"id\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 16519,
+      "length": 5,
+      "value": "\"key\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 16554,
+      "length": 7,
+      "value": "\"value\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 16767,
+      "length": 6,
+      "value": "\"unit\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 16803,
+      "length": 7,
+      "value": "\"value\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 17028,
+      "length": 6,
+      "value": "\"unit\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "StringLiteral",
+      "offset": 17064,
+      "length": 7,
+      "value": "\"value\""
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
+      "kind": "Dictionary",
+      "offset": 22043,
+      "length": 4019,
+      "value": "[(\"usps\", \"USPS\"), (\"ups\", \"UPS\"), (\"amazon\", \"Amazon\"), (\"purolator\", \"Purolator\"), (\"fedex\", \"FedEx\"), (\"canada-post\", \"CANADA POST\"), (\"canpar\", \"Canpar\"), (\"cdl\", \"CDL\"), (\"china-ems\", \"CHINA-EMS\"), (\"china-post\", \"CHINA-POST\"), (\"dhl\", \"DHL\"), (\"dynamex\", \"DYNAMEX\"), (\"equick-cn\", \"Equick CN\"), (\"fastway\", \"fastway\"), (\"australia-post\", \"AUSTRALIA POST\"), (\"hongkong-post\", \"Hongkong Post\"), (\"india-post\", \"India Post\"), (\"japan-post\", \"JP Post\"), (\"jd\", \"JD\"), (\"lasership\", \"LaserShip\"), (\"mark3\", \"MARK 3\"), (\"maxx\", \"Max\"), (\"ontrac\", \"OnTrac\"), (\"pakistan-post\", \"PAKISTAN POST\"), (\"royal-mail\", \"Royal Mail\"), (\"sf-express\", \"SF EXPRESS\"), (\"singapore-post\", \"Singapore POST\"), (\"sto-express\", \"sto express\"), (\"tnt\", \"TNT\"), (\"yto-express\", \"YTO EXPRESS\"), (\"yun-express\", \"YunExpress\"), (\"zto-express\", \"ZTO EXPRESS\"), (\"dpd\", \"dpd\"), (\"star-track\", \"STARTRACK\"), (\"hermes\", \"Hermes\"), (\"parcel-force\", \"PARCEL-FORCE\"), (\"postnl\", \"postnl\"), (\"yodel\", \"YODEL\"), (\"gls\", \"GLS\"), (\"colissimo\", \"colissimo\"), (\"collect-plus\", \"collect +\"), (\"transworld\", \"transworld\"), (\"crawfords-delivery-services\", \"Crawfords\"), (\"whistl\", \"whistl\"), (\"an-post\", \"an post\"), (\"wish-post\", \"wish POST\"), (\"city-air-express\", \"City Air Express\"), (\"sagawa-express\", \"Sagawa Express\"), (\"fukuyama-transportation\", \"Fukuyama Transportation\"), (\"skyworldwide\", \"Sky Worldwide\"), (\"toll-group\", \"Toll Group\"), (\"ide-express\", \"IDE Express\"), (\"road-express\", \"Road Express\"), (\"endeavour\", \"endeavour\"), (\"overnight-express\", \"Overnight Express\"), (\"rhyme-express\", \"Rhyme Express\"), (\"yuantong-express\", \"Yuantong Express\"), (\"best-express\", \"Best Express\"), (\"deppon\", \"Deppon\"), (\"tmall\", \"tmall\"), (\"netease\", \"Netease\"), (\"unitop\", \"Unitop\"), (\"chronopost\", \"Chrono Post\"), (\"newzealand-post\", \"New Zealand Post\"), (\"ninja-van\", \"ninja van\"), (\"pos-laju\", \"POS LAJU\"), (\"city-link\", \"City Link\"), (\"lel-express\", \"LEL Express\"), (\"gdex\", \"GDEX\"), (\"blibli\", \"Blibli\"), (\"tokopedia\", \"Tokopedia\"), (\"tiki\", \"tiki\"), (\"j&t-express\", \"J&T Express\"), (\"jne\", \"JNE\"), (\"surpostal\", \"Surpostal\"), (\"espana\", \"Espana\"), (\"mercado\", \"Mercado\"), (\"webpack\", \"Webpack\"), (\"andreani\", \"Andreani\"), (\"correo-argentino\", \"Correo Argentino\"), (\"urbano\", \"Urbano\"), (\"correos\", \"Correos\"), (\"yamato-transport\", \"Yamato Transport\"), (\"247-express\", \"247 Express\"), (\"chilexpress\", \"Chilexpress\"), (\"flash-express\", \"Flash Express\"), (\"kerry-express\", \"Kerry Express\"), (\"shopee-xpress\", \"Shopee Express\"), (\"thailand-post\", \"Thailand Post\"), (\"viettel-post\", \"Viettel Post\"), (\"wsp-express\", \"WSP Express\"), (\"zoom-express\", \"Zoom Express\"), (\"inpost\", \"inpost\"), (\"poczta_polska\", \"Poczta Polska\"), (\"blue-express\", \"Blue Express\"), (\"olva\", \"Olva\"), (\"aramex\", \"Aramex\"), (\"nhat-tin-logistics\", \"Nhat Tin Logistics\"), (\"bpost\", \"BPost\"), (\"vietnam-post\", \"Vietnam Post\"), (\"ocs\", \"OCS\"), (\"dawn-wing\", \"Dawn Wing\"), (\"the-courier-guy\", \"The Courier Guy\"), (\"ccd-courier\", \"CCD Courier\"), (\"bex-express\", \"BEX Express\"), (\"postnard\", \"Postnard\"), (\"2go-express\", \"2GO Express\"), (\"jrs-express\", \"JRS Express\"), (\"geodis\", \"Geodis\"), (\"lso\", \"LSO\"), (\"statovernight\", \"statovernight\"), (\"bring\", \"Bring\"), (\"sr-group\", \"SR Group\"), (\"pentagon-freight\", \"Pentagon Freight\"), (\"loomis-express\", \"Loomis Express\"), (\"transferd\", \"Transferd\"), (\"logi-trans\", \"Logi Trans\"), (\"jetpak\", \"jetpak\"), (\"db-schenker\", \"DB-SCHENKER\"), (\"merkesdal\", \"merkesdal\"), (\"kuehne-nagel\", \"KUEHNE+NAGEL\"), (\"postnord\", \"postnord\"), (\"nor-lines\", \"Nor Lines\"), (\"envialia\", \"envialia\"), (\"nacex\", \"NACEX\"), (\"mrw\", \"MRW\"), (\"correos-express\", \"Correos Express\"), (\"redur\", \"REDUR\"), (\"ctt\", \"ctt Express\"), (\"sending\", \"sending\")]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/Couriers In Order\/Colis Prive.swift",
@@ -23730,6 +24531,13 @@
       "value": "0"
     },
     {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/StringExtension.swift",
+      "kind": "IntegerLiteral",
+      "offset": 5096,
+      "length": 1,
+      "value": "0"
+    },
+    {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/Couriers In Order\/Kerry Express.swift",
       "kind": "StringLiteral",
       "offset": 341,
@@ -23760,7 +24568,7 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/LayoutModel\/LayoutLMv3Tokenizer\/LayoutLMv3ByteEncoder.swift",
       "kind": "Dictionary",
-      "offset": 179,
+      "offset": 188,
       "length": 4613,
       "value": "[(33, \"!\"), (34, \"\"\"), (35, \"#\"), (36, \"$\"), (37, \"%\"), (38, \"&\"), (39, \"'\"), (40, \"(\"), (41, \")\"), (42, \"*\"), (43, \"+\"), (44, \",\"), (45, \"-\"), (46, \".\"), (47, \"\/\"), (48, \"0\"), (49, \"1\"), (50, \"2\"), (51, \"3\"), (52, \"4\"), (53, \"5\"), (54, \"6\"), (55, \"7\"), (56, \"8\"), (57, \"9\"), (58, \":\"), (59, \";\"), (60, \"<\"), (61, \"=\"), (62, \">\"), (63, \"?\"), (64, \"@\"), (65, \"A\"), (66, \"B\"), (67, \"C\"), (68, \"D\"), (69, \"E\"), (70, \"F\"), (71, \"G\"), (72, \"H\"), (73, \"I\"), (74, \"J\"), (75, \"K\"), (76, \"L\"), (77, \"M\"), (78, \"N\"), (79, \"O\"), (80, \"P\"), (81, \"Q\"), (82, \"R\"), (83, \"S\"), (84, \"T\"), (85, \"U\"), (86, \"V\"), (87, \"W\"), (88, \"X\"), (89, \"Y\"), (90, \"Z\"), (91, \"[\"), (92, \"\\\"), (93, \"]\"), (94, \"^\"), (95, \"_\"), (96, \"`\"), (97, \"a\"), (98, \"b\"), (99, \"c\"), (100, \"d\"), (101, \"e\"), (102, \"f\"), (103, \"g\"), (104, \"h\"), (105, \"i\"), (106, \"j\"), (107, \"k\"), (108, \"l\"), (109, \"m\"), (110, \"n\"), (111, \"o\"), (112, \"p\"), (113, \"q\"), (114, \"r\"), (115, \"s\"), (116, \"t\"), (117, \"u\"), (118, \"v\"), (119, \"w\"), (120, \"x\"), (121, \"y\"), (122, \"z\"), (123, \"{\"), (124, \"|\"), (125, \"}\"), (126, \"~\"), (161, \"¡\"), (162, \"¢\"), (163, \"£\"), (164, \"¤\"), (165, \"¥\"), (166, \"¦\"), (167, \"§\"), (168, \"¨\"), (169, \"©\"), (170, \"ª\"), (171, \"«\"), (172, \"¬\"), (174, \"®\"), (175, \"¯\"), (176, \"°\"), (177, \"±\"), (178, \"²\"), (179, \"³\"), (180, \"´\"), (181, \"µ\"), (182, \"¶\"), (183, \"·\"), (184, \"¸\"), (185, \"¹\"), (186, \"º\"), (187, \"»\"), (188, \"¼\"), (189, \"½\"), (190, \"¾\"), (191, \"¿\"), (192, \"À\"), (193, \"Á\"), (194, \"Â\"), (195, \"Ã\"), (196, \"Ä\"), (197, \"Å\"), (198, \"Æ\"), (199, \"Ç\"), (200, \"È\"), (201, \"É\"), (202, \"Ê\"), (203, \"Ë\"), (204, \"Ì\"), (205, \"Í\"), (206, \"Î\"), (207, \"Ï\"), (208, \"Ð\"), (209, \"Ñ\"), (210, \"Ò\"), (211, \"Ó\"), (212, \"Ô\"), (213, \"Õ\"), (214, \"Ö\"), (215, \"×\"), (216, \"Ø\"), (217, \"Ù\"), (218, \"Ú\"), (219, \"Û\"), (220, \"Ü\"), (221, \"Ý\"), (222, \"Þ\"), (223, \"ß\"), (224, \"à\"), (225, \"á\"), (226, \"â\"), (227, \"ã\"), (228, \"ä\"), (229, \"å\"), (230, \"æ\"), (231, \"ç\"), (232, \"è\"), (233, \"é\"), (234, \"ê\"), (235, \"ë\"), (236, \"ì\"), (237, \"í\"), (238, \"î\"), (239, \"ï\"), (240, \"ð\"), (241, \"ñ\"), (242, \"ò\"), (243, \"ó\"), (244, \"ô\"), (245, \"õ\"), (246, \"ö\"), (247, \"÷\"), (248, \"ø\"), (249, \"ù\"), (250, \"ú\"), (251, \"û\"), (252, \"ü\"), (253, \"ý\"), (254, \"þ\"), (255, \"ÿ\"), (0, \"Ā\"), (1, \"ā\"), (2, \"Ă\"), (3, \"ă\"), (4, \"Ą\"), (5, \"ą\"), (6, \"Ć\"), (7, \"ć\"), (8, \"Ĉ\"), (9, \"ĉ\"), (10, \"Ċ\"), (11, \"ċ\"), (12, \"Č\"), (13, \"č\"), (14, \"Ď\"), (15, \"ď\"), (16, \"Đ\"), (17, \"đ\"), (18, \"Ē\"), (19, \"ē\"), (20, \"Ĕ\"), (21, \"ĕ\"), (22, \"Ė\"), (23, \"ė\"), (24, \"Ę\"), (25, \"ę\"), (26, \"Ě\"), (27, \"ě\"), (28, \"Ĝ\"), (29, \"ĝ\"), (30, \"Ğ\"), (31, \"ğ\"), (32, \"Ġ\"), (127, \"ġ\"), (128, \"Ģ\"), (129, \"ģ\"), (130, \"Ĥ\"), (131, \"ĥ\"), (132, \"Ħ\"), (133, \"ħ\"), (134, \"Ĩ\"), (135, \"ĩ\"), (136, \"Ī\"), (137, \"ī\"), (138, \"Ĭ\"), (139, \"ĭ\"), (140, \"Į\"), (141, \"į\"), (142, \"İ\"), (143, \"ı\"), (144, \"Ĳ\"), (145, \"ĳ\"), (146, \"Ĵ\"), (147, \"ĵ\"), (148, \"Ķ\"), (149, \"ķ\"), (150, \"ĸ\"), (151, \"Ĺ\"), (152, \"ĺ\"), (153, \"Ļ\"), (154, \"ļ\"), (155, \"Ľ\"), (156, \"ľ\"), (157, \"Ŀ\"), (158, \"ŀ\"), (159, \"Ł\"), (160, \"ł\"), (173, \"Ń\")]"
     },
@@ -23795,7 +24603,35 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 12127,
+      "offset": 12194,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 13980,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 16351,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "Dictionary",
+      "offset": 18847,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 18982,
       "length": 4,
       "value": "true"
     },
@@ -23921,401 +24757,261 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 932,
+      "offset": 239,
+      "length": 22,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1130,
       "length": 5,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 947,
+      "offset": 1145,
       "length": 5,
       "value": "2"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 962,
+      "offset": 1160,
       "length": 6,
       "value": "3"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 978,
+      "offset": 1176,
       "length": 5,
       "value": "4"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 993,
+      "offset": 1191,
       "length": 6,
       "value": "5"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 1900,
+      "offset": 2098,
       "length": 2,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 1912,
+      "offset": 2110,
       "length": 7,
       "value": "2"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 1929,
+      "offset": 2127,
       "length": 10,
       "value": "3"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 1949,
+      "offset": 2147,
       "length": 7,
       "value": "4"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 9378,
+      "offset": 10776,
       "length": 4,
       "value": "0.65"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 9385,
+      "offset": 10783,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 9466,
+      "offset": 10864,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 9598,
+      "offset": 10996,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 9738,
+      "offset": 11136,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 26016,
+      "offset": 11277,
       "length": 4366,
       "value": "\"O48\/+S\/shW\/dpUCqyjZVvi6ESIukDIh1eOUFHup0MwmVL3O3AEFowyfJ9ox06QnzopJj+MotaCS3E4AA2idDbsEW7xsnWU\/g31lggnJPtujMJ4bVQw6dBJIrpi3ubt4TzBxu1M0jxwkgr2kOzBWK2FcJ1Ca8QjtLFMF210+6v8iymqFbNgH\/OX\/CHBab4aXmSWid5lMvz8It+GLxYVfZfbW4BmJtrd62MceerGshGboGvJr6w5ngsqirOPXXKgpVyl5pNZlhkI0rOYgy8wFdUcgD4t9iKkFKEGIr13DN\/WJ4RmyjQ2yXBHJtndg+cV\/2+wIP6iHE16OIUb6Im\/Mls0bagnF3DbE9JhsKEH64GkNs\/ZbTieB6n0OXK06r+1gaZPmkU6Q8hbceYA4NUwd1OqPHwb7NRXW+QsfHTiDPSuOVxDyJUyAguN5uEo+dpQxM1g5leTkXCioU+wmaZfH4VgXOOeGBA5vmuolA5y79QSgNZoELXYbhkAcf20GBNNQnE9gmSAynPZd8yWqRfoh3zelZXouAYZqON98\/1IP+JKCLvMIw3cBSrdyzzNVNhN\/blstDMbrJD02GgM3GfmVYmY7uH3CYncZfgi7noexkn6rQ5jetMi1a3bFvGh7NTn+rmJdKzVaxcTwlFZnVO92ZLc+405LOQJJQgkCTcfLSjes2IVX00cHm9KAHKRkeZ8M6WWp4MdVXu0l8OXkcf7g8ckNbgV3mrtZEkA\/a37pvDkSdPXyBG+cmKperR8xNqz7csDLLFJcAoMyR3X1tvd3eQgL\/6us+UAtSg7P8AwN3Cx6KxUWs1xYvulPe6o\/LXlvbI7n6c1zD8vqJRp4byS\/\/YjYCAIGZSfebLGDh5ysPD8\/6Q7gxVuUECwO8ryLoml9jG5R6eZyWLQjBIfArifNCKpTwrvd1rRjUB75MMx1th6FdAez0zFVcO15BfDsJqwwo+JxnEcPtTJUcivQ2C4qcwqFsqbkm9TnHlxVOlOqO+BKYtaboAvMFZAAu\/IAjO1eARlNzTemCpQG1gQPdEFMoO+cw5GSFcoikwhZ7JaSmb2mmDUM0T9tE2+kF9+djgFC2Fu0tSih0E\/sb8hR8yPE0GHUwZGFGLhv2JlmcrIpz8yVl\/HlPtmi561ZWQWYPSPePA6yuGwJTXHBFx9cmm3xCqqNDAHavfLBns6BviSWuuJhnPOF\/XzxX4qCDZEXkiPnEHb9sTxo89EC6v4cYOs8kQPtRMBmDY\/11QNz\/TGBQsSUd+OutToq1DoZ+AJktoHB2oMOSGj7eGZErA9756a7nm9ebhdvv5duD0MvNQRbnxjHZRmaaGFszX+\/X0T00IpbfRGFtg6rT3Mu3Rv+P7Jpe5QLn7kDc15eXT31VkdunYAk861KQcjpAzXwFuhmkFaogrkXHjAimAkqdOOZZjnmeihzghTV6rhZitjW7aNTc+J\/VxVXF++30btaLqFX7+Nu9Ctr0YtwgXcS\/+jiPdglzFpLLyOFPdJIcA37kKsJtW2dQy4YgCD3qS3IRxQsu9PTFA2kvlk5r7x9LqUS5jZm1QacJynR8cdIdHHd32XIf7umG33roB0NaKrDxylzUmfV7LW7jFlCIYRiiNHQbF8OYGFppiej\/uociBvflinqm5rgvwtIwKCDajcXWgZqachD3arVAIgTyEl5\/W0r6ZoFiYILd5ZINCm+ZNvytLRVEXKlFZcgirw7hZu0M88rZ\/hQNHEKKXxelXtLoWZfShCI3YfGp3+\/iYmY+KEkciIy3A\/KgR6V40XGTUIlr00FztcGCdlEymWCM5X1uGFZhC91IQJZ3fOx21+TknfGU4v45hTk47hsOxoeoap5k\/fj+KqZXnYGDyQ73dbwStg1LrD\/hlv670D3KH+6WzxQdF+JwCfYZ8ZpcFL9XdajFzAJlQAUQo8py8csArddZsNPpVIJVOe80nMApltK8okIeB1MzDzMxjzw\/pm37g\/0OG+A5\/cyIniNNTjYz5kRTbWZhpSa6obQgRifUTjdN3G6CObcwK7SGUshYXHVBbLtsqc0JtTiERfMyjcWMbfj6mqmJ\/ICLG\/PqS4gsPlWfrPckJLQ6GI9+eSe2O80xL84RL3sK7S5+3Xqf2dADrrtp8urOIGfKuUrTCjESWYkASZOoSIq\/g2f6LPrsj3v\/sZqUWvlmO6lxUorc9BY6SYKuhVFVaIZ51z8X+7MHb\/AAeDwz\/NcJ1ZpMTHXkAPcXiUgFPR3DDED0qy2j0RQ5yiRd1LuJpYhEVq97ugYnDWA9oTs0DyaKsWvWf+5ZUT60qJ480q3x05USjs+wr+paMYJOy51eN\/dgGGxnfq1lxYyiOSfoF5Yy+hNQgJEnqnVRtB27EFi7Q4a3ZgSqb1N4RRAmsaTkuBHCfVa09dpKAJ21lO+nsRMxLYdppMXPkIuO2FS91+84OMaWgRzJ8B7HNZ2e2fzEqn3RNuBb4unxn\/ErwMzd5bXdqzD+ZVXb\/Pvi5dshomeoG2HM1UOOa+eexogBzt3bikIi9POvymvSqjGviycQRQNhbbTJBjlbQqxK63FU5AQXM0BkSh2WFPLgbrBTvbPB54\/u0cYs5pnwVU+N0xkQ95iROKPfHAg62IggtE6IvJiH2sE4ONXtJMer9eeCPqB\/PjUaDwHo3f2tXfUZ6sDqhL14nN0+XHlw6eF\/hKyXj2UP\/Ny8T+hU6aEGLeqZuGkW5\/LB3GKjRKP2L5nyIxumw1XePDvvgu3Bm0jKewyGK6vZzZGQAprHoVdpe2tsPg9q+2PZuO2ADvmOSuCLr\/wqIK8PuGpb9DIpSfM+6fY16ta7JGPfG8Ay5lbnPvdh5tDvI5aH3JQJE6Y7XBJhgdYUnsFXXcsenCGjEpblZ0EyGh56aKhwMbG3qYpfZMcoop75PCe35Xi+zwiSdcSAQEp1QLEqU7TxTDyym9hW3HLyl10LkpDqsbb1KOmkw0grLMavj+LKBOVtgHUyVvjVKVrdbHGoFocdDz8BJGvrbgETgeBJnqK81SFzufS0Nvc7HxU5At4qZhLBdytrjDr6R7D+9YYzmp8ozGbOaE7gEDAzkMy0WEgCDz29LaUrf4lQl3lppOk+odwR6A\/rmokP4QsOuy6QADDyAdf3ZIs8NBx6Bbe0o7lWHmh29lWJsKVvSodBLFvCE7mro7oI3w\/ZXxAI0aoJiXbfaEC3IPUrhuTv6K+xSP88mzHqorb+iK\/bxwXFDvv5irChREx1GZ4JDDrt3BWpLhiFaQrLJtWfw3VjmGpf9tvyfsQaZQFmVJVPsxzkzC3tMKWm7xu\/tkzxn+hMPRNFyoxUqreIgv8m0KcAhdX0AhpChZnnEDY4\/cS4ecKit49RFQFftSTYMfG3qiqeCilw0wGaYEU3difAOKxMPDL+7dUGCjqpfU8DVIMczQngBPqKoEQjTXx5JsQmSWnXy8RQ5nASod3\/\/9pffNA9t42XLCqpaLoBX+GwSO9MXUNVAH59aIpz4PtpnGFTvhD9CCmlcN0gXyzUIR7bk6qT0Npqv5Ny8CxLS+ioSZmDmuUSXdB1LpxIzVVuNR13vsA+YAS3UYvtck2Zn93uuksK+t0gvTSZfsXLmzvXafTUU6VtiR4NpSyJnZieLEBAx7Ib2Nacu9n3Qg6VC8Ea+aEE8QbfjvVAxGB5vApoXw0hBCGwJfryCbMa4bVHv55xkeuqC9RsJVnqAVB5zD1PgiIyrM4O3x0kc5+jyvqeFaAjFR1I\/kCRvpIIoDAv\/MAADWOz\/RezLR9HGvASfthPx\/dKgOkaTOL4HCHYouPGu6bFqO0LBFD3DqBi9hYc3ZW+ElUnSJxqH0TzqSaAEfO6kgPQXX9PBviwwy\/nRsdg3tSHWjUQyglUhn+0b9AVa50pmi\/n1i0XyEQNRFER\/UxRh7rTg6Drks77lICZoJ2rfnW7mZKTgV8lxtG9WQWRk22GqQ8Vjj36yvTI7nlcMOJiLXvJ9i2jVe7Jidiba9BejIZgpw3tiuuR9cairv2hvNvR8flr3ti0jEqMhFGqvXhXcY7RaCR23DrIUVQfZxBKpJK\/Ojz4Qg4nJkjhVQXmBMWTIwrExxsvehpwb8\/XOF\/5Hw2iPew8yE4CZYI\/vxpH3JvSTQzaQ3wnfPYCPBW+a3QJXQli\/4XNAhFZdNuXCyR8qmB7BMU11abrYfhGy0fxfCo9K+wzR5AYP1Ay9c4M8aP1y05II85prCvQ5NRU52243M+f+8k+KK4KIu2WVl43itYITr7T972rbdZ+xkpB8kN3KQkNOdLLc\/UvCFn+qHppFheXqcjxPrhyhJJM6SAeukt8FrAnkDXRtin8oef7qPSy00ZKJhTu9f\/7itP5SrcyjJ828Wm4X527cX5rKfbR+Kw=\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 30460,
+      "offset": 15717,
       "length": 4366,
       "value": "\"t3PSIozWPwSsA3n577pecRvQ\/Ps8QeBZ1PWOzRmJ5XPtSUm9VyFA4jAcbgAehWlXuAgr0uhXtmMV\/0dvs4Nnm9tdOm2uW\/eiru3KggC+aM93lPG+yCetEE0Z5tvpNZgoOyVV2plokpy75D7tpk1g5FD8HZYHzi6ThHvri6Ad2uQCBsXPwvmOWJ8haPEmhnvg3IrMAl8miVzHSz3iY3GzUpuzJhb\/LC8a1Fjk4Sc+l0hm3AQ8bWRiJXkcyVjWSTlmyy4o7GkQ7otKwT2Txi+HRK3D12\/qJUFNV4bOpnu7gmOXPJxzXmSXHc3CsPuwHsfyEDnn\/jzUVmM+QEz2r1Et9GO2u\/doI9wlvTcsxCTDjfkHWzNc+EFPvXGLfAQjXyVES9A1+bSpuHF1fbLHj4Zf9AZ6d+4\/WD0qRYnnGEZ2VKpLI4CmOJRB6fdLNAgWByAydS+d1T120o2XBZJPYKwc3Or7W4aIMjWtEmp8vUl93bCYOYl\/tGvX1LyofNc2oMUKijJQaJjxyDdFHrOYpxvU7oOBv2XcarB3HKvcb3RspPaeCEmDEddROOgCzkvm1UIDvaiQ8p2EUGpxnrElw3MwAgNjN3QO\/1De68nZ8KIsONeWRl47LAfyXmwLQqCMldhkE7nPFCU9N7LMPoM8MuC7k8tNryJUI7fFxw1Qqu8ocJbmtlweCdE+hGz4IwkZAi0agdo56s9xD1PzJCp6I0cOcfeeJc7GHgHY+iBL3HR5HveN5rY8EvZVTnQ4mlEgCbFsrOE76uMwsDVyYAZOMeTHvaRNjmt8czxUgSyAiyrJgntb6hkKjsGv7hesvYIDuj2idFFzP0FVSPYzhfOm5BSUuk+L1B2UiYMf28CgObdEouxwX3y7Rc8VkptrGN1CUaME\/uU8FV390oXnW5y3yp0apou0MULAPsp1Rnt4vbsRKnz+sW4P6Ft65lWz+7oz\/62AR2Bd+ZXOCTNxqgMVz3+3QlvQECIrJEvG46L4022WudVGxKyqb1WACB2qS9lNYoUDwBsWok6+GQFJWUh9EPXv\/ZiG6dUvNz83RTAtyala+Sat3wMyNnzBX3J\/3T8s9uOvkR6g1r\/k81e54Pw\/fDIpDkSdeI4EOYf5xQGOI6rEgFsOcHvnATp0TfamamWslcZDcct39\/NqX3gtqy2mCO3ZRhL3CQ9u6qea5qtg6IVcDh5MLGfYG7jZ1q5BSu5CSKwK6rCheQD8O4O5NbbWZHK2oyB2SjONsRtfCyAE9189EtLvE5BdM3fOB3LZSTHAhIdiBVTcyg2CTFWaBjDizfcOaspOyMXuQYyckHyCyslNzHINIQnj0acVYgBFl\/9ZPe30BDAUIc7UhK5apAlFXiHF3UDSoTCz4DazBRdi5YN+A6e\/8bpPouxTxLkBCZfi6QTba68dMlobFHkD1A73CSFCdl4B0leoFHfnngsQ8VfZTkS1KgmGnm+MBsemLYzxmdorUvWuC9rYyBYxohwqNwUt46Iky+weZxxD\/AreUUrbHj2VSf1VyRpEQ0tgw1VfTRUOU62S2KhvWUtaw+AmpZ+ziE+RELbfHI9X3wL0DqgUgJC6IDwB4Lu2K2JGVgaQ3GH2FhlNnjxquxwklm8JDWmrsf5WTKqNj7ZlZfXZdwad3WarCAOKqbOq8a6G7KTxbU6r0frFqaAhVxqIbkA+NgY7aiatnDGbZ7L+lFqL6SeCksICcJ0fSq1WjyZ6lWPbyR1xyAwL9Ad7dRfLA7lNhlS7NgRedYcgwMw3sqxAW\/cynIqNXq9jGpkivppLK5lhhLg5CupnNQVNTTV9JHO3POQ\/xDXodPrhdujDBbdqBDMLx747CPr2ikycAVE+pTJj2Tk+AW+oSAmetdYWZYJZEyU9Wrx3biRwVLZbaFlpljIJHrsn7yTjI\/2UDsuYtKgcP29FsNcmaYbRYNW\/26GqPeU3qPV65QxvBCTgH6IkaPnpYszItNiR2h1i2LrbqA3ZEmUimaglGY2RuSAhX4x32PBru5QTZ15Sv2RUuZDvc1O\/KlQB8Ozf4u\/TfEtobPTSGLjXnLTTV2COBXk4+Qcb45BJIQ0sCWSp1HCfqyqFY\/crLYOkU+PWhroNPAQplA9WVzLBVDMYiYmfaNVfik4ceoNCKdNZVNBKgwTu1cYGNdrcGqwmUPSnjpqewLjN4clsKaDf5\/nhUSgNV7IEeuhPRkosAqrE56KKPpfIqDS2mFbKcJ+SnXMxzGBa7kaAy+SkpSg0lNXRf0ov0nrVRK+MiSKP26chxX6E+0FQs887q2z\/JtKa3sZ11gTxHqVpOlQE3jCrxg7UwYMtF1tNlZiLh8CFE27wKBcplwEl4fgijLg\/Lxf9f4\/De+zmEUjTWB8ZUOlo3PbLaI3r+VRhkBo62VAA+bPLzf8pWySHEo2QFJBNCzd3khs+R\/Fdt14QSty6brDpFyu9o5YE32fe65g\/mUp8LAWjC8scK2nLHJ60ix3zkcrGjLctjSTihTPpnnmA65CUw\/bAUhH2WdFva6R6I6NfFosUmuz7mrty8Kp3Wxebjx+b+7TJkGtOdi3Q7o56CQ7g\/STuVWX6iUv3b\/eZuqyV6iQU3hddNnmkYxisIM\/c8c49PRFWzFVYqMbsIHDtY5QR7d+Lv6OElwabhTZXObrT0a5Yx8\/zKS1uZLI9Pcfn8XosNhiK821+Z2sRksNYIOs3Af6GujWlH7WEddujTgbUYWHUDYG\/4Z70qnxr+dzJTSWqBGWLX7c6qsxM3jPTo1H+QfE66E\/WGhPC8lii2eD0m4thDHgRklO2MWdMv8Bc8eDstmECr6u5B1Su2MHlF9tUreboC0UXJvS+irGVEppgFxSQMAPIcJtDo1OdWmptJjg0jO54h0dpZlm6U6GEe8JnPtFA6lbkqnA+yQMD1eLLFNkB5Gml6avEV+S9Krl0HfP97\/uzmBo6uMPOUo3BwUp\/iLY8adTDzZ\/BVik\/13b0XsY2gVzrWmqm8xmjjxk5Xi2M5f2DFdMspIddMlZhdM05Thu+KMW7a3hkwfNKBw\/tvZeORyT1MD21+Ld8ZyC3Kz8M0NO4uO7sEHTTdn1bl5w2Tdn88fIdE7WNffso2hpZN\/t0BJWsD3mUVokjYsbUjKEmT9sD362EGaW3VU43JJ\/\/THBrOzlGC0t9K2qTAtRuCwWqilawAINwcnk9itqvfKo7i+qaYunBsBbpyRxl099N0Kg8bfZVd4\/X7c6CNVaT4uk6ObPac9Dqu9tXwK7\/jIHzoYCMhGpFpUvyafUz8UKf1oW49cRmCfDszYa36L69Bwd9obvrXTQx5LdWX+iZ6wWUtVSHWMXIE+Ek+rZZ1QS4p7wYsFTly0v33IRuwmZsgZUU8EkFvNxE8iRV8fsE0rI2WqFtFjvLXRpsBqy2PTI8qStU\/HmNbG7TC5iWgL38zxG5isy22\/CYG\/Yy5I6u0PtcLIkKFZ4yhRy4Rx9t2SJGjFtcnpOUqvPEaIIcRWMP94vmc0e4Ak+Ob2bBHbCKhKQRjdZZcVadN7mSYUag3YtLYI+XR377BYcpEa4y3XmvtvVTtdSUrHfmI2wO4khpDC6Ta6frrelNf3gegWH07CViHxEe5yblfpLIp9fGT81ky9X8LoeMUODgB+5PtzE5nEnq0MR+OVAGNivARFDMgilQcVvQ6CGFWJdrDGiXzJhlpJWPF40M8gFRAim1GgRI7rLzZs5ro+UVLUtc82do4OrtXRXVdS0OBKa+So5H1qoIAv2p2jlYaUSH+omhUuRd9LWDkZLXK6qh0dbCT4oMd+ZrXYYe7bK8uZGUyusLYc+P41LmTykmj3Y3cQuJg3dbhZyogFgFjbC+qUOvN+87IG5JrK1uAf3IODYVkxSyIG7YMSODn211gr9XuwgeGBjQhv2f\/UFjJl6Tm4dAOA\/fsKGGA0+EiUWR1zbsCUpJWVNYvk+QZ7JWB+u4OyrEPLgDaCkDbF3sjZWxATMqBHL3SoOYjrDKDSOgs9RRuXVkBh5l5eovEWe8MtFuLhh0N77Dfy11tKepnSPJ5+H6MOtwBwR57VKgbFJSP7fyS7pYhgGqBvsR+zRp9sVIwKu27W24hx+qDxsduE3ZqPum3uPsiDJElaEM4TRiuwwqCEYVmQKMHSlx1LfY16RJj0RLqzEZCOdQWKyF+hgtwMuuX\/HythQnwCczsr+JCXnSskK5p15+Mo71e0CG2N3JgT2nSvC5X+oDEMEe76ErwFL2DQulDT6Jik2eMYzQb4UeFo56JVAdj4qX2rM0Akc+d1JlgIfNvMdOcYqRJsttJBGAfxWPwejTAt2inqN4RmC+2XvyW4b0EAAc4S\/jSXBoY4YmHF8pZtKoPfjPz2dMfdOV+2TfJsCEBvTwvAcUhv0=\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 38292,
-      "length": 3326,
-      "value": "\"-----BEGIN PRIVATE KEY-----\nMIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQCh1rynyAN485Lc\n8cyv6yKNHN8MjQl6KfO7fjCvyhYytxRKmL5rQkVaPEaOENmOl008QG\/JEvPdWzr1\n9uL03bHKhOd6LDuyO+hu7+KSvVWJr7NV\/i3fBylGhkvb4GlqVdRfwQG5xdSNGjoX\nnqbRTpAeItGCsO544ThRHhJHEgdti3moDOqt4FdVtJNOeh\/b+4aEL1hNhj4Zvzrv\nK8NYIFHO9\/ZQYRUdOVGWCsBX6wM9AK8OFP9d9yS\/eZvFUF7s18jZrpFTK+nz1IXn\nvD7E7uUf+OkyYia5H6Ra4osW34RL0mVLOx0cVi88a\/pcqsDv33OA29KitVBjnUiz\nrPz6UnzwARu42OMTPeMCc\/46AY8oC5YprDVkLole9\/6Llns7pt1q2h73az7wliZl\nZGmwlMd1+8d3i2OE\/69v8a6iE00DYsXo1FDhOgbGzworMmx8Kztad8ZAu+gSoFZc\nP1WYr2m7NEi5dsBVS+pQ2omiC0G4hjTiQkaZIDzB6mC7FzobrV\/8BDKpKSo5Yl09\nHrhaA\/pwABfzxuF0jn7KH6UDgRWmjWF9MDiGCrCKOXJEoSugJhwhGbWUqG71J8YF\nnb+C\/Pj\/cA4nC7Na7kJayEyVjdiMtpNCbeAo5grtJ8sGdbWeKus27qIYcx1VW\/4m\n3J5OJwQbeYmNr5fn1xwZeSdRG8dT3QIDAQABAoICAAzEptSr5I491UfmMcptSCgO\n75ALboR7W9XeglPUI0U0CX9LJrbKnzMbz0s1DB0CVd8bjFY2TxQXNwMhy80a0oSS\nULrkU39f15otBdii5GU8\/e6aY58Vbw232bNKtLZleCBn102DTJ4nRA8J\/spDov4l\nrBbeA6p4xlsr\/rApvXlIiDwYbMl0Ch\/iY77Mxsexw+6Y16QiI7MfUbR95OcGgb3M\n9VtpFWPdWlD2ny8whOxiqez3\/h+5OGZ83yvFh\/+ylI+MBL4lmEsa6MecI+2glWYc\n2rUVZk2zr+FVvzh6QPNEcaZqTwUlzYs8T5\/Q\/vDN1cyES0139ZQuXAaE7t6G9IFQ\nrkSyi+QMtuApL3\/UZ1K+C1mAx7Gx1v+CnJNb0+L5kGuZYYLWE7i+M4e4ahgXd0YW\njpTEaS2RKZjUZdXCjLOhvIw2w30+MLmlm\/PQR3lxWoModD6AV0ELPlbTjtt29ZSX\nyQudi2KogaFFEosGv984T45ABSFpSS7\/Of5UpBgQJQRZaPHYGxq\/gbbrKZLfxeVH\nvkuMG+k5d2medpjZu7qGr3ZYTpKAz43qqTQi69mOCDyBwrNmhTDfO0Cy1W+J5VrB\nZJ84GME0+jtuvBDSLtHv2rJKnCutTSSGehYC6YGF\/Rb8UTUHxSl+NN3Kbe9vnsqD\n1TcH7\/auoPNoXaG0x9TXAoIBAQDehSN7TchnHNb27FZG5g34k6\/u2MxsMz+24703\nAkNbIoFBFRvpCQlbwPIQST4y5\/2u40MHj4roubJtNmsxOVadufcwlDmcVDg\/NxJ8\npzQr0D4hOGpJ51LAgLoOTxfgG95AQ744i321b5c\/H2ek2Ko4FyJ7rBHxZ\/xnnbXi\nCZJ3vC2StlX+zVwHdCY1acPmJGlY0qXQWVezp9VwxU9BFUYxWuKUS0MKPNU\/Ejxi\nm2YBwEvHmjnNCbSkn4kg1OrPOJdiLFt5UQXu16EFtspdhkIUMuY0e0Y9w2UwSzTk\nSk1A0NVeLKFK2kXqQGo6+bZWaJeaBNh4CoTAHQ\/GXJrW8gFfAoIBAQC6MFK7Z0Q5\nVKur02FeqQuMlLsKBU4Vh\/zc8DpDfH647uqZDsxBMuqsSMmBoxuV3ehahgSWi9CV\nAisJmSgVuCsaDJ1hTpcLo8LOB\/Q7tcxAept1\/7EiU3bk8KOCNyWxUpbAmEI8\/kuG\nUwcbiR5WUvmmVRNMVyu9MnurKe1vfkivHNza1PaAfaYLi5DQrOEotxpzgKeVd1Yl\nWRF0nNkLqeqM\/k8qLYmJcqfrybmQbnxxqCD5hS2XqLeKyzC0wkYFwF\/MXAJYe0VX\nLeevDYjuCwnQnRqU0bj4TJcDLbRB2mYOY7WKaKybMZgtX14mBqH8nLJbwanYtoZ8\ncGScYsiRWghDAoIBAQDPr5QeUcrp8pDwhkVAhxgjGjTqyI6DrpGZMZY48XPMa7gX\n9ovGRRjm+n7zlGjpOn4b7SFyvRb5f9h49oG1v76IGDoOrUnYDwMwfUZT8ftPqV1T\nxEPwFme2JG+DS28NTPVzJcc1H3yFC1IvKDCkO1UkZPNaWo+ksVlznE9WWXjLKGeg\nt24sE6ABlPbUg5LECtgIfxMkEz83\/z3Hs2D1bdXF2v3\/Sv+XXo\/p\/is+HaxnlgMk\nmV25cYWY4Q4sBo3iOv+QMbZu1KCk+7zeiGz4PYcPMzKJaUV2ABlBqfAD4xWXmVKM\nQzuHkZIPwW9k\/AyjOZvFtSAVajvc00MV8PjUBawhAoIBAB145L+xewUwN\/R9A16+\nl4trR6gwasnRut8mT7K7FDwl5ZDQ3Ng9PRSEeRFCRm2UsOETccp620ubCkD8s3Gs\ns3XuJUNv80zuYTnH3ItPHcPfJJirHtj2KU3YIanNHPRSxHY8I9AP2Nisb+WV8O1t\nOQNxWBqvecb7JMRVYLZTYSIHCZbCOzrfqNcPAp9lnkaZpWA\/L0fjmglTbgXthhXo\nka4720Ar8SeGtLoINo18T8qV+JJG2I63MEaSH2WdkwP6DbAFqIFlEfbY12HIXLKB\noM4a8Eg6YnM7fHQOWghKj\/kbI3ODWj8+vH4CKJ8QUbfw\/fK0VzRswCEWkXaH1IPd\noo0CggEBALEnWdPhXygAozeXunmDKT6aYNf43apDuHLJ2TZg4HZ+oKsS1rmq0Suc\nkIHdQHPtZhut3TUHXmb5IIL90GYYBjDgIuOIxhJrNegf4XJarNcufkfdqwnmC8HP\nP0zWEZD6aYZqxc+otbD4VsonwNeyBvaJOdqCtUkJQXaOXUkmqFwt6ectMvv6XnsT\nsOrsKNr6+N+83HxU3dFZDmJvny5FLbcLGNLYyphlM10TVm6fj3IDux3AIrCBMQgr\nH+Iy\/9AwX8NBqY8wGXJyFvliPKR6lkxEvRSOx4icuji8tgl1qRjhXPdPylU\/SKRo\nQgj1nL\/cbx2XMS4uap+l9isCSSZ\/d2I=\n-----END PRIVATE KEY-----\n\""
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 41783,
+      "offset": 20247,
       "length": 1,
       "value": "4"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 41808,
+      "offset": 20272,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 41896,
+      "offset": 20360,
       "length": 13,
       "value": "\"threadCount\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 41973,
+      "offset": 20537,
       "length": 3,
       "value": "256"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 42006,
+      "offset": 20570,
       "length": 3,
       "value": "224"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 42045,
-      "length": 1,
-      "value": "1"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "BooleanLiteral",
-      "offset": 42121,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 42165,
+      "offset": 20612,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 42234,
+      "offset": 20687,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 42237,
+      "offset": 20690,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 42325,
+      "offset": 20790,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 42350,
+      "offset": 20821,
       "length": 1,
       "value": "4"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 42387,
-      "length": 1,
-      "value": "1"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 42412,
-      "length": 2,
-      "value": "34"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42464,
+      "offset": 22055,
       "length": 7,
       "value": "\"vocab\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42478,
+      "offset": 22069,
       "length": 6,
       "value": "\"json\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42524,
-      "length": 9,
-      "value": "\"lmModel\""
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 42540,
-      "length": 8,
-      "value": "\"tflite\""
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 42589,
+      "offset": 22194,
       "length": 8,
       "value": "\"merges\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42604,
+      "offset": 22209,
       "length": 5,
       "value": "\"txt\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 42650,
-      "length": 8,
-      "value": "\"config\""
+      "kind": "Array",
+      "offset": 22502,
+      "length": 888,
+      "value": "[\"S-O\", \"S-O_COURIER_NAME\", \"S-O_COURIER_TRACKING_NO\", \"S-O_EXTRA_DIMENSION\", \"S-O_EXTRA_WEIGHT\", \"S-O_LABEL_SHIPMENT_TYPE\", \"S-R_ADDRESS_BUILDING\", \"S-R_ADDRESS_CITY\", \"S-R_ADDRESS_COUNTRY\", \"S-R_ADDRESS_FLOOR\", \"S-R_ADDRESS_OFFICE_NO\", \"S-R_ADDRESS_STATE\", \"S-R_ADDRESS_STREET\", \"S-R_ADDRESS_ZIP_CODE\", \"S-R_PERSON_BUSINESS_NAME\", \"S-R_PERSON_NAME\", \"S-R_PERSON_PHONE\", \"S-S_ADDRESS_BUILDING\", \"S-S_ADDRESS_CITY\", \"S-S_ADDRESS_COUNTRY\", \"S-S_ADDRESS_FLOOR\", \"S-S_ADDRESS_OFFICE_NO\", \"S-S_ADDRESS_STATE\", \"S-S_ADDRESS_STREET\", \"S-S_ADDRESS_ZIP_CODE\", \"S-S_PERSON_BUSINESS_NAME\", \"S-S_PERSON_NAME\", \"S-S_PERSON_PHONE\", \"S-O_PURCHASE_ORDER\", \"S-O_REFERENCE_NUMBER\", \"S-R_ADDRESS_PO_BOX\", \"S-S_ADDRESS_PO_BOX\", \"S-O_RMA_NUMBER\", \"S-O_INVOICE_NUMBER\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 42665,
-      "length": 6,
-      "value": "\"json\""
+      "kind": "Array",
+      "offset": 23442,
+      "length": 266,
+      "value": "[\"S-R_ADDRESS_CITY\", \"S-R_ADDRESS_STATE\", \"S-R_ADDRESS_ZIP_CODE\", \"S-R_PERSON_BUSINESS_NAME\", \"S-R_PERSON_NAME\", \"S-S_ADDRESS_CITY\", \"S-S_ADDRESS_STATE\", \"S-S_ADDRESS_ZIP_CODE\", \"S-S_PERSON_BUSINESS_NAME\", \"S-S_PERSON_NAME\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "FloatLiteral",
-      "offset": 42990,
-      "length": 3,
-      "value": "1.0"
+      "kind": "Array",
+      "offset": 23763,
+      "length": 56,
+      "value": "[\"S-O_PURCHASE_ORDER\", \"S-O_REFERENCE_NUMBER\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "FloatLiteral",
-      "offset": 43002,
-      "length": 3,
-      "value": "0.7"
+      "kind": "Array",
+      "offset": 23866,
+      "length": 98,
+      "value": "[\"invoice\", \"item_label\", \"bol\", \"receipt\", \"unknown\", \"shipping_label\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "FloatLiteral",
-      "offset": 43013,
-      "length": 3,
-      "value": "0.0"
+      "kind": "Array",
+      "offset": 23999,
+      "length": 421,
+      "value": "[\"O\", \"SUPPLIER_NAME\", \"ITEM_NAME\", \"SUPPLIER_ADDRESS\", \"MODEL\", \"SERIAL_NUMBERS\", \"ORIGIN_COUNTRY\", \"ITEM_NUMBER\", \"ITEM_SKU\", \"MAC_ID\", \"PRODUCTION_DATE\", \"ITEM_DIMENSION\", \"PURCHASE_ORDER\", \"CUSTOMER_SKU\", \"QUANTITY\", \"ITEM_WEIGHT\", \"PACKAGED_WEIGHT\", \"CARTON_NUMBER\", \"PACKAGED_DIMENSION\", \"SALES_ORDER\", \"COLOR\", \"LOT_NUMBER\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "FloatLiteral",
-      "offset": 43025,
-      "length": 3,
-      "value": "0.3"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "FloatLiteral",
-      "offset": 43069,
-      "length": 3,
-      "value": "0.8"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43130,
-      "length": 1,
-      "value": "7"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43188,
-      "length": 2,
-      "value": "10"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "FloatLiteral",
-      "offset": 43240,
-      "length": 4,
-      "value": "0.23"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43288,
-      "length": 1,
-      "value": "5"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43324,
-      "length": 1,
-      "value": "5"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43371,
-      "length": 1,
-      "value": "7"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43418,
-      "length": 2,
-      "value": "10"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43463,
-      "length": 1,
-      "value": "4"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43503,
-      "length": 1,
-      "value": "3"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "IntegerLiteral",
-      "offset": 43551,
-      "length": 2,
-      "value": "14"
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 43612,
-      "length": 38,
-      "value": "\"Tap ▶︎ button to get the answer.\""
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 43683,
-      "length": 61,
-      "value": "\"⚠️Got empty question.\nPlease enter non-empty question.\""
-    },
-    {
-      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
-      "kind": "StringLiteral",
-      "offset": 43781,
-      "length": 39,
-      "value": "\"❗️Failed to inference the answer.\""
+      "kind": "Array",
+      "offset": 24471,
+      "length": 84,
+      "value": "[\"ITEM_NUMBER\", \"SERIAL_NUMBERS\", \"SALES_ORDER\", \"PURCHASE_ORDER\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/Couriers In Order\/Australia-Post.swift",
@@ -24404,21 +25100,21 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/MLModel\/MLEssentials\/BertTokenizer.swift",
       "kind": "Array",
-      "offset": 2707,
+      "offset": 2725,
       "length": 60,
       "value": "[\"[UNK]\", \"[SEP]\", \"[PAD]\", \"[CLS]\", \"[MASK]\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/MLModel\/MLEssentials\/BertTokenizer.swift",
       "kind": "StringLiteral",
-      "offset": 3829,
+      "offset": 3856,
       "length": 7,
       "value": "\"[UNK]\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/MLModel\/MLEssentials\/BertTokenizer.swift",
       "kind": "IntegerLiteral",
-      "offset": 3876,
+      "offset": 3903,
       "length": 3,
       "value": "100"
     },
@@ -24610,6 +25306,20 @@
       "offset": 10578,
       "length": 1,
       "value": "0"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/LayoutModel\/LayoutLMv3Tokenizer\/LayoutLMv3TFLite.swift",
+      "kind": "IntegerLiteral",
+      "offset": 251,
+      "length": 27,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/LayoutModel\/LayoutLMv3Tokenizer\/LayoutLMv3TFLite.swift",
+      "kind": "IntegerLiteral",
+      "offset": 288,
+      "length": 14,
+      "value": "2"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/Extensions\/MLMultiArrayExtension+Utils.swift",

@@ -1,9 +1,10 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 6.0 effective-5.10 (swiftlang-6.0.0.9.10 clang-1600.0.26.2)
-// swift-module-flags: -target x86_64-apple-ios15.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name VisionSDK
+// swift-module-flags: -target x86_64-apple-ios16.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name VisionSDK
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface
 import AVFoundation
 import Accelerate
+import Combine
 import CommonCrypto
 import Compression
 import CoreFoundation
@@ -361,6 +362,7 @@ extension AVFoundation.AVCaptureDevice {
 }
 extension Swift.String {
   public func search(_ inString: Swift.String, at groupNumber: Swift.Int = 0, name groupName: Swift.String? = nil) -> Swift.String?
+  public func searchAll(_ inString: Swift.String, at groupNumber: Swift.Int = 0, name groupName: Swift.String? = nil) -> [Swift.String]
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
@@ -370,6 +372,9 @@ extension VisionSDK.VisionAPIManager {
   @objc dynamic public func checkPriceTagAuthenticationWithKey(_ apiKey: Swift.String?, _ completion: @escaping ((_ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callManifestAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callDocumentClassificationAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callItemLabelsAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 @_hasMissingDesignatedInitializers final public class SignatureRunner {
   final public let signatureKey: Swift.String
@@ -471,6 +476,7 @@ extension VisionSDK.Connectivity {
   case shippingLabel
   case billOfLading
   case itemLabel
+  case documentClassification
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -505,7 +511,6 @@ extension VisionSDK.Connectivity {
 @_inheritsConvenienceInitializers @objc(Constants) public class VSDKConstants : ObjectiveC.NSObject {
   public static var apiKey: Swift.String
   public static var apiEnvironment: VisionSDK.VSDKAppEnvironment
-  public static var modelUrl: Foundation.URL!
   @objc override dynamic public init()
   @objc deinit
 }

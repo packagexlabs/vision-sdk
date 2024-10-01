@@ -508,6 +508,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 
 
 
+
+
 typedef SWIFT_ENUM(NSInteger, VSDKAppEnvironment, open) {
   VSDKAppEnvironmentDev = 0,
   VSDKAppEnvironmentQa = 1,
@@ -526,6 +528,7 @@ typedef SWIFT_ENUM(NSInteger, VSDKModelClass, open) {
   VSDKModelClassShippingLabel = 0,
   VSDKModelClassBillOfLading = 1,
   VSDKModelClassItemLabel = 2,
+  VSDKModelClassDocumentClassification = 3,
 };
 
 typedef SWIFT_ENUM(NSInteger, VSDKModelSize, open) {
@@ -551,6 +554,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 - (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
 - (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callDocumentClassificationAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callItemLabelsAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callMatchingAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withResponseData:(NSData * _Nonnull)responseData andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 #endif
@@ -1071,6 +1077,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 
 
 
+
+
 typedef SWIFT_ENUM(NSInteger, VSDKAppEnvironment, open) {
   VSDKAppEnvironmentDev = 0,
   VSDKAppEnvironmentQa = 1,
@@ -1089,6 +1097,7 @@ typedef SWIFT_ENUM(NSInteger, VSDKModelClass, open) {
   VSDKModelClassShippingLabel = 0,
   VSDKModelClassBillOfLading = 1,
   VSDKModelClassItemLabel = 2,
+  VSDKModelClassDocumentClassification = 3,
 };
 
 typedef SWIFT_ENUM(NSInteger, VSDKModelSize, open) {
@@ -1114,6 +1123,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 - (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
 - (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)callManifestAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nonnull)apiKey withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callDocumentClassificationAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callItemLabelsAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callMatchingAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withResponseData:(NSData * _Nonnull)responseData andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 #endif
