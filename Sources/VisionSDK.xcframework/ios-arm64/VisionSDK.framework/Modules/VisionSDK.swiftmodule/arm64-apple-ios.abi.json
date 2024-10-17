@@ -2032,7 +2032,7 @@
           {
             "kind": "Function",
             "name": "reportErrorWith",
-            "printedName": "reportErrorWith(_:withBarcodes:reportText:response:)",
+            "printedName": "reportErrorWith(_:andToken:forModelClass:withModelSize:image:withBarcodes:reportText:response:withCompletion:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -2041,9 +2041,60 @@
               },
               {
                 "kind": "TypeNominal",
-                "name": "CIImage",
-                "printedName": "CoreImage.CIImage",
-                "usr": "c:objc(cs)CIImage"
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKModelClass",
+                "printedName": "VisionSDK.VSDKModelClass",
+                "usr": "c:@M@VisionSDK@E@VSDKModelClass"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKModelSize",
+                "printedName": "VisionSDK.VSDKModelSize",
+                "hasDefaultArg": true,
+                "usr": "c:@M@VisionSDK@E@VSDKModelSize"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "CoreImage.CIImage?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "CIImage",
+                    "printedName": "CoreImage.CIImage",
+                    "usr": "c:objc(cs)CIImage"
+                  }
+                ],
+                "usr": "s:Sq"
               },
               {
                 "kind": "TypeNominal",
@@ -2061,17 +2112,9 @@
               },
               {
                 "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "Swift.String?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "String",
-                    "printedName": "Swift.String",
-                    "usr": "s:SS"
-                  }
-                ],
-                "usr": "s:Sq"
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
               },
               {
                 "kind": "TypeNominal",
@@ -2086,11 +2129,37 @@
                   }
                 ],
                 "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Int) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Int",
+                        "printedName": "Swift.Int",
+                        "usr": "s:Si"
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@VisionSDK@objc(cs)OnDeviceOCRManager(im)reportErrorWith:withBarcodes:reportText:response:",
-            "mangledName": "$s9VisionSDK18OnDeviceOCRManagerC15reportErrorWith_12withBarcodes0F4Text8responseySo7CIImageC_SaySSGSSSg10Foundation4DataVSgtF",
+            "usr": "c:@M@VisionSDK@objc(cs)OnDeviceOCRManager(im)reportErrorWith:andToken:forModelClass:withModelSize:image:withBarcodes:reportText:response:withCompletion:",
+            "mangledName": "$s9VisionSDK18OnDeviceOCRManagerC15reportErrorWith_8andToken13forModelClass04withL4Size5image0N8Barcodes0F4Text8response0N10CompletionySSSg_AmA09VSDKModelM0OAA0uO0OSo7CIImageCSgSaySSGSS10Foundation4DataVSgySicSgtF",
             "moduleName": "VisionSDK",
             "declAttributes": [
               "AccessControl",
@@ -19737,147 +19806,147 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 9851,
+      "offset": 10821,
       "length": 4,
       "value": "\"_i\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 9888,
+      "offset": 10858,
       "length": 5,
       "value": "\"_mv\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10081,
+      "offset": 11051,
       "length": 4,
       "value": "\"_i\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10175,
+      "offset": 11145,
       "length": 22,
       "value": "\"price_tag_extraction\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10237,
+      "offset": 11207,
       "length": 27,
       "value": "\"shipping_label_extraction\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10302,
+      "offset": 11272,
       "length": 25,
       "value": "\"shipping_label_matching\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10356,
+      "offset": 11326,
       "length": 27,
       "value": "\"bill_of_lading_extraction\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10419,
+      "offset": 11389,
       "length": 23,
       "value": "\"item_label_extraction\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10477,
+      "offset": 11447,
       "length": 11,
       "value": "\"telemetry\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10569,
+      "offset": 11539,
       "length": 27,
       "value": "\"shipping_label_extraction\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 10819,
+      "offset": 11789,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10940,
+      "offset": 11910,
       "length": 4,
       "value": "\"_i\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 10975,
+      "offset": 11945,
       "length": 4,
       "value": "\"_a\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11008,
+      "offset": 11978,
       "length": 4,
       "value": "\"_u\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11038,
+      "offset": 12008,
       "length": 4,
       "value": "\"_m\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11073,
+      "offset": 12043,
       "length": 4,
       "value": "\"_t\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11104,
+      "offset": 12074,
       "length": 5,
       "value": "\"_rt\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11135,
+      "offset": 12105,
       "length": 5,
       "value": "\"_et\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11171,
+      "offset": 12141,
       "length": 6,
       "value": "\"_o_1\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11206,
+      "offset": 12176,
       "length": 5,
       "value": "\"_p1\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 11239,
+      "offset": 12209,
       "length": 4,
       "value": "\"_b\""
     },
@@ -19961,7 +20030,7 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 15689,
+      "offset": 17574,
       "length": 4,
       "value": "true"
     },
