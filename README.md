@@ -492,6 +492,27 @@ PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
 
 `callManifestAPIWith` method recieves the captured image and the API Key as parameters.
 
+### Analytics Methods
+
+VisionSDK contains an automatic error logging system which reports any internal SDK error while in use. You can also report issues with on-device solution using our built-in reporting functions. VisionSDK will automatically post those issues depending on internet connectivity.
+
+```swift
+
+    // This method must be provided with `apiKey` or `token`.
+    // modelClass: VSDKModelClass - Select required Model Class. e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g. .micro
+    // image: CIImage? - Optional captured image
+    // reportText: String - Description of issue you are facing
+    // response: Data? - Optional response object you received from On-device extraction on the given image
+
+    func reportErrorWith(_ apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelClass, withModelSize modelSize: VSDKModelSize = .micro, image: CIImage?, withBarcodes barcodes: [String], reportText: String, response: Data?, withCompletion completion: ((_ response: Int)->())?)
+
+    // Completion block returns an integer indicating response action on reported error. 
+    /// 1 = Error reported successfully
+    /// 2 = Error saved. Will be automatically posted later by VisionSDK.
+
+```
+
 
 # VisionSDK Android Integration
 
