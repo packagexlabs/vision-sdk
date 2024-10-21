@@ -492,6 +492,7 @@ PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
 
 `callManifestAPIWith` method recieves the captured image and the API Key as parameters.
 
+
 ### Analytics Methods
 
 VisionSDK contains an automatic error logging system which reports any internal SDK error while in use. You can also report issues with on-device solution using our built-in reporting functions. VisionSDK will automatically post those issues depending on internet connectivity.
@@ -512,6 +513,9 @@ VisionSDK contains an automatic error logging system which reports any internal 
     /// 2 = Error saved. Will be automatically posted later by VisionSDK.
 
 ```
+
+This method is called on the shared instance of `OnDeviceOCRManager`. It can be accessed using `OnDeviceOCRManager.shared`
+syntax.
 
 
 # VisionSDK Android Integration
