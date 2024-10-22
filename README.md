@@ -492,11 +492,37 @@ PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
 
 `callManifestAPIWith` method recieves the captured image and the API Key as parameters.
 
+
+### Analytics Methods
+
+VisionSDK contains an automatic error logging system which reports any internal SDK error while in use. You can also report issues with on-device solution using our built-in reporting functions. VisionSDK will automatically post those issues depending on internet connectivity.
+
+```swift
+
+    // This method must be provided with `apiKey` or `token`.
+    // modelClass: VSDKModelClass - Select required Model Class. e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g. .micro
+    // image: CIImage? - Optional captured image
+    // reportText: String - Description of issue you are facing
+    // response: Data? - Optional response object you received from On-device extraction on the given image
+
+    func reportErrorWith(_ apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelClass, withModelSize modelSize: VSDKModelSize = .micro, image: CIImage?, withBarcodes barcodes: [String], reportText: String, response: Data?, withCompletion completion: ((_ response: Int)->())?)
+
+    // Completion block returns an integer indicating response action on reported error. 
+    /// 1 = Error reported successfully
+    /// 2 = Error saved. Will be automatically posted later by VisionSDK.
+
+```
+
+This method is called on the shared instance of `OnDeviceOCRManager`. It can be accessed using `OnDeviceOCRManager.shared`
+syntax.
+
+
 # VisionSDK Android Integration
 
 The VisionSDK Android Integration is a barcode and QR code scanner framework for Android that
 provides a simple and efficient way to detect barcodes and QR codes in both manual and
-automatic capturing modes. It also includes AI capabilites to extract information from logistic
+automatic capturing modes. It also includes AI capabilities to extract information from logistic
 documents.
 
 Some key features of the VisionSDK Android Integration include:
@@ -508,7 +534,8 @@ Some key features of the VisionSDK Android Integration include:
 - Information extraction from logistic documents (via both local ML models (offline) and REST API)
     - Shipping Label
     - Bill of Lading
-    - Price Tag (under progress)
+    - Item Label
+    - Document Classification
 
 ## Installation
 Vision SDK is hosted on JitPack.io
@@ -523,7 +550,7 @@ Then add the following dependency to
 your project's build.gradle file:
 
 ```kotlin
-implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.6")
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.18")
 ```
 Check the [latest version](https://jitpack.io/#packagexlabs/vision-sdk-android) here
 
@@ -544,9 +571,8 @@ There are 2 ways for authentication
 
 ```kotlin
 VisionSDK.getInstance().initialize(
-    environment = //TODO environment,
-    authentication = //TODO authentication,
-    manifest = //TODO manifest
+   context = this,
+   environment = Environment.SANDBOX
 )
 ```
 
@@ -557,10 +583,36 @@ VisionSDK.getInstance().initialize(
 Set initial setting/configurations of the camera:
 
 ```kotlin
-    visionCameraView.setVisionViewState(visionViewState = VisionViewState())
+visionCameraView.configure(
+   detectionMode = DetectionMode.Barcode OR DetectionMode.QRCode OR OR DetectionMode.BarcodeOrQRCode OR DetectionMode.OCR,
+   scanningMode = ScanningMode.Manual OR ScanningMode.Auto,
+   isMultipleScanEnabled = true OR false
+)
 
-    val nthFrameToProcess = 15
-    visionCameraView.shouldOnlyProcessNthFrame(nthFrameToProcess) // Optional
+visionCameraView.setFlashTurnedOn( true OR false )
+
+visionCameraView.setObjectDetectionConfiguration(
+   ObjectDetectionConfiguration(
+      isTextIndicationOn = true,
+      isBarcodeOrQRCodeIndicationOn = true,
+      isDocumentIndicationOn = true,
+      secondsToWaitBeforeDocumentCapture = 3
+   )
+)
+
+// Optional
+visionCameraView.setCameraSettings(
+   CameraSettings(
+      nthFrameToProcess = -1 OR 10 OR any integer number
+   )
+)
+
+// Optional
+if (visionCameraView.isCameraStarted()) {
+   visionCameraView
+      .getFocusRegionManager()
+      .setFocusSettings(screenState.focusSettings)
+}
 ```
 
 To start scanning for barcodes, QR codes, text or documents, use the startCamera method after it is initialized. See the code below for example:
@@ -568,20 +620,13 @@ To start scanning for barcodes, QR codes, text or documents, use the startCamera
 ```kotlin
 private fun startScanning() {
 
-    visionCameraView.setObjectDetectionConfiguration(
-        ObjectDetectionConfiguration(
-           isTextIndicationOn = true,
-           isBarcodeOrQRCodeIndicationOn = true,
-           isDocumentIndicationOn = true,
-           secondsToWaitBeforeDocumentCapture = 3
-        )
-    )
     visionCameraView.setScannerCallback(object : ScannerCallback {
-      fun detectionCallbacks(barcodeDetected: Boolean, qrCodeDetected: Boolean, textDetected: Boolean, documentDetected: Boolean) {
+
+      fun onIndications(barcodeDetected: Boolean, qrCodeDetected: Boolean, textDetected: Boolean, documentDetected: Boolean) {
 
       }
 
-      fun onBarcodesDetected(barcodeList: List<String>) {
+      fun onCodesScanned(barcodeList: List<String>) {
 
       }
 
@@ -589,7 +634,7 @@ private fun startScanning() {
 
       }
 
-      fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<String>) {
+      fun onImageCaptured(bitmap: Bitmap, value: List<String>) {
          // bitmap: The bitmap of captured image
          // imageFile: Optional image file if user requested the image to be saved as file also.
          // value: List of barcodes that were detected in the given image.
@@ -599,7 +644,10 @@ private fun startScanning() {
     visionCameraView.setCameraLifecycleCallback(object : CameraLifecycleCallback {
       override fun onCameraStarted() {
           // If you want to apply Focus Settings, you can do that here, after camera is started.
-          visionCameraView.getFocusRegionManager().setFocusSettings(focusSettings = FocusSettings())
+          // Optional
+          visionCameraView
+            .getFocusRegionManager()
+            .setFocusSettings(focusSettings = FocusSettings())
       }
       override fun onCameraStopped() {}
     })
@@ -612,20 +660,23 @@ Note that, once `onBarcodesDetected` or `onImageCaptured` callbacks are called, 
 This is to prevent extra processing and battery consumption. When client wants to start analysing camera feed again, after consuming the results of previous scan, client needs to call the following function:
 
 ```kotlin
-  visionCameraView.rescan()
+visionCameraView.rescan()
 ```
 
 ### Zoom Options
 After camera is started, client can request all the zoom levels and can set zoom in camera. There are two ways to set zoom.
 #### Linear Zoom
 ```kotlin
-    val zoomLevel: Float = 0.0F // Linear zoom levels range from 0.0F to 1.0F
-    visionCameraView.setLinearZoom(zoomLevel)
+val zoomLevel = 0.0F // Linear zoom levels range from 0.0F to 1.0F
+visionCameraView.setLinearZoom(zoomLevel)
 ```
 #### Ratio Zoom
 ```kotlin
-    val zoomRatio: Float = visionCameraView.getMinZoomRatioAvailable() // Ratio zoom levels range from visionCameraView.getMinZoomRatioAvailable() to visionCameraView.getMaxZoomRatioAvailable()
-    visionCameraView.setZoomRatio(zoomRatio)
+// Ratio zoom levels range from visionCameraView.getMinZoomRatioAvailable() to visionCameraView.getMaxZoomRatioAvailable()
+val minZoomRatio = visionCameraView.getMinZoomRatioAvailable()
+val maxZoomRatio = visionCameraView.getMaxZoomRatioAvailable()
+
+visionCameraView.setZoomRatio(1.0F OR any Float between minZoomRatio or maxZoomRatio)
 ```
 
 #### Scanning Modes
@@ -642,8 +693,7 @@ Detection mode is used to specify what the user is trying to detect
 1. `Barcode` detects only barcode
 2. `QRCode` detects only QR codes
 3. `OCR` for OCR detection. This mode will capture an image for the user. User can then decide to extract logistic data from it using either API call or on-device OCR capabilities.
-4. `PriceTag` is underprogress
-5. `Photo` is used to take images without any processing
+4. `Photo` is used to take images without any processing
 
 ### Trigger Manual Capture
 
@@ -685,12 +735,16 @@ Once the user has successfully initialized `VisionSDK`, the they can use class `
 Following are the APIs that are available for our users through VisionSDK:
 1. Shipping Label (both online and on-device)
 2. Bill of Lading (only online)
+3. Item Label (both online and on-device)
+4. Document Classification (both online and on-device)
 
 Logistic information can be extracted from image in these two contexts. Users can post these images using the following suspended functions from `ApiManager` class.
 
 #### Shipping Label
 ```kotlin
 val jsonResponse = ApiManager().shippingLabelApiCallSync(
+   apiKey = "YOUR_API_KEY_HERE", // You only need to pass one of the two params (apiKey or token)
+   token = "YOUR_TOKEN_HERE",
    bitmap = bitmap,
    barcodeList = list,
    locationId = "OPTIONAL_LOCATION_ID",
@@ -722,12 +776,32 @@ val jsonResponse = ApiManager().shippingLabelApiCallSync(
 #### Bill of Lading
 ```Kotlin
 val jsonResponse = ApiManager().manifestApiCallSync(
+   apiKey = "YOUR_API_KEY_HERE", // You only need to pass one of the two params (apiKey or token)
+   token = "YOUR_TOKEN_HERE",
    bitmap = bitmap,
    barcodeList = list
 )
 ```
 
-### Making On-Device Shipping Label Call (usage without internet):
+#### Item Label
+```Kotlin
+val jsonResponse = ApiManager().itemLabelApiCallSync(
+   apiKey = "YOUR_API_KEY_HERE", // You only need to pass one of the two params (apiKey or token)
+   token = "YOUR_TOKEN_HERE",
+   bitmap = bitmap
+)
+```
+
+#### Document Classification
+```Kotlin
+val jsonResponse = ApiManager().documentClassificationApiCallSync(
+   apiKey = "YOUR_API_KEY_HERE", // You only need to pass one of the two params (apiKey or token)
+   token = "YOUR_TOKEN_HERE",
+   bitmap = bitmap
+)
+```
+
+### Making On-Device Call (usage without internet):
 
 You need internet to download the important files for the first time. These files are used for processing and extracting data from the images.
 In order to do that, you need to use `configure()` function of the class `OnDeviceOCRManager`.
@@ -753,9 +827,9 @@ Following are its option:
 ```kotlin
 ShippingLabel
 BillOfLading
-PriceTag
+ItemLabel
+DocumentClassification
 ```
-`PriceTag` is not currently supported.
 
 `ModelSize` is another enum (an optional parameter here) that is used to inform the VisionSDK about the type of files that it should download. Following are the types of model:
 ```kotlin
@@ -766,7 +840,15 @@ Medium
 Large
 XLarge
 ```
-Currently, only `Micro` and `Large` are supported.
+
+### On-Device Options Currently Available
+
+| Model Class            | Nano | Micro | Small | Medium | Large | XLarge |
+|------------------------|------|-------|-------|--------|-------|--------|
+| ShippingLabel          | X    | ✓     | X     | X      | ✓     | X      |
+| BillOfLading           | X    | X     | X     | X      | X     | X      |
+| ItemLabel              | X    | X     | X     | X      | ✓     | X      |
+| DocumentClassification | X    | X     | X     | X      | ✓     | X      |
 
 After creating the instance of `OnDeviceOCRManager`, you need to call its `configure()` function. This suspend function will download the important files, if needed, and then load them in memory.
 
@@ -795,6 +877,23 @@ Once you are done with the `OnDeviceOCRManager`, make sure that you destroy its 
 onDeviceOCRManager.destroy()
 ```
 
+## Report an issue
+VisionSDK contains internal error reporting mechanism if it faces any issue. 
+Furthermore, if you get a response from On-Device models, that you consider to be incorrect, then you can report it using the following function:
+```kotlin
+val reportResult: ReportResult = ApiManager().reportAnIssueSync(
+   context: Context,
+   apiKey = "YOUR_API_KEY_HERE", // You only need to pass one of the two params (apiKey or token)
+   token = "YOUR_TOKEN_HERE",
+   platformType: PlatformType = PlatformType.Native,
+   modelClass: ModelClass,
+   modelSize: ModelSize,
+   report: String,
+   customData: Map<String, Any?>? = null,
+   base64ImageToReportOn: String? = null
+)
+```
+
 ## Attribution
 https://www.flaticon.com/free-icon/browser_9892390?term=template&page=1&position=10&origin=search&related_id=9892390
 
@@ -803,3 +902,5 @@ https://www.flaticon.com/free-icon/browser_9892390?term=template&page=1&position
 Copyright © 2024 PackageX Labs.
 
 Licensed under the MIT License.
+
+
