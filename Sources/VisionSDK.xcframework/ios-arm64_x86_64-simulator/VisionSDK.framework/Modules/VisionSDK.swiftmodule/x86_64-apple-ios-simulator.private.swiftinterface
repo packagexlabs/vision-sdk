@@ -93,7 +93,8 @@ public enum Runtime {
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(OnDeviceOCRManager) public class OnDeviceOCRManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.OnDeviceOCRManager
   @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelClass, withModelSize modelSize: VisionSDK.VSDKModelSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
-  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelClass, withModelSize modelSize: VisionSDK.VSDKModelSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelClass, withModelSize modelSize: VisionSDK.VSDKModelSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
   @objc public func extractDataFromImage(_ image: CoreImage.CIImage, withBarcodes barcodes: [Swift.String], _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
   @objc deinit
 }
@@ -360,10 +361,6 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
 }
 extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)
-}
-extension Swift.String {
-  public func search(_ inString: Swift.String, at groupNumber: Swift.Int = 0, name groupName: Swift.String? = nil) -> Swift.String?
-  public func searchAll(_ inString: Swift.String, at groupNumber: Swift.Int = 0, name groupName: Swift.String? = nil) -> [Swift.String]
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager

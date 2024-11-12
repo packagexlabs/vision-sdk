@@ -499,7 +499,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response withCompletion:(void (^ _Nullable)(NSInteger))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)extractDataFromImage:(CIImage * _Nonnull)image withBarcodes:(NSArray<NSString *> * _Nonnull)barcodes :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
@@ -1069,7 +1070,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response withCompletion:(void (^ _Nullable)(NSInteger))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)extractDataFromImage:(CIImage * _Nonnull)image withBarcodes:(NSArray<NSString *> * _Nonnull)barcodes :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
