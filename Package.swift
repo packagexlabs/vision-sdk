@@ -6,13 +6,13 @@ import PackageDescription
 let package = Package(
     name: "VisionSDK",
     platforms: [
-        .macOS(.v11), .iOS(.v15), .tvOS(.v15)
+        .iOS(.v16)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "VisionSDK",
-            targets: ["VisionSDK"]),
+            targets: ["VisionSDK", "TensorFlow"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -23,6 +23,10 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .binaryTarget(
                     name: "VisionSDK",
-                    path: "./Sources/VisionSDK.xcframework")
+                    path: "./Sources/VisionSDK.xcframework"),
+        .binaryTarget(
+                    name: "TensorFlow",
+                    path: "./Sources/TensorFlowLiteC.xcframework"
+                )
     ]
 )
