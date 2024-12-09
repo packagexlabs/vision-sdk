@@ -14,7 +14,7 @@
 		</data>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<data>
-		s90r3Dv0fSBLzNJIt3opBubzANU=
+		RbDbQZhZS8S5Q+hNKcAxSJLN2Mw=
 		</data>
 		<key>Headers/VisionSDK.h</key>
 		<data>
@@ -26,11 +26,11 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		3tJy9y/NU9lKPsS9plrEu0eiLyU=
+		2KOg06wkAAy4EMmi6s+9IwfRpro=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		pw3jG7Bx6WyIltUpOkDpP32XUFY=
+		N/m+pB8FfQ8P9oWyD25DUFqiqrA=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -38,19 +38,19 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		pw3jG7Bx6WyIltUpOkDpP32XUFY=
+		N/m+pB8FfQ8P9oWyD25DUFqiqrA=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		Tk83rGPvFP3BT712Q/ulbltYRWo=
+		1nEhJ5yFd4WMZoA1xhvrlqg18ss=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		O9ya8vGkpeaPLMhDAn7DQaYNeZg=
+		kVHtMaeeEaZWwB/h1i/LQlysL1Y=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		oHymhQLpT8lScqqj5hmUqTASF5I=
+		wHMiE8KbLOZ/UfkqhZ3fuYHctJk=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
@@ -58,11 +58,11 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		oHymhQLpT8lScqqj5hmUqTASF5I=
+		wHMiE8KbLOZ/UfkqhZ3fuYHctJk=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		YMzKO+lyxu6Zvt3pWhRL0BPhJNQ=
+		YeI0O1mZ/qbP6L0ZKBpAECfLgfo=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -2021,7 +2021,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			QBP8ikZGvzoeZGAGUrlac4oGeDhIX8GQfVvKEFXSNQ4=
+			06hxpb/oGhAwvrfzgcsN+cI9vcIs/2HSRjo6sGGh5N0=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK.h</key>
@@ -2035,14 +2035,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			QrOS9pz83PjXUcvucZeORR2GY/GnAooIROoAxBGmwBI=
+			QLa5aMoFi/9sUtDAulXRQOhHJ0Zk+nxSHR2Dakd2E1U=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			bmrlB4FES8L3nHPQJracq1m3geI3S2a7zgBcsscPupQ=
+			kIlXLGIy96oFqY4BX99Oa5tejriOBK5xzfsSWoS/NNE=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
@@ -2056,28 +2056,28 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			bmrlB4FES8L3nHPQJracq1m3geI3S2a7zgBcsscPupQ=
+			kIlXLGIy96oFqY4BX99Oa5tejriOBK5xzfsSWoS/NNE=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Xpe+K3M67nOZh6IU5T0Bc40dxZ+hyENU8bcIkCHsyVQ=
+			viWASK/Mxspi4DYifmNwRlG6waSi2c5kU3c6Ygd65vE=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			QzXNtt/kUdfCU+6MzQQ4z1/vwSmnRcjOYqOzwuyjbEw=
+			/kXjF4CdK0p3RptEx4g97YcTMnQ3IllCwkhuZ2QWlqU=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			zkhYyu89YfvEEhaKl1OWXDjcb2Cq1eJYQ9tKQikjdrU=
+			vxSiItku1I8qIk+7YEpx8LNRsifEaPF4krPwOfFTGLQ=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
@@ -2091,14 +2091,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			zkhYyu89YfvEEhaKl1OWXDjcb2Cq1eJYQ9tKQikjdrU=
+			vxSiItku1I8qIk+7YEpx8LNRsifEaPF4krPwOfFTGLQ=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ILqDSNkgQQvSyQ475Kh07HuYcyk7ToS3lXndL6rZNyk=
+			5BuJzGLWscAYFVFVe8NAJ3KxTDIrD397ikjsvZabch8=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
