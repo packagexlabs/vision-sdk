@@ -26,7 +26,7 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		OnmqHUhq8lLsnXzr9hgBUcRum3E=
+		GQ4W4lFR1tTHv8fcfsgvT1CDejI=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
@@ -46,7 +46,7 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		M/9arhXRLDNQMGLUYkzQtt++CFs=
+		FthuJgMbgFSOFTdFzyfbFaiv/o4=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
@@ -2035,7 +2035,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			NBS3GrV9SnV2mu1jdKuug3gO4m+S/hY6bgfTjSn0yt8=
+			SyXvWL2BD2NJhib2CT1uACf0agb0bBrYWJYUriwUWYs=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
@@ -2070,7 +2070,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			54g4qkcjjOWBmmB3pE+Khh3cUGze9nfK3ZVlh/64G1M=
+			HTaH25g2SD3pu+o8FPQbIveLOvo2qxDQaL6Yk3XDN6o=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
