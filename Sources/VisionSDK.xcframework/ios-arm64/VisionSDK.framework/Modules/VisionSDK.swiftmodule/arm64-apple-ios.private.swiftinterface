@@ -509,6 +509,7 @@ extension VisionSDK.Connectivity {
 @_inheritsConvenienceInitializers @objc(Constants) public class VSDKConstants : ObjectiveC.NSObject {
   public static var apiKey: Swift.String
   public static var apiEnvironment: VisionSDK.VSDKAppEnvironment
+  public static var modelUrl: Foundation.URL!
   @objc override dynamic public init()
   @objc deinit
 }
