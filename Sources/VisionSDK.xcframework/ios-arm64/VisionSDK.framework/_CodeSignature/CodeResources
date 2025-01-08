@@ -26,7 +26,7 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		fURlq9e438XJyY3TOaa7A+V7jzw=
+		vc93bBhnqt/HkwWNlnXBMtZ0/zc=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
@@ -42,7 +42,7 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		wM7qoi24OB03Q/mc3A06uWc6AeI=
+		0s4fHbw5Rth9Kcotm5EbGPd5SSs=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -2015,7 +2015,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			oSFpE2WZpNdXOFxG07LKPeM+3Bn95xmLRGAqDVR8hYo=
+			eVULhi0iJkthDo435/8SkXDZHra38VyS6cPnLxPHdbo=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
@@ -2043,7 +2043,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			/cTdxGL2nxOuO456vn7zygLVlGOQdl4e0TTIiEuvh6E=
+			lEarI14WvPE8fs+YW6ZJhXyWmQZfOGRkcCTwCXl+PQ0=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
