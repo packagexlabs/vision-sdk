@@ -550,7 +550,7 @@ Then add the following dependency to
 your project's build.gradle file:
 
 ```kotlin
-implementation ("com.github.packagexlabs:vision-sdk-android:v2.0.18")
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.1.3")
 ```
 Check the [latest version](https://jitpack.io/#packagexlabs/vision-sdk-android) here
 
@@ -807,11 +807,12 @@ You need internet to download the important files for the first time. These file
 In order to do that, you need to use `configure()` function of the class `OnDeviceOCRManager`.
 
 ```kotlin
+val size: ModelSize? = ModelSize.Large
+val ocrModule = OCRModule.ShippingLabel(size)
 val onDeviceOCRManager = OnDeviceOCRManager(
    context: Context,
    platformType: PlatformType,
-   modelClass: ModelClass,
-   modelSize: ModelSize
+   ocrModule: ocrModule
 )
 ```
 
@@ -822,7 +823,7 @@ Flutter // For Flutter apps
 ReactNative // For React Native apps
 ```
 
-`ModelClass` is an enum that is used to inform the VisionSDK of the kind of OCR capabilities you require in your app.
+`OCRModule` is a sealed class that is used to inform the VisionSDK of the kind of OCR capabilities you require on your Bitmap image.
 Following are its option:
 ```kotlin
 ShippingLabel
@@ -846,7 +847,7 @@ XLarge
 | Model Class            | Nano | Micro | Small | Medium | Large | XLarge |
 |------------------------|------|-------|-------|--------|-------|--------|
 | ShippingLabel          | X    | ✓     | X     | X      | ✓     | X      |
-| BillOfLading           | X    | X     | X     | X      | X     | X      |
+| BillOfLading           | X    | X     | X     | X      | ✓     | X      |
 | ItemLabel              | X    | X     | X     | X      | ✓     | X      |
 | DocumentClassification | X    | X     | X     | X      | ✓     | X      |
 
@@ -886,20 +887,31 @@ val reportResult: ReportResult = ApiManager().reportAnIssueSync(
    apiKey = "YOUR_API_KEY_HERE", // You only need to pass one of the two params (apiKey or token)
    token = "YOUR_TOKEN_HERE",
    platformType: PlatformType = PlatformType.Native,
-   modelClass: ModelClass,
-   modelSize: ModelSize,
+   modelToReport = modelToReport,
    report: String,
    customData: Map<String, Any?>? = null,
    base64ImageToReportOn: String? = null
 )
 ```
 
+Here, `modelToReport` can be one of the following objects:
+```kotlin
+SLModelToReport
+BOLModelToReport
+ILModelToReport
+DCModelToReport
+```
+
 ## Attribution
 https://www.flaticon.com/free-icon/browser_9892390?term=template&page=1&position=10&origin=search&related_id=9892390
 
+https://iconduck.com/icons/68215/share-ios
+
+https://iconduck.com/icons/12743/trash
+
 ## License
 
-Copyright © 2024 PackageX Labs.
+Copyright © 2025 PackageX Labs.
 
 Licensed under the MIT License.
 
