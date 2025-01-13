@@ -87,27 +87,61 @@ public struct QuantizationParameters : Swift.Equatable, Swift.Hashable {
 }
 @_inheritsConvenienceInitializers @objc(VSDKAnalyticsReportModel) public class VSDKAnalyticsReportModel : ObjectiveC.NSObject, Swift.Codable {
   @objc override dynamic public init()
-  @objc deinit
-  public func encode(to encoder: any Swift.Encoder) throws
   required public init(from decoder: any Swift.Decoder) throws
-}
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(SLReportModel) public class SLReportModel : VisionSDK.VSDKAnalyticsReportModel {
-  @objc override dynamic public init()
-  override public func encode(to encoder: any Swift.Encoder) throws
+  public func encode(to encoder: any Swift.Encoder) throws
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(BOLReportModel) public class BOLReportModel : VisionSDK.VSDKAnalyticsReportModel {
+@_inheritsConvenienceInitializers @objc(SLReportModel) public class SLReportModel : VisionSDK.VSDKAnalyticsReportModel {
+  public var isTrackingNoWrong: Swift.Bool
+  public var isCourierNameWrong: Swift.Bool
+  public var isWeightWrong: Swift.Bool
+  public var isDimensionsValueWrong: Swift.Bool
+  public var isReceiverNameWrong: Swift.Bool
+  public var isReceiverAddressWrong: Swift.Bool
+  public var isSenderNameWrong: Swift.Bool
+  public var isSenderAddressWrong: Swift.Bool
   @objc override dynamic public init()
   override public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(ILReportModel) public class ILReportModel : VisionSDK.VSDKAnalyticsReportModel {
+@_inheritsConvenienceInitializers @objc(BOLReportModel) public class BOLReportModel : VisionSDK.VSDKAnalyticsReportModel {
+  public var isReferenceNoWrong: Swift.Bool
+  public var isLoadNumberWrong: Swift.Bool
+  public var isPurchaseOrderNumberWrong: Swift.Bool
+  public var isInvoiceNumberWrong: Swift.Bool
+  public var isCustomerPurchaseOrderNumberWrong: Swift.Bool
+  public var isOrderNumberWrong: Swift.Bool
+  public var isBillOfLadingWrong: Swift.Bool
+  public var isMasterBillOfLadingWrong: Swift.Bool
+  public var isLineBillOfLadingWrong: Swift.Bool
+  public var isHouseBillOfLadingWrong: Swift.Bool
+  public var isShippingIdWrong: Swift.Bool
+  public var isShippingDateWrong: Swift.Bool
+  public var isDateWrong: Swift.Bool
   @objc override dynamic public init()
   override public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(DCReportModel) public class DCReportModel : VisionSDK.VSDKAnalyticsReportModel {
+@_inheritsConvenienceInitializers @objc(ILReportModel) public class ILReportModel : VisionSDK.VSDKAnalyticsReportModel {
+  public var isSupplierNameWrong: Swift.Bool
+  public var isItemNameWrong: Swift.Bool
+  public var isItemSKUWrong: Swift.Bool
+  public var isWeightWrong: Swift.Bool
+  public var isQuantityWrong: Swift.Bool
+  public var isDimensionsValueWrong: Swift.Bool
+  public var isProductionDateWrong: Swift.Bool
+  public var isSupplierAddressWrong: Swift.Bool
   @objc override dynamic public init()
+  override public func encode(to encoder: any Swift.Encoder) throws
+  required public init(from decoder: any Swift.Decoder) throws
+  @objc deinit
+}
+@_inheritsConvenienceInitializers @objc(DCReportModel) public class DCReportModel : VisionSDK.VSDKAnalyticsReportModel {
+  public var isDocumentClassWrong: Swift.Bool
+  @objc override dynamic public init()
+  required public init(from decoder: any Swift.Decoder) throws
   override public func encode(to encoder: any Swift.Encoder) throws
   @objc deinit
 }
