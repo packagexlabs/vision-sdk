@@ -321,6 +321,11 @@ SWIFT_CLASS_NAMED("BOLReportModel")
 @end
 
 
+typedef SWIFT_ENUM(NSInteger, CameraPosition, open) {
+  CameraPositionBack = 1,
+  CameraPositionFront = 2,
+};
+
 typedef SWIFT_ENUM(NSInteger, CaptureMode, open) {
   CaptureModeAuto = 0,
   CaptureModeManual = 1,
@@ -343,6 +348,7 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorPriceTagDelegateNotImplemented = 8,
   CodeScannerErrorTemplateNotFound = 9,
   CodeScannerErrorNoTemplateCodesFound = 10,
+  CodeScannerErrorItemDelegateNotImplemented = 11,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -352,6 +358,7 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
   CodeScannerModeOcr = 3,
   CodeScannerModePhoto = 4,
   CodeScannerModePriceTag = 5,
+  CodeScannerModeItemRetrieval = 6,
 };
 
 @class NSCoder;
@@ -429,10 +436,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @protocol CodeScannerViewDelegate;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
-- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
+- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode cameraPosition:(enum CameraPosition)cameraPosition;
 - (void)setScanModeTo:(enum CodeScannerMode)mode;
 - (void)setCaptureModeTo:(enum CaptureMode)mode;
 - (void)setCaptureTypeTo:(enum CaptureType)type;
+- (void)setCameraPositionTo:(enum CameraPosition)position;
 - (void)capturePhoto;
 - (void)startRunning;
 - (void)stopRunning;
@@ -444,21 +452,30 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @end
 
 @class NSError;
+@class DetectedBarcode;
 
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(NSError * _Nonnull)error;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<DetectedBarcode *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 @optional
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
+- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<NSString *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
 SWIFT_CLASS_NAMED("DCReportModel")
 @interface DCReportModel : VSDKAnalyticsReportModel
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
+SWIFT_CLASS_NAMED("DetectedBarcode")
+@interface DetectedBarcode : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
@@ -511,8 +528,8 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOffline = 1,
 };
 
-enum VSDKModelClass : NSInteger;
-enum VSDKModelSize : NSInteger;
+enum VSDKModelExternalClass : NSInteger;
+enum VSDKModelExternalSize : NSInteger;
 @class CIImage;
 @class NSData;
 
@@ -522,9 +539,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 + (OnDeviceOCRManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)extractDataFromImage:(CIImage * _Nonnull)image withBarcodes:(NSArray<NSString *> * _Nonnull)barcodes :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
@@ -557,20 +574,20 @@ SWIFT_CLASS_NAMED("VSDKConstants")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
-typedef SWIFT_ENUM(NSInteger, VSDKModelClass, open) {
-  VSDKModelClassShippingLabel = 0,
-  VSDKModelClassBillOfLading = 1,
-  VSDKModelClassItemLabel = 2,
-  VSDKModelClassDocumentClassification = 3,
+typedef SWIFT_ENUM(NSInteger, VSDKModelExternalClass, open) {
+  VSDKModelExternalClassShippingLabel = 0,
+  VSDKModelExternalClassBillOfLading = 1,
+  VSDKModelExternalClassItemLabel = 2,
+  VSDKModelExternalClassDocumentClassification = 3,
 };
 
-typedef SWIFT_ENUM(NSInteger, VSDKModelSize, open) {
-  VSDKModelSizeNano = 0,
-  VSDKModelSizeMicro = 1,
-  VSDKModelSizeSmall = 2,
-  VSDKModelSizeMedium = 3,
-  VSDKModelSizeLarge = 4,
-  VSDKModelSizeXlarge = 5,
+typedef SWIFT_ENUM(NSInteger, VSDKModelExternalSize, open) {
+  VSDKModelExternalSizeNano = 0,
+  VSDKModelExternalSizeMicro = 1,
+  VSDKModelExternalSizeSmall = 2,
+  VSDKModelExternalSizeMedium = 3,
+  VSDKModelExternalSizeLarge = 4,
+  VSDKModelExternalSizeXlarge = 5,
 };
 
 
@@ -923,6 +940,11 @@ SWIFT_CLASS_NAMED("BOLReportModel")
 @end
 
 
+typedef SWIFT_ENUM(NSInteger, CameraPosition, open) {
+  CameraPositionBack = 1,
+  CameraPositionFront = 2,
+};
+
 typedef SWIFT_ENUM(NSInteger, CaptureMode, open) {
   CaptureModeAuto = 0,
   CaptureModeManual = 1,
@@ -945,6 +967,7 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorPriceTagDelegateNotImplemented = 8,
   CodeScannerErrorTemplateNotFound = 9,
   CodeScannerErrorNoTemplateCodesFound = 10,
+  CodeScannerErrorItemDelegateNotImplemented = 11,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -954,6 +977,7 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
   CodeScannerModeOcr = 3,
   CodeScannerModePhoto = 4,
   CodeScannerModePriceTag = 5,
+  CodeScannerModeItemRetrieval = 6,
 };
 
 @class NSCoder;
@@ -1031,10 +1055,11 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @protocol CodeScannerViewDelegate;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
-- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
+- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode cameraPosition:(enum CameraPosition)cameraPosition;
 - (void)setScanModeTo:(enum CodeScannerMode)mode;
 - (void)setCaptureModeTo:(enum CaptureMode)mode;
 - (void)setCaptureTypeTo:(enum CaptureType)type;
+- (void)setCameraPositionTo:(enum CameraPosition)position;
 - (void)capturePhoto;
 - (void)startRunning;
 - (void)stopRunning;
@@ -1046,21 +1071,30 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @end
 
 @class NSError;
+@class DetectedBarcode;
 
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(NSError * _Nonnull)error;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<NSString *> * _Nonnull)codes;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<DetectedBarcode *> * _Nonnull)codes;
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 @optional
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
+- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<NSString *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
 SWIFT_CLASS_NAMED("DCReportModel")
 @interface DCReportModel : VSDKAnalyticsReportModel
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
+SWIFT_CLASS_NAMED("DetectedBarcode")
+@interface DetectedBarcode : NSObject
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
@@ -1113,8 +1147,8 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOffline = 1,
 };
 
-enum VSDKModelClass : NSInteger;
-enum VSDKModelSize : NSInteger;
+enum VSDKModelExternalClass : NSInteger;
+enum VSDKModelExternalSize : NSInteger;
 @class CIImage;
 @class NSData;
 
@@ -1124,9 +1158,9 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 + (OnDeviceOCRManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelClass)modelClass withModelSize:(enum VSDKModelSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)extractDataFromImage:(CIImage * _Nonnull)image withBarcodes:(NSArray<NSString *> * _Nonnull)barcodes :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
@@ -1159,20 +1193,20 @@ SWIFT_CLASS_NAMED("VSDKConstants")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
-typedef SWIFT_ENUM(NSInteger, VSDKModelClass, open) {
-  VSDKModelClassShippingLabel = 0,
-  VSDKModelClassBillOfLading = 1,
-  VSDKModelClassItemLabel = 2,
-  VSDKModelClassDocumentClassification = 3,
+typedef SWIFT_ENUM(NSInteger, VSDKModelExternalClass, open) {
+  VSDKModelExternalClassShippingLabel = 0,
+  VSDKModelExternalClassBillOfLading = 1,
+  VSDKModelExternalClassItemLabel = 2,
+  VSDKModelExternalClassDocumentClassification = 3,
 };
 
-typedef SWIFT_ENUM(NSInteger, VSDKModelSize, open) {
-  VSDKModelSizeNano = 0,
-  VSDKModelSizeMicro = 1,
-  VSDKModelSizeSmall = 2,
-  VSDKModelSizeMedium = 3,
-  VSDKModelSizeLarge = 4,
-  VSDKModelSizeXlarge = 5,
+typedef SWIFT_ENUM(NSInteger, VSDKModelExternalSize, open) {
+  VSDKModelExternalSizeNano = 0,
+  VSDKModelExternalSizeMicro = 1,
+  VSDKModelExternalSizeSmall = 2,
+  VSDKModelExternalSizeMedium = 3,
+  VSDKModelExternalSizeLarge = 4,
+  VSDKModelExternalSizeXlarge = 5,
 };
 
 

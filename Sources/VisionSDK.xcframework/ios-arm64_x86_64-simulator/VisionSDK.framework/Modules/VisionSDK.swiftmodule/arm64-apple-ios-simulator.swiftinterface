@@ -152,9 +152,9 @@ public enum Runtime {
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(OnDeviceOCRManager) public class OnDeviceOCRManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.OnDeviceOCRManager
-  @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelClass, withModelSize modelSize: VisionSDK.VSDKModelSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
-  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
-  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelClass, withModelSize modelSize: VisionSDK.VSDKModelSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
+  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
   @objc public func extractDataFromImage(_ image: CoreImage.CIImage, withBarcodes barcodes: [Swift.String], _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
   @objc deinit
 }
@@ -266,6 +266,7 @@ public protocol Delegate : AnyObject {
   case priceTagDelegateNotImplemented = 8
   case templateNotFound = 9
   case noTemplateCodesFound = 10
+  case itemDelegateNotImplemented = 11
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -279,6 +280,7 @@ public protocol Delegate : AnyObject {
   case ocr
   case photo
   case priceTag
+  case itemRetrieval
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -303,6 +305,15 @@ public protocol Delegate : AnyObject {
     get
   }
 }
+@objc public enum CameraPosition : Swift.Int {
+  case back = 1
+  case front = 2
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
 @objc public enum CaptureMode : Swift.Int {
   case auto
   case manual
@@ -314,10 +325,11 @@ public protocol Delegate : AnyObject {
 }
 @objc(CodeScannerViewDelegate) public protocol CodeScannerViewDelegate {
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: Foundation.NSError)
-  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [Swift.String])
+  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [VisionSDK.DetectedBarcode])
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String) -> Swift.Bool
+  @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [Swift.String]) -> [Swift.String : Swift.Bool]
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
@@ -389,6 +401,9 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor @preconcurrency public var scanMode: VisionSDK.CodeScannerMode {
     get
   }
+  @_Concurrency.MainActor @preconcurrency public static var cameraPosition: VisionSDK.CameraPosition {
+    get
+  }
   @_Concurrency.MainActor @preconcurrency public static var videoDevice: AVFoundation.AVCaptureDevice {
     get
   }
@@ -398,10 +413,11 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 extension VisionSDK.CodeScannerView {
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode, cameraPosition: VisionSDK.CameraPosition = .back)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCameraPositionTo(_ position: VisionSDK.CameraPosition)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func capturePhoto()
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func startRunning()
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func stopRunning()
@@ -421,6 +437,9 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
 }
 extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)
+}
+@_hasMissingDesignatedInitializers @objc(DetectedBarcode) final public class DetectedBarcode : ObjectiveC.NSObject {
+  @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
@@ -530,7 +549,7 @@ extension VisionSDK.Connectivity {
     get
   }
 }
-@objc public enum VSDKModelClass : Swift.Int {
+@objc public enum VSDKModelExternalClass : Swift.Int {
   case shippingLabel
   case billOfLading
   case itemLabel
@@ -541,7 +560,7 @@ extension VisionSDK.Connectivity {
     get
   }
 }
-@objc public enum VSDKModelSize : Swift.Int {
+@objc public enum VSDKModelExternalSize : Swift.Int {
   case nano
   case micro
   case small
@@ -609,6 +628,9 @@ extension VisionSDK.OCRMode : Swift.RawRepresentable {}
 extension VisionSDK.CaptureType : Swift.Equatable {}
 extension VisionSDK.CaptureType : Swift.Hashable {}
 extension VisionSDK.CaptureType : Swift.RawRepresentable {}
+extension VisionSDK.CameraPosition : Swift.Equatable {}
+extension VisionSDK.CameraPosition : Swift.Hashable {}
+extension VisionSDK.CameraPosition : Swift.RawRepresentable {}
 extension VisionSDK.CaptureMode : Swift.Equatable {}
 extension VisionSDK.CaptureMode : Swift.Hashable {}
 extension VisionSDK.CaptureMode : Swift.RawRepresentable {}
@@ -618,12 +640,12 @@ extension VisionSDK.Connectivity.NetworkStatus : Swift.Equatable {}
 extension VisionSDK.Connectivity.NetworkStatus : Swift.Hashable {}
 extension VisionSDK.Connectivity.Connection : Swift.Equatable {}
 extension VisionSDK.Connectivity.Connection : Swift.Hashable {}
-extension VisionSDK.VSDKModelClass : Swift.Equatable {}
-extension VisionSDK.VSDKModelClass : Swift.Hashable {}
-extension VisionSDK.VSDKModelClass : Swift.RawRepresentable {}
-extension VisionSDK.VSDKModelSize : Swift.Equatable {}
-extension VisionSDK.VSDKModelSize : Swift.Hashable {}
-extension VisionSDK.VSDKModelSize : Swift.RawRepresentable {}
+extension VisionSDK.VSDKModelExternalClass : Swift.Equatable {}
+extension VisionSDK.VSDKModelExternalClass : Swift.Hashable {}
+extension VisionSDK.VSDKModelExternalClass : Swift.RawRepresentable {}
+extension VisionSDK.VSDKModelExternalSize : Swift.Equatable {}
+extension VisionSDK.VSDKModelExternalSize : Swift.Hashable {}
+extension VisionSDK.VSDKModelExternalSize : Swift.RawRepresentable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.Equatable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.Hashable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.RawRepresentable {}
