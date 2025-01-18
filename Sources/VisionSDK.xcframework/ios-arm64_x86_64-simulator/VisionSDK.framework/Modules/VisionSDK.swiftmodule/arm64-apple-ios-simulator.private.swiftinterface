@@ -266,7 +266,8 @@ public protocol Delegate : AnyObject {
   case priceTagDelegateNotImplemented = 8
   case templateNotFound = 9
   case noTemplateCodesFound = 10
-  case itemDelegateNotImplemented = 11
+  case itemRetrievalDelegateNotImplemented = 11
+  case authenticationNeededForItemRetrievalScanning = 12
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -375,10 +376,11 @@ extension VisionSDK.CodeScannerViewDelegate {
   }
   @objc(CameraSettings) public class CameraSettings : ObjectiveC.NSObject {
     public var nthFrameToProcess: Swift.Int64
+    public var cameraPosition: VisionSDK.CameraPosition
     @objc public static var `default`: VisionSDK.CodeScannerView.CameraSettings {
       @objc get
     }
-    @objc public init(nthFrameToProcess: Swift.Int64 = 10)
+    @objc public init(nthFrameToProcess: Swift.Int64 = 10, cameraPosition: VisionSDK.CameraPosition = .back)
     @objc deinit
   }
   @objc(PriceTagDetectionSettings) public class PriceTagDetectionSettings : ObjectiveC.NSObject {
@@ -391,21 +393,32 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage = UIImage(named: "vsdkValidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!, invalidTagImage: UIKit.UIImage = UIImage(named: "vsdkInvalidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!)
     @objc deinit
   }
-  @_Concurrency.MainActor @preconcurrency public var focusSettings: VisionSDK.CodeScannerView.FocusSettings
-  @_Concurrency.MainActor @preconcurrency public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration
-  @_Concurrency.MainActor @preconcurrency public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings
-  @_Concurrency.MainActor @preconcurrency public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings
-  @_Concurrency.MainActor @preconcurrency public var sessionPreset: AVFoundation.AVCaptureSession.Preset
-  @_Concurrency.MainActor @preconcurrency public var captureMode: VisionSDK.CaptureMode
-  @_Concurrency.MainActor @preconcurrency public var captureType: VisionSDK.CaptureType
+  @_Concurrency.MainActor @preconcurrency public var focusSettings: VisionSDK.CodeScannerView.FocusSettings {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency public var sessionPreset: AVFoundation.AVCaptureSession.Preset {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency public var captureMode: VisionSDK.CaptureMode {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency public var captureType: VisionSDK.CaptureType {
+    get
+  }
   @_Concurrency.MainActor @preconcurrency public var scanMode: VisionSDK.CodeScannerMode {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public static var cameraPosition: VisionSDK.CameraPosition {
-    get
-  }
-  @_Concurrency.MainActor @preconcurrency public static var videoDevice: AVFoundation.AVCaptureDevice {
-    get
+  @_Concurrency.MainActor @preconcurrency public var videoDevice: AVFoundation.AVCaptureDevice {
+    get throws
   }
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func layoutSubviews()
   @objc deinit
@@ -413,11 +426,15 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 extension VisionSDK.CodeScannerView {
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode, cameraPosition: VisionSDK.CameraPosition = .back)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCameraPositionTo(_ position: VisionSDK.CameraPosition)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setFocusSettingsTo(_ focusSettings: VisionSDK.CodeScannerView.FocusSettings)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setObjectDetectionConfigurationTo(_ objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCameraSettingsTo(_ cameraSettings: VisionSDK.CodeScannerView.CameraSettings)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setPriceTagDetectionSettingsTo(_ priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings)
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setSessionPresetTo(_ sessionPreset: AVFoundation.AVCaptureSession.Preset)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func capturePhoto()
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func startRunning()
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func stopRunning()
@@ -439,6 +456,9 @@ extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)
 }
 @_hasMissingDesignatedInitializers @objc(DetectedBarcode) final public class DetectedBarcode : ObjectiveC.NSObject {
+  @objc final public let stringValue: Swift.String
+  @objc final public let symbology: Vision.VNBarcodeSymbology
+  @objc final public let extractedData: [Swift.String : Swift.String]?
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
@@ -446,7 +466,7 @@ extension AVFoundation.AVCaptureDevice {
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func checkPriceTagAuthenticationWithKey(_ apiKey: Swift.String?, _ completion: @escaping ((_ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func checkScanningFeatureAuthenticationWithKey(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil) async -> (Foundation.NSError?)
   @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func getPredictionBillOfLadingCloud(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any] = [:], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callDocumentClassificationAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))

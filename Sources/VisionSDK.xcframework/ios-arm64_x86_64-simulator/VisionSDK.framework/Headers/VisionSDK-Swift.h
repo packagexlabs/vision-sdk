@@ -286,6 +286,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 @import Foundation;
 @import ObjectiveC;
 @import UIKit;
+@import Vision;
 #endif
 
 #endif
@@ -348,7 +349,8 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorPriceTagDelegateNotImplemented = 8,
   CodeScannerErrorTemplateNotFound = 9,
   CodeScannerErrorNoTemplateCodesFound = 10,
-  CodeScannerErrorItemDelegateNotImplemented = 11,
+  CodeScannerErrorItemRetrievalDelegateNotImplemented = 11,
+  CodeScannerErrorAuthenticationNeededForItemRetrievalScanning = 12,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -398,7 +400,7 @@ SWIFT_CLASS_NAMED("CameraSettings")
 @interface CameraSettings : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) CameraSettings * _Nonnull default_;)
 + (CameraSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithNthFrameToProcess:(int64_t)nthFrameToProcess OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithNthFrameToProcess:(int64_t)nthFrameToProcess cameraPosition:(enum CameraPosition)cameraPosition OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -436,11 +438,15 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @protocol CodeScannerViewDelegate;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
-- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode cameraPosition:(enum CameraPosition)cameraPosition;
+- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
 - (void)setScanModeTo:(enum CodeScannerMode)mode;
 - (void)setCaptureModeTo:(enum CaptureMode)mode;
 - (void)setCaptureTypeTo:(enum CaptureType)type;
-- (void)setCameraPositionTo:(enum CameraPosition)position;
+- (void)setFocusSettingsTo:(FocusSettings * _Nonnull)focusSettings;
+- (void)setObjectDetectionConfigurationTo:(ObjectDetectionConfiguration * _Nonnull)objectDetectionConfiguration;
+- (void)setCameraSettingsTo:(CameraSettings * _Nonnull)cameraSettings;
+- (void)setPriceTagDetectionSettingsTo:(PriceTagDetectionSettings * _Nonnull)priceTagDetectionSettings;
+- (void)setSessionPresetTo:(AVCaptureSessionPreset _Nonnull)sessionPreset;
 - (void)capturePhoto;
 - (void)startRunning;
 - (void)stopRunning;
@@ -474,6 +480,9 @@ SWIFT_CLASS_NAMED("DCReportModel")
 
 SWIFT_CLASS_NAMED("DetectedBarcode")
 @interface DetectedBarcode : NSObject
+@property (nonatomic, readonly, copy) NSString * _Nonnull stringValue;
+@property (nonatomic, readonly) VNBarcodeSymbology _Nonnull symbology;
+@property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> * _Nullable extractedData;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -601,7 +610,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
+- (void)checkScanningFeatureAuthenticationWithKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token completionHandler:(void (^ _Nonnull)(NSError * _Nullable))completionHandler;
 - (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)getPredictionBillOfLadingCloud:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)callDocumentClassificationAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
@@ -905,6 +914,7 @@ typedef unsigned int swift_uint4  __attribute__((__ext_vector_type__(4)));
 @import Foundation;
 @import ObjectiveC;
 @import UIKit;
+@import Vision;
 #endif
 
 #endif
@@ -967,7 +977,8 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorPriceTagDelegateNotImplemented = 8,
   CodeScannerErrorTemplateNotFound = 9,
   CodeScannerErrorNoTemplateCodesFound = 10,
-  CodeScannerErrorItemDelegateNotImplemented = 11,
+  CodeScannerErrorItemRetrievalDelegateNotImplemented = 11,
+  CodeScannerErrorAuthenticationNeededForItemRetrievalScanning = 12,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -1017,7 +1028,7 @@ SWIFT_CLASS_NAMED("CameraSettings")
 @interface CameraSettings : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) CameraSettings * _Nonnull default_;)
 + (CameraSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithNthFrameToProcess:(int64_t)nthFrameToProcess OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithNthFrameToProcess:(int64_t)nthFrameToProcess cameraPosition:(enum CameraPosition)cameraPosition OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -1055,11 +1066,15 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @protocol CodeScannerViewDelegate;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
-- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode cameraPosition:(enum CameraPosition)cameraPosition;
+- (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode;
 - (void)setScanModeTo:(enum CodeScannerMode)mode;
 - (void)setCaptureModeTo:(enum CaptureMode)mode;
 - (void)setCaptureTypeTo:(enum CaptureType)type;
-- (void)setCameraPositionTo:(enum CameraPosition)position;
+- (void)setFocusSettingsTo:(FocusSettings * _Nonnull)focusSettings;
+- (void)setObjectDetectionConfigurationTo:(ObjectDetectionConfiguration * _Nonnull)objectDetectionConfiguration;
+- (void)setCameraSettingsTo:(CameraSettings * _Nonnull)cameraSettings;
+- (void)setPriceTagDetectionSettingsTo:(PriceTagDetectionSettings * _Nonnull)priceTagDetectionSettings;
+- (void)setSessionPresetTo:(AVCaptureSessionPreset _Nonnull)sessionPreset;
 - (void)capturePhoto;
 - (void)startRunning;
 - (void)stopRunning;
@@ -1093,6 +1108,9 @@ SWIFT_CLASS_NAMED("DCReportModel")
 
 SWIFT_CLASS_NAMED("DetectedBarcode")
 @interface DetectedBarcode : NSObject
+@property (nonatomic, readonly, copy) NSString * _Nonnull stringValue;
+@property (nonatomic, readonly) VNBarcodeSymbology _Nonnull symbology;
+@property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> * _Nullable extractedData;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -1220,7 +1238,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 
 
 @interface VisionAPIManager (SWIFT_EXTENSION(VisionSDK))
-- (void)checkPriceTagAuthenticationWithKey:(NSString * _Nullable)apiKey :(void (^ _Nonnull)(NSError * _Nullable))completion;
+- (void)checkScanningFeatureAuthenticationWithKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token completionHandler:(void (^ _Nonnull)(NSError * _Nullable))completionHandler;
 - (void)callScanAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)getPredictionBillOfLadingCloud:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)callDocumentClassificationAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
