@@ -537,6 +537,7 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOffline = 1,
 };
 
+@class NSURL;
 enum VSDKModelExternalClass : NSInteger;
 enum VSDKModelExternalSize : NSInteger;
 @class CIImage;
@@ -548,6 +549,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 + (OnDeviceOCRManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+- (NSURL * _Nullable)getVSDKLogFileURL SWIFT_WARN_UNUSED_RESULT;
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
