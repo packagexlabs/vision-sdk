@@ -537,8 +537,6 @@ Some key features of the VisionSDK Android Integration include:
     - Item Label
     - Document Classification
 
-![Example1](ReadMeContent/Videos/Sample/VisionSDKSample.gif)
-
 ## Installation
 Vision SDK is hosted on JitPack.io
 
@@ -552,7 +550,7 @@ Then add the following dependency to
 your project's build.gradle file:
 
 ```kotlin
-implementation ("com.github.packagexlabs:vision-sdk-android:v2.1.12")
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.1.13")
 ```
 
 [![](https://jitpack.io/v/packagexlabs/vision-sdk-android.svg)](https://jitpack.io/#packagexlabs/vision-sdk-android)
