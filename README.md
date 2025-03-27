@@ -537,6 +537,8 @@ Some key features of the VisionSDK Android Integration include:
     - Item Label
     - Document Classification
 
+![Example1](ReadMeContent/Videos/Sample/VisionSDKSample.gif)
+
 ## Installation
 Vision SDK is hosted on JitPack.io
 
@@ -550,8 +552,11 @@ Then add the following dependency to
 your project's build.gradle file:
 
 ```kotlin
-implementation ("com.github.packagexlabs:vision-sdk-android:v2.1.3")
+implementation ("com.github.packagexlabs:vision-sdk-android:v2.1.12")
 ```
+
+[![](https://jitpack.io/v/packagexlabs/vision-sdk-android.svg)](https://jitpack.io/#packagexlabs/vision-sdk-android)
+
 Check the [latest version](https://jitpack.io/#packagexlabs/vision-sdk-android) here
 
 ## Usage
@@ -626,18 +631,17 @@ private fun startScanning() {
 
       }
 
-      fun onCodesScanned(barcodeList: List<String>) {
+      fun onCodesScanned(barcodeList: List<ScannedCodeResult>) {
 
       }
 
-      fun onFailure(exception: ScannerException) {
+      fun onFailure(exception: VisionSDKException) {
 
       }
 
-      fun onImageCaptured(bitmap: Bitmap, value: List<String>) {
+      fun onImageCaptured(bitmap: Bitmap, scannedCodeResults: List<ScannedCodeResult>) {
          // bitmap: The bitmap of captured image
-         // imageFile: Optional image file if user requested the image to be saved as file also.
-         // value: List of barcodes that were detected in the given image.
+         // scannedCodeResults: List of barcodes that were detected in the given image.
       }
     })
 
@@ -719,7 +723,7 @@ visionCameraView.capture()
 ```
 
 ```kotlin
-fun onImageCaptured(bitmap: Bitmap, imageFile: File?, value: List<String>) {
+fun onImageCaptured(bitmap: Bitmap, value: List<ScannedCodeResult>) {
    //Image along with the barcodes
 }
 ```
@@ -908,6 +912,16 @@ https://www.flaticon.com/free-icon/browser_9892390?term=template&page=1&position
 https://iconduck.com/icons/68215/share-ios
 
 https://iconduck.com/icons/12743/trash
+
+https://iconduck.com/icons/135251/switch-camera
+
+https://iconduck.com/icons/21758/check-circle
+
+https://iconduck.com/emojis/131776/check-mark-button
+
+https://iconduck.com/emojis/17512/negative-squared-cross-mark
+
+https://iconduck.com/icons/120793/barcode-fill
 
 ## License
 
