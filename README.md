@@ -8,11 +8,25 @@ with Restful API) modes. Written in Swift.
 
 ## Development Requirements
 
-- iOS 15.0+
+- iOS 16.0+
 - Swift: 5.7
 - Xcode Version: 13.0
 
 ## Installation
+
+### Swift Package Manager
+
+The [Swift Package Manager](https://swift.org/package-manager/) is a tool for automating the distribution of Swift code
+and is integrated into the `swift` compiler.
+
+Once you have your Swift package set up, adding VisionSDK as a dependency is as easy as adding it to the `dependencies`
+value of your `Package.swift`.
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/packagexlabs/vision-sdk.git", .upToNextMajor(from: "1.0.0"))
+]
+```
 
 ### CocoaPods
 
@@ -84,20 +98,20 @@ final class ViewController: UIViewController {
         
         // You can modify FocusSettings properties if needed
         let focusSettings = CodeScannerView.FocusSettings()
-        scannerView.focusSettings = focusSettings
+        scannerView.setFocusSettingsTo(focusSettings)
                 
         // You can modify focus ObjectDetectionConfiguration properties if needed
         let objectDetectionConfiguration = CodeScannerView.ObjectDetectionConfiguration()
-        scannerView.objectDetectionConfiguration = objectDetectionConfiguration
+        scannerView.setObjectDetectionConfigurationTo(objectDetectionConfiguration)
                 
         // You can modify focus CameraSettings properties if needed
         let cameraSettings = CodeScannerView.CameraSettings()
-        scannerView.cameraSettings = cameraSettings
+        scannerView.setCameraSettingsTo(cameraSettings)
         
                 
         // For price Tag mode you can use this
         let priceTagDetectionSettings = CodeScannerView.PriceTagDetectionSettings()
-        scannerView.priceTagDetectionSettings = priceTagDetectionSettings
+        scannerView.setPriceTagDetectionSettingsTo(priceTagDetectionSettings)
         
         scannerView.startRunning()
     }
@@ -113,11 +127,11 @@ final class ViewController: UIViewController {
 
 extension ViewController: CodeScannerViewDelegate {
 
-    func codeScannerView(_ scannerView: CodeScannerView, didFailure error: CodeScannerError) {
+    func codeScannerView(_ scannerView: CodeScannerView, didFailure error: NSError) {
         print(error)
     }
 
-    func codeScannerView(_ scannerView: CodeScannerView, didSuccess codes: [String]) {
+    func codeScannerView(_ scannerView: CodeScannerView, didSuccess codes: [DetectedBarcode]) {
         print(codes)
     }
 
@@ -127,12 +141,20 @@ extension ViewController: CodeScannerViewDelegate {
     }
 
     // returns captured image with all barcodes detected in it, cropped image only if document is detected in the image
-    func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String]) {
+    func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String]) {
     
     }
 
-    // This function is called only in Price Tag mode and requires boolean return value to display verification success on camera view. Please note that .priceTag mode works only if you are authenticated user. For authentication, use VisionAPIManager.checkPriceTagAuthenticationWithKey method
-    func codeScannerViewDidCapturePrice(_ price: String, withSKU sKU: String) -> Bool {
+    // This function is called only in Price Tag mode and requires boolean return value to display verification success on camera view.
+    // Please note that .priceTag mode works only if you are authenticated user. For authentication, use VisionAPIManager.checkScanningFeatureAuthenticationWithKey method
+    func codeScannerViewDidCapturePrice(_ price: String, withSKU sKU: String) -> Bool
+        
+    }
+
+    // This function is called only in Item Retrieval mode.
+    // Its passes all the captured item codes so the app can check woth its inventory and return dictionary with validation boolean for each code so the SDK can draw run time results on screen.
+    // Please note that .itemRetrieval mode works only if you are authenticated user. For authentication, use VisionAPIManager.checkScanningFeatureAuthenticationWithKey method
+    func codeScannerViewDidCaptureItemCodesWith(_ codes: [String]) -> [String: Bool] {
         
     }
 }
@@ -239,6 +261,8 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, sessionPreset
       and qrcodes in live camera feed if enabled by `isTextIndicationOn` or `isBarCodeOrQRCodeIndicationOn`. Processing
       every single frame may be costly in terms of CPU usage and battery consumption. Default value is `10` which means
       that from camera stream of usual 30 fps, every 10 frame is processed. Its value should be set between 1 - 30.
+
+    - `cameraPosition: CameraPosition = .back` - This is the camera position you want to use.
       
 - `PriceTagDetectionSettings` - PriceTagDetectionSettings struct defines the price tag related properties of scanner view. These properties are:
 
@@ -262,6 +286,7 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, sessionPreset
     - `.ocr` - Use this mode to capture photos for later user in OCR API call.
     - `.photo` - Use this mode to capture regular photos without the need for OCR
     - `.priceTag` - Use this mode for scanning price tags. This mode is only available for authenticated users.
+    - `.itemRetrieval` - Use this mode for item retrieval. This mode is only available for authenticated users.
 
 ```swift
 
@@ -332,11 +357,11 @@ mode.
 
 ```swift
 
-func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [String])
+func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [DetectedBarcode])
 
 ```
 
-This method returns with the codes scanned after successful scan
+This method returns with the codes scanned after successful scan. Detected code object contains string value, symbology and optional attributes extracted in case of gs1 barcode.
 
 ```swift
 
@@ -349,12 +374,12 @@ code indication is enabled while configuring the scanner view.
 
 ```swift
 
-func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String], savedImageURL: URL?)
+func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String])
 
 ```
 
 This method is called when `capturePhoto()` method is called in OCR or Photo Mode. It return with the captured image from camera stream, all the
-detected codes in it, and an optional cropped document image if a document is detected with in the captured image. `savedImageURL` parameter provides with the on device image url if `CameraSettings.shouldAutoSaveCapturedImage` is set to `true` while configuring the scanner view.
+detected codes in it, and an optional cropped document image if a document is detected with in the captured image.
 
 ```swift
 
@@ -379,6 +404,8 @@ public enum CodeScannerError: Int {
     case priceTagDelegateNotImplemented = 8
     case templateNotFound = 9
     case noTemplateCodesFound = 10
+    case itemRetrievalDelegateNotImplemented = 11
+    case authenticationNeededForItemRetrievalScanning = 12
 }
 
 ```
@@ -445,15 +472,17 @@ NOTE: VisionSDK automatically saves created templates into its secure storage. Y
 
 ### On-Device OCR Methods
 
-This method must be called first before using offline device OCR. Preparation should complete first without any errors. For that, listen to completion block in the params.
+This method must be called first before using offline device OCR. Preparation should complete first without any errors. For that, listen to completion block in the params. You can you any of these two methods depending if you want to specify modelSize or not. If not, then VisionSDK will automatically configure the modelSize based on your PackageX Subscription.
 
 ```swift
 
     // This method must be provided with `apiKey` or `token`.
     // modelClass: VSDKModelClass - Select required Model Class. Currently supported is .shippingLabel only
     // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. Currently supported sizes are .micro and .large only.
-    
-    func prepareOfflineOCR(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelClass, withModelSize modelSize: VSDKModelSize = .micro, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float)->())?, withCompletion completion:((_ error: NSError?)->())?)
+
+    func prepareOfflineOCR(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float, _ isModelAlreadyDownloaded: Bool)->())?, withCompletion completion:((_ error: NSError?)->())?)
+
+    func prepareOfflineOCR(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .micro, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float, _ isModelAlreadyDownloaded: Bool)->())?, withCompletion completion:((_ error: NSError?)->())?)
 
 ```    
 
@@ -474,23 +503,35 @@ syntax.
 
 ```swift
 
-func checkPriceTagAuthenticationWithKey(_ apiKey: String?, _ completion: @escaping ((_ error: NSError?) -> Void))
+func checkScanningFeatureAuthenticationWithKey(_ apiKey: String? = nil, andToken token: String? = nil) async -> (NSError?)
 
-func callScanAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, andLocationId locationId: String? = nil, andOptions options: [String: String], withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?)-> Void))
+func callScanAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, andLocationId locationId: String? = nil, andOptions options: [String: Any], andMetaData metaData: [String: Any] = [:], andRecipient recipient: [String: Any]? = nil, andSender sender: [String: Any]? = nil, withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ error: NSError?)-> Void))
 
-func callManifestAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ response: URLResponse?, _ error: NSError?) -> Void))
+func getPredictionBillOfLadingCloud(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, andLocationId locationId: String? = nil, andOptions options: [String: Any] = [:], withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ error: NSError?)-> Void))
+
+func callDocumentClassificationAPIWith(_ image: UIImage, andApiKey apiKey: String? = nil, andToken token: String? = nil, withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ error: NSError?)-> Void))
+
+func callItemLabelsAPIWith(_ image: UIImage, andApiKey apiKey: String? = nil, andToken token: String? = nil, withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ error: NSError?)-> Void))
+
+func callMatchingAPIWith(_ image: UIImage, andBarcodes barcodes: [String], andApiKey apiKey: String? = nil, andToken token: String? = nil, withResponseData responseData: Data, andLocationId locationId: String? = nil, andOptions options: [String: Any], andMetaData metaData: [String: Any] = [:], andRecipient recipient: [String: Any]? = nil, andSender sender: [String: Any]? = nil, withImageResizing shouldResizeImage: Bool = true, _ completion: @escaping ((_ data: Data?, _ error: NSError?)-> Void))
 
 ```
 
 These methods are called on the shared instance of `VisionAPIManager`. It can be accessed using `VisionAPIManager.shared`
 syntax. 
 
-To use price tag scanning, you need to authenticate first using `checkPriceTagAuthenticationWithKey` method. Upon successful completion block calling without error, you can use price tag mode of scanner view.
+To use price tag scanning or item retrieval usage, you need to authenticate first using `checkScanningFeatureAuthenticationWithKey` method. Upon successful completion block calling without error, you can use price tag or item retrieval mode of scanner view.
 
 `callScanAPIWith` method recieves the captured image and the API Key or AuthToken as parameters. It returns with the OCR Response from
 PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
 
-`callManifestAPIWith` method recieves the captured image and the API Key as parameters.
+`getPredictionBillOfLadingCloud` method recieves the captured image and the API Key or token as parameters.
+
+`callDocumentClassificationAPIWith` method recieves the captured image and the API Key or token as parameters.
+
+`callItemLabelsAPIWith` method recieves the captured image and the API Key or token as parameters.
+
+`callMatchingAPIWith` method recieves the captured image and the API Key or token as parameters. `responseData` requires the local on-device extracted object for matching with cloud.
 
 
 ### Analytics Methods
@@ -506,11 +547,14 @@ VisionSDK contains an automatic error logging system which reports any internal 
     // reportText: String - Description of issue you are facing
     // response: Data? - Optional response object you received from On-device extraction on the given image
 
-    func reportErrorWith(_ apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelClass, withModelSize modelSize: VSDKModelSize = .micro, image: CIImage?, withBarcodes barcodes: [String], reportText: String, response: Data?, withCompletion completion: ((_ response: Int)->())?)
+    func reportErrorWith(_ apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .micro, image: CIImage?, reportText: String, response: Data?, reportModel: VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Int)->())?)
 
     // Completion block returns an integer indicating response action on reported error. 
     /// 1 = Error reported successfully
     /// 2 = Error saved. Will be automatically posted later by VisionSDK.
+
+    // This method can be used to retrieve internal VisionSDK logs. It returns the URL to the zip file that contains usage logs of VisionSDK. It does not contain any user related or sensitive information and is used only for error tracking only.
+    func getVSDKLogs() -> URL?
 
 ```
 
