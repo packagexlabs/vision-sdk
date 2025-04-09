@@ -12,7 +12,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "VisionSDK",
-            targets: ["PXVisionSDK", "VisionSDK", "TensorFlow"]),
+            targets: ["PXVisionSDK", "VisionSDK"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -23,7 +23,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "PXVisionSDK",
-            dependencies: ["VisionSDK", "TensorFlow"],
+            dependencies: ["VisionSDK"],
             linkerSettings: [
                 .linkedLibrary("c++")
             ]
@@ -31,9 +31,5 @@ let package = Package(
         .binaryTarget(
                     name: "VisionSDK",
                     path: "./Sources/VisionSDK.xcframework"),
-        .binaryTarget(
-                    name: "TensorFlow",
-                    path: "./Sources/TensorFlowLiteC.xcframework"
-                )
     ]
 )

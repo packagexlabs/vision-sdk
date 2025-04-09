@@ -10,11 +10,23 @@
 		</data>
 		<key>Assets.car</key>
 		<data>
-		2DAK8E+2b0WOzLKvnH3VgeatL1o=
+		0/HkYAl4jtp0172YKN7ChnmUsy4=
+		</data>
+		<key>Frameworks/TensorFlowLiteC.framework/Info.plist</key>
+		<data>
+		09ND613qUqTdnooFRxoZaWfdjWg=
+		</data>
+		<key>Frameworks/TensorFlowLiteC.framework/TensorFlowLiteC</key>
+		<data>
+		2KkZtVHhN3C0WQypPp8fi7XHg+w=
+		</data>
+		<key>Frameworks/TensorFlowLiteC.framework/_CodeSignature/CodeResources</key>
+		<data>
+		IbmGMagjysB6P74lFBrqwgWVIkI=
 		</data>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<data>
-		hyVvVo+donRjSMzxxeu30kBc9Uw=
+		F2LpltJBpbqmeCtW9xdqCPTinRA=
 		</data>
 		<key>Headers/VisionSDK.h</key>
 		<data>
@@ -22,27 +34,27 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		7eOJC+EK4Y06TiAOG93bghvvbE4=
+		6IL1WZjVWpW07S6qMYhTJoZVDD4=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		6N5rHVjNJ18zWH08DEn0oB7/tu8=
+		0MbAr1cGDMo9pBASIH1BEjUZiWI=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
-		6PXYm1yhLhZlDuQIdEdVkG7gnQk=
+		4AhYRSdb5n6LfnMdQtTjM5cSte8=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<data>
-		rt2hJB23qqjcxoIu31S8soq0kVY=
+		tA6UpKmwYse2HtR5CTgrClYdzik=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<data>
-		6PXYm1yhLhZlDuQIdEdVkG7gnQk=
+		4AhYRSdb5n6LfnMdQtTjM5cSte8=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		JmLjXhvkbRzL782nT9dy9gr2Avk=
+		5Xu16MUCQRfgU/+tXxPTz1uklg0=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -1994,14 +2006,35 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			nEsoTXQGTHOx/Blk5rgLvqew3DkolcqPbMBWLYCMk6c=
+			CqVU/387E8ccEcsHrGhIIsCEjn+qFo4k9jOCpSP9EuQ=
+			</data>
+		</dict>
+		<key>Frameworks/TensorFlowLiteC.framework/Info.plist</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			KEV6TJwWyAiAG8TK92SHmcCrDGsh1gKyI0B9zZ9zR8A=
+			</data>
+		</dict>
+		<key>Frameworks/TensorFlowLiteC.framework/TensorFlowLiteC</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			ZBHLAtECJFmz3RRBO2ChXVttE5af7HYqRk1plpx9tLQ=
+			</data>
+		</dict>
+		<key>Frameworks/TensorFlowLiteC.framework/_CodeSignature/CodeResources</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			69CjDt1T1JRif/FtM1eZBc16FNEm8mX4tz160hvcr7s=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			b/npnmNTr9+4XmjK3R2cwEbdpWPQzViYY3mGHrAyTKU=
+			6tMqH2HN3F/1mK2/WP1lE8/9DkcyHGewPP8doCubAco=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK.h</key>
@@ -2015,35 +2048,35 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			UenhsUbYKPWwpmEMV4AVLzf0yfoYYCeUlEPOQLe6vJU=
+			xFa6dUgtG78TTOY7+TAuJCceA/pwx3ws71Edci1gso8=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			7A91egXuilLDZbGdriOlA0mFyVNa1rDy2vtfGNCFmoA=
+			VMkUHQ8aZGAtsDzMV8LPNmrtjEalDX0xnDptWKvLWxA=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eN5eMJ7j07t7PVjS9pXiuFbrgx3K1HmBY1sMbndtfB8=
+			KelJ9evwEYRTaF/dZRVtdvhEVklLVQfEq9xQxN9x1ZQ=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			7A91egXuilLDZbGdriOlA0mFyVNa1rDy2vtfGNCFmoA=
+			VMkUHQ8aZGAtsDzMV8LPNmrtjEalDX0xnDptWKvLWxA=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			rU0XjuaWPysxuI3f26XODY9VS+FyGonSV+d/DwAxTuE=
+			jiY8zcoQus1e0gcsnF4wcnU5RUyLDPt0lc2QZPceAys=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
