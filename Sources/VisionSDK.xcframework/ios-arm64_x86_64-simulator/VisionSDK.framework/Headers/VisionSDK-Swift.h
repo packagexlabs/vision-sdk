@@ -491,11 +491,14 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(NSError * _Nonnull)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<DetectedBarcode *> * _Nonnull)codes;
+@optional
+- (void)codeScannerViewDidDetectBoxes:(BOOL)text barCode:(NSArray<NSValue *> * _Nonnull)barCode qrCode:(NSArray<NSValue *> * _Nonnull)qrCode document:(CGRect)document;
+@required
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 @optional
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
-- (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<NSString *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
+- (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU withBoundingBox:(CGRect)boundingBox SWIFT_WARN_UNUSED_RESULT;
+- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<DetectedBarcode *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
@@ -510,6 +513,7 @@ SWIFT_CLASS_NAMED("DetectedBarcode")
 @property (nonatomic, readonly, copy) NSString * _Nonnull stringValue;
 @property (nonatomic, readonly) enum BarcodeSymbology symbology;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> * _Nullable extractedData;
+@property (nonatomic, readonly) CGRect boundingBox;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -577,7 +581,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (NSURL * _Nullable)getVSDKLogs SWIFT_WARN_UNUSED_RESULT;
-- (void)doSampleCrash;
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
@@ -1149,11 +1152,14 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(NSError * _Nonnull)error;
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<DetectedBarcode *> * _Nonnull)codes;
+@optional
+- (void)codeScannerViewDidDetectBoxes:(BOOL)text barCode:(NSArray<NSValue *> * _Nonnull)barCode qrCode:(NSArray<NSValue *> * _Nonnull)qrCode document:(CGRect)document;
+@required
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 @optional
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes;
-- (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<NSString *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
+- (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU withBoundingBox:(CGRect)boundingBox SWIFT_WARN_UNUSED_RESULT;
+- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<DetectedBarcode *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
 @end
 
 
@@ -1168,6 +1174,7 @@ SWIFT_CLASS_NAMED("DetectedBarcode")
 @property (nonatomic, readonly, copy) NSString * _Nonnull stringValue;
 @property (nonatomic, readonly) enum BarcodeSymbology symbology;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> * _Nullable extractedData;
+@property (nonatomic, readonly) CGRect boundingBox;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -1235,7 +1242,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (NSURL * _Nullable)getVSDKLogs SWIFT_WARN_UNUSED_RESULT;
-- (void)doSampleCrash;
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
