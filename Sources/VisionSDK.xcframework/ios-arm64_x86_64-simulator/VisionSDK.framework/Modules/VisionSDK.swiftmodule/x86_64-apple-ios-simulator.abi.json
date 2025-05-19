@@ -22509,504 +22509,504 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 9734,
+      "offset": 9760,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9781,
+      "offset": 9807,
       "length": 47,
       "value": "\"Already processing \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9814,
+      "offset": 9840,
       "length": 1,
       "value": "\"! Please wait\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9891,
+      "offset": 9917,
       "length": 11,
       "value": "\"VisionSDK\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 9910,
+      "offset": 9936,
       "length": 3,
       "value": "306"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9953,
+      "offset": 9979,
       "length": 33,
       "value": "\"Already processing! Please wait\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 10069,
+      "offset": 10095,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10226,
+      "offset": 10252,
       "length": 34,
       "value": "\"Offline OCR is being prepared...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10420,
+      "offset": 10446,
       "length": 25,
       "value": "\"Model size retrieved...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10661,
+      "offset": 10687,
       "length": 46,
       "value": "\"Retrieved size is \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10706,
+      "offset": 10732,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 11168,
+      "offset": 11194,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 11355,
+      "offset": 11381,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 11369,
+      "offset": 11395,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 11398,
+      "offset": 11424,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 11415,
+      "offset": 11441,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 11496,
+      "offset": 11522,
       "length": 83,
       "value": "\"getModelSize completion handler - currentlyRequiredModelSpecifications updated...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 11702,
+      "offset": 11728,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 11818,
+      "offset": 11844,
       "length": 89,
       "value": "\"getModelSize completion handler - no internet available and not a valid offline user...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 11951,
+      "offset": 11977,
       "length": 11,
       "value": "\"VisionSDK\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 11970,
+      "offset": 11996,
       "length": 3,
       "value": "304"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12013,
+      "offset": 12039,
       "length": 47,
       "value": "\"Please connect with network to load resources\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12322,
+      "offset": 12348,
       "length": 106,
       "value": "\"getModelSize completion handler - first model specification found and starting to configure the model...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12662,
+      "offset": 12688,
       "length": 126,
       "value": "\"configureModelForModelClass completion handler - model configuration completed with error: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12783,
+      "offset": 12809,
       "length": 1,
       "value": "\")...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 12927,
+      "offset": 12953,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 12987,
+      "offset": 13013,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 13207,
+      "offset": 13233,
       "length": 91,
       "value": "\"getModelSize completion handler - completed with error: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 13293,
+      "offset": 13319,
       "length": 1,
       "value": "\")...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 13424,
+      "offset": 13450,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 13479,
+      "offset": 13505,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30186,
+      "offset": 30212,
       "length": 161,
       "value": "\"setupModelDownloadingWith - For model class: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30254,
+      "offset": 30280,
       "length": 1,
       "value": "\", and size: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30287,
+      "offset": 30313,
       "length": 1,
       "value": "\" - isModelAlreadyDownloaded: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30343,
+      "offset": 30369,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30627,
+      "offset": 30653,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30829,
+      "offset": 30855,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 31695,
+      "offset": 31721,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 31934,
+      "offset": 31960,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "FloatLiteral",
-      "offset": 32265,
+      "offset": 32291,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 32502,
+      "offset": 32528,
       "length": 63,
       "value": "\"didFinishLoadingWithError completion handler - self is nil...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 32715,
+      "offset": 32741,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 32766,
+      "offset": 32792,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 32877,
+      "offset": 32903,
       "length": 97,
       "value": "\"didFinishLoadingWithError completion handler - error occurred \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 32970,
+      "offset": 32996,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 33168,
+      "offset": 33194,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 33411,
+      "offset": 33437,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33496,
+      "offset": 33522,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 33548,
+      "offset": 33574,
       "length": 89,
       "value": "\"didFinishLoadingWithError completion handler - Updated finished model loading status...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33809,
+      "offset": 33835,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 33875,
+      "offset": 33901,
       "length": 74,
       "value": "\"didFinishLoadingWithError completion handler - Starting next download...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 34171,
+      "offset": 34197,
       "length": 98,
       "value": "\"configureModelForModelClass completion handler - error occurred \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 34265,
+      "offset": 34291,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 34407,
+      "offset": 34433,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 34466,
+      "offset": 34492,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 34742,
+      "offset": 34768,
       "length": 76,
       "value": "\"OnDeviceModelManager.shared.didFinishLoadingWithError - On Device Ready...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 34944,
+      "offset": 34970,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 34999,
+      "offset": 35025,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 35258,
+      "offset": 35284,
       "length": 64,
       "value": "\"setupModelDownloadingWith - Starting to load existing model...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 35562,
+      "offset": 35588,
       "length": 113,
       "value": "\"setupModelDownloadingWith - Error occured while loading existing model. error: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 35671,
+      "offset": 35697,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 35981,
+      "offset": 36007,
       "length": 80,
       "value": "\"Error occured while loading encrypted saved model while internet was connected\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36118,
+      "offset": 36144,
       "length": 60,
       "value": "\"setupModelDownloadingWith - Removed existing model data...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 36257,
+      "offset": 36283,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 36308,
+      "offset": 36334,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 36608,
+      "offset": 36634,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 36659,
+      "offset": 36685,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36703,
+      "offset": 36729,
       "length": 97,
       "value": "\"setupModelDownloadingWith - Error occurred while loading model info before starting download...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36866,
+      "offset": 36892,
       "length": 11,
       "value": "\"VisionSDK\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 36885,
+      "offset": 36911,
       "length": 3,
       "value": "304"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36928,
+      "offset": 36954,
       "length": 70,
       "value": "\"No Model Info Found! Please contact our customer support at PackageX\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 37086,
+      "offset": 37112,
       "length": 56,
       "value": "\"setupModelDownloadingWith - Starting Model Download...\""
     },
@@ -23944,7 +23944,7 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 36007,
+      "offset": 36860,
       "length": 4,
       "value": "true"
     },
@@ -30930,182 +30930,182 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1113,
+      "offset": 1150,
       "length": 16,
       "value": "\"shipping_label\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "Dictionary",
-      "offset": 1382,
+      "offset": 1419,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1652,
+      "offset": 1689,
       "length": 12,
       "value": "\"created_at\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1691,
+      "offset": 1728,
       "length": 12,
       "value": "\"updated_at\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1745,
+      "offset": 1782,
       "length": 11,
       "value": "\"image_url\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1779,
+      "offset": 1816,
       "length": 8,
       "value": "\"object\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1843,
+      "offset": 1880,
       "length": 17,
       "value": "\"organization_id\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1891,
+      "offset": 1928,
       "length": 16,
       "value": "\"purchase_order\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1937,
+      "offset": 1974,
       "length": 15,
       "value": "\"provider_name\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1977,
+      "offset": 2037,
       "length": 10,
       "value": "\"raw_text\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2020,
+      "offset": 2080,
       "length": 18,
       "value": "\"reference_number\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2070,
+      "offset": 2130,
       "length": 17,
       "value": "\"tracking_number\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2136,
+      "offset": 2196,
       "length": 6,
       "value": "\"type\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2308,
+      "offset": 2368,
       "length": 18,
       "value": "\"extracted_labels\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2379,
+      "offset": 2439,
       "length": 11,
       "value": "\"recipient\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2413,
+      "offset": 2473,
       "length": 8,
       "value": "\"sender\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2448,
+      "offset": 2508,
       "length": 13,
       "value": "\"middle_mile\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 7271,
+      "offset": 8802,
       "length": 9,
       "value": "\"address\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 7836,
+      "offset": 9367,
       "length": 8,
       "value": "\"object\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 7953,
+      "offset": 9484,
       "length": 14,
       "value": "\"country_code\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 8045,
+      "offset": 9576,
       "length": 13,
       "value": "\"postal_code\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 8112,
+      "offset": 9643,
       "length": 12,
       "value": "\"state_code\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 8153,
+      "offset": 9684,
       "length": 10,
       "value": "\"textarea\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 8227,
+      "offset": 9758,
       "length": 19,
       "value": "\"formatted_address\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 8278,
+      "offset": 9809,
       "length": 13,
       "value": "\"location_id\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "Dictionary",
-      "offset": 57716,
+      "offset": 62716,
       "length": 5109,
       "value": "[(\"ups\", \"UPS\"), (\"fedex\", \"FedEx\"), (\"usps\", \"USPS\"), (\"amazon\", \"Amazon\"), (\"amazon-fba-us\", \"Amazon\"), (\"purolator\", \"Purolator\"), (\"canada-post\", \"CANADA POST\"), (\"canpar\", \"Canpar\"), (\"cdl\", \"CDL\"), (\"china-ems\", \"CHINA-EMS\"), (\"china-post\", \"CHINA-POST\"), (\"dhl\", \"DHL\"), (\"dynamex\", \"DYNAMEX\"), (\"equick-cn\", \"Equick CN\"), (\"fastway\", \"fastway\"), (\"australia-post\", \"AUSTRALIA POST\"), (\"hongkong-post\", \"Hongkong Post\"), (\"india-post\", \"India Post\"), (\"japan-post\", \"JP Post\"), (\"jd\", \"JD\"), (\"lasership\", \"LaserShip\"), (\"mark3\", \"MARK 3\"), (\"maxx\", \"Max\"), (\"ontrac\", \"OnTrac\"), (\"pakistan-post\", \"PAKISTAN POST\"), (\"royal-mail\", \"Royal Mail\"), (\"sf-express\", \"SF EXPRESS\"), (\"singapore-post\", \"Singapore POST\"), (\"sto-express\", \"sto express\"), (\"tnt\", \"TNT\"), (\"yto-express\", \"YTO EXPRESS\"), (\"yun-express\", \"YunExpress\"), (\"zto-express\", \"ZTO EXPRESS\"), (\"dpd\", \"dpd\"), (\"star-track\", \"STARTRACK\"), (\"hermes\", \"Hermes\"), (\"parcel-force\", \"PARCEL-FORCE\"), (\"postnl\", \"postnl\"), (\"yodel\", \"YODEL\"), (\"gls\", \"GLS\"), (\"colissimo\", \"colissimo\"), (\"collect-plus\", \"collect +\"), (\"transworld\", \"transworld\"), (\"crawfords-delivery-services\", \"Crawfords\"), (\"whistl\", \"whistl\"), (\"an-post\", \"an post\"), (\"wish-post\", \"wish POST\"), (\"city-air-express\", \"City Air Express\"), (\"sagawa-express\", \"Sagawa Express\"), (\"fukuyama-transportation\", \"Fukuyama Transportation\"), (\"skyworldwide\", \"Sky Worldwide\"), (\"toll-group\", \"Toll Group\"), (\"ide-express\", \"IDE Express\"), (\"road-express\", \"Road Express\"), (\"endeavour\", \"endeavour\"), (\"overnight-express\", \"Overnight Express\"), (\"rhyme-express\", \"Rhyme Express\"), (\"yuantong-express\", \"Yuantong Express\"), (\"best-express\", \"Best Express\"), (\"deppon\", \"Deppon\"), (\"tmall\", \"tmall\"), (\"netease\", \"Netease\"), (\"unitop\", \"Unitop\"), (\"chronopost\", \"Chrono Post\"), (\"newzealand-post\", \"New Zealand Post\"), (\"ninja-van\", \"ninja van\"), (\"pos-laju\", \"POS LAJU\"), (\"city-link\", \"City Link\"), (\"lel-express\", \"LEL Express\"), (\"gdex\", \"GDEX\"), (\"blibli\", \"Blibli\"), (\"tokopedia\", \"Tokopedia\"), (\"tiki\", \"tiki\"), (\"j&t-express\", \"J&T Express\"), (\"jne\", \"JNE\"), (\"surpostal\", \"Surpostal\"), (\"espana\", \"Espana\"), (\"mercado\", \"Mercado\"), (\"webpack\", \"Webpack\"), (\"andreani\", \"Andreani\"), (\"correo-argentino\", \"Correo Argentino\"), (\"urbano\", \"Urbano\"), (\"correos\", \"Correos\"), (\"yamato-transport\", \"Yamato Transport\"), (\"247-express\", \"247 Express\"), (\"chilexpress\", \"Chilexpress\"), (\"flash-express\", \"Flash Express\"), (\"kerry-express\", \"Kerry Express\"), (\"shopee-xpress\", \"Shopee Express\"), (\"thailand-post\", \"Thailand Post\"), (\"viettel-post\", \"Viettel Post\"), (\"wsp-express\", \"WSP Express\"), (\"zoom-express\", \"Zoom Express\"), (\"inpost\", \"inpost\"), (\"poczta_polska\", \"Poczta Polska\"), (\"blue-express\", \"Blue Express\"), (\"olva\", \"Olva\"), (\"aramex\", \"Aramex\"), (\"nhat-tin-logistics\", \"Nhat Tin Logistics\"), (\"bpost\", \"BPost\"), (\"vietnam-post\", \"Vietnam Post\"), (\"ocs\", \"OCS\"), (\"dawn-wing\", \"Dawn Wing\"), (\"the-courier-guy\", \"The Courier Guy\"), (\"ccd-courier\", \"CCD Courier\"), (\"bex-express\", \"BEX Express\"), (\"postnard\", \"Postnard\"), (\"2go-express\", \"2GO Express\"), (\"jrs-express\", \"JRS Express\"), (\"geodis\", \"Geodis\"), (\"lso\", \"LSO\"), (\"statovernight\", \"statovernight\"), (\"bring\", \"Bring\"), (\"sr-group\", \"SR Group\"), (\"pentagon-freight\", \"Pentagon Freight\"), (\"loomis-express\", \"Loomis Express\"), (\"transferd\", \"Transferd\"), (\"logi-trans\", \"Logi Trans\"), (\"jetpak\", \"jetpak\"), (\"db-schenker\", \"DB-SCHENKER\"), (\"merkesdal\", \"merkesdal\"), (\"kuehne-nagel\", \"KUEHNE+NAGEL\"), (\"postnord\", \"postnord\"), (\"nor-lines\", \"Nor Lines\"), (\"envialia\", \"envialia\"), (\"nacex\", \"NACEX\"), (\"mrw\", \"MRW\"), (\"correos-express\", \"Correos Express\"), (\"redur\", \"REDUR\"), (\"ctt\", \"ctt Express\"), (\"sending\", \"sending\"), (\"couriers-please\", \"CouriersPlease\"), (\"intelcom\", \"Intelcom\"), (\"posteitaliane\", \"Posteitaliane\"), (\"colis prive\", \"Colis Prive\"), (\"la poste\", \"La Poste\"), (\"deutsche post\", \"Deutsche Post\"), (\"brt\", \"BRT\"), (\"ciblex\", \"Ciblex\"), (\"united-delivery\", \"United Delivery\"), (\"walmart\", \"Walmart\"), (\"york-university-bookstore\", \"York University Bookstore\"), (\"gofo-express\", \"Gofo Express\"), (\"temu\", \"Temu\"), (\"ameriship\", \"Ameriship\"), (\"ipl\", \"IPL\"), (\"dg-fulfillment\", \"DG Fulfillment\")]"
     },
@@ -34003,49 +34003,56 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 31805,
+      "offset": 31804,
+      "length": 88,
+      "value": "[\"S-O_COURIER_NAME\", \"S-O_COURIER_TRACKING_NO\", \"S-O_LABEL_SHIPMENT_TYPE\"]"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
+      "kind": "Array",
+      "offset": 31939,
       "length": 120,
       "value": "[\"invoice\", \"item_label\", \"bol\", \"receipt\", \"other_document\", \"unknown\", \"shipping_label\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 31960,
+      "offset": 32094,
       "length": 784,
       "value": "[\"O\", \"SUPPLIER_NAME\", \"ITEM_NAME\", \"SUPPLIER_ADDRESS\", \"MODEL\", \"SERIAL_NUMBERS\", \"ORIGIN_COUNTRY\", \"ITEM_NUMBER\", \"ITEM_SKU\", \"MAC_ID\", \"PRODUCTION_DATE\", \"ITEM_DIMENSION\", \"PURCHASE_ORDER\", \"CUSTOMER_SKU\", \"QUANTITY\", \"ITEM_WEIGHT\", \"PACKAGED_WEIGHT\", \"CARTON_NUMBER\", \"PACKAGED_DIMENSION\", \"SALES_ORDER\", \"COLOR\", \"LOT_NUMBER\", \"SUPPLIER_NUMBER\", \"SUPPLIER_ITEM_NUMBER\", \"CUSTOMER_NAME\", \"CUSTOMER_ADDRESS\", \"CUSTOMER_NUMBER\", \"CUSTOMER_ITEM_NUMBER\", \"CARTON_ID\", \"REFERENCE\", \"JOB_ID\", \"SSCC\", \"CLEI_CODE\", \"VERSION\", \"UPC\", \"GTIN\", \"SIZE\", \"EXPIRATION_DATE\", \"ITEM_PRICE\", \"ITEM_VOLUME\", \"ITEM_CHEMICAL_FORMULA\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 32795,
+      "offset": 32929,
       "length": 253,
       "value": "[\"MODEL\", \"SERIAL_NUMBERS\", \"ITEM_NUMBER\", \"ITEM_SKU\", \"MAC_ID\", \"PURCHASE_ORDER\", \"CUSTOMER_SKU\", \"QUANTITY\", \"SALES_ORDER\", \"SUPPLIER_ITEM_NUMBER\", \"CUSTOMER_ITEM_NUMBER\", \"REFERENCE\", \"CLEI_CODE\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 33085,
+      "offset": 33219,
       "length": 603,
       "value": "[\"O\", \"MASTER_BILL_OF_LADING\", \"LOAD_NO\", \"QUANTITY_TABLE_HEADER\", \"DESCRIPTION_TABLE_HEADER\", \"INVOICE_KEY\", \"SHIPPING_DATE\", \"WEIGHT_TABLE_HEADER\", \"PRICE\", \"OTHERS_TABLE_HEADERS\", \"PO_NO\", \"HOUSE_BILL_OF_LADING\", \"TRAK_NO\", \"REF_NO\", \"LINE_BILL_OF_LADING\", \"BILL_OF_LADING\", \"INVOICE\", \"SKU_TABLE_HEADER\", \"REF_NO_KEY\", \"WEIGHT\", \"PRICE_TABLE_HEADER\", \"SHIPPING_ID\", \"LOAD_NO_KEY\", \"DESCRIPTION\", \"PO_NO_KEY\", \"OTHER_TABLE_VALUES\", \"SKU\", \"QUANTITY\", \"ORDER_NO\", \"ORDER_NO_KEY\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 33721,
+      "offset": 33855,
       "length": 38,
       "value": "[\"value\", \"key\", \"pair\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 33789,
+      "offset": 33923,
       "length": 3690,
       "value": "[\"usps\", \"ups\", \"ecms\", \"amazon\", \"purolator\", \"fedex\", \"canada_post\", \"canpar\", \"lasership\", \"cdl\", \"china_ems\", \"china_post\", \"dhl\", \"dynamex\", \"equick-cn\", \"fastway\", \"australia-post\", \"hongkong-post\", \"india-post\", \"japan-post\", \"jd\", \"mark3\", \"max_express\", \"ontrac\", \"royal-mail\", \"sf-express\", \"singapore-post\", \"sto-express\", \"tnt\", \"yto-express\", \"yun-express\", \"zto-express\", \"colissimo\", \"dpd\", \"star-track\", \"hermes\", \"parcel-force\", \"postnl\", \"yodel\", \"gls\", \"collect-plus\", \"transworld\", \"crawfords-delivery-services\", \"whistl\", \"an-post\", \"wish-post\", \"city-air-express\", \"sagawa-express\", \"fukuyama-transportation\", \"skyworldwide\", \"toll-group\", \"ide-express\", \"road-express\", \"endeavour\", \"overnight-express\", \"rhyme-express\", \"yuantong-express\", \"best-express\", \"deppon\", \"tmall\", \"netease\", \"unitop\", \"chronopost\", \"newzealand-post\", \"ninja-van\", \"pos-laju\", \"city-link\", \"lel-express\", \"gdex\", \"blibli\", \"tokopedia\", \"tiki\", \"j&t-express\", \"jne\", \"surpostal\", \"mercado\", \"webpack\", \"andreani\", \"correios\", \"correo-argentino\", \"nacex\", \"urbano\", \"correos\", \"247-express\", \"chilexpress\", \"flash-express\", \"kerry-express\", \"shopee-xpress\", \"thailand-post\", \"viettel-post\", \"wsp-express\", \"zoom-express\", \"inpost\", \"espana\", \"poczta_polska\", \"blue-express\", \"olva\", \"aramex\", \"nhat-tin-logistics\", \"bpost\", \"vietnam-post\", \"ocs\", \"dawn-wing\", \"the-courier-guy\", \"ccd-courier\", \"bex-express\", \"2go-express\", \"jrs-express\", \"geodis\", \"lso\", \"statovernight\", \"bring\", \"sr-group\", \"pentagon-freight\", \"loomis-express\", \"logi-trans\", \"jetpak\", \"db-schenker\", \"merkesdal\", \"kuehne-nagel\", \"postnord\", \"nor-lines\", \"envialia\", \"mrw\", \"correos-express\", \"redur\", \"ctt\", \"sending\", \"dtdc\", \"bluedart\", \"shree-maruti\", \"swiss-post\", \"yamato-transport\", \"office-depot\", \"leopards\", \"gpo\", \"m&p\", \"tcs\", \"keeney\", \"couriersplease\", \"intelcom\", \"posteitaliane\", \"la_poste\", \"colis_prive\", \"deutsche_post\", \"brt\", \"ciblex\", \"ics\", \"staples\", \"tforce\", \"veho\", \"nbc\", \"novex\", \"atlas-couriers\", \"grand-and-toy\", \"corporate-couriers-logistics\", \"nz-couriers\", \"abc\", \"tph\", \"momo\", \"korea-post\", \"urgent-couriers\", \"lawton-connect\", \"crown\", \"abbott-communications\", \"hsinchu-logistics\", \"pitt-ohio-express\", \"dksh\", \"seur\", \"ems_belpost\", \"kce\", \"quill-dot-com\", \"parcel-post\", \"cdek\", \"ppl\", \"old\", \"uzpost\", \"my-toll\", \"uline\", \"coordinadora\", \"trans-o-flex\", \"k-parcel\", \"t-force\", \"collicare-logistics\", \"speedx\", \"lax\", \"lex\", \"team-global-express\", \"logistiq\", \"global-chinese\", \"micro-precision\", \"airways-freight\", \"better-trucks\", \"border-express-delivery\", \"sendle\", \"tdt\", \"thanh-cong-express\", \"deliver-it\", \"team-global-express\", \"logistiq\", \"global-chinese\", \"micro-precision\", \"airways-freight\", \"better-trucks\", \"border-express-delivery\", \"sendle\", \"tdt\", \"thanh-cong-express\", \"inland-logistics\", \"arc-best\"]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Dictionary",
-      "offset": 37509,
+      "offset": 37643,
       "length": 5780,
       "value": "[(\"usps\", \"usps\"), (\"ups\", \"ups\"), (\"ecms\", \"ecms\"), (\"amazon-fba-us\", \"amazon_mws\"), (\"purolator\", \"purolator\"), (\"fedex\", \"fedex\"), (\"canada-post\", \"canada_post\"), (\"canpar\", \"canpar\"), (\"cdl\", \"cdl\"), (\"china-ems\", \"china_ems\"), (\"china-post\", \"china_post\"), (\"dhl\", \"dhl\"), (\"dynamex\", \"dynamex\"), (\"equick-cn\", \"equick-cn\"), (\"fastway\", \"fastway\"), (\"australia-post\", \"australia_post\"), (\"hong-kong-post\", \"hongkong_post\"), (\"india-post\", \"india_post\"), (\"japan-post\", \"jp_post\"), (\"jd\", \"jd\"), (\"lasership\", \"lasership\"), (\"mark3\", \"mark3\"), (\"maxx\", \"max_express\"), (\"ontrac\", \"ontrac\"), (\"royal-mail\", \"royal_mail\"), (\"sf-express\", \"sf_express\"), (\"singapore-post\", \"singapore_post\"), (\"sto-express\", \"sto_express\"), (\"tnt\", \"tnt\"), (\"yto-express\", \"yto_express\"), (\"yunexpress\", \"yun_express\"), (\"zto-express\", \"zto_express\"), (\"dpd\", \"dpd\"), (\"star-track\", \"star_track\"), (\"hermes\", \"hermes\"), (\"parcel-force\", \"parcel_force\"), (\"postnl\", \"post_nl\"), (\"yodel\", \"yodel\"), (\"gls\", \"gso\"), (\"colissimo\", \"colissimo\"), (\"collect-plus\", \"collect_plus\"), (\"transworld\", \"transworld\"), (\"crawfords-delivery-services\", \"crawfords_delivery_services\"), (\"whistl\", \"whistl\"), (\"an-post\", \"an_post\"), (\"wish-post\", \"wish_post\"), (\"city-air-express\", \"city_air_express\"), (\"sagawa-express\", \"sagawa_express\"), (\"fukuyama-transportation\", \"fukuyama_transportation\"), (\"skyworldwide\", \"skyworldwide\"), (\"toll-group\", \"toll_group\"), (\"ide-express\", \"ide_express\"), (\"road-express\", \"road_express\"), (\"endeavour\", \"endeavour\"), (\"overnight-express\", \"overnight_express\"), (\"rhyme-express\", \"rhyme_express\"), (\"yuantong-express\", \"yuantong_express\"), (\"best-express\", \"best_express\"), (\"deppon\", \"deppon\"), (\"tmall\", \"tmall\"), (\"netease\", \"netease\"), (\"unitop\", \"unitop\"), (\"chronopost\", \"chronopost\"), (\"newzealand-post\", \"newzealand_post\"), (\"ninja-van\", \"ninja_van\"), (\"pos-laju\", \"pos_laju\"), (\"city-link\", \"city_link\"), (\"lel-express\", \"lel_express\"), (\"gdex\", \"gdex\"), (\"blibli\", \"blibli\"), (\"tokopedia\", \"tokopedia\"), (\"tiki\", \"tiki\"), (\"j&t-express\", \"j&t_express\"), (\"jne\", \"jne\"), (\"surpostal\", \"surpostal\"), (\"mercado\", \"mercado\"), (\"webpack\", \"webpack\"), (\"andreani\", \"andreani\"), (\"urbano\", \"urbano\"), (\"correos\", \"correos\"), (\"247express\", \"247_express\"), (\"chilexpress\", \"chile_express\"), (\"flash-express\", \"flash_express\"), (\"kerry-express\", \"kerry_express\"), (\"shopee-xpress\", \"shopee_xpress\"), (\"thailand-post\", \"thailand_post\"), (\"viettel-post\", \"viettel_post\"), (\"wsp-express\", \"wsp_express\"), (\"zoom-express\", \"zoom_express\"), (\"inpost\", \"inpost\"), (\"poczta-polska\", \"poczta_polska\"), (\"blue-express\", \"blue_express\"), (\"olva-courier\", \"olva\"), (\"aramex\", \"aramex\"), (\"nhat-tin-logistics\", \"nhat_tin_logistics\"), (\"bpost\", \"bpost\"), (\"vietnam-post\", \"vietnam_post\"), (\"ocs\", \"ocs\"), (\"dawn-wing\", \"dawn_wing\"), (\"the-courier-guy\", \"the_courier_guy\"), (\"ccd-courier\", \"ccd_couier\"), (\"bex-express\", \"bex_express\"), (\"2go-express\", \"2GO Express\"), (\"jrs-express\", \"JRS Express\"), (\"geodis\", \"GEODIS\"), (\"lso\", \"lso\"), (\"statovernight\", \"statovernight\"), (\"bring\", \"bring\"), (\"sr-group\", \"sr_group\"), (\"pentagon-freight\", \"pentagon_freight\"), (\"loomis-express\", \"loomis_express\"), (\"logi-trans\", \"logi_trans\"), (\"jetpak\", \"jetpak\"), (\"db-schenker\", \"db_schenker\"), (\"merkesdal\", \"merkesdal\"), (\"kuehne-nagel\", \"kuehne_nagel\"), (\"nor-lines\", \"nor_lines\"), (\"envialia\", \"envialia\"), (\"nacex\", \"nacex\"), (\"mrw\", \"mrw\"), (\"correos-express\", \"correo_express\"), (\"redur\", \"redur\"), (\"ctt\", \"ctt\"), (\"sending\", \"sending\"), (\"dtdc\", \"dtdc\"), (\"bluedart\", \"bluedart\"), (\"shree-maruti\", \"shree_maruti\"), (\"swiss-post\", \"swiss_post\"), (\"yamato\", \"kuroneko_yamato\"), (\"office-depot\", \"office_depot\"), (\"leopard\", \"leopards\"), (\"gpo\", \"gpo\"), (\"m&p\", \"m&p\"), (\"tcs\", \"tcs\"), (\"keeney\", \"keeney\"), (\"couriers-please\", \"couriers_please\"), (\"intelcom\", \"intelcom\"), (\"posteitaliane\", \"posteitaliane\"), (\"la-poste\", \"la_poste\"), (\"colis-prive\", \"colis_prive\"), (\"deutsche-post\", \"deutsche_post\"), (\"brt\", \"brt\"), (\"ciblex\", \"ciblex\"), (\"ics\", \"ics\"), (\"staples\", \"staples\"), (\"tforce\", \"tforce\"), (\"veho\", \"veho\"), (\"nbc\", \"nbc\"), (\"novex\", \"novex\"), (\"atlas-courier\", \"atlas_courier\"), (\"grand-and-toy\", \"grand_and_toy\"), (\"corporate-couriers-logistics\", \"corporate_couriers_logistics\"), (\"nz-couriers\", \"nz_couriers\"), (\"abc\", \"abc\"), (\"tph\", \"tph\"), (\"momo\", \"momo\"), (\"urgent-couriers\", \"urgent_couriers\"), (\"lawton-connect\", \"lawton_connect\"), (\"crown\", \"crown\"), (\"abbott\", \"abbott_communications\"), (\"rl-carriers\", \"rl_carriers\"), (\"hct\", \"hsinchu_logistics\"), (\"pitt-ohio-express\", \"pitt_ohio_express\"), (\"dksh\", \"dksh\"), (\"seur\", \"seur\"), (\"ems-belpost\", \"ems_belpost\"), (\"korea-post\", \"korea_post\"), (\"ace-courier\", \"ace_couriers\"), (\"uline\", \"uline\"), (\"speed-post\", \"speed-post\"), (\"quill\", \"quill\"), (\"ppl\", \"ppl\"), (\"trans-o-flex\", \"trans_o_flex\"), (\"uzpost\", \"uzpost\"), (\"old\", \"old\"), (\"parcel-post\", \"parcel_post\"), (\"poczta_polska\", \"poczta_polska\"), (\"my-toll\", \"my_toll\"), (\"coordinadora\", \"coordinadora\"), (\"kce\", \"kce\"), (\"cdek\", \"cdek\"), (\"collicare-logistics\", \"collicare_logistics\"), (\"correo-argentino\", \"correo_argentino\"), (\"lax\", \"lax\"), (\"lex\", \"lex\"), (\"postnord\", \"postnord\"), (\"team-global-express\", \"team_global_express\"), (\"logistiq\", \"logistiq\"), (\"flight-path-services\", \"flight_path_services\"), (\"cainiao\", \"cainiao\"), (\"uniuni\", \"uniuni\"), (\"roadie\", \"roadie\")]"
     },
