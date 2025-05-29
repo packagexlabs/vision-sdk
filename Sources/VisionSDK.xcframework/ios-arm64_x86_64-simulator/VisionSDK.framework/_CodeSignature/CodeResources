@@ -12,22 +12,6 @@
 		<data>
 		0/HkYAl4jtp0172YKN7ChnmUsy4=
 		</data>
-		<key>Frameworks/TensorFlowLiteC.framework/Info.plist</key>
-		<data>
-		BaXgn9H85AQhDC85qOaC2LEhI5c=
-		</data>
-		<key>Frameworks/TensorFlowLiteC.framework/PrivacyInfo.xcprivacy</key>
-		<data>
-		PFHYbs0V3eUFDWQyYQcwEetuqEk=
-		</data>
-		<key>Frameworks/TensorFlowLiteC.framework/TensorFlowLiteC</key>
-		<data>
-		YbCIUd15IRP1mC73D5Px2ilG6MQ=
-		</data>
-		<key>Frameworks/TensorFlowLiteC.framework/_CodeSignature/CodeResources</key>
-		<data>
-		N93fBhWoeSNtbv80RjJZA6tPQ6g=
-		</data>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<data>
 		fqTz8tstWEwio32/6RTzeM9/oMs=
@@ -2031,34 +2015,6 @@
 			<key>hash2</key>
 			<data>
 			CqVU/387E8ccEcsHrGhIIsCEjn+qFo4k9jOCpSP9EuQ=
-			</data>
-		</dict>
-		<key>Frameworks/TensorFlowLiteC.framework/Info.plist</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			GlXYUbKjiWHiEwVq9akI+lrBijX0US5danuVjppPfh0=
-			</data>
-		</dict>
-		<key>Frameworks/TensorFlowLiteC.framework/PrivacyInfo.xcprivacy</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			A7LHCDOjMaKx79Ef8WjtAqjq39Xn0fvzDuzHUJpK6kc=
-			</data>
-		</dict>
-		<key>Frameworks/TensorFlowLiteC.framework/TensorFlowLiteC</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			q4+H2TEgubjM5mX72Xr/IRKiIUeA/arGxAMt0ajVods=
-			</data>
-		</dict>
-		<key>Frameworks/TensorFlowLiteC.framework/_CodeSignature/CodeResources</key>
-		<dict>
-			<key>hash2</key>
-			<data>
-			wIhG37NLGhLpG8/znDFBvYj2lPmITo7R24DYGjIQnJ8=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK-Swift.h</key>
