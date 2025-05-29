@@ -22,7 +22,7 @@
 		</data>
 		<key>Frameworks/TensorFlowLiteC.framework/TensorFlowLiteC</key>
 		<data>
-		yMf1l+8WfNPVoQt5Jo1fenVfV7M=
+		Prpsfl+wNGmCJgJ/1wezkjRWuQY=
 		</data>
 		<key>Frameworks/TensorFlowLiteC.framework/_CodeSignature/CodeResources</key>
 		<data>
@@ -42,7 +42,7 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.abi.json</key>
 		<data>
-		oFI6g7b6m+tP+TMXhTdEPnG6xm0=
+		xKlO66pKhABqNm5RP5tCSx6mnm8=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
 		<data>
@@ -58,7 +58,7 @@
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.swiftmodule</key>
 		<data>
-		xmUQ8qD54uPkc/r3NBIm0UFxSO4=
+		Xn+WNFgahSeUgJhqnSjxihUw5x8=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -2031,7 +2031,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			0n394nFqLxW++z7af0jvefgOMqf+EzZzTrDdCEL0ilE=
+			mys/fbB9vV0htTFKSYcQijDpDUzceRJMpJ7xrOoZQaU=
 			</data>
 		</dict>
 		<key>Frameworks/TensorFlowLiteC.framework/_CodeSignature/CodeResources</key>
@@ -2059,7 +2059,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			6yfOyjHIjujeU2Vh2hcN9XsyLWxlAD22dkrRwLrg+oM=
+			77Jy/e1/hznfShPpvbg5rz72w30abt3T/UgVyZ9RgSU=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios.private.swiftinterface</key>
@@ -2087,7 +2087,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			pgJq9CBWVUctUcc4sVhCUgdOkYlZ8np+mZwGGxoVrj4=
+			56WuA3YDepr4bM96JVya754SiqI/KJZ5jx/b+6GPlSQ=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
