@@ -22530,532 +22530,532 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 1316,
+      "offset": 1391,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 9760,
+      "offset": 9835,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9807,
+      "offset": 9882,
       "length": 47,
       "value": "\"Already processing \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9840,
+      "offset": 9915,
       "length": 1,
       "value": "\"! Please wait\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9917,
+      "offset": 9992,
       "length": 11,
       "value": "\"VisionSDK\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 9936,
+      "offset": 10011,
       "length": 3,
       "value": "306"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 9979,
+      "offset": 10054,
       "length": 33,
       "value": "\"Already processing! Please wait\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 10095,
+      "offset": 10170,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10252,
+      "offset": 10327,
       "length": 34,
       "value": "\"Offline OCR is being prepared...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10446,
+      "offset": 10521,
       "length": 25,
       "value": "\"Model size retrieved...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10687,
+      "offset": 10892,
       "length": 46,
       "value": "\"Retrieved size is \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 10732,
+      "offset": 10937,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 11194,
+      "offset": 11399,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 11381,
+      "offset": 11586,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 11395,
+      "offset": 11600,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 11424,
+      "offset": 11629,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 11441,
+      "offset": 11646,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 11522,
+      "offset": 11727,
       "length": 83,
       "value": "\"getModelSize completion handler - currentlyRequiredModelSpecifications updated...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 11728,
+      "offset": 11933,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 11844,
+      "offset": 12049,
       "length": 89,
       "value": "\"getModelSize completion handler - no internet available and not a valid offline user...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 11977,
+      "offset": 12182,
       "length": 11,
       "value": "\"VisionSDK\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 11996,
+      "offset": 12201,
       "length": 3,
       "value": "304"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12039,
+      "offset": 12244,
       "length": 47,
       "value": "\"Please connect with network to load resources\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12348,
+      "offset": 12553,
       "length": 106,
       "value": "\"getModelSize completion handler - first model specification found and starting to configure the model...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12688,
+      "offset": 12893,
       "length": 126,
       "value": "\"configureModelForModelClass completion handler - model configuration completed with error: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 12809,
+      "offset": 13014,
       "length": 1,
       "value": "\")...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 12953,
+      "offset": 13158,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 13013,
+      "offset": 13218,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 13233,
+      "offset": 13438,
       "length": 91,
       "value": "\"getModelSize completion handler - completed with error: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 13319,
+      "offset": 13524,
       "length": 1,
       "value": "\")...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 13450,
+      "offset": 13655,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 13505,
+      "offset": 13710,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30212,
+      "offset": 30417,
       "length": 161,
       "value": "\"setupModelDownloadingWith - For model class: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30280,
+      "offset": 30485,
       "length": 1,
       "value": "\", and size: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30313,
+      "offset": 30518,
       "length": 1,
       "value": "\" - isModelAlreadyDownloaded: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 30369,
+      "offset": 30574,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30653,
+      "offset": 30858,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 30855,
+      "offset": 31060,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 31721,
+      "offset": 31926,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 31960,
+      "offset": 32165,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "FloatLiteral",
-      "offset": 32291,
+      "offset": 32496,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 32528,
+      "offset": 32733,
       "length": 63,
       "value": "\"didFinishLoadingWithError completion handler - self is nil...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 32741,
+      "offset": 32946,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 32792,
+      "offset": 32997,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 32903,
+      "offset": 33108,
       "length": 97,
       "value": "\"didFinishLoadingWithError completion handler - error occurred \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 32996,
+      "offset": 33201,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 33194,
+      "offset": 33399,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 33437,
+      "offset": 33642,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33522,
+      "offset": 33727,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 33574,
+      "offset": 33779,
       "length": 89,
       "value": "\"didFinishLoadingWithError completion handler - Updated finished model loading status...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 33835,
+      "offset": 34040,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 33901,
+      "offset": 34106,
       "length": 74,
       "value": "\"didFinishLoadingWithError completion handler - Starting next download...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 34197,
+      "offset": 34402,
       "length": 98,
       "value": "\"configureModelForModelClass completion handler - error occurred \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 34291,
+      "offset": 34496,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 34433,
+      "offset": 34638,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 34492,
+      "offset": 34697,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 34768,
+      "offset": 35076,
       "length": 76,
       "value": "\"OnDeviceModelManager.shared.didFinishLoadingWithError - On Device Ready...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 34970,
+      "offset": 35278,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 35025,
+      "offset": 35333,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 35284,
+      "offset": 35592,
       "length": 64,
       "value": "\"setupModelDownloadingWith - Starting to load existing model...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 35588,
+      "offset": 35896,
       "length": 113,
       "value": "\"setupModelDownloadingWith - Error occured while loading existing model. error: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 35697,
+      "offset": 36005,
       "length": 3,
       "value": "\"...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36007,
+      "offset": 36315,
       "length": 80,
       "value": "\"Error occured while loading encrypted saved model while internet was connected\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36144,
+      "offset": 36452,
       "length": 60,
       "value": "\"setupModelDownloadingWith - Removed existing model data...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 36283,
+      "offset": 36591,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 36334,
+      "offset": 36642,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "Array",
-      "offset": 36634,
+      "offset": 36942,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 36685,
+      "offset": 36993,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36729,
+      "offset": 37037,
       "length": 97,
       "value": "\"setupModelDownloadingWith - Error occurred while loading model info before starting download...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36892,
+      "offset": 37200,
       "length": 11,
       "value": "\"VisionSDK\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 36911,
+      "offset": 37219,
       "length": 3,
       "value": "304"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 36954,
+      "offset": 37262,
       "length": 70,
       "value": "\"No Model Info Found! Please contact our customer support at PackageX\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "StringLiteral",
-      "offset": 37112,
+      "offset": 37420,
       "length": 56,
       "value": "\"setupModelDownloadingWith - Starting Model Download...\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 66756,
+      "offset": 67064,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 66777,
+      "offset": 67085,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceConfigurationManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 66802,
+      "offset": 67110,
       "length": 1,
       "value": "5"
     },
@@ -23993,7 +23993,7 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 36860,
+      "offset": 37940,
       "length": 4,
       "value": "true"
     },
