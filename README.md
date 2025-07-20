@@ -141,9 +141,12 @@ extension ViewController: CodeScannerViewDelegate {
     }
 
     // returns captured image with all barcodes detected in it, cropped image only if document is detected in the image
+    @available(iOS, introduced: 15.0, deprecated: 17.0)
     func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String]) {
     
     }
+    
+    func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedBarcode])
 
     // This function is called only in Price Tag mode and requires boolean return value to display verification success on camera view.
     // Please note that .priceTag mode works only if you are authenticated user. For authentication, use VisionAPIManager.checkScanningFeatureAuthenticationWithKey method
@@ -374,7 +377,7 @@ code indication is enabled while configuring the scanner view.
 
 ```swift
 
-func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String])
+func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedBarcode])
 
 ```
 
@@ -490,7 +493,10 @@ For extraction of data using Offline OCR use the following method.
 
 ```swift
 
+    @available(iOS, introduced: 15.0, deprecated: 17.0)
     func extractDataFromImage(_ image: CIImage, withBarcodes barcodes: [String], _ completion: @escaping ((Data?, NSError?) -> Void))
+    
+    func extractDataFromImageUsing(_ image: CIImage, withBarcodes barcodes: [DetectedBarcode], _ completion: @escaping ((Data?, NSError?) -> Void))
 
 ```   
 
