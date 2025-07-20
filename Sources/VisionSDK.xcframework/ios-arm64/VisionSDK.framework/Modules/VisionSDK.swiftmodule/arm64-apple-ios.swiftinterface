@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.0.3 effective-5.10 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)
-// swift-module-flags: -target arm64-apple-ios16.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name VisionSDK
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface
+// swift-compiler-version: Apple Swift version 6.1.2 effective-5.10 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
+// swift-module-flags: -target arm64-apple-ios16.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1.2
 import AVFoundation
 import Accelerate
 import Combine
@@ -95,7 +95,9 @@ import zlib
   @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
   @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
   @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
-  @objc public func extractDataFromImage(_ image: CoreImage.CIImage, withBarcodes barcodes: [Swift.String], _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
+  @available(iOS, introduced: 15.0, deprecated: 17.0)
+  @objc public func extractDataFromImage(_ image: CoreImage.CIImage, withBarcodes barcodes: [Swift.String], _ completion: @escaping (Foundation.Data?, Foundation.NSError?) -> Swift.Void)
+  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedBarcode], _ completion: @escaping (Foundation.Data?, Foundation.NSError?) -> Swift.Void)
   @objc deinit
 }
 public enum InterpreterError : Swift.Error, Swift.Equatable, Swift.Hashable {
@@ -234,7 +236,9 @@ extension VisionSDK.InterpreterError : Swift.CustomStringConvertible {
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [VisionSDK.DetectedBarcode])
   @objc optional func codeScannerViewDidDetectBoxes(_ text: Swift.Bool, barCode: [CoreFoundation.CGRect], qrCode: [CoreFoundation.CGRect], document: CoreFoundation.CGRect)
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
+  @available(iOS, introduced: 15.0, deprecated: 17.0)
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
+  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedBarcode])
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect) -> Swift.Bool
   @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedBarcode]) -> [Swift.String : Swift.Bool]
 }
@@ -373,13 +377,14 @@ extension AVFoundation.AVCaptureDevice {
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  @objc dynamic public func checkScanningFeatureAuthenticationWithKey(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil) async -> (Foundation.NSError?)
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func getPredictionBillOfLadingCloud(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any] = [:], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func callDocumentClassificationAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func callItemLabelsAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
-  @objc dynamic public func callItemLabelsMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func checkScanningFeatureAuthenticationWithKey(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil) async -> Foundation.NSError?
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func getPredictionBillOfLadingCloud(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any] = [:], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func callDocumentClassificationAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func callItemLabelsAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func callItemLabelsMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], withImageResizing shouldResizeImage: Swift.Bool = false, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
 }
 public enum ReachabilityError : Swift.Error {
   case FailedToCreateWithAddress(Darwin.sockaddr_in)
