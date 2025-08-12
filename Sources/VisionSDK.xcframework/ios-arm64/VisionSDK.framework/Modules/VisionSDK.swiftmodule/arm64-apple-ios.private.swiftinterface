@@ -365,11 +365,12 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
 extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)
 }
-@_hasMissingDesignatedInitializers @objc(DetectedBarcode) final public class DetectedBarcode : ObjectiveC.NSObject {
+@objc(DetectedBarcode) final public class DetectedBarcode : ObjectiveC.NSObject {
   @objc final public let stringValue: Swift.String
   @objc final public let symbology: VisionSDK.BarcodeSymbology
   @objc final public let extractedData: [Swift.String : Swift.String]?
   @objc final public let boundingBox: CoreFoundation.CGRect
+  public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero)
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
