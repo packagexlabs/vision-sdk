@@ -16592,7 +16592,7 @@
           {
             "kind": "Function",
             "name": "callItemLabelsMatchingAPIWith",
-            "printedName": "callItemLabelsMatchingAPIWith(_:andBarcodes:andApiKey:andToken:withResponseData:withImageResizing:_:)",
+            "printedName": "callItemLabelsMatchingAPIWith(_:andBarcodes:andApiKey:andToken:withResponseData:withImageResizing:andMetaData:_:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -16663,6 +16663,26 @@
                 "usr": "s:Sb"
               },
               {
+                "kind": "TypeNominal",
+                "name": "Dictionary",
+                "printedName": "[Swift.String : Any]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ProtocolComposition",
+                    "printedName": "Any"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:SD"
+              },
+              {
                 "kind": "TypeFunc",
                 "name": "Function",
                 "printedName": "(Foundation.Data?, Foundation.NSError?) -> ()",
@@ -16711,8 +16731,8 @@
               }
             ],
             "declKind": "Func",
-            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callItemLabelsMatchingAPIWith:andBarcodes:andApiKey:andToken:withResponseData:withImageResizing::",
-            "mangledName": "$s9VisionSDK0A10APIManagerC29callItemLabelsMatchingAPIWith_11andBarcodes0I6ApiKey0I5Token16withResponseData0N13ImageResizing_ySo7UIImageC_SaySSGSSSgAM10Foundation0P0VSbyAPSg_So7NSErrorCSgtctF",
+            "usr": "c:@CM@VisionSDK@objc(cs)VisionAPIManager(im)callItemLabelsMatchingAPIWith:andBarcodes:andApiKey:andToken:withResponseData:withImageResizing:andMetaData::",
+            "mangledName": "$s9VisionSDK0A10APIManagerC29callItemLabelsMatchingAPIWith_11andBarcodes0I6ApiKey0I5Token16withResponseData0N13ImageResizing0i4MetaP0_ySo7UIImageC_SaySSGSSSgAN10Foundation0P0VSbSDySSypGyAQSg_So7NSErrorCSgtctF",
             "moduleName": "VisionSDK",
             "declAttributes": [
               "Dynamic",
@@ -34133,8 +34153,15 @@
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "Dictionary",
+      "offset": 36601,
+      "length": 3,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 40953,
+      "offset": 41041,
       "length": 5,
       "value": "false"
     },
