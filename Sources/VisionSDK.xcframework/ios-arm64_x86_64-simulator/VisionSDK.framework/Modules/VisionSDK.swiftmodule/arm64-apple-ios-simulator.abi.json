@@ -30564,63 +30564,63 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "Dictionary",
-      "offset": 13442,
+      "offset": 13441,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "Array",
-      "offset": 15328,
+      "offset": 15326,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "StringLiteral",
-      "offset": 16964,
+      "offset": 16962,
       "length": 4,
       "value": "\"id\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "StringLiteral",
-      "offset": 16996,
+      "offset": 16994,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "StringLiteral",
-      "offset": 17031,
+      "offset": 17029,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "StringLiteral",
-      "offset": 17244,
+      "offset": 17242,
       "length": 6,
       "value": "\"unit\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "StringLiteral",
-      "offset": 17280,
+      "offset": 17278,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "StringLiteral",
-      "offset": 17505,
+      "offset": 17503,
       "length": 6,
       "value": "\"unit\""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OldOCRResponse.swift",
       "kind": "StringLiteral",
-      "offset": 17541,
+      "offset": 17539,
       "length": 7,
       "value": "\"value\""
     },
