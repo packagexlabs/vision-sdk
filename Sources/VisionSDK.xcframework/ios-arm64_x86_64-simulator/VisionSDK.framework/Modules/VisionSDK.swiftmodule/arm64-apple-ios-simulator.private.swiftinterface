@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 6.1.2 effective-5.10 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)
-// swift-module-flags: -target arm64-apple-ios16.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDK
+// swift-module-flags: -target arm64-apple-ios16-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDK
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface -interface-compiler-version 6.1.2
 import AVFoundation
 import Accelerate
@@ -385,7 +385,7 @@ extension VisionSDK.VisionAPIManager {
   @objc dynamic public func callItemLabelsAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
   @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
   @objc dynamic public func callItemLabelsMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, withImageResizing shouldResizeImage: Swift.Bool = true, andMetaData metaData: [Swift.String : Any] = [:], _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], withImageResizing shouldResizeImage: Swift.Bool = false, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = false, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
 }
 public enum ReachabilityError : Swift.Error {
   case FailedToCreateWithAddress(Darwin.sockaddr_in)
