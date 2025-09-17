@@ -8,8 +8,10 @@ import Combine
 import CommonCrypto
 import Compression
 import CoreFoundation
+import CoreGraphics
 import CoreImage
 import CoreML
+import CoreVideo
 import CryptoKit
 import Darwin
 import DeveloperToolsSupport
@@ -97,7 +99,8 @@ import zlib
   @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
   @available(iOS, introduced: 15.0, deprecated: 17.0)
   @objc public func extractDataFromImage(_ image: CoreImage.CIImage, withBarcodes barcodes: [Swift.String], _ completion: @escaping (Foundation.Data?, Foundation.NSError?) -> Swift.Void)
-  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedBarcode], _ completion: @escaping (Foundation.Data?, Foundation.NSError?) -> Swift.Void)
+  @objc public func getImageSharpnessScore(_ image: CoreImage.CIImage) -> Swift.Float
+  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedBarcode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping (Foundation.Data?, Foundation.NSError?) -> Swift.Void)
   @objc deinit
 }
 public enum InterpreterError : Swift.Error, Swift.Equatable, Swift.Hashable {
@@ -238,9 +241,10 @@ extension VisionSDK.InterpreterError : Swift.CustomStringConvertible {
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
   @available(iOS, introduced: 15.0, deprecated: 17.0)
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
-  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedBarcode])
+  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedBarcode], imageSharpnessScore: Swift.Float)
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect) -> Swift.Bool
   @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedBarcode]) -> [Swift.String : Swift.Bool]
+  @objc optional func codeScannerView(_ imageSharpnessScore: Swift.Float)
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)

@@ -487,9 +487,10 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 /// @discussion
 /// This fuction will be removed in future. Please use codeScannerView (scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedBarcode]) instead.
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes SWIFT_AVAILABILITY(ios,introduced=15.0,deprecated=17.0);
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withBarcodes:(NSArray<DetectedBarcode *> * _Nonnull)barcodes;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withBarcodes:(NSArray<DetectedBarcode *> * _Nonnull)barcodes imageSharpnessScore:(float)imageSharpnessScore;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU withBoundingBox:(CGRect)boundingBox SWIFT_WARN_UNUSED_RESULT;
 - (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<DetectedBarcode *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
+- (void)codeScannerView:(float)imageSharpnessScore;
 @end
 
 SWIFT_CLASS_NAMED("DCReportModel")
@@ -567,7 +568,8 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 /// @discussion
 /// This fuction will be removed in future. Please use extractDataFromImageUsing instead.
 - (void)extractDataFromImage:(CIImage * _Nonnull)image withBarcodes:(NSArray<NSString *> * _Nonnull)barcodes :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion SWIFT_AVAILABILITY(ios,introduced=15.0,deprecated=17.0);
-- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedBarcode *> * _Nonnull)barcodes :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (float)getImageSharpnessScore:(CIImage * _Nonnull)image SWIFT_WARN_UNUSED_RESULT;
+- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedBarcode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 SWIFT_CLASS_NAMED("SLReportModel")
