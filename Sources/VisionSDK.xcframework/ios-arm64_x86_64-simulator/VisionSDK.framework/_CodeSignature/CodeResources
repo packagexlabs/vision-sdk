@@ -10,11 +10,11 @@
 		</data>
 		<key>Assets.car</key>
 		<data>
-		gsAv/j9FfI7q7HX84nLF2sTqbVc=
+		ScivII0yVqOfo1iVxY3Ht2DXwdM=
 		</data>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<data>
-		oXVLOZAbOoHc0faRPGn7R1NWxPE=
+		uHsqyIG8MvKCNV7cHDXrPK1Nhwk=
 		</data>
 		<key>Headers/VisionSDK.h</key>
 		<data>
@@ -22,47 +22,47 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		ZS9MbGoj6ln+KF+nmxVJ53HbfQQ=
+		3woT+qFI22w5Bnsqrh2VQKfyio0=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		QkoTdQQQAsJOAggkvrd7RvHUsrk=
+		BHBED+IBafstI+no23jI5YG+va8=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		hh26vPdjqE5AD/8y9fQajvDDA+s=
+		kwDTvOzEhgjiHfmNb3fRlmLviBM=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		PM8QciAmbjODpdfCYDA/j7Y5Agw=
+		Ee3NWaII7zpNxSLSF646J8iP/Sw=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		hh26vPdjqE5AD/8y9fQajvDDA+s=
+		kwDTvOzEhgjiHfmNb3fRlmLviBM=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		XavDzaCJNnne/h603IiiN3r5FPQ=
+		Y5ef8L4wPYry3OjfnCBeq/qAg+Q=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		z2z5zjs6Xm9cT2it/r0j9uZ7FkY=
+		PDkVPkyq2hlIhtkTiBHtEl7o+4k=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		UE8KQXkCNBafrjgu+QRSfyl4Vdg=
+		Jb3aX/GH+rY9jnUfEQ0x8MRYeHQ=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		6ZYqitc96L8r29aAw9sAN20tijg=
+		EpYg0MvKHvLugcAColRrGNEH4hU=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		UE8KQXkCNBafrjgu+QRSfyl4Vdg=
+		Jb3aX/GH+rY9jnUfEQ0x8MRYeHQ=
 		</data>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		FCgkuuHig98Zr0m/Sm2pvoxftO8=
+		aD4G9UHkssZITfd4iXb3qLcVF0g=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -82,7 +82,7 @@
 		</data>
 		<key>VSDKStoryboard.storyboardc/Y6W-OH-hqX-view-5EZ-qb-Rvc.nib</key>
 		<data>
-		oJOTP0nwGDekD0FigvLZB/gTTk0=
+		QOUBrtGRnu2UbdmhPdgCPCGG1mQ=
 		</data>
 		<key>byteEncoder.json</key>
 		<data>
@@ -2014,14 +2014,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			ArzDMuStBJlowQ8sZAtBSuWbQISMXwqodoCWP6UnM8U=
+			LCJA6WmkqzzTPvP4+DMS182MBNAHoOAN63xzOURGSnA=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK-Swift.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			NyGVt42nsl97xGstWDHWuceAdHwHrKenKAOJ+PthV+w=
+			ycr7/N8k5/sfEFnRP6f54Nj3k8XGgyNtrJe+WvXtUtg=
 			</data>
 		</dict>
 		<key>Headers/VisionSDK.h</key>
@@ -2035,70 +2035,70 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			EDY8QI1RNTUa4eslkeDj2e5V3remJ7+iE+Gw7oloVls=
+			grsm1ulcdSHNWJa5O9l5QYJkCMhXYzGUsz3hh00Quxw=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			KslGQ2uNIXq8/J6u/CmPLhgYAwpo0S9E+NJI4KnQUhk=
+			l2SfuAgK+xVE18oRFBEt9IbpozeVdwvIy9QSTSyt7eU=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			z3oVwApoSRjuTtlPWzjFl+GdHTL3sRiC2h6j0XyvQKI=
+			CFAND3En9iB2SciY4hfKrswpo9IhdGi3waEYhgG2omc=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			KslGQ2uNIXq8/J6u/CmPLhgYAwpo0S9E+NJI4KnQUhk=
+			l2SfuAgK+xVE18oRFBEt9IbpozeVdwvIy9QSTSyt7eU=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			ihEwhuHajd1bD11/0XVq92RDNk4jTIfl1yqGEOtraaQ=
+			itgRID4+dMd+f+16fUahK1e/wOu/zwGwgohX/1UBXqY=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Gyl9Klokj20R/06PXhSC3+AOxnPEinVvYtDy8lhM2Ic=
+			OXkBEI93PF8TlncsLooNVYLgc0seMOTIskXtqrA0T3w=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Qy1aD8/GM3NxlXK6AEnq6wZ5WE6W/zSdiuvEjbtVOkY=
+			8rVu2MLpIr8/Y10H2i9JQj5jHJS+RpOzqSqXZfXPoKM=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			AX/dcBu1K9TL7ChAuHodlwZHAFJ0evQC3o7hja99s8I=
+			f/633cn99DNPkt/2jILKQ+wS8AyPR7CHi5kMvybOC/Y=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Qy1aD8/GM3NxlXK6AEnq6wZ5WE6W/zSdiuvEjbtVOkY=
+			8rVu2MLpIr8/Y10H2i9JQj5jHJS+RpOzqSqXZfXPoKM=
 			</data>
 		</dict>
 		<key>Modules/VisionSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Mik1T25OcCXXc+cc10YW8tyhoCSTJYFPUYmkPvRNh8c=
+			xeMMdk6qLCPTp3lGRXrXwzrarn5pheH7JqtBMqjKVkI=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>
@@ -2133,7 +2133,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			2Fmf2KQfun3lwhuEJaDD9ohl8PAuxQV4S5ipMsNJZjE=
+			pug3mrcNPHHfCO7VWLQmJK63DRFheLpEgKo0K4vqNv4=
 			</data>
 		</dict>
 		<key>byteEncoder.json</key>

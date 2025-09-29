@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.2 effective-5.10 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)
-// swift-module-flags: -target x86_64-apple-ios16-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDK
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2
+// swift-compiler-version: Apple Swift version 6.0.3 effective-5.10 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)
+// swift-module-flags: -target x86_64-apple-ios16-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name VisionSDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface
 import AVFoundation
 import Accelerate
 import Combine
@@ -94,22 +94,12 @@ import zlib
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(OnDeviceOCRManager) public class OnDeviceOCRManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.OnDeviceOCRManager
-  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func getVSDKLogs() -> Foundation.URL?
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
-  #endif
   @objc public func getImageSharpnessScore(_ image: CoreImage.CIImage) -> Swift.Float
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedBarcode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping (Foundation.Data?, Foundation.NSError?) -> Swift.Void)
-  #endif
+  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedBarcode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
   @objc deinit
 }
 public struct QuantizationParameters : Swift.Equatable, Swift.Hashable {
@@ -165,11 +155,9 @@ public enum InterpreterError : Swift.Error, Swift.Equatable, Swift.Hashable {
   }
 }
 extension VisionSDK.InterpreterError : Foundation.LocalizedError {
-  #if compiler(>=5.3) && $NonescapableTypes
   public var errorDescription: Swift.String? {
     get
   }
-  #endif
 }
 extension VisionSDK.InterpreterError : Swift.CustomStringConvertible {
   public var description: Swift.String {
@@ -193,11 +181,9 @@ public enum SignatureRunnerError : Swift.Error, Swift.Equatable, Swift.Hashable 
   }
 }
 extension VisionSDK.SignatureRunnerError : Foundation.LocalizedError {
-  #if compiler(>=5.3) && $NonescapableTypes
   public var errorDescription: Swift.String? {
     get
   }
-  #endif
 }
 extension VisionSDK.SignatureRunnerError : Swift.CustomStringConvertible {
   public var description: Swift.String {
@@ -262,12 +248,8 @@ extension VisionSDK.Tensor.Shape : Swift.ExpressibleByArrayLiteral {
   final public var signatureKeys: [Swift.String] {
     get
   }
-  #if compiler(>=5.3) && $NonescapableTypes
   convenience public init(modelPath: Swift.String, options: VisionSDK.Interpreter.Options? = nil, delegates: [any VisionSDK.Delegate]? = nil) throws
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   convenience public init(modelData: Foundation.Data, options: VisionSDK.Interpreter.Options? = nil, delegates: [any VisionSDK.Delegate]? = nil) throws
-  #endif
   @objc deinit
   final public func invoke() throws
   final public func input(at index: Swift.Int) throws -> VisionSDK.Tensor
@@ -306,9 +288,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
   case noTemplateCodesFound = 10
   case itemRetrievalDelegateNotImplemented = 11
   case authenticationNeededForItemRetrievalScanning = 12
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -322,9 +302,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
   case photo
   case priceTag
   case itemRetrieval
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -333,9 +311,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
 @objc public enum OCRMode : Swift.Int {
   case online
   case offline
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -344,9 +320,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
 @objc public enum CaptureType : Swift.Int {
   case single
   case multiple
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -355,9 +329,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
 @objc public enum CameraPosition : Swift.Int {
   case back = 1
   case front = 2
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -366,9 +338,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
 @objc public enum CaptureMode : Swift.Int {
   case auto
   case manual
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -402,9 +372,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
   case unknown
   public func stringValue() -> Swift.String
   public static func value(VNStringValue: Swift.String) -> VisionSDK.BarcodeSymbology
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -415,13 +383,9 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [VisionSDK.DetectedBarcode])
   @objc optional func codeScannerViewDidDetectBoxes(_ text: Swift.Bool, barCode: [CoreFoundation.CGRect], qrCode: [CoreFoundation.CGRect], document: CoreFoundation.CGRect)
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
-  #if compiler(>=5.3) && $NonescapableTypes
   @available(iOS, introduced: 15.0, deprecated: 17.0)
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedBarcode], imageSharpnessScore: Swift.Float)
-  #endif
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect) -> Swift.Bool
   @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedBarcode]) -> [Swift.String : Swift.Bool]
   @objc optional func codeScannerView(_ imageSharpnessScore: Swift.Float)
@@ -451,9 +415,7 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public static var `default`: VisionSDK.CodeScannerView.FocusSettings {
       @objc get
     }
-    #if compiler(>=5.3) && $NonescapableTypes
     @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, showCodeBoundariesInMultipleScan: Swift.Bool = true, validCodeBoundryBorderColor: UIKit.UIColor = .green, validCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, validCodeBoundryFillColor: UIKit.UIColor = .green.withAlphaComponent(0.3), inValidCodeBoundryBorderColor: UIKit.UIColor = .red, inValidCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, inValidCodeBoundryFillColor: UIKit.UIColor = .red.withAlphaComponent(0.3), showDocumentBoundries: Swift.Bool = true, documentBoundryBorderColor: UIKit.UIColor = .orange, documentBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, documentBoundryFillColor: UIKit.UIColor = .orange.withAlphaComponent(0.3), focusImageTintColor: UIKit.UIColor = .white, focusImageHighlightedColor: UIKit.UIColor = .white)
-    #endif
     @objc deinit
   }
   @objc(ObjectDetectionConfiguration) public class ObjectDetectionConfiguration : ObjectiveC.NSObject {
@@ -467,9 +429,7 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public static var `default`: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
       @objc get
     }
-    #if compiler(>=5.3) && $NonescapableTypes
     @objc public init(isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, isDocumentIndicationOn: Swift.Bool = true, codeDetectionConfidence: Swift.Float = 0.5, documentDetectionConfidence: Swift.Float = 0.9, secondsToWaitBeforeDocumentCapture: Swift.Double = 3.0, selectedTemplateId: Swift.String? = nil)
-    #endif
     @objc deinit
   }
   @objc(CameraSettings) public class CameraSettings : ObjectiveC.NSObject {
@@ -524,9 +484,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func layoutSubviews()
   @objc deinit
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(frame: CoreFoundation.CGRect)
-  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
-  #endif
 }
 extension VisionSDK.CodeScannerView {
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode, isLongDistanceScanningEnabled: Swift.Bool = false)
@@ -552,9 +510,7 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCaptureVideoDataOutputSampl
   @_Concurrency.MainActor @preconcurrency @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
 extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate {
-  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: (any Swift.Error)?)
-  #endif
   @_Concurrency.MainActor @preconcurrency @objc dynamic public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
 }
 extension AVFoundation.AVCaptureDevice {
@@ -565,9 +521,7 @@ extension AVFoundation.AVCaptureDevice {
   @objc final public let symbology: VisionSDK.BarcodeSymbology
   @objc final public let extractedData: [Swift.String : Swift.String]?
   @objc final public let boundingBox: CoreFoundation.CGRect
-  #if compiler(>=5.3) && $NonescapableTypes
-  public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero)
-  #endif
+  @objc public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero)
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
@@ -575,30 +529,14 @@ extension AVFoundation.AVCaptureDevice {
   @objc deinit
 }
 extension VisionSDK.VisionAPIManager {
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func checkScanningFeatureAuthenticationWithKey(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil) async -> Foundation.NSError?
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func getPredictionBillOfLadingCloud(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any] = [:], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func callDocumentClassificationAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func callItemLabelsAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func callItemLabelsMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, withImageResizing shouldResizeImage: Swift.Bool = true, andMetaData metaData: [Swift.String : Any] = [:], _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
-  @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = false, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  #endif
+  @objc dynamic public func checkScanningFeatureAuthenticationWithKey(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil) async -> (Foundation.NSError?)
+  @objc dynamic public func callScanAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func getPredictionBillOfLadingCloud(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any] = [:], withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callDocumentClassificationAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callItemLabelsAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callItemLabelsMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, withImageResizing shouldResizeImage: Swift.Bool = true, andMetaData metaData: [Swift.String : Any] = [:], _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+  @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = false, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
 }
 public enum ReachabilityError : Swift.Error {
   case FailedToCreateWithAddress(Darwin.sockaddr_in)
@@ -657,12 +595,8 @@ public class Connectivity {
     get
   }
   required public init(reachabilityRef: SystemConfiguration.SCNetworkReachability, usingHostname: Swift.Bool = false)
-  #if compiler(>=5.3) && $NonescapableTypes
   convenience public init?(hostname: Swift.String)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   convenience public init?()
-  #endif
   @objc deinit
 }
 extension VisionSDK.Connectivity {
@@ -689,9 +623,7 @@ extension VisionSDK.Connectivity {
   case billOfLading
   case itemLabel
   case documentClassification
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -704,9 +636,7 @@ extension VisionSDK.Connectivity {
   case medium
   case large
   case xlarge
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -718,9 +648,7 @@ extension VisionSDK.Connectivity {
   case staging
   case production
   case sandbox
-  #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
-  #endif
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
     get
@@ -746,12 +674,8 @@ extension VisionSDK.Connectivity {
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidAppear(_ animated: Swift.Bool)
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewWillDisappear(_ animated: Swift.Bool)
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public func viewDidDisappear(_ animated: Swift.Bool)
-  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(nibName nibNameOrNil: Swift.String?, bundle nibBundleOrNil: Foundation.Bundle?)
-  #endif
-  #if compiler(>=5.3) && $NonescapableTypes
   @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
-  #endif
   @objc deinit
 }
 extension VisionSDK.GenerateTemplateController {
