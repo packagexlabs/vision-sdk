@@ -655,6 +655,7 @@ extension VisionSDK.Connectivity {
   }
 }
 @_inheritsConvenienceInitializers @objc(Constants) public class VSDKConstants : ObjectiveC.NSObject {
+  public static var ciscoClassificationTextThreshold: CoreFoundation.CGFloat
   public static var apiKey: Swift.String
   public static var apiEnvironment: VisionSDK.VSDKAppEnvironment
   public static var modelUrl: Foundation.URL!
