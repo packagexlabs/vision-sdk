@@ -379,6 +379,10 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorNoTemplateCodesFound = 10,
   CodeScannerErrorItemRetrievalDelegateNotImplemented = 11,
   CodeScannerErrorAuthenticationNeededForItemRetrievalScanning = 12,
+  CodeScannerErrorOcrModeMoveCloser = 13,
+  CodeScannerErrorOcrModeMoveBack = 14,
+  CodeScannerErrorOcrModeHoldStill = 15,
+  CodeScannerErrorOcrModePointCameraToDocument = 16,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -486,14 +490,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @end
 
 @class NSError;
-@class DetectedBarcode;
+@class DetectedCode;
 
 SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 @protocol CodeScannerViewDelegate
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didFailure:(NSError * _Nonnull)error;
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<DetectedBarcode *> * _Nonnull)codes;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didSuccess:(NSArray<DetectedCode *> * _Nonnull)codes;
 @optional
-- (void)codeScannerViewDidDetectBoxes:(BOOL)text barCode:(NSArray<NSValue *> * _Nonnull)barCode qrCode:(NSArray<NSValue *> * _Nonnull)qrCode document:(CGRect)document;
+- (void)codeScannerViewDidDetectBoxes:(BOOL)text barCode:(NSArray<DetectedCode *> * _Nonnull)barCode qrCode:(NSArray<DetectedCode *> * _Nonnull)qrCode document:(CGRect)document;
 @required
 - (void)codeScannerViewDidDetect:(BOOL)text barCode:(BOOL)barCode qrCode:(BOOL)qrCode document:(BOOL)document;
 @optional
@@ -501,11 +505,11 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 /// @abstract
 /// Called when an image is captured. It provides image with other extracted details
 /// @discussion
-/// This fuction will be removed in future. Please use codeScannerView (scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedBarcode]) instead.
+/// This fuction will be removed in future. Please use codeScannerView (scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedCode]) instead.
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes SWIFT_AVAILABILITY(ios,introduced=15.0,deprecated=17.0);
-- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withBarcodes:(NSArray<DetectedBarcode *> * _Nonnull)barcodes imageSharpnessScore:(float)imageSharpnessScore;
+- (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes imageSharpnessScore:(float)imageSharpnessScore;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU withBoundingBox:(CGRect)boundingBox SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<DetectedBarcode *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
+- (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<DetectedCode *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
 - (void)codeScannerView:(float)imageSharpnessScore;
 @end
 
@@ -516,13 +520,12 @@ SWIFT_CLASS_NAMED("DCReportModel")
 @end
 
 
-SWIFT_CLASS_NAMED("DetectedBarcode")
-@interface DetectedBarcode : NSObject
+SWIFT_CLASS_NAMED("DetectedCode")
+@interface DetectedCode : NSObject
 @property (nonatomic, readonly, copy) NSString * _Nonnull stringValue;
 @property (nonatomic, readonly) enum BarcodeSymbology symbology;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> * _Nullable extractedData;
 @property (nonatomic, readonly) CGRect boundingBox;
-- (nonnull instancetype)initWithStringValue:(NSString * _Nonnull)stringValue symbology:(enum BarcodeSymbology)symbology extractedData:(NSDictionary<NSString *, NSString *> * _Nullable)extractedData boundingBox:(CGRect)boundingBox OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -591,10 +594,12 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (NSURL * _Nullable)getVSDKLogs SWIFT_WARN_UNUSED_RESULT;
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
+- (BOOL)deconfigureOfflineOCRWithShouldDeleteFromDisk:(BOOL)shouldDeleteFromDisk error:(NSError * _Nullable * _Nullable)error;
+- (BOOL)deconfigureOfflineOCRFor:(enum VSDKModelExternalClass)modelClass shouldDeleteFromDisk:(BOOL)shouldDeleteFromDisk error:(NSError * _Nullable * _Nullable)error;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (float)getImageSharpnessScore:(CIImage * _Nonnull)image SWIFT_WARN_UNUSED_RESULT;
-- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedBarcode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 

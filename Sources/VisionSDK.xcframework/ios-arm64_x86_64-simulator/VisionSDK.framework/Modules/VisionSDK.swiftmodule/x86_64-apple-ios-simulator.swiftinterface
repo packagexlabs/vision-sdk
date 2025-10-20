@@ -92,188 +92,6 @@ import zlib
   override public func encode(to encoder: any Swift.Encoder) throws
   @objc deinit
 }
-@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(OnDeviceOCRManager) public class OnDeviceOCRManager : ObjectiveC.NSObject {
-  @objc public static let shared: VisionSDK.OnDeviceOCRManager
-  @objc public func getVSDKLogs() -> Foundation.URL?
-  @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
-  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
-  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
-  @objc public func getImageSharpnessScore(_ image: CoreImage.CIImage) -> Swift.Float
-  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedBarcode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
-  @objc deinit
-}
-public struct QuantizationParameters : Swift.Equatable, Swift.Hashable {
-  public let scale: Swift.Float
-  public let zeroPoint: Swift.Int
-  public static func == (a: VisionSDK.QuantizationParameters, b: VisionSDK.QuantizationParameters) -> Swift.Bool
-  public func hash(into hasher: inout Swift.Hasher)
-  public var hashValue: Swift.Int {
-    get
-  }
-}
-@_hasMissingDesignatedInitializers final public class SignatureRunner {
-  final public let signatureKey: Swift.String
-  final public var inputs: [Swift.String] {
-    get
-  }
-  final public var outputs: [Swift.String] {
-    get
-  }
-  @objc deinit
-  final public func invoke(with inputs: [Swift.String : Foundation.Data]) throws
-  final public func input(named name: Swift.String) throws -> VisionSDK.Tensor
-  final public func output(named name: Swift.String) throws -> VisionSDK.Tensor
-  final public func resizeInput(named name: Swift.String, toShape shape: VisionSDK.Tensor.Shape) throws
-  final public func copy(_ data: Foundation.Data, toInputNamed name: Swift.String) throws
-  final public func allocateTensors() throws
-}
-public protocol Delegate : AnyObject {
-  typealias CDelegate = Swift.UnsafeMutablePointer<TensorFlowLiteC.TfLiteDelegate>
-  var cDelegate: Self.CDelegate { get }
-}
-public enum Runtime {
-  public static var version: Swift.String {
-    get
-  }
-}
-public enum InterpreterError : Swift.Error, Swift.Equatable, Swift.Hashable {
-  case invalidTensorIndex(index: Swift.Int, maxIndex: Swift.Int)
-  case invalidTensorDataCount(provided: Swift.Int, required: Swift.Int)
-  case invalidTensorDataType
-  case failedToLoadModel
-  case failedToCreateInterpreter
-  case failedToResizeInputTensor(index: Swift.Int)
-  case failedToCopyDataToInputTensor
-  case failedToAllocateTensors
-  case allocateTensorsRequired
-  case invokeInterpreterRequired
-  case tensorFlowLiteError(Swift.String)
-  public static func == (a: VisionSDK.InterpreterError, b: VisionSDK.InterpreterError) -> Swift.Bool
-  public func hash(into hasher: inout Swift.Hasher)
-  public var hashValue: Swift.Int {
-    get
-  }
-}
-extension VisionSDK.InterpreterError : Foundation.LocalizedError {
-  public var errorDescription: Swift.String? {
-    get
-  }
-}
-extension VisionSDK.InterpreterError : Swift.CustomStringConvertible {
-  public var description: Swift.String {
-    get
-  }
-}
-public enum SignatureRunnerError : Swift.Error, Swift.Equatable, Swift.Hashable {
-  case invalidTensorDataCount(provided: Swift.Int, required: Swift.Int)
-  case invalidTensorDataType
-  case failedToCreateSignatureRunner(signatureKey: Swift.String)
-  case failedToGetTensor(tensorType: Swift.String, nameInSignature: Swift.String)
-  case failedToResizeInputTensor(inputName: Swift.String)
-  case failedToCopyDataToInputTensor
-  case failedToAllocateTensors
-  case failedToInvokeSignature(signatureKey: Swift.String)
-  case allocateTensorsRequired
-  public static func == (a: VisionSDK.SignatureRunnerError, b: VisionSDK.SignatureRunnerError) -> Swift.Bool
-  public func hash(into hasher: inout Swift.Hasher)
-  public var hashValue: Swift.Int {
-    get
-  }
-}
-extension VisionSDK.SignatureRunnerError : Foundation.LocalizedError {
-  public var errorDescription: Swift.String? {
-    get
-  }
-}
-extension VisionSDK.SignatureRunnerError : Swift.CustomStringConvertible {
-  public var description: Swift.String {
-    get
-  }
-}
-public struct Tensor : Swift.Equatable, Swift.Hashable {
-  public let name: Swift.String
-  public let dataType: VisionSDK.Tensor.DataType
-  public let shape: VisionSDK.Tensor.Shape
-  public let data: Foundation.Data
-  public let quantizationParameters: VisionSDK.QuantizationParameters?
-  public static func == (a: VisionSDK.Tensor, b: VisionSDK.Tensor) -> Swift.Bool
-  public func hash(into hasher: inout Swift.Hasher)
-  public var hashValue: Swift.Int {
-    get
-  }
-}
-extension VisionSDK.Tensor {
-  public enum DataType : Swift.Equatable, Swift.Hashable {
-    case bool
-    case uInt8
-    case int16
-    case int32
-    case int64
-    case float16
-    case float32
-    case float64
-    public static func == (a: VisionSDK.Tensor.DataType, b: VisionSDK.Tensor.DataType) -> Swift.Bool
-    public func hash(into hasher: inout Swift.Hasher)
-    public var hashValue: Swift.Int {
-      get
-    }
-  }
-}
-extension VisionSDK.Tensor {
-  public struct Shape : Swift.Equatable, Swift.Hashable {
-    public let rank: Swift.Int
-    public let dimensions: [Swift.Int]
-    public init(_ dimensions: [Swift.Int])
-    public init(_ elements: Swift.Int...)
-    public static func == (a: VisionSDK.Tensor.Shape, b: VisionSDK.Tensor.Shape) -> Swift.Bool
-    public func hash(into hasher: inout Swift.Hasher)
-    public var hashValue: Swift.Int {
-      get
-    }
-  }
-}
-extension VisionSDK.Tensor.Shape : Swift.ExpressibleByArrayLiteral {
-  public init(arrayLiteral: Swift.Int...)
-  public typealias ArrayLiteralElement = Swift.Int
-}
-@_hasMissingDesignatedInitializers final public class Interpreter {
-  final public let options: VisionSDK.Interpreter.Options?
-  final public let delegates: [any VisionSDK.Delegate]?
-  final public var inputTensorCount: Swift.Int {
-    get
-  }
-  final public var outputTensorCount: Swift.Int {
-    get
-  }
-  final public var signatureKeys: [Swift.String] {
-    get
-  }
-  convenience public init(modelPath: Swift.String, options: VisionSDK.Interpreter.Options? = nil, delegates: [any VisionSDK.Delegate]? = nil) throws
-  convenience public init(modelData: Foundation.Data, options: VisionSDK.Interpreter.Options? = nil, delegates: [any VisionSDK.Delegate]? = nil) throws
-  @objc deinit
-  final public func invoke() throws
-  final public func input(at index: Swift.Int) throws -> VisionSDK.Tensor
-  final public func output(at index: Swift.Int) throws -> VisionSDK.Tensor
-  final public func resizeInput(at index: Swift.Int, to shape: VisionSDK.Tensor.Shape) throws
-  @discardableResult
-  final public func copy(_ data: Foundation.Data, toInputAt index: Swift.Int) throws -> VisionSDK.Tensor
-  final public func allocateTensors() throws
-  final public func signatureRunner(with key: Swift.String) throws -> VisionSDK.SignatureRunner
-}
-extension VisionSDK.Interpreter {
-  public struct Options : Swift.Equatable, Swift.Hashable {
-    public var threadCount: Swift.Int?
-    public var isXNNPackEnabled: Swift.Bool
-    public init()
-    public static func == (a: VisionSDK.Interpreter.Options, b: VisionSDK.Interpreter.Options) -> Swift.Bool
-    public func hash(into hasher: inout Swift.Hasher)
-    public var hashValue: Swift.Int {
-      get
-    }
-  }
-}
-@available(*, deprecated, renamed: "Interpreter.Options")
-public typealias InterpreterOptions = VisionSDK.Interpreter.Options
 @objc public enum CodeScannerError : Swift.Int {
   case cameraUsageNotAuthorized = 0
   case noTextDetected = 1
@@ -288,6 +106,10 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
   case noTemplateCodesFound = 10
   case itemRetrievalDelegateNotImplemented = 11
   case authenticationNeededForItemRetrievalScanning = 12
+  case ocrModeMoveCloser = 13
+  case ocrModeMoveBack = 14
+  case ocrModeHoldStill = 15
+  case ocrModePointCameraToDocument = 16
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -380,14 +202,14 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
 }
 @objc(CodeScannerViewDelegate) public protocol CodeScannerViewDelegate {
   @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didFailure error: Foundation.NSError)
-  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [VisionSDK.DetectedBarcode])
-  @objc optional func codeScannerViewDidDetectBoxes(_ text: Swift.Bool, barCode: [CoreFoundation.CGRect], qrCode: [CoreFoundation.CGRect], document: CoreFoundation.CGRect)
+  @objc func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didSuccess codes: [VisionSDK.DetectedCode])
+  @objc optional func codeScannerViewDidDetectBoxes(_ text: Swift.Bool, barCode: [VisionSDK.DetectedCode], qrCode: [VisionSDK.DetectedCode], document: CoreFoundation.CGRect)
   @objc func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
   @available(iOS, introduced: 15.0, deprecated: 17.0)
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
-  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedBarcode], imageSharpnessScore: Swift.Float)
+  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedCode], imageSharpnessScore: Swift.Float)
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect) -> Swift.Bool
-  @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedBarcode]) -> [Swift.String : Swift.Bool]
+  @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedCode]) -> [Swift.String : Swift.Bool]
   @objc optional func codeScannerView(_ imageSharpnessScore: Swift.Float)
 }
 extension VisionSDK.CodeScannerViewDelegate {
@@ -516,12 +338,12 @@ extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate
 extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)
 }
-@objc(DetectedBarcode) final public class DetectedBarcode : ObjectiveC.NSObject {
+@objc(DetectedCode) final public class DetectedCode : ObjectiveC.NSObject {
   @objc final public let stringValue: Swift.String
   @objc final public let symbology: VisionSDK.BarcodeSymbology
   @objc final public let extractedData: [Swift.String : Swift.String]?
   @objc final public let boundingBox: CoreFoundation.CGRect
-  @objc public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero)
+  public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero)
   @objc deinit
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
@@ -537,6 +359,190 @@ extension VisionSDK.VisionAPIManager {
   @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callItemLabelsMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, withImageResizing shouldResizeImage: Swift.Bool = true, andMetaData metaData: [Swift.String : Any] = [:], _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
   @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = false, _ completion: @escaping ((_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void))
+}
+public enum Runtime {
+  public static var version: Swift.String {
+    get
+  }
+}
+public enum SignatureRunnerError : Swift.Error, Swift.Equatable, Swift.Hashable {
+  case invalidTensorDataCount(provided: Swift.Int, required: Swift.Int)
+  case invalidTensorDataType
+  case failedToCreateSignatureRunner(signatureKey: Swift.String)
+  case failedToGetTensor(tensorType: Swift.String, nameInSignature: Swift.String)
+  case failedToResizeInputTensor(inputName: Swift.String)
+  case failedToCopyDataToInputTensor
+  case failedToAllocateTensors
+  case failedToInvokeSignature(signatureKey: Swift.String)
+  case allocateTensorsRequired
+  public static func == (a: VisionSDK.SignatureRunnerError, b: VisionSDK.SignatureRunnerError) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+extension VisionSDK.SignatureRunnerError : Foundation.LocalizedError {
+  public var errorDescription: Swift.String? {
+    get
+  }
+}
+extension VisionSDK.SignatureRunnerError : Swift.CustomStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+}
+public struct Tensor : Swift.Equatable, Swift.Hashable {
+  public let name: Swift.String
+  public let dataType: VisionSDK.Tensor.DataType
+  public let shape: VisionSDK.Tensor.Shape
+  public let data: Foundation.Data
+  public let quantizationParameters: VisionSDK.QuantizationParameters?
+  public static func == (a: VisionSDK.Tensor, b: VisionSDK.Tensor) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+extension VisionSDK.Tensor {
+  public enum DataType : Swift.Equatable, Swift.Hashable {
+    case bool
+    case uInt8
+    case int16
+    case int32
+    case int64
+    case float16
+    case float32
+    case float64
+    public static func == (a: VisionSDK.Tensor.DataType, b: VisionSDK.Tensor.DataType) -> Swift.Bool
+    public func hash(into hasher: inout Swift.Hasher)
+    public var hashValue: Swift.Int {
+      get
+    }
+  }
+}
+extension VisionSDK.Tensor {
+  public struct Shape : Swift.Equatable, Swift.Hashable {
+    public let rank: Swift.Int
+    public let dimensions: [Swift.Int]
+    public init(_ dimensions: [Swift.Int])
+    public init(_ elements: Swift.Int...)
+    public static func == (a: VisionSDK.Tensor.Shape, b: VisionSDK.Tensor.Shape) -> Swift.Bool
+    public func hash(into hasher: inout Swift.Hasher)
+    public var hashValue: Swift.Int {
+      get
+    }
+  }
+}
+extension VisionSDK.Tensor.Shape : Swift.ExpressibleByArrayLiteral {
+  public init(arrayLiteral: Swift.Int...)
+  public typealias ArrayLiteralElement = Swift.Int
+}
+public struct QuantizationParameters : Swift.Equatable, Swift.Hashable {
+  public let scale: Swift.Float
+  public let zeroPoint: Swift.Int
+  public static func == (a: VisionSDK.QuantizationParameters, b: VisionSDK.QuantizationParameters) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum InterpreterError : Swift.Error, Swift.Equatable, Swift.Hashable {
+  case invalidTensorIndex(index: Swift.Int, maxIndex: Swift.Int)
+  case invalidTensorDataCount(provided: Swift.Int, required: Swift.Int)
+  case invalidTensorDataType
+  case failedToLoadModel
+  case failedToCreateInterpreter
+  case failedToResizeInputTensor(index: Swift.Int)
+  case failedToCopyDataToInputTensor
+  case failedToAllocateTensors
+  case allocateTensorsRequired
+  case invokeInterpreterRequired
+  case tensorFlowLiteError(Swift.String)
+  public static func == (a: VisionSDK.InterpreterError, b: VisionSDK.InterpreterError) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+extension VisionSDK.InterpreterError : Foundation.LocalizedError {
+  public var errorDescription: Swift.String? {
+    get
+  }
+}
+extension VisionSDK.InterpreterError : Swift.CustomStringConvertible {
+  public var description: Swift.String {
+    get
+  }
+}
+@_hasMissingDesignatedInitializers final public class Interpreter {
+  final public let options: VisionSDK.Interpreter.Options?
+  final public let delegates: [any VisionSDK.Delegate]?
+  final public var inputTensorCount: Swift.Int {
+    get
+  }
+  final public var outputTensorCount: Swift.Int {
+    get
+  }
+  final public var signatureKeys: [Swift.String] {
+    get
+  }
+  convenience public init(modelPath: Swift.String, options: VisionSDK.Interpreter.Options? = nil, delegates: [any VisionSDK.Delegate]? = nil) throws
+  convenience public init(modelData: Foundation.Data, options: VisionSDK.Interpreter.Options? = nil, delegates: [any VisionSDK.Delegate]? = nil) throws
+  @objc deinit
+  final public func invoke() throws
+  final public func input(at index: Swift.Int) throws -> VisionSDK.Tensor
+  final public func output(at index: Swift.Int) throws -> VisionSDK.Tensor
+  final public func resizeInput(at index: Swift.Int, to shape: VisionSDK.Tensor.Shape) throws
+  @discardableResult
+  final public func copy(_ data: Foundation.Data, toInputAt index: Swift.Int) throws -> VisionSDK.Tensor
+  final public func allocateTensors() throws
+  final public func signatureRunner(with key: Swift.String) throws -> VisionSDK.SignatureRunner
+}
+extension VisionSDK.Interpreter {
+  public struct Options : Swift.Equatable, Swift.Hashable {
+    public var threadCount: Swift.Int?
+    public var isXNNPackEnabled: Swift.Bool
+    public init()
+    public static func == (a: VisionSDK.Interpreter.Options, b: VisionSDK.Interpreter.Options) -> Swift.Bool
+    public func hash(into hasher: inout Swift.Hasher)
+    public var hashValue: Swift.Int {
+      get
+    }
+  }
+}
+@available(*, deprecated, renamed: "Interpreter.Options")
+public typealias InterpreterOptions = VisionSDK.Interpreter.Options
+@_hasMissingDesignatedInitializers final public class SignatureRunner {
+  final public let signatureKey: Swift.String
+  final public var inputs: [Swift.String] {
+    get
+  }
+  final public var outputs: [Swift.String] {
+    get
+  }
+  @objc deinit
+  final public func invoke(with inputs: [Swift.String : Foundation.Data]) throws
+  final public func input(named name: Swift.String) throws -> VisionSDK.Tensor
+  final public func output(named name: Swift.String) throws -> VisionSDK.Tensor
+  final public func resizeInput(named name: Swift.String, toShape shape: VisionSDK.Tensor.Shape) throws
+  final public func copy(_ data: Foundation.Data, toInputNamed name: Swift.String) throws
+  final public func allocateTensors() throws
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(OnDeviceOCRManager) public class OnDeviceOCRManager : ObjectiveC.NSObject {
+  @objc public static let shared: VisionSDK.OnDeviceOCRManager
+  @objc public func getVSDKLogs() -> Foundation.URL?
+  @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
+  @objc public func deconfigureOfflineOCR(shouldDeleteFromDisk: Swift.Bool) throws
+  @objc public func deconfigureOfflineOCR(for modelClass: VisionSDK.VSDKModelExternalClass, shouldDeleteFromDisk: Swift.Bool) throws
+  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func getImageSharpnessScore(_ image: CoreImage.CIImage) -> Swift.Float
+  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedCode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
+  @objc deinit
+}
+public protocol Delegate : AnyObject {
+  typealias CDelegate = Swift.UnsafeMutablePointer<TensorFlowLiteC.TfLiteDelegate>
+  var cDelegate: Self.CDelegate { get }
 }
 public enum ReachabilityError : Swift.Error {
   case FailedToCreateWithAddress(Darwin.sockaddr_in)
