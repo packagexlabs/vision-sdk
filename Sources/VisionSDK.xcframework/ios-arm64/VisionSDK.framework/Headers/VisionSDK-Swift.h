@@ -350,6 +350,13 @@ typedef SWIFT_ENUM(NSInteger, BarcodeSymbology, open) {
 
 
 
+typedef SWIFT_ENUM(NSInteger, CameraLiveGuidance, open) {
+  CameraLiveGuidanceMoveCloser = 0,
+  CameraLiveGuidanceMoveBack = 1,
+  CameraLiveGuidanceHoldStill = 2,
+  CameraLiveGuidancePointCameraToDocument = 3,
+};
+
 typedef SWIFT_ENUM(NSInteger, CameraPosition, open) {
   CameraPositionBack = 1,
   CameraPositionFront = 2,
@@ -379,10 +386,6 @@ typedef SWIFT_ENUM(NSInteger, CodeScannerError, open) {
   CodeScannerErrorNoTemplateCodesFound = 10,
   CodeScannerErrorItemRetrievalDelegateNotImplemented = 11,
   CodeScannerErrorAuthenticationNeededForItemRetrievalScanning = 12,
-  CodeScannerErrorOcrModeMoveCloser = 13,
-  CodeScannerErrorOcrModeMoveBack = 14,
-  CodeScannerErrorOcrModeHoldStill = 15,
-  CodeScannerErrorOcrModePointCameraToDocument = 16,
 };
 
 typedef SWIFT_ENUM(NSInteger, CodeScannerMode, open) {
@@ -510,7 +513,7 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes imageSharpnessScore:(float)imageSharpnessScore;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU withBoundingBox:(CGRect)boundingBox SWIFT_WARN_UNUSED_RESULT;
 - (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<DetectedCode *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
-- (void)codeScannerView:(float)imageSharpnessScore;
+- (void)codeScannerViewdidUpdateSceneWithSharpness:(float)imageSharpnessScore onCameraLiveGuidance:(enum CameraLiveGuidance)onCameraLiveGuidance;
 @end
 
 

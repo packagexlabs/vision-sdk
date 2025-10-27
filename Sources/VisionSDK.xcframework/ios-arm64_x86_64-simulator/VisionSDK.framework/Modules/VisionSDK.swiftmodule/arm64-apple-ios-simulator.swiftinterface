@@ -92,6 +92,20 @@ import zlib
   override public func encode(to encoder: any Swift.Encoder) throws
   @objc deinit
 }
+@objc public enum CameraLiveGuidance : Swift.Int {
+  case moveCloser = 0
+  case moveBack = 1
+  case holdStill = 2
+  case pointCameraToDocument = 3
+  public var description: Swift.String {
+    get
+  }
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
 @objc public enum CodeScannerError : Swift.Int {
   case cameraUsageNotAuthorized = 0
   case noTextDetected = 1
@@ -106,10 +120,6 @@ import zlib
   case noTemplateCodesFound = 10
   case itemRetrievalDelegateNotImplemented = 11
   case authenticationNeededForItemRetrievalScanning = 12
-  case ocrModeMoveCloser = 13
-  case ocrModeMoveBack = 14
-  case ocrModeHoldStill = 15
-  case ocrModePointCameraToDocument = 16
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -210,7 +220,7 @@ import zlib
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedCode], imageSharpnessScore: Swift.Float)
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect) -> Swift.Bool
   @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedCode]) -> [Swift.String : Swift.Bool]
-  @objc optional func codeScannerView(_ imageSharpnessScore: Swift.Float)
+  @objc optional func codeScannerViewdidUpdateSceneWithSharpness(_ imageSharpnessScore: Swift.Float, onCameraLiveGuidance: VisionSDK.CameraLiveGuidance)
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
@@ -692,6 +702,9 @@ extension VisionSDK.GenerateTemplateController {
 extension VisionSDK.GenerateTemplateController : AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegate {
   @_Concurrency.MainActor @preconcurrency @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
+extension VisionSDK.CameraLiveGuidance : Swift.Equatable {}
+extension VisionSDK.CameraLiveGuidance : Swift.Hashable {}
+extension VisionSDK.CameraLiveGuidance : Swift.RawRepresentable {}
 extension VisionSDK.CodeScannerError : Swift.Equatable {}
 extension VisionSDK.CodeScannerError : Swift.Hashable {}
 extension VisionSDK.CodeScannerError : Swift.RawRepresentable {}
