@@ -30554,316 +30554,330 @@
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 47590,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 47632,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 47849,
+      "offset": 47572,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 47896,
+      "offset": 47584,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 47763,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 47805,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "Array",
+      "offset": 48022,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "Array",
+      "offset": 48069,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 48568,
+      "offset": 48741,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 48575,
+      "offset": 48748,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 48616,
+      "offset": 48789,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 49523,
+      "offset": 49696,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 49572,
+      "offset": 49745,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 49750,
+      "offset": 49923,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 49864,
+      "offset": 50037,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 51135,
+      "offset": 51308,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 51230,
+      "offset": 51403,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 51469,
+      "offset": 51642,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 52131,
+      "offset": 52304,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 52308,
+      "offset": 52481,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 52783,
+      "offset": 52956,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 53118,
+      "offset": 53291,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 53829,
+      "offset": 54002,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 54022,
+      "offset": 54195,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 54497,
+      "offset": 54670,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 54881,
+      "offset": 55054,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 55692,
+      "offset": 55865,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 55778,
+      "offset": 55951,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 56132,
+      "offset": 56305,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 56607,
+      "offset": 56780,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 58203,
+      "offset": 58230,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 58646,
+      "offset": 58673,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 59255,
+      "offset": 59282,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 59306,
+      "offset": 59333,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 60470,
+      "offset": 60497,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 60643,
+      "offset": 60670,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 61722,
+      "offset": 61749,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 62104,
+      "offset": 62131,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 62369,
+      "offset": 62396,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 63316,
+      "offset": 63343,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 64528,
+      "offset": 64555,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 65126,
+      "offset": 65153,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 65337,
+      "offset": 65364,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 65413,
+      "offset": 65440,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 65523,
+      "offset": 65550,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 66339,
+      "offset": 66366,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 66346,
+      "offset": 66373,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 66387,
+      "offset": 66414,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 67661,
+      "offset": 67688,
       "length": 5,
       "value": "false"
     },
