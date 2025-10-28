@@ -419,7 +419,7 @@ Please handle the camera guidance accordingly if needed. `CameraLiveGuidance` ca
 
 ```swift
 
-func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedBarcode])
+optional func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedCode], imageSharpnessScore: Float)
 
 ```
 
