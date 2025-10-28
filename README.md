@@ -131,7 +131,12 @@ extension ViewController: CodeScannerViewDelegate {
         print(error)
     }
 
-    func codeScannerView(_ scannerView: CodeScannerView, didSuccess codes: [DetectedBarcode]) {
+    // called in photo and ocr scan modes.
+    func codeScannerViewdidUpdateSceneWithSharpness(_ imageSharpnessScore: Float, onCameraLiveGuidance: CameraLiveGuidance) {
+        
+    }
+    
+    func codeScannerView(_ scannerView: CodeScannerView, didSuccess codes: [DetectedCode]) {
         print(codes)
     }
 
@@ -140,13 +145,20 @@ extension ViewController: CodeScannerViewDelegate {
         
     }
 
+    // called when text, barcode or qr code is detected in camera stream. This function is called every nth frame that is processed in live video feed.
+    func codeScannerViewDidDetectBoxes(_ text: Bool, barCode: [DetectedCode], qrCode: [DetectedCode], document: CGRect) {
+        print("Total Codes\((barCode + qrCode).count)")
+    }
+
     // returns captured image with all barcodes detected in it, cropped image only if document is detected in the image
     @available(iOS, introduced: 15.0, deprecated: 17.0)
     func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withbarCodes barcodes: [String]) {
     
     }
     
-    func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedBarcode])
+    func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedCode], imageSharpnessScore: Float) {
+        // returns captured image and other properties with its sharpness score between 0 - 1
+    }
 
     // This function is called only in Price Tag mode and requires boolean return value to display verification success on camera view.
     // Please note that .priceTag mode works only if you are authenticated user. For authentication, use VisionAPIManager.checkScanningFeatureAuthenticationWithKey method
@@ -377,6 +389,36 @@ code indication is enabled while configuring the scanner view.
 
 ```swift
 
+optional func codeScannerViewDidDetectBoxes(_ text: Bool, barCode: [DetectedCode], qrCode: [DetectedCode], document: CGRect)
+
+```
+
+This method is called when text, barcode or qr code is detected in the camera stream. It returns all the bounding boxes of detected code or document in the scene with every frame. This function is called in all scan modes
+
+```swift
+
+optional func codeScannerViewdidUpdateSceneWithSharpness(_ imageSharpnessScore: Float, onCameraLiveGuidance: CameraLiveGuidance)
+
+```
+
+This method is called with every frame in photo and ocr scan modes. It provides camera frame sharpness and live user instructions for better image capturing.
+
+```swift
+
+@objc
+public enum CameraLiveGuidance: Int {
+    case moveCloser = 0
+    case moveBack = 1
+    case holdStill = 2
+    case pointCameraToDocument = 3
+}
+
+```
+
+Please handle the camera guidance accordingly if needed. `CameraLiveGuidance` cases are given as well. You can use them to guide user for better capturing of documents.
+
+```swift
+
 func codeScannerView(_ scannerView: CodeScannerView, didCaptureOCRImage image: UIImage, withCroppedImge croppedImage: UIImage?, withBarcodes barcodes: [DetectedBarcode])
 
 ```
@@ -493,14 +535,23 @@ For extraction of data using Offline OCR use the following method.
 
 ```swift
 
-    @available(iOS, introduced: 15.0, deprecated: 17.0)
-    func extractDataFromImage(_ image: CIImage, withBarcodes barcodes: [String], _ completion: @escaping ((Data?, NSError?) -> Void))
-    
-    func extractDataFromImageUsing(_ image: CIImage, withBarcodes barcodes: [DetectedBarcode], _ completion: @escaping ((Data?, NSError?) -> Void))
+    func extractDataFromImageUsing(_ image: CIImage, withBarcodes barcodes: [DetectedCode], checkImageSharpness: Bool = false, _ completion: @escaping ((Data?, NSError?) -> Void))
+
+```
+
+For managing On-Device OCR models, use these following methods
+
+```swift
+
+    // Using this method offloads the configured model from the memory for the given model class
+    // if shouldDeleteFromDisk is true, then it deletes the models entirely from disk, resulting in re-downloading if configured again.
+    public func deconfigureOfflineOCR(for modelClass: VSDKModelExternalClass, shouldDeleteFromDisk: Bool) throws
+
+    // This method offloads all models currently configured from the memory.
+    // if shouldDeleteFromDisk is true, then it deletes the models entirely from disk, resulting in re-downloading if configured again.
+    public func deconfigureOfflineOCR(shouldDeleteFromDisk: Bool) throws 
 
 ```   
-
-It returns with the OCR Response based on PackageX Platform API [Response](https://docs.packagex.io/docs/scans/models).
  
 These methods are called on the shared instance of `OnDeviceOCRManager`. It can be accessed using `OnDeviceOCRManager.shared`
 syntax.
