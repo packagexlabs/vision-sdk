@@ -15426,6 +15426,16 @@
       },
       {
         "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
         "name": "TensorFlowLiteC",
         "printedName": "TensorFlowLiteC",
         "declKind": "Import",
@@ -32074,392 +32084,392 @@
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1927,
+      "offset": 1937,
       "length": 27,
       "value": "\"scan_\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 1953,
+      "offset": 1963,
       "length": 1,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2022,
+      "offset": 2032,
       "length": 6,
       "value": "\"scan\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 2427,
+      "offset": 2437,
       "length": 16,
       "value": "\"shipping_label\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "Dictionary",
-      "offset": 2729,
+      "offset": 2739,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "Array",
-      "offset": 2937,
+      "offset": 2947,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "Dictionary",
-      "offset": 2994,
+      "offset": 3004,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3082,
+      "offset": 3092,
       "length": 12,
       "value": "\"created_at\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3125,
+      "offset": 3135,
       "length": 12,
       "value": "\"updated_at\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3187,
+      "offset": 3197,
       "length": 11,
       "value": "\"image_url\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3225,
+      "offset": 3235,
       "length": 8,
       "value": "\"object\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3297,
+      "offset": 3307,
       "length": 17,
       "value": "\"organization_id\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3349,
+      "offset": 3359,
       "length": 16,
       "value": "\"purchase_order\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3399,
+      "offset": 3409,
       "length": 15,
       "value": "\"provider_name\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3470,
+      "offset": 3480,
       "length": 10,
       "value": "\"raw_text\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3517,
+      "offset": 3527,
       "length": 18,
       "value": "\"reference_number\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3571,
+      "offset": 3581,
       "length": 17,
       "value": "\"tracking_number\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3645,
+      "offset": 3655,
       "length": 6,
       "value": "\"type\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3846,
+      "offset": 3856,
       "length": 18,
       "value": "\"extracted_labels\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3929,
+      "offset": 3939,
       "length": 11,
       "value": "\"recipient\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 3967,
+      "offset": 3977,
       "length": 8,
       "value": "\"sender\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 4006,
+      "offset": 4016,
       "length": 13,
       "value": "\"middle_mile\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 11727,
+      "offset": 11737,
       "length": 14,
       "value": "\"country_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 11831,
+      "offset": 11841,
       "length": 13,
       "value": "\"postal_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 11906,
+      "offset": 11916,
       "length": 12,
       "value": "\"state_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 11951,
+      "offset": 11961,
       "length": 10,
       "value": "\"textarea\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 12033,
+      "offset": 12043,
       "length": 19,
       "value": "\"formatted_address\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 12088,
+      "offset": 12098,
       "length": 13,
       "value": "\"location_id\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 15687,
+      "offset": 15697,
       "length": 9,
       "value": "\"address\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 16328,
+      "offset": 16338,
       "length": 8,
       "value": "\"object\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 16461,
+      "offset": 16471,
       "length": 14,
       "value": "\"country_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 16565,
+      "offset": 16575,
       "length": 13,
       "value": "\"postal_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 16640,
+      "offset": 16650,
       "length": 12,
       "value": "\"state_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 16685,
+      "offset": 16695,
       "length": 10,
       "value": "\"textarea\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 16767,
+      "offset": 16777,
       "length": 19,
       "value": "\"formatted_address\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 16822,
+      "offset": 16832,
       "length": 13,
       "value": "\"location_id\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19023,
+      "offset": 19033,
       "length": 16,
       "value": "\"purchase_order\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19073,
+      "offset": 19083,
       "length": 15,
       "value": "\"provider_name\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19152,
+      "offset": 19162,
       "length": 18,
       "value": "\"reference_number\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19206,
+      "offset": 19216,
       "length": 17,
       "value": "\"tracking_number\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19393,
+      "offset": 19403,
       "length": 18,
       "value": "\"extracted_labels\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19454,
+      "offset": 19464,
       "length": 11,
       "value": "\"recipient\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19492,
+      "offset": 19502,
       "length": 8,
       "value": "\"sender\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 19531,
+      "offset": 19541,
       "length": 13,
       "value": "\"middle_mile\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "Array",
-      "offset": 23137,
+      "offset": 23147,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 35687,
+      "offset": 35697,
       "length": 14,
       "value": "\"country_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 35791,
+      "offset": 35801,
       "length": 13,
       "value": "\"postal_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 35866,
+      "offset": 35876,
       "length": 12,
       "value": "\"state_code\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "StringLiteral",
-      "offset": 35920,
+      "offset": 35930,
       "length": 19,
       "value": "\"formatted_address\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "FloatLiteral",
-      "offset": 98820,
+      "offset": 99962,
       "length": 3,
       "value": "0.5"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "FloatLiteral",
-      "offset": 102891,
+      "offset": 104033,
       "length": 3,
       "value": "0.8"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "BooleanLiteral",
-      "offset": 103077,
+      "offset": 104219,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "FloatLiteral",
-      "offset": 103245,
+      "offset": 104387,
       "length": 3,
       "value": "0.7"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "BooleanLiteral",
-      "offset": 103300,
+      "offset": 104442,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "FloatLiteral",
-      "offset": 103405,
+      "offset": 104547,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseSLModel.swift",
       "kind": "Dictionary",
-      "offset": 104316,
+      "offset": 105458,
       "length": 5172,
       "value": "[(\"ups\", \"UPS\"), (\"fedex\", \"FedEx\"), (\"usps\", \"USPS\"), (\"amazon\", \"Amazon\"), (\"amazon-fba-us\", \"Amazon\"), (\"purolator\", \"Purolator\"), (\"canada-post\", \"CANADA POST\"), (\"canpar\", \"Canpar\"), (\"cdl\", \"CDL\"), (\"china-ems\", \"CHINA-EMS\"), (\"china-post\", \"CHINA-POST\"), (\"dhl\", \"DHL\"), (\"dynamex\", \"DYNAMEX\"), (\"equick-cn\", \"Equick CN\"), (\"fastway\", \"fastway\"), (\"australia-post\", \"AUSTRALIA POST\"), (\"hongkong-post\", \"Hongkong Post\"), (\"india-post\", \"India Post\"), (\"japan-post\", \"JP Post\"), (\"jd\", \"JD\"), (\"lasership\", \"LaserShip\"), (\"mark3\", \"MARK 3\"), (\"maxx\", \"Max\"), (\"ontrac\", \"OnTrac\"), (\"pakistan-post\", \"PAKISTAN POST\"), (\"royal-mail\", \"Royal Mail\"), (\"sf-express\", \"SF EXPRESS\"), (\"singapore-post\", \"Singapore POST\"), (\"sto-express\", \"sto express\"), (\"tnt\", \"TNT\"), (\"yto-express\", \"YTO EXPRESS\"), (\"yun-express\", \"YunExpress\"), (\"zto-express\", \"ZTO EXPRESS\"), (\"dpd\", \"dpd\"), (\"star-track\", \"STARTRACK\"), (\"hermes\", \"Hermes\"), (\"parcel-force\", \"PARCEL-FORCE\"), (\"postnl\", \"postnl\"), (\"yodel\", \"YODEL\"), (\"gls\", \"GLS\"), (\"colissimo\", \"colissimo\"), (\"collect-plus\", \"collect +\"), (\"transworld\", \"transworld\"), (\"crawfords-delivery-services\", \"Crawfords\"), (\"whistl\", \"whistl\"), (\"an-post\", \"an post\"), (\"wish-post\", \"wish POST\"), (\"city-air-express\", \"City Air Express\"), (\"sagawa-express\", \"Sagawa Express\"), (\"fukuyama-transportation\", \"Fukuyama Transportation\"), (\"skyworldwide\", \"Sky Worldwide\"), (\"toll-group\", \"Toll Group\"), (\"ide-express\", \"IDE Express\"), (\"road-express\", \"Road Express\"), (\"endeavour\", \"endeavour\"), (\"overnight-express\", \"Overnight Express\"), (\"rhyme-express\", \"Rhyme Express\"), (\"yuantong-express\", \"Yuantong Express\"), (\"best-express\", \"Best Express\"), (\"deppon\", \"Deppon\"), (\"tmall\", \"tmall\"), (\"netease\", \"Netease\"), (\"unitop\", \"Unitop\"), (\"chronopost\", \"Chrono Post\"), (\"newzealand-post\", \"New Zealand Post\"), (\"ninja-van\", \"ninja van\"), (\"pos-laju\", \"POS LAJU\"), (\"city-link\", \"City Link\"), (\"lel-express\", \"LEL Express\"), (\"gdex\", \"GDEX\"), (\"blibli\", \"Blibli\"), (\"tokopedia\", \"Tokopedia\"), (\"tiki\", \"tiki\"), (\"j&t-express\", \"J&T Express\"), (\"jne\", \"JNE\"), (\"surpostal\", \"Surpostal\"), (\"espana\", \"Espana\"), (\"mercado\", \"Mercado\"), (\"webpack\", \"Webpack\"), (\"andreani\", \"Andreani\"), (\"correo-argentino\", \"Correo Argentino\"), (\"urbano\", \"Urbano\"), (\"correos\", \"Correos\"), (\"yamato-transport\", \"Yamato Transport\"), (\"247-express\", \"247 Express\"), (\"chilexpress\", \"Chilexpress\"), (\"flash-express\", \"Flash Express\"), (\"kerry-express\", \"Kerry Express\"), (\"shopee-xpress\", \"Shopee Express\"), (\"thailand-post\", \"Thailand Post\"), (\"viettel-post\", \"Viettel Post\"), (\"wsp-express\", \"WSP Express\"), (\"zoom-express\", \"Zoom Express\"), (\"inpost\", \"inpost\"), (\"poczta_polska\", \"Poczta Polska\"), (\"blue-express\", \"Blue Express\"), (\"olva\", \"Olva\"), (\"aramex\", \"Aramex\"), (\"nhat-tin-logistics\", \"Nhat Tin Logistics\"), (\"bpost\", \"BPost\"), (\"vietnam-post\", \"Vietnam Post\"), (\"ocs\", \"OCS\"), (\"dawn-wing\", \"Dawn Wing\"), (\"the-courier-guy\", \"The Courier Guy\"), (\"ccd-courier\", \"CCD Courier\"), (\"bex-express\", \"BEX Express\"), (\"postnard\", \"Postnard\"), (\"2go-express\", \"2GO Express\"), (\"jrs-express\", \"JRS Express\"), (\"geodis\", \"Geodis\"), (\"lso\", \"LSO\"), (\"statovernight\", \"statovernight\"), (\"bring\", \"Bring\"), (\"sr-group\", \"SR Group\"), (\"pentagon-freight\", \"Pentagon Freight\"), (\"loomis-express\", \"Loomis Express\"), (\"transferd\", \"Transferd\"), (\"logi-trans\", \"Logi Trans\"), (\"jetpak\", \"jetpak\"), (\"db-schenker\", \"DB-SCHENKER\"), (\"merkesdal\", \"merkesdal\"), (\"kuehne-nagel\", \"KUEHNE+NAGEL\"), (\"postnord\", \"postnord\"), (\"nor-lines\", \"Nor Lines\"), (\"envialia\", \"envialia\"), (\"nacex\", \"NACEX\"), (\"mrw\", \"MRW\"), (\"correos-express\", \"Correos Express\"), (\"redur\", \"REDUR\"), (\"ctt\", \"ctt Express\"), (\"sending\", \"sending\"), (\"couriers-please\", \"CouriersPlease\"), (\"intelcom\", \"Intelcom\"), (\"posteitaliane\", \"Posteitaliane\"), (\"colis prive\", \"Colis Prive\"), (\"la poste\", \"La Poste\"), (\"deutsche post\", \"Deutsche Post\"), (\"brt\", \"BRT\"), (\"ciblex\", \"Ciblex\"), (\"united-delivery\", \"United Delivery\"), (\"walmart\", \"Walmart\"), (\"york-university-bookstore\", \"York University Bookstore\"), (\"gofo-express\", \"Gofo Express\"), (\"temu\", \"Temu\"), (\"ameriship\", \"Ameriship\"), (\"ipl\", \"IPL\"), (\"dg-fulfillment\", \"DG Fulfillment\"), (\"Lanter LTL\", \"Lanter LTL\"), (\"volvo\", \"Volvo\")]"
     },
@@ -34209,112 +34219,112 @@
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 13789,
+      "offset": 14632,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 17468,
+      "offset": 18311,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 88196,
+      "offset": 91125,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 98704,
+      "offset": 101633,
       "length": 10,
       "value": "\"vertices\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 98849,
+      "offset": 101778,
       "length": 9,
       "value": "\"topLeft\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 98920,
+      "offset": 101849,
       "length": 10,
       "value": "\"topRight\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 98994,
+      "offset": 101923,
       "length": 12,
       "value": "\"bottomLeft\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99071,
+      "offset": 102000,
       "length": 13,
       "value": "\"bottomRight\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99140,
+      "offset": 102069,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99164,
+      "offset": 102093,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99203,
+      "offset": 102132,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99228,
+      "offset": 102157,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99269,
+      "offset": 102198,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99296,
+      "offset": 102225,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99338,
+      "offset": 102267,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 99366,
+      "offset": 102295,
       "length": 3,
       "value": "\"y\""
     },
@@ -34860,98 +34870,105 @@
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 11154,
+      "offset": 11156,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 11201,
+      "offset": 11203,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 11317,
+      "offset": 11319,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 11365,
+      "offset": 11367,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 11415,
+      "offset": 11417,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 11661,
+      "offset": 11663,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 11707,
+      "offset": 11709,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "StringLiteral",
-      "offset": 11785,
+      "offset": 11787,
       "length": 12,
       "value": "\"label_type\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "StringLiteral",
-      "offset": 11828,
+      "offset": 11830,
       "length": 13,
       "value": "\"label_brand\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "StringLiteral",
-      "offset": 12136,
+      "offset": 12138,
       "length": 19,
       "value": "\"detected_sections\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
+      "kind": "Array",
+      "offset": 12329,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
+      "kind": "Array",
+      "offset": 12587,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "StringLiteral",
-      "offset": 12237,
+      "offset": 12855,
       "length": 9,
       "value": "\"address\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "Array",
-      "offset": 16453,
-      "length": 2,
-      "value": "[]"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
-      "kind": "Array",
-      "offset": 46851,
+      "offset": 47497,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "BooleanLiteral",
-      "offset": 124693,
+      "offset": 141496,
       "length": 5,
       "value": "false"
     },
@@ -36442,21 +36459,21 @@
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23503,
+      "offset": 23499,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "Array",
-      "offset": 51427,
+      "offset": 51856,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 52640,
+      "offset": 53069,
       "length": 4,
       "value": "true"
     },
@@ -41323,7 +41340,7 @@
       "kind": "FloatLiteral",
       "offset": 42723,
       "length": 4,
-      "value": "0.15"
+      "value": "0.05"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
@@ -41678,303 +41695,282 @@
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45024,
+      "offset": 45153,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45360,
+      "offset": 45489,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45373,
+      "offset": 45502,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45388,
+      "offset": 45517,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45401,
+      "offset": 45530,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45434,
+      "offset": 45563,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 45471,
+      "offset": 45600,
       "length": 3,
       "value": "0.8"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45509,
+      "offset": 45638,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45824,
+      "offset": 45953,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45839,
+      "offset": 45968,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45856,
+      "offset": 45985,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45871,
+      "offset": 46000,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45906,
+      "offset": 46035,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 45945,
+      "offset": 46074,
       "length": 3,
       "value": "0.8"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45983,
+      "offset": 46112,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 46187,
+      "offset": 46316,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 46245,
+      "offset": 46374,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 46381,
+      "offset": 46510,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 46814,
+      "offset": 46943,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 46833,
+      "offset": 46962,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 46997,
+      "offset": 47126,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47005,
+      "offset": 47134,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47079,
+      "offset": 47208,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47103,
+      "offset": 47232,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47313,
+      "offset": 47442,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47321,
+      "offset": 47450,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47465,
+      "offset": 47594,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47474,
+      "offset": 47603,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47506,
+      "offset": 47635,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47514,
+      "offset": 47643,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47570,
+      "offset": 47699,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47613,
+      "offset": 47742,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47641,
+      "offset": 47770,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47691,
+      "offset": 47820,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47715,
+      "offset": 47844,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47921,
+      "offset": 48050,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47931,
+      "offset": 48060,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48058,
+      "offset": 48187,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 48067,
+      "offset": 48196,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48099,
+      "offset": 48228,
       "length": 7,
       "value": "\"value\""
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
-      "kind": "IntegerLiteral",
-      "offset": 48109,
-      "length": 1,
-      "value": "0"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
-      "kind": "StringLiteral",
-      "offset": 48165,
-      "length": 7,
-      "value": "\"value\""
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
-      "kind": "IntegerLiteral",
-      "offset": 48215,
-      "length": 1,
-      "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
@@ -41986,245 +41982,266 @@
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48293,
+      "offset": 48294,
+      "length": 7,
+      "value": "\"value\""
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 48344,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 48367,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
+      "kind": "StringLiteral",
+      "offset": 48422,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48312,
+      "offset": 48441,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48503,
+      "offset": 48632,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 48512,
+      "offset": 48641,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "Array",
-      "offset": 48583,
+      "offset": 48712,
       "length": 13,
       "value": "[\":\", \" in \"]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 48820,
+      "offset": 48949,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 48876,
+      "offset": 49005,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 48981,
+      "offset": 49110,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49080,
+      "offset": 49209,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49103,
+      "offset": 49232,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49165,
+      "offset": 49294,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49353,
+      "offset": 49482,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 49550,
+      "offset": 49679,
       "length": 3,
       "value": "0.6"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "Array",
-      "offset": 49616,
+      "offset": 49745,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 49688,
+      "offset": 49817,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49726,
+      "offset": 49855,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49736,
+      "offset": 49865,
       "length": 1,
       "value": "0"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
-      "kind": "IntegerLiteral",
-      "offset": 49748,
-      "length": 1,
-      "value": "3"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
-      "kind": "IntegerLiteral",
-      "offset": 49758,
-      "length": 1,
-      "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
       "offset": 49877,
       "length": 1,
-      "value": "2"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
-      "kind": "IntegerLiteral",
-      "offset": 49892,
-      "length": 1,
-      "value": "0"
-    },
-    {
-      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
-      "kind": "IntegerLiteral",
-      "offset": 49909,
-      "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49924,
+      "offset": 49887,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50052,
+      "offset": 50006,
+      "length": 1,
+      "value": "2"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 50021,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50073,
+      "offset": 50038,
+      "length": 1,
+      "value": "3"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 50053,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 50181,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 50202,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 50253,
+      "offset": 50382,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 51003,
+      "offset": 51132,
       "length": 4,
       "value": "0.01"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 51389,
+      "offset": 51518,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51718,
+      "offset": 51847,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51739,
+      "offset": 51868,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51762,
+      "offset": 51891,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51783,
+      "offset": 51912,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51814,
+      "offset": 51943,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 51905,
+      "offset": 52034,
       "length": 3,
       "value": "0.6"
     },
     {
       "filePath": "\/Users\/nomanhassan\/Downloads\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 52135,
+      "offset": 52264,
       "length": 3,
       "value": "\" \""
     },
