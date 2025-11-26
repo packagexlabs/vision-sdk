@@ -471,6 +471,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 
 
 @protocol CodeScannerViewDelegate;
+@class AVCapturePhotoSettings;
 
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK))
 - (void)configureWithDelegate:(id <CodeScannerViewDelegate> _Nonnull)delegate sessionPreset:(AVCaptureSessionPreset _Nonnull)sessionPreset captureMode:(enum CaptureMode)captureMode captureType:(enum CaptureType)captureType scanMode:(enum CodeScannerMode)scanMode isLongDistanceScanningEnabled:(BOOL)isLongDistanceScanningEnabled;
@@ -483,6 +484,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)setPriceTagDetectionSettingsTo:(PriceTagDetectionSettings * _Nonnull)priceTagDetectionSettings;
 - (void)setSessionPresetTo:(AVCaptureSessionPreset _Nonnull)sessionPreset;
 - (void)capturePhoto;
+- (void)capturePhotoUsingPhotoSettings:(AVCapturePhotoSettings * _Nonnull)photoSettings;
 - (void)startRunning;
 - (void)stopRunning;
 - (void)rescan;

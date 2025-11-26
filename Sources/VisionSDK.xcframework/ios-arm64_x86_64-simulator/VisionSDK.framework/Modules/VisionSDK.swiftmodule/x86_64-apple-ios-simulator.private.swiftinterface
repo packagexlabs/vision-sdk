@@ -329,6 +329,7 @@ extension VisionSDK.CodeScannerView {
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setPriceTagDetectionSettingsTo(_ priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func setSessionPresetTo(_ sessionPreset: AVFoundation.AVCaptureSession.Preset)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func capturePhoto()
+  @objc @_Concurrency.MainActor @preconcurrency dynamic public func capturePhotoUsingPhotoSettings(_ photoSettings: AVFoundation.AVCapturePhotoSettings)
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func startRunning()
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func stopRunning()
   @objc @_Concurrency.MainActor @preconcurrency dynamic public func rescan()
