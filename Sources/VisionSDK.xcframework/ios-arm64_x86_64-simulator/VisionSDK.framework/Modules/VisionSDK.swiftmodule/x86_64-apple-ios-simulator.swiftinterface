@@ -543,13 +543,34 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
   @objc public static let shared: VisionSDK.OnDeviceOCRManager
   @objc public func getVSDKLogs() -> Foundation.URL?
   @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
-  @objc public func deconfigureOfflineOCR(shouldDeleteFromDisk: Swift.Bool) throws
-  @objc public func deconfigureOfflineOCR(for modelClass: VisionSDK.VSDKModelExternalClass, shouldDeleteFromDisk: Swift.Bool) throws
-  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
-  @objc public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func downloadModel(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func cancelDownload(_ modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func loadModel(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc public func unloadModel(_ modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large)
+  @objc public func deleteModel(_ modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large)
   @objc public func getImageSharpnessScore(_ image: CoreImage.CIImage) -> Swift.Float
-  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedCode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
+  @objc public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedCode], checkImageSharpness: Swift.Bool = false, modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
   @objc deinit
+}
+extension VisionSDK.OnDeviceOCRManager {
+  @objc dynamic public func prepareOfflineOCR(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float, _ isModelAlreadyDownloaded: Swift.Bool) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc dynamic public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedCode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
+}
+extension VisionSDK.OnDeviceOCRManager {
+  @objc dynamic public func checkModelUpdate(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc dynamic public func isModelLoaded(_ modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large) -> Swift.Bool
+  @objc dynamic public func getLoadedModels() -> [[Swift.String : Swift.String]]
+  @objc dynamic public func getDownloadedModel(_ modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large) -> VisionSDK.DownloadedModelData?
+  @objc dynamic public func getDownloadedModels() -> [VisionSDK.DownloadedModelData]
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(DownloadedModelData) final public class DownloadedModelData : ObjectiveC.NSObject, Swift.Codable {
+  @objc final public var modelClass: Swift.String?
+  @objc final public var modelSize: Swift.String?
+  @objc final public var modelVersionId: Swift.String?
+  @objc final public var modelVersion: Swift.String?
+  @objc deinit
+  final public func encode(to encoder: any Swift.Encoder) throws
+  public init(from decoder: any Swift.Decoder) throws
 }
 public protocol Delegate : AnyObject {
   typealias CDelegate = Swift.UnsafeMutablePointer<TensorFlowLiteC.TfLiteDelegate>
@@ -640,6 +661,8 @@ extension VisionSDK.Connectivity {
   case billOfLading
   case itemLabel
   case documentClassification
+  public func stringValue() -> Swift.String
+  public static func value(stringValue: Swift.String) -> VisionSDK.VSDKModelExternalClass
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -653,6 +676,20 @@ extension VisionSDK.Connectivity {
   case medium
   case large
   case xlarge
+  public func stringValue() -> Swift.String
+  public static func value(stringValue: Swift.String) -> VisionSDK.VSDKModelExternalSize
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum VSDKPlatformType : Swift.Int {
+  case native
+  case flutter
+  case reactNative
+  public func stringValue() -> Swift.String
+  public static func value(stringValue: Swift.String) -> VisionSDK.VSDKPlatformType
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -675,7 +712,7 @@ extension VisionSDK.Connectivity {
   public static var ciscoClassificationTextThreshold: CoreFoundation.CGFloat
   public static var apiKey: Swift.String
   public static var apiEnvironment: VisionSDK.VSDKAppEnvironment
-  public static var modelUrl: Foundation.URL!
+  public static var platform: VisionSDK.VSDKPlatformType
   @objc override dynamic public init()
   @objc deinit
 }
@@ -739,6 +776,9 @@ extension VisionSDK.VSDKModelExternalClass : Swift.RawRepresentable {}
 extension VisionSDK.VSDKModelExternalSize : Swift.Equatable {}
 extension VisionSDK.VSDKModelExternalSize : Swift.Hashable {}
 extension VisionSDK.VSDKModelExternalSize : Swift.RawRepresentable {}
+extension VisionSDK.VSDKPlatformType : Swift.Equatable {}
+extension VisionSDK.VSDKPlatformType : Swift.Hashable {}
+extension VisionSDK.VSDKPlatformType : Swift.RawRepresentable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.Equatable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.Hashable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.RawRepresentable {}

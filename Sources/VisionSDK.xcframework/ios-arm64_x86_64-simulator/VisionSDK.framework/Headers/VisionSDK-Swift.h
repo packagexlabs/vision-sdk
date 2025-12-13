@@ -450,13 +450,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-@class AVCaptureOutput;
-@class AVCaptureConnection;
-
-@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
-- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
-@end
-
 @class AVCapturePhotoOutput;
 @class AVCapturePhoto;
 @class AVCaptureResolvedPhotoSettings;
@@ -464,6 +457,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCapturePhotoCaptureDelegate>
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output didFinishProcessingPhoto:(AVCapturePhoto * _Nonnull)photo error:(NSError * _Nullable)error;
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output willCapturePhotoForResolvedSettings:(AVCaptureResolvedPhotoSettings * _Nonnull)resolvedSettings;
+@end
+
+@class AVCaptureOutput;
+@class AVCaptureConnection;
+
+@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
+- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
 @end
 
 
@@ -536,6 +536,17 @@ SWIFT_CLASS_NAMED("DetectedCode")
 @end
 
 
+SWIFT_CLASS_NAMED("DownloadedModelData")
+@interface DownloadedModelData : NSObject
+@property (nonatomic, copy) NSString * _Nullable modelClass;
+@property (nonatomic, copy) NSString * _Nullable modelSize;
+@property (nonatomic, copy) NSString * _Nullable modelVersionId;
+@property (nonatomic, copy) NSString * _Nullable modelVersion;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+
 
 @class NSBundle;
 
@@ -599,16 +610,32 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (NSURL * _Nullable)getVSDKLogs SWIFT_WARN_UNUSED_RESULT;
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
-- (BOOL)deconfigureOfflineOCRWithShouldDeleteFromDisk:(BOOL)shouldDeleteFromDisk error:(NSError * _Nullable * _Nullable)error;
-- (BOOL)deconfigureOfflineOCRFor:(enum VSDKModelExternalClass)modelClass shouldDeleteFromDisk:(BOOL)shouldDeleteFromDisk error:(NSError * _Nullable * _Nullable)error;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)downloadModelWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)cancelDownload:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)loadModelWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)unloadModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize;
+- (void)deleteModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize;
 - (float)getImageSharpnessScore:(CIImage * _Nonnull)image SWIFT_WARN_UNUSED_RESULT;
-- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness modelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 
 
+
+
+@interface OnDeviceOCRManager (SWIFT_EXTENSION(VisionSDK))
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+@end
+
+
+@interface OnDeviceOCRManager (SWIFT_EXTENSION(VisionSDK))
+- (void)checkModelUpdateWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (BOOL)isModelLoaded:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
+- (NSArray<NSDictionary<NSString *, NSString *> *> * _Nonnull)getLoadedModels SWIFT_WARN_UNUSED_RESULT;
+- (DownloadedModelData * _Nullable)getDownloadedModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
+- (NSArray<DownloadedModelData *> * _Nonnull)getDownloadedModels SWIFT_WARN_UNUSED_RESULT;
+@end
 
 
 
@@ -651,6 +678,12 @@ typedef SWIFT_ENUM(NSInteger, VSDKModelExternalSize, open) {
   VSDKModelExternalSizeMedium = 3,
   VSDKModelExternalSizeLarge = 4,
   VSDKModelExternalSizeXlarge = 5,
+};
+
+typedef SWIFT_ENUM(NSInteger, VSDKPlatformType, open) {
+  VSDKPlatformTypeNative = 0,
+  VSDKPlatformTypeFlutter = 1,
+  VSDKPlatformTypeReactNative = 2,
 };
 
 
@@ -1134,13 +1167,6 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
-@class AVCaptureOutput;
-@class AVCaptureConnection;
-
-@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
-- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
-@end
-
 @class AVCapturePhotoOutput;
 @class AVCapturePhoto;
 @class AVCaptureResolvedPhotoSettings;
@@ -1148,6 +1174,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 @interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCapturePhotoCaptureDelegate>
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output didFinishProcessingPhoto:(AVCapturePhoto * _Nonnull)photo error:(NSError * _Nullable)error;
 - (void)captureOutput:(AVCapturePhotoOutput * _Nonnull)output willCapturePhotoForResolvedSettings:(AVCaptureResolvedPhotoSettings * _Nonnull)resolvedSettings;
+@end
+
+@class AVCaptureOutput;
+@class AVCaptureConnection;
+
+@interface CodeScannerView (SWIFT_EXTENSION(VisionSDK)) <AVCaptureVideoDataOutputSampleBufferDelegate>
+- (void)captureOutput:(AVCaptureOutput * _Nonnull)output didOutputSampleBuffer:(CMSampleBufferRef _Nonnull)sampleBuffer fromConnection:(AVCaptureConnection * _Nonnull)connection;
 @end
 
 
@@ -1220,6 +1253,17 @@ SWIFT_CLASS_NAMED("DetectedCode")
 @end
 
 
+SWIFT_CLASS_NAMED("DownloadedModelData")
+@interface DownloadedModelData : NSObject
+@property (nonatomic, copy) NSString * _Nullable modelClass;
+@property (nonatomic, copy) NSString * _Nullable modelSize;
+@property (nonatomic, copy) NSString * _Nullable modelVersionId;
+@property (nonatomic, copy) NSString * _Nullable modelVersion;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
+
 
 @class NSBundle;
 
@@ -1283,16 +1327,32 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (NSURL * _Nullable)getVSDKLogs SWIFT_WARN_UNUSED_RESULT;
 - (void)reportErrorWith:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize image:(CIImage * _Nullable)image reportText:(NSString * _Nonnull)reportText response:(NSData * _Nullable)response reportModel:(VSDKAnalyticsReportModel * _Nullable)reportModel withCompletion:(void (^ _Nullable)(NSInteger))completion;
-- (BOOL)deconfigureOfflineOCRWithShouldDeleteFromDisk:(BOOL)shouldDeleteFromDisk error:(NSError * _Nullable * _Nullable)error;
-- (BOOL)deconfigureOfflineOCRFor:(enum VSDKModelExternalClass)modelClass shouldDeleteFromDisk:(BOOL)shouldDeleteFromDisk error:(NSError * _Nullable * _Nullable)error;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
-- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)downloadModelWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)cancelDownload:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)loadModelWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)unloadModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize;
+- (void)deleteModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize;
 - (float)getImageSharpnessScore:(CIImage * _Nonnull)image SWIFT_WARN_UNUSED_RESULT;
-- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness modelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 
 
+
+
+@interface OnDeviceOCRManager (SWIFT_EXTENSION(VisionSDK))
+- (void)prepareOfflineOCRWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float, BOOL))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)extractDataFromImageUsing:(CIImage * _Nonnull)image withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes checkImageSharpness:(BOOL)checkImageSharpness :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+@end
+
+
+@interface OnDeviceOCRManager (SWIFT_EXTENSION(VisionSDK))
+- (void)checkModelUpdateWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (BOOL)isModelLoaded:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
+- (NSArray<NSDictionary<NSString *, NSString *> *> * _Nonnull)getLoadedModels SWIFT_WARN_UNUSED_RESULT;
+- (DownloadedModelData * _Nullable)getDownloadedModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
+- (NSArray<DownloadedModelData *> * _Nonnull)getDownloadedModels SWIFT_WARN_UNUSED_RESULT;
+@end
 
 
 
@@ -1335,6 +1395,12 @@ typedef SWIFT_ENUM(NSInteger, VSDKModelExternalSize, open) {
   VSDKModelExternalSizeMedium = 3,
   VSDKModelExternalSizeLarge = 4,
   VSDKModelExternalSizeXlarge = 5,
+};
+
+typedef SWIFT_ENUM(NSInteger, VSDKPlatformType, open) {
+  VSDKPlatformTypeNative = 0,
+  VSDKPlatformTypeFlutter = 1,
+  VSDKPlatformTypeReactNative = 2,
 };
 
 
