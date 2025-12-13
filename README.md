@@ -54,8 +54,11 @@ generate your own API key at [cloud.packagex.io](https://cloud.packagex.io/auth/
 guide [here](https://docs.packagex.io/docs/getting-started/welcome).
 
 ```swift
-Constants.apiKey = "your_api_key"
-Constants.apiEnvironment = .staging
+
+VSDKConstants.apiKey = "your_api_key"
+VSDKConstants.apiEnvironment = .staging
+VSDKConstants.platform = .native
+
 ```
 
 ### The Basis Of Usage
@@ -517,44 +520,274 @@ NOTE: VisionSDK automatically saves created templates into its secure storage. Y
 
 ### On-Device OCR Methods
 
-This method must be called first before using offline device OCR. Preparation should complete first without any errors. For that, listen to completion block in the params. You can you any of these two methods depending if you want to specify modelSize or not. If not, then VisionSDK will automatically configure the modelSize based on your PackageX Subscription.
+#### Model Downloading
+
+This method must be called first to download required VisionSDK resources.
 
 ```swift
 
     // This method must be provided with `apiKey` or `token`.
-    // modelClass: VSDKModelClass - Select required Model Class. Currently supported is .shippingLabel only
-    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. Currently supported sizes are .micro and .large only.
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+    // progress callback returns with normalized progress between 0 - 1
+    // completion callback is called when the download operation completes with or without any error.
 
-    func prepareOfflineOCR(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float, _ isModelAlreadyDownloaded: Bool)->())?, withCompletion completion:((_ error: NSError?)->())?)
+    public func downloadModel(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float)->())?, withCompletion completion:((_ error: NSError?)->())?)
 
-    func prepareOfflineOCR(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .micro, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float, _ isModelAlreadyDownloaded: Bool)->())?, withCompletion completion:((_ error: NSError?)->())?)
+```
 
-```    
+#### Cancel Downloading
+
+Use this method to cancel any in progress download.
+
+```swift
+
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+    // completion callback is called when the cancel operation completes with or without any error.
+
+    public func cancelDownload(_ modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large, withCompletion completion:((_ error: NSError?)->())?)
+
+```   
+
+#### Model Loading
+
+This method must be called first before using offline OCR. Model should be loaded using `downloadModel` function first.
+
+```swift
+
+    // This method must be provided with `apiKey` or `token`.
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+    // completion callback is called when the download operation completes with or without any error.
+
+    public func loadModel(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large, withCompletion completion:((_ error: NSError?)->())?)
+
+```
+
+#### Model Unloading
+
+Use this model to unload any pre-loaded models from memory.
+
+```swift
+
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+
+    public func unloadModel(_ modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large)
+
+```
+
+#### Model Deleting
+
+This method deletes the pre-downloaded model from the disk. It automatically unloads the model if already loaded.  
+
+```swift
+
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+
+    public func deleteModel(_ modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large)
+
+```
+
+#### Model Loading Status Check
+
+This method checks if the given model is loaded in the memory or not. Returns true or false.  
+
+```swift
+
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+
+    public func isModelLoaded(_ modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large) -> Bool
+
+```
+
+This method returns all models and their respective sizes loaded in the memory.  
+
+```swift
+
+    public func getLoadedModels() -> [[String: String]]
+    
+    // returns array of dictionary with below sample
+    //  [   
+    //      {"class": "shipping_label", "size": "large"}
+    //      {"class": "item_label", "size": "large"}
+    //  ]
+
+```
+
+#### Model Downloaded Status Check
+
+This method checks if the given model is has been downladed or not. Returns model information if existing model found or returns nil.  
+
+```swift
+
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+
+    public func getDownloadedModel(_ modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large) -> DownloadedModelData?
+    
+    // returns optional object of DownloadedModelData
+    //
+    //      public final class DownloadedModelData: NSObject, Codable {
+    //
+    //          @objc public var modelClass: String? = nil
+    //          @objc public var modelSize: String? = nil
+    //          @objc public var modelVersionId: String? = nil
+    //          @objc public var modelVersion: String? = nil
+    //      }
+    //
+}
+
+```
+
+This method returns all downloaded models and their respective data.  
+
+```swift
+
+    public func getDownloadedModels() -> [DownloadedModelData]
+    
+    // returns array of DownloadedModelData 
+    //
+    //      public final class DownloadedModelData: NSObject, Codable {
+    //
+    //          @objc public var modelClass: String? = nil
+    //          @objc public var modelSize: String? = nil
+    //          @objc public var modelVersionId: String? = nil
+    //          @objc public var modelVersion: String? = nil
+    //      }
+    //
+
+```
+
+#### Data Extraction
 
 For extraction of data using Offline OCR use the following method.
 
 ```swift
 
-    func extractDataFromImageUsing(_ image: CIImage, withBarcodes barcodes: [DetectedCode], checkImageSharpness: Bool = false, _ completion: @escaping ((Data?, NSError?) -> Void))
+    // image: CIImage - Provide CIImage you want to process
+    // barcodes: [DetectedCode] - Provide all detected codes in the image. If empty, VisionSDK will extract all codes by itself.
+    // checkImageSharpness: Bool - Set this to true if you want to VisionSDK to first check if the image is good enough for OCR and then proceed.
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+    // completion: @escaping ((Data?, NSError?) - It is called upon completion of extraction process. Watch out for errors
+     
+    public func extractDataFromImageUsing(_ image: CIImage, withBarcodes barcodes: [DetectedCode], checkImageSharpness: Bool = false, modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large, _ completion: @escaping ((Data?, NSError?) -> Void))
 
 ```
 
-For managing On-Device OCR models, use these following methods
+#### On-Device Usage Example
 
 ```swift
 
-    // Using this method offloads the configured model from the memory for the given model class
-    // if shouldDeleteFromDisk is true, then it deletes the models entirely from disk, resulting in re-downloading if configured again.
-    public func deconfigureOfflineOCR(for modelClass: VSDKModelExternalClass, shouldDeleteFromDisk: Bool) throws
+        VSDKConstants.apiKey = "your_api_key"
+        VSDKConstants.apiEnvironment = .staging // or .dev, .qa, .staging, .production, .sandbox
+        
+        VSDKConstants.platform = .native   // or .native , .flutter , .reactNative
+        
+        
+        OnDeviceOCRManager.shared.downloadModel(withApiKey: VSDKConstants.apiKey, forModelClass: .shippingLabel, withModelSize: .large) { currentProgress, totalSize in
+            
+            print("\(Int((currentProgress/totalSize) * 100))% Complete")
+            
+        } withCompletion: { error in
+            
+            if let error = error {
+                // Handle downloading error
+            }
+            else {
+                
+                // Start Model Loading
+            }
+        }
+        
+        OnDeviceOCRManager.shared.cancelDownload(.shippingLabel, withModelSize: .large) { error in
+            if let error = error {
+                // Handle error
+            }
+            else {
+                
+                // Do your job
+            }
+        }
+        
+        OnDeviceOCRManager.shared.loadModel(withApiKey: VSDKConstants.apiKey, forModelClass: .shippingLabel, withModelSize: .large) { error in
+            
+            if let error = error {
+                // Handle loading error
+            }
+            else {
+                
+                // You can now start data extraction
+            }
+            
+        }
+        
+        OnDeviceOCRManager.shared.unloadModel(.shippingLabel, withModelSize: .large)
+        
+        OnDeviceOCRManager.shared.deleteModel(.shippingLabel, withModelSize: .large)
+        
+        
+        // check if model is loaded or not
+        // returns true or false
+        
+        let isModelLoaded = OnDeviceOCRManager.shared.isModelLoaded(.shippingLabel, withModelSize: .large)
+        
+        
+        // get all loaded models
+        // returns following output
+        //  [
+        //      {"class": "shipping_label", "size": "large"}
+        //      {"class": "item_label", "size": "large"}
+        //  ]
+        
+        let allLoadedModels: [[String : String]] = OnDeviceOCRManager.shared.getLoadedModels()
+        
+        
+        
+        // Get model details of sepecific downloaded model
+        // returns optional object of DownloadedModelData
+        //
+        //      public final class DownloadedModelData: NSObject, Codable {
+        //
+        //          @objc public var modelClass: String? = nil
+        //          @objc public var modelSize: String? = nil
+        //          @objc public var modelVersionId: String? = nil
+        //          @objc public var modelVersion: String? = nil
+        //      }
 
-    // This method offloads all models currently configured from the memory.
-    // if shouldDeleteFromDisk is true, then it deletes the models entirely from disk, resulting in re-downloading if configured again.
-    public func deconfigureOfflineOCR(shouldDeleteFromDisk: Bool) throws 
+        let modelDetails: VisionSDK.DownloadedModelData = OnDeviceOCRManager.shared.getDownloadedModel(.shippingLabel, withModelSize: .large)
+        
+        
+        // Get all downloaded models
+        let allDownloadedModels: [VisionSDK.DownloadedModelData] = OnDeviceOCRManager.shared.getDownloadedModels()
+        
+        
+        // ON-Device Data Extraction example
+        
+        let image = UIImage(named: "shippingLabelSample")
+        let ciImage = CIImage(image: image!)!
+        
+        OnDeviceOCRManager.shared.extractDataFromImageUsing(ciImage, withBarcodes: [], modelClass: .shippingLabel, withModelSize: .large) { data, error in
+            
+            if let error = error {
+                // Handle loading error
+            }
+            else {
+                
+                // check for data and parse it
+            }
+        }
 
-```   
+```
  
-These methods are called on the shared instance of `OnDeviceOCRManager`. It can be accessed using `OnDeviceOCRManager.shared`
-syntax.
+#### Important Note
+
+All of the above methods are called on the shared instance of `OnDeviceOCRManager`. It can be accessed using `OnDeviceOCRManager.shared` syntax.
+Please note that all functions perform their internal operations on safe threads but communicate back on main thead
     
 ### OCR Methods
 
@@ -1027,5 +1260,4 @@ https://iconduck.com/icons/120793/barcode-fill
 Copyright © 2025 PackageX Labs.
 
 Licensed under the MIT License.
-
 
