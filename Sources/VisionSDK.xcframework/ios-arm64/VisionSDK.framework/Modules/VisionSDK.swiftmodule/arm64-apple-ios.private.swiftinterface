@@ -557,7 +557,7 @@ extension VisionSDK.OnDeviceOCRManager {
   @objc dynamic public func extractDataFromImageUsing(_ image: CoreImage.CIImage, withBarcodes barcodes: [VisionSDK.DetectedCode], checkImageSharpness: Swift.Bool = false, _ completion: @escaping ((Foundation.Data?, Foundation.NSError?) -> Swift.Void))
 }
 extension VisionSDK.OnDeviceOCRManager {
-  @objc dynamic public func checkModelUpdate(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
+  @objc dynamic public func checkModelUpdate(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
   @objc dynamic public func isModelLoaded(_ modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large) -> Swift.Bool
   @objc dynamic public func getLoadedModels() -> [[Swift.String : Swift.String]]
   @objc dynamic public func getDownloadedModel(_ modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large) -> VisionSDK.DownloadedModelData?

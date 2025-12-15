@@ -630,7 +630,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 
 
 @interface OnDeviceOCRManager (SWIFT_EXTENSION(VisionSDK))
-- (void)checkModelUpdateWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)checkModelUpdateWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (BOOL)isModelLoaded:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
 - (NSArray<NSDictionary<NSString *, NSString *> *> * _Nonnull)getLoadedModels SWIFT_WARN_UNUSED_RESULT;
 - (DownloadedModelData * _Nullable)getDownloadedModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
@@ -1347,7 +1347,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 
 
 @interface OnDeviceOCRManager (SWIFT_EXTENSION(VisionSDK))
-- (void)checkModelUpdateWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
+- (void)checkModelUpdateWithApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token forModelClass:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize withProgressTracking:(void (^ _Nullable)(float, float))progress withCompletion:(void (^ _Nullable)(NSError * _Nullable))completion;
 - (BOOL)isModelLoaded:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
 - (NSArray<NSDictionary<NSString *, NSString *> *> * _Nonnull)getLoadedModels SWIFT_WARN_UNUSED_RESULT;
 - (DownloadedModelData * _Nullable)getDownloadedModel:(enum VSDKModelExternalClass)modelClass withModelSize:(enum VSDKModelExternalSize)modelSize SWIFT_WARN_UNUSED_RESULT;
