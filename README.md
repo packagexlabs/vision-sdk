@@ -271,7 +271,7 @@ scannerView.configure(delegate: VisionSDK.CodeScannerViewDelegate, sessionPreset
       
     - `secondsToWaitBeforeDocumentCapture: Double` - Time threshold to wait before capturing a document automatically in OCR mode. VisionSDK only captures the document if it is continuously detected for the n(value of this property) seconds. Default is `3.0`.
     
-    - `selectedTemplateId: String?` - Set this value using the template id if you want to detect multiple codes using a specific template. To use a specific template, set the captureType to .multiple as well.
+    - `selectedTemplate: Data? = nil` - Set this value using the template data if you want to detect multiple codes using a specific template. To use a specific template, set the captureType to .multiple as well.
 
 - `CameraSettings` - CameraSettings struct defines the camera related properties of scanner view. These properties are:
 
@@ -486,11 +486,11 @@ Listen to the `GenerateTemplateControllerDelegate` methods to get response.
 
     extension BarcodeViewController: GenerateTemplateControllerDelegate {
     
-        // This function provides you with the ID of the template that has been created
-        func templateScanController(_ controller: GenerateTemplateController, didFinishWith result: String) {
-            print(result)
+        // It provides JSON of the created template
+        func templateScanController(_ controller: GenerateTemplateController, didFinishWith templateData: Data) {
+        
         }
-    
+            
         func templateScanController(_ controller: GenerateTemplateController, didFailWithError error: any Error) {
             controller.dismiss(animated: true)
         }
@@ -499,22 +499,6 @@ Listen to the `GenerateTemplateControllerDelegate` methods to get response.
             print("Template creation cancelled")
         }
     }
-    
-```
-
-
-NOTE: VisionSDK automatically saves created templates into its secure storage. You can access those saved template using methods below
-
-```swift
-    
-    // This method returns all the ids of the saved templates
-    CodeScannerView.getAllTemplates()
-
-    // This method deletes the template with the specified ID
-    CodeScannerView.deleteTemplateWithId(_ id: String)
-    
-    // This method deletes all saved templates
-    CodeScannerView.deleteAllTemplates()
     
 ```
 
@@ -549,6 +533,22 @@ Use this method to cancel any in progress download.
     public func cancelDownload(_ modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large, withCompletion completion:((_ error: NSError?)->())?)
 
 ```   
+
+#### Model Updating
+
+This method can be used to check for updates for a given model.
+
+```swift
+
+    // This method must be provided with `apiKey` or `token`.
+    // modelClass: VSDKModelClass - Select required Model Class. Curr e.g .shippingLabel
+    // modelSize: VSDKModelSize - Select the model size for the above selected Model Class. e.g .micro
+    // progress callback returns with normalized progress between 0 - 1
+    // completion callback is called when the download operation completes with or without any error.
+
+    public func checkModelUpdate(withApiKey apiKey: String? = nil, andToken token: String? = nil, forModelClass modelClass: VSDKModelExternalClass, withModelSize modelSize: VSDKModelExternalSize = .large, withProgressTracking progress: ((_ currentProgress: Float, _ totalSize: Float)->())?, withCompletion completion:((_ error: NSError?)->())?)
+
+```
 
 #### Model Loading
 
@@ -711,6 +711,21 @@ For extraction of data using Offline OCR use the following method.
             else {
                 
                 // Do your job
+            }
+        }
+        
+        OnDeviceOCRManager.shared.checkModelUpdate(withApiKey: VSDKConstants.apiKey, forModelClass: .shippingLabel, withModelSize: .large) { currentProgress, totalSize in
+            
+            print("\(Int((currentProgress/totalSize) * 100))% Complete")
+            
+        } withCompletion: { error in
+            
+            if let error = error {
+                // Handle update error
+            }
+            else {
+                
+                // Model update complete
             }
         }
         
