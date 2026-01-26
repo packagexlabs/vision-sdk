@@ -30158,14 +30158,14 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKUserDefaultsHandler.swift",
       "kind": "StringLiteral",
-      "offset": 4162,
+      "offset": 4457,
       "length": 64,
       "value": "\"Could not create UserDefaults with suite name: \""
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKUserDefaultsHandler.swift",
       "kind": "StringLiteral",
-      "offset": 4225,
+      "offset": 4520,
       "length": 2,
       "value": "\"\""
     },
@@ -32608,28 +32608,28 @@
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 67971,
+      "offset": 67973,
       "length": 2,
       "value": "-1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 67978,
+      "offset": 67980,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 68019,
+      "offset": 68021,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/muzamil\/Documents\/PackageXProjects\/VisionSDK\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 69293,
+      "offset": 69295,
       "length": 5,
       "value": "false"
     },
