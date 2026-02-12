@@ -352,6 +352,7 @@ typedef SWIFT_ENUM(NSInteger, CameraLiveGuidance, open) {
   CameraLiveGuidanceMoveBack = 1,
   CameraLiveGuidanceHoldStill = 2,
   CameraLiveGuidancePointCameraToDocument = 3,
+  CameraLiveGuidanceReadyToCapture = 4,
 };
 
 typedef SWIFT_ENUM(NSInteger, CameraPosition, open) {
@@ -409,7 +410,7 @@ SWIFT_CLASS_NAMED("FocusSettings")
 @interface FocusSettings : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) FocusSettings * _Nonnull default_;)
 + (FocusSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showCodeBoundariesInMultipleScan:(BOOL)showCodeBoundariesInMultipleScan validCodeBoundryBorderColor:(UIColor * _Nonnull)validCodeBoundryBorderColor validCodeBoundryBorderWidth:(CGFloat)validCodeBoundryBorderWidth validCodeBoundryFillColor:(UIColor * _Nonnull)validCodeBoundryFillColor inValidCodeBoundryBorderColor:(UIColor * _Nonnull)inValidCodeBoundryBorderColor inValidCodeBoundryBorderWidth:(CGFloat)inValidCodeBoundryBorderWidth inValidCodeBoundryFillColor:(UIColor * _Nonnull)inValidCodeBoundryFillColor showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryBorderWidth:(CGFloat)documentBoundryBorderWidth documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithFocusImage:(UIImage * _Nullable)focusImage focusImageRect:(CGRect)focusImageRect shouldDisplayFocusImage:(BOOL)shouldDisplayFocusImage shouldScanInFocusImageRect:(BOOL)shouldScanInFocusImageRect showCodeBoundariesInMultipleScan:(BOOL)showCodeBoundariesInMultipleScan validCodeBoundryBorderColor:(UIColor * _Nonnull)validCodeBoundryBorderColor validCodeBoundryBorderWidth:(CGFloat)validCodeBoundryBorderWidth validCodeBoundryFillColor:(UIColor * _Nonnull)validCodeBoundryFillColor inValidCodeBoundryBorderColor:(UIColor * _Nonnull)inValidCodeBoundryBorderColor inValidCodeBoundryBorderWidth:(CGFloat)inValidCodeBoundryBorderWidth inValidCodeBoundryFillColor:(UIColor * _Nonnull)inValidCodeBoundryFillColor showDocumentBoundries:(BOOL)showDocumentBoundries documentBoundryBorderColor:(UIColor * _Nonnull)documentBoundryBorderColor documentBoundryBorderWidth:(CGFloat)documentBoundryBorderWidth documentBoundryFillColor:(UIColor * _Nonnull)documentBoundryFillColor highlightedDocumentBoundryBorderColor:(UIColor * _Nonnull)highlightedDocumentBoundryBorderColor highlightedDocumentBoundryBorderWidth:(CGFloat)highlightedDocumentBoundryBorderWidth highlightedDocumentBoundryFillColor:(UIColor * _Nonnull)highlightedDocumentBoundryFillColor focusImageTintColor:(UIColor * _Nonnull)focusImageTintColor focusImageHighlightedColor:(UIColor * _Nonnull)focusImageHighlightedColor OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
