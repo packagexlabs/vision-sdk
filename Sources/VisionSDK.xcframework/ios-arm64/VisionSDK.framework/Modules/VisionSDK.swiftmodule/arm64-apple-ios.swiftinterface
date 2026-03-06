@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.2 effective-5.10 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)
+// swift-compiler-version: Apple Swift version 6.2.3 effective-5.10 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)
 // swift-module-flags: -target arm64-apple-ios16 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDK
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2.3
 import AVFoundation
 import Accelerate
 import Combine
@@ -11,7 +11,6 @@ import CoreFoundation
 import CoreGraphics
 import CoreImage
 import CoreML
-import CoreMotion
 import CoreVideo
 import CryptoKit
 import Darwin
@@ -19,7 +18,6 @@ import DeveloperToolsSupport
 import Foundation
 import MachO
 import ObjectiveC
-import QuartzCore
 import Security
 import Swift
 import SwiftUI
@@ -99,7 +97,6 @@ import zlib
   case moveBack = 1
   case holdStill = 2
   case pointCameraToDocument = 3
-  case readyToCapture = 4
   public var description: Swift.String {
     get
   }
@@ -266,16 +263,13 @@ extension VisionSDK.CodeScannerViewDelegate {
     public var documentBoundryBorderColor: UIKit.UIColor
     public var documentBoundryBorderWidth: CoreFoundation.CGFloat
     public var documentBoundryFillColor: UIKit.UIColor
-    public var highlightedDocumentBoundryBorderColor: UIKit.UIColor
-    public var highlightedDocumentBoundryBorderWidth: CoreFoundation.CGFloat
-    public var highlightedDocumentBoundryFillColor: UIKit.UIColor
     public var focusImageTintColor: UIKit.UIColor
     public var focusImageHighlightedColor: UIKit.UIColor
     @objc public static var `default`: VisionSDK.CodeScannerView.FocusSettings {
       @objc get
     }
     #if compiler(>=5.3) && $NonescapableTypes
-    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, showCodeBoundariesInMultipleScan: Swift.Bool = true, validCodeBoundryBorderColor: UIKit.UIColor = .green, validCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, validCodeBoundryFillColor: UIKit.UIColor = .green.withAlphaComponent(0.3), inValidCodeBoundryBorderColor: UIKit.UIColor = .red, inValidCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, inValidCodeBoundryFillColor: UIKit.UIColor = .red.withAlphaComponent(0.3), showDocumentBoundries: Swift.Bool = true, documentBoundryBorderColor: UIKit.UIColor = .orange, documentBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, documentBoundryFillColor: UIKit.UIColor = .orange.withAlphaComponent(0.3), highlightedDocumentBoundryBorderColor: UIKit.UIColor = .green, highlightedDocumentBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, highlightedDocumentBoundryFillColor: UIKit.UIColor = .green.withAlphaComponent(0.3), focusImageTintColor: UIKit.UIColor = .white, focusImageHighlightedColor: UIKit.UIColor = .white)
+    @objc public init(focusImage: UIKit.UIImage? = nil, focusImageRect: CoreFoundation.CGRect = .zero, shouldDisplayFocusImage: Swift.Bool = true, shouldScanInFocusImageRect: Swift.Bool = true, showCodeBoundariesInMultipleScan: Swift.Bool = true, validCodeBoundryBorderColor: UIKit.UIColor = .green, validCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, validCodeBoundryFillColor: UIKit.UIColor = .green.withAlphaComponent(0.3), inValidCodeBoundryBorderColor: UIKit.UIColor = .red, inValidCodeBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, inValidCodeBoundryFillColor: UIKit.UIColor = .red.withAlphaComponent(0.3), showDocumentBoundries: Swift.Bool = true, documentBoundryBorderColor: UIKit.UIColor = .orange, documentBoundryBorderWidth: CoreFoundation.CGFloat = 1.0, documentBoundryFillColor: UIKit.UIColor = .orange.withAlphaComponent(0.3), focusImageTintColor: UIKit.UIColor = .white, focusImageHighlightedColor: UIKit.UIColor = .white)
     #endif
     @objc deinit
   }
@@ -291,7 +285,7 @@ extension VisionSDK.CodeScannerViewDelegate {
       @objc get
     }
     #if compiler(>=5.3) && $NonescapableTypes
-    @objc public init(isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, isDocumentIndicationOn: Swift.Bool = true, codeDetectionConfidence: Swift.Float = 0.5, documentDetectionConfidence: Swift.Float = 0.9, secondsToWaitBeforeDocumentCapture: Swift.Double = 0.1, selectedTemplate: Foundation.Data? = nil)
+    @objc public init(isTextIndicationOn: Swift.Bool = true, isBarCodeOrQRCodeIndicationOn: Swift.Bool = true, isDocumentIndicationOn: Swift.Bool = true, codeDetectionConfidence: Swift.Float = 0.5, documentDetectionConfidence: Swift.Float = 0.9, secondsToWaitBeforeDocumentCapture: Swift.Double = 3.0, selectedTemplate: Foundation.Data? = nil)
     #endif
     @objc deinit
   }
