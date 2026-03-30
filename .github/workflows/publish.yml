@@ -1,0 +1,109 @@
+name: Publish VisionSDK
+
+on:
+  repository_dispatch:
+    types: [xcframework-release]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish XCFramework & CocoaPods
+    runs-on: macos-15
+
+    steps:
+      - name: Parse payload
+        id: payload
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+          ASSET_URL="${{ github.event.client_payload.asset_url }}"
+          if [[ -z "$VERSION" || -z "$ASSET_URL" ]]; then
+            echo "Error: Missing version or asset_url in payload"
+            exit 1
+          fi
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version '$VERSION' does not match semver X.Y.Z"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "asset_url=$ASSET_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Download xcframework
+        run: |
+          curl -L \
+            -H "Authorization: Bearer ${{ secrets.VISION_SDK_IOS_PAT }}" \
+            -H "Accept: application/octet-stream" \
+            "${{ steps.payload.outputs.asset_url }}" \
+            -o VisionSDK.xcframework.zip
+
+      - name: Replace xcframework
+        run: |
+          rm -rf Sources/VisionSDK.xcframework
+          unzip VisionSDK.xcframework.zip -d Sources/
+
+      - name: Validate xcframework structure
+        run: |
+          set -o pipefail
+          plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
+            | grep -q '"ios-arm64"' && echo "Device slice OK"
+          plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
+            | grep -q 'ios-arm64_x86_64-simulator' && echo "Simulator slice OK"
+
+      - name: Bump podspec version
+        run: |
+          VERSION="${{ steps.payload.outputs.version }}"
+          sed -i '' "/spec\.version/s/\"[0-9][0-9.]*\"/\"${VERSION}\"/" VisionSDK.podspec
+          echo "Podspec version bumped to $VERSION"
+          grep 'spec.version' VisionSDK.podspec
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Integration test (SPM build)
+        run: |
+          xcodebuild build -scheme PXVisionSDK \
+            -package-path . \
+            -destination 'platform=iOS Simulator,name=iPhone 16'
+
+      - name: Commit and tag
+        run: |
+          VERSION="${{ steps.payload.outputs.version }}"
+          git add Sources/VisionSDK.xcframework VisionSDK.podspec
+          git commit -m "Release VisionSDK v${VERSION}"
+          git tag "${VERSION}"
+
+      - name: Push
+        run: |
+          git push origin main
+          git push origin "${{ steps.payload.outputs.version }}"
+
+      - name: Wait for push propagation
+        run: |
+          VERSION="${{ steps.payload.outputs.version }}"
+          sleep 10
+          git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q "${VERSION}" || { echo "Tag not visible on remote"; exit 1; }
+
+      - name: Publish to CocoaPods
+        env:
+          COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
+        run: pod trunk push VisionSDK.podspec --allow-warnings
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.payload.outputs.version }}"
+          gh release create "${VERSION}" \
+            --title "VisionSDK ${VERSION}" \
+            --notes "Published VisionSDK ${VERSION} to SPM and CocoaPods.
+
+          Built from [vision-sdk-ios v${VERSION}](https://github.com/packagexlabs/vision-sdk-ios/releases/tag/v${VERSION})."
