@@ -10,7 +10,7 @@ permissions:
 jobs:
   publish:
     name: Publish XCFramework & CocoaPods
-    runs-on: macos-15
+    runs-on: macos-26
 
     steps:
       - name: Parse payload
