@@ -70,9 +70,8 @@ jobs:
 
       - name: Integration test (SPM build)
         run: |
-          xcodebuild build -scheme PXVisionSDK \
-            -package-path . \
-            -destination 'platform=iOS Simulator,name=iPhone 16'
+          xcodebuild build -scheme VisionSDK \
+            -destination 'generic/platform=iOS Simulator'
 
       - name: Commit and tag
         run: |
