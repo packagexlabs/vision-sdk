@@ -26,6 +26,11 @@ jobs:
             echo "Error: Version '$VERSION' does not match semver X.Y.Z"
             exit 1
           fi
+          # Validate asset_url is a GitHub API URL to prevent PAT leakage
+          if [[ ! "$ASSET_URL" =~ ^https://api\.github\.com/repos/packagexlabs/ ]]; then
+            echo "Error: asset_url must be a GitHub API URL under packagexlabs org"
+            exit 1
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "asset_url=$ASSET_URL" >> "$GITHUB_OUTPUT"
 
@@ -47,16 +52,23 @@ jobs:
 
       - name: Replace xcframework
         run: |
+          set -euo pipefail
           rm -rf Sources/VisionSDK.xcframework
-          unzip VisionSDK.xcframework.zip -d Sources/
+          # List zip contents and reject entries with path traversal
+          if unzip -l VisionSDK.xcframework.zip | grep -q '\.\.'; then
+            echo "Error: Zip contains path traversal entries"
+            exit 1
+          fi
+          # Only extract the expected xcframework directory
+          unzip VisionSDK.xcframework.zip 'VisionSDK.xcframework/*' -d Sources/
 
       - name: Validate xcframework structure
         run: |
-          set -o pipefail
+          set -euo pipefail
           plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
-            | grep -q '"ios-arm64"' && echo "Device slice OK"
+            | grep -q '"ios-arm64"' && echo "Device slice OK" || { echo "Error: ios-arm64 device slice missing from XCFramework"; exit 1; }
           plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
-            | grep -q 'ios-arm64_x86_64-simulator' && echo "Simulator slice OK"
+            | grep -q 'ios-arm64_x86_64-simulator' && echo "Simulator slice OK" || { echo "Error: ios-arm64_x86_64-simulator slice missing from XCFramework"; exit 1; }
 
       - name: Bump podspec version
         run: |
@@ -70,7 +82,9 @@ jobs:
 
       - name: Integration test (SPM build)
         run: |
-          xcodebuild build -scheme VisionSDK \
+          xcodebuild build \
+            -workspace .swiftpm/xcode/package.xcworkspace \
+            -scheme VisionSDK \
             -destination 'generic/platform=iOS Simulator'
 
       - name: Commit and tag
