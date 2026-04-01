@@ -345,6 +345,7 @@ typedef SWIFT_ENUM(NSInteger, BarcodeSymbology, open) {
   BarcodeSymbologyQr = 22,
   BarcodeSymbologyUpce = 23,
   BarcodeSymbologyUnknown = 24,
+  BarcodeSymbologyUpca = 25,
 };
 
 typedef SWIFT_ENUM(NSInteger, CameraLiveGuidance, open) {

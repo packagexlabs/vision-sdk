@@ -216,6 +216,7 @@ import zlib
   case qr
   case upce
   case unknown
+  case upca
   public func stringValue() -> Swift.String
   public static func value(VNStringValue: Swift.String) -> VisionSDK.BarcodeSymbology
   public static func value(stringValue: Swift.String) -> VisionSDK.BarcodeSymbology
