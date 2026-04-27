@@ -512,6 +512,9 @@ SWIFT_CLASS_NAMED("DetectedCode")
 @property (nonatomic, readonly) enum BarcodeSymbology symbology;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> * _Nullable extractedData;
 @property (nonatomic, readonly) CGRect boundingBox;
+/// Bounding box normalized to 0-1 range with top-left origin.
+/// Use this when you need device/resolution-independent coordinates.
+@property (nonatomic, readonly) CGRect normalizedBoundingBox;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -1180,6 +1183,9 @@ SWIFT_CLASS_NAMED("DetectedCode")
 @property (nonatomic, readonly) enum BarcodeSymbology symbology;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> * _Nullable extractedData;
 @property (nonatomic, readonly) CGRect boundingBox;
+/// Bounding box normalized to 0-1 range with top-left origin.
+/// Use this when you need device/resolution-independent coordinates.
+@property (nonatomic, readonly) CGRect normalizedBoundingBox;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end

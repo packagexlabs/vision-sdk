@@ -381,8 +381,9 @@ extension AVFoundation.AVCaptureDevice {
   @objc final public let symbology: VisionSDK.BarcodeSymbology
   @objc final public let extractedData: [Swift.String : Swift.String]?
   @objc final public let boundingBox: CoreFoundation.CGRect
+  @objc final public let normalizedBoundingBox: CoreFoundation.CGRect
   #if compiler(>=5.3) && $NonescapableTypes
-  public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero)
+  public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero, normalizedBoundingBox: CoreFoundation.CGRect = .zero)
   #endif
   @objc deinit
 }
