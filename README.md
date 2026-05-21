@@ -869,7 +869,7 @@ syntax.
 
 ## Dimensioning (3D Box Measurement, iOS only)
 
-VisionSDK ships an optional dimensioning module that measures a real-world box's length, width, height, and volume using the device's LiDAR sensor. The module is **opt-in** — it is not part of the default Core install — and lives in the source distribution at [`packagexlabs/vision-sdk-ios`](https://github.com/packagexlabs/vision-sdk-ios) because it bundles an `MVDimensioningCore.xcframework` and a CoreML model-decryption key alongside its Swift sources.
+VisionSDK ships an optional dimensioning module that measures a real-world box's length, width, height, and volume using the device's LiDAR sensor. The module is **opt-in** — it is not part of the default Core install — and lives in the source distribution at [`packagexlabs/vision-sdk-ios`](https://github.com/packagexlabs/vision-sdk-ios).
 
 ### Hardware & OS Requirements
 
@@ -1001,7 +1001,7 @@ All fields are on `VSDKDimensioningConfiguration`:
 
 | Field | Type | Default | Notes |
 |---|---|---|---|
-| `mode` | `VSDKDimensioningMode` | `.offline` | `.offline` runs entirely on-device. `.online` routes SAM2 segmentation through PackageX cloud (requires `VSDKConstants.apiKey`). |
+| `mode` | `VSDKDimensioningMode` | `.offline` | `.offline` runs entirely on-device. `.online` augments the pipeline with a cloud-side path (requires `VSDKConstants.apiKey`). |
 | `measurementUnit` | `UnitLength` | `.centimeters` | Any `Foundation.UnitLength` — pass `.inches`, `.millimeters`, etc. |
 | `maximumTrackCount` | `Int` | `5` | Cap on simultaneous tracked boxes. |
 
