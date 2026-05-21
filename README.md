@@ -867,6 +867,179 @@ This method is called on the shared instance of `OnDeviceOCRManager`. It can be 
 syntax.
 
 
+## Dimensioning (3D Box Measurement, iOS only)
+
+VisionSDK ships an optional dimensioning module that measures a real-world box's length, width, height, and volume using the device's LiDAR sensor. The module is **opt-in** — it is not part of the default Core install — and lives in the source distribution at [`packagexlabs/vision-sdk-ios`](https://github.com/packagexlabs/vision-sdk-ios) because it bundles an `MVDimensioningCore.xcframework` and a CoreML model-decryption key alongside its Swift sources.
+
+### Hardware & OS Requirements
+
+- iOS 17.0+ (the dimensioning module raises the minimum deployment target above the SDK Core's iOS 13)
+- LiDAR-equipped device (iPhone 12 Pro / 13 Pro / 14 Pro / 15 Pro and newer; iPad Pro 2020+). On non-LiDAR devices and simulators, the module fails fast with `lidarUnavailable`.
+
+### Installation
+
+Dimensioning is not included in the `packagexlabs/vision-sdk` binary SPM distribution — install via the source distribution.
+
+**CocoaPods**
+
+```ruby
+platform :ios, '17.0'
+pod 'VisionSDK/Core'
+pod 'VisionSDK/Dimensioning'
+```
+
+**Swift Package Manager** — point at `vision-sdk-ios` directly and link both products:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/packagexlabs/vision-sdk-ios.git", from: "2.2.2")
+],
+targets: [
+    .target(
+        name: "MyApp",
+        dependencies: [
+            .product(name: "VisionSDK",             package: "vision-sdk-ios"),
+            .product(name: "VisionSDKDimensioning", package: "vision-sdk-ios"),
+        ]
+    )
+]
+```
+
+### Info.plist
+
+```xml
+<key>NSCameraUsageDescription</key>
+<string>Required for dimensioning</string>
+<key>Privacy - LiDAR Usage Description</key>
+<string>Required for 3D box measurement</string>
+```
+
+### App-Launch Setup
+
+```swift
+import VisionSDK
+import VisionSDKDimensioning
+
+// Required only for `.online` mode (cloud-assisted segmentation)
+VSDKConstants.apiKey = "YOUR_API_KEY"
+
+// Capability check
+let caps = VSDKDimensioning.deviceCapabilities()
+guard caps.lidar else { /* hide dimensioning UI */ return }
+
+// Pre-warm CoreML decryption keys + JIT compilation
+Task { await VSDKDimensioning.prefetchModels() }
+```
+
+### UIKit / Objective-C Usage
+
+```swift
+import UIKit
+import VisionSDKDimensioning
+
+class DimensioningViewController: UIViewController, VSDKDimensioningViewDelegate {
+
+    private let dimView = VSDKDimensioningView()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(dimView)
+        NSLayoutConstraint.activate([
+            dimView.topAnchor.constraint(equalTo: view.topAnchor),
+            dimView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            dimView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        dimView.configure(delegate: self, mode: .offline, maximumTrackCount: 3)
+        dimView.startRunning()
+    }
+
+    // MARK: - VSDKDimensioningViewDelegate
+
+    func dimensioningView(_ view: VSDKDimensioningView,
+                          didCapture measurement: VSDKDimensioningMeasurement) {
+        print(measurement.length, measurement.width, measurement.height)
+    }
+
+    func dimensioningView(_ view: VSDKDimensioningView, didFailWithError error: NSError) {
+        // error.domain == "io.packagex.visionsdk.dimensioning"
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        dimView.deConfigure()
+    }
+}
+```
+
+### SwiftUI / async-await Usage
+
+```swift
+import SwiftUI
+import VisionSDKDimensioning
+
+// Quick path — declarative camera with capture callback
+struct DimCameraView: View {
+    var body: some View {
+        VSDKDimensioningSwiftUIView(
+            configuration: .init(mode: .offline, measurementUnit: .centimeters),
+            onCapture: { measurement in
+                print(measurement.length, measurement.width, measurement.height)
+            }
+        )
+        .ignoresSafeArea()
+    }
+}
+```
+
+For full lifecycle control — `pause()` / `resume()` / `await capture()`, observable `phase` and `tracks` — use `VSDKDimensioningSession` directly.
+
+### Configuration
+
+All fields are on `VSDKDimensioningConfiguration`:
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `mode` | `VSDKDimensioningMode` | `.offline` | `.offline` runs entirely on-device. `.online` routes SAM2 segmentation through PackageX cloud (requires `VSDKConstants.apiKey`). |
+| `measurementUnit` | `UnitLength` | `.centimeters` | Any `Foundation.UnitLength` — pass `.inches`, `.millimeters`, etc. |
+| `maximumTrackCount` | `Int` | `5` | Cap on simultaneous tracked boxes. |
+
+### Result
+
+```swift
+struct VSDKDimensioningMeasurement {
+    let id: UUID
+    let timestamp: Date
+    let length, width, height: NSMeasurement   // unit matches `measurementUnit`
+    let distanceFromCamera: NSMeasurement       // meters
+    let confidence: Float                       // 0...1
+    let usedCloudSAM: Bool
+    var volume: NSMeasurement { get }           // cubic meters
+}
+```
+
+Convert on the fly with `measurement.length.converting(to: .inches).doubleValue`.
+
+### Errors
+
+All cases live under `domain = "io.packagex.visionsdk.dimensioning"`:
+
+| Case | Code | Trigger |
+|---|---|---|
+| `.missingCredentials` | 0 | `.online` mode started without `VSDKConstants.apiKey` |
+| `.notConfigured` | 1 | `startRunning()` called before `configure(...)` |
+| `.lidarUnavailable` | 2 | Non-LiDAR device or simulator |
+| `.arSessionFailed(reason)` | 3 | ARKit session interruption |
+| `.noGroundPlane` | 4 | No anchorable horizontal surface |
+| `.captureTimedOut` | 5 | `capture()` never reached a stable measurement |
+| `.userCancelled` | 6 | Cancellation propagated from the session |
+
+### Important: Capture Session Conflict
+
+`VSDKDimensioningView` and `VSDKDimensioningSession` own their own `ARSession`. ARKit and `AVCaptureSession` cannot share the camera, so you must stop the regular `CodeScannerView` before presenting any dimensioning UI, and vice versa.
+
+
 # VisionSDK Android Integration
 
 The VisionSDK Android Integration is a barcode and QR code scanner framework for Android that
