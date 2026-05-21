@@ -830,6 +830,15 @@ extension VisionSDK.GenerateTemplateController {
 extension VisionSDK.GenerateTemplateController : AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegate {
   @_Concurrency.MainActor @preconcurrency @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
+public struct VSDKDimensioningCredentials : Swift.Sendable {
+  public let apiKey: Swift.String
+  public let sdkID: Swift.String
+  public let cloudURL: Foundation.URL
+  public init(apiKey: Swift.String, sdkID: Swift.String, cloudURL: Foundation.URL)
+  public static var current: VisionSDK.VSDKDimensioningCredentials {
+    get
+  }
+}
 extension VisionSDK.CameraLiveGuidance : Swift.Equatable {}
 extension VisionSDK.CameraLiveGuidance : Swift.Hashable {}
 extension VisionSDK.CameraLiveGuidance : Swift.RawRepresentable {}

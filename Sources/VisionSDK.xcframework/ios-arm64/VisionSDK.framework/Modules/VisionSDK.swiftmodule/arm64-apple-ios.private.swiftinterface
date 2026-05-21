@@ -830,6 +830,35 @@ extension VisionSDK.GenerateTemplateController {
 extension VisionSDK.GenerateTemplateController : AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegate {
   @_Concurrency.MainActor @preconcurrency @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
+public struct VSDKDimensioningCredentials : Swift.Sendable {
+  public let apiKey: Swift.String
+  public let sdkID: Swift.String
+  public let cloudURL: Foundation.URL
+  public init(apiKey: Swift.String, sdkID: Swift.String, cloudURL: Foundation.URL)
+  public static var current: VisionSDK.VSDKDimensioningCredentials {
+    get
+  }
+}
+@_spi(VSDKDimensioning) public struct VSDKDimensioningTelemetryEvent : @unchecked Swift.Sendable {
+  @_spi(VSDKDimensioning) public enum Kind : Swift.String, Swift.Sendable {
+    @_spi(VSDKDimensioning) case measurementCaptured
+    @_spi(VSDKDimensioning) case measurementAborted
+    #if compiler(>=5.3) && $NonescapableTypes
+    @_spi(VSDKDimensioning) public init?(rawValue: Swift.String)
+    #endif
+    @_spi(VSDKDimensioning) public typealias RawValue = Swift.String
+    @_spi(VSDKDimensioning) public var rawValue: Swift.String {
+      @_spi(VSDKDimensioning) get
+    }
+  }
+  @_spi(VSDKDimensioning) public let kind: VisionSDK.VSDKDimensioningTelemetryEvent.Kind
+  @_spi(VSDKDimensioning) public let properties: [Swift.String : Any]
+  @_spi(VSDKDimensioning) public let timestamp: Foundation.Date
+  @_spi(VSDKDimensioning) public init(kind: VisionSDK.VSDKDimensioningTelemetryEvent.Kind, properties: [Swift.String : Any], timestamp: Foundation.Date = Date())
+}
+@_spi(VSDKDimensioning) public enum VSDKDimensioningTelemetry {
+  @_spi(VSDKDimensioning) public static func report(_ event: VisionSDK.VSDKDimensioningTelemetryEvent)
+}
 extension VisionSDK.CameraLiveGuidance : Swift.Equatable {}
 extension VisionSDK.CameraLiveGuidance : Swift.Hashable {}
 extension VisionSDK.CameraLiveGuidance : Swift.RawRepresentable {}
@@ -872,3 +901,6 @@ extension VisionSDK.VSDKPlatformType : Swift.RawRepresentable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.Equatable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.Hashable {}
 extension VisionSDK.VSDKAppEnvironment : Swift.RawRepresentable {}
+@_spi(VSDKDimensioning) extension VisionSDK.VSDKDimensioningTelemetryEvent.Kind : Swift.Equatable {}
+@_spi(VSDKDimensioning) extension VisionSDK.VSDKDimensioningTelemetryEvent.Kind : Swift.Hashable {}
+@_spi(VSDKDimensioning) extension VisionSDK.VSDKDimensioningTelemetryEvent.Kind : Swift.RawRepresentable {}
