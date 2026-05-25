@@ -13,6 +13,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/packagexlabs/vision-sdk'
   s.author           = { 'PackageX' => 'engineering@packagex.io' }
   s.swift_version    = '5.0'
+  s.platform         = :ios, '13.0'
   s.source           = { :git => 'https://github.com/packagexlabs/vision-sdk.git', :tag => s.version.to_s }
   s.default_subspecs = 'Core'
 
