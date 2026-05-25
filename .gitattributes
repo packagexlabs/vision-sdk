@@ -1,0 +1,5 @@
+# Git LFS tracking for large xcframeworks
+# MVDimensioningCore is ~226 MB and exceeds GitHub's 100 MB per-file limit.
+# VisionSDK.xcframework and TensorFlowLiteC.xcframework are under the limit
+# and remain as regular git objects.
+Sources/MVDimensioningCore.xcframework/** filter=lfs diff=lfs merge=lfs -text
