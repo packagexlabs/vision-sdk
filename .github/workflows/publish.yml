@@ -18,6 +18,7 @@ jobs:
         run: |
           VERSION="${{ github.event.client_payload.version }}"
           ASSET_URL="${{ github.event.client_payload.asset_url }}"
+          DIM_URL="${{ github.event.client_payload.dimensioning_asset_url }}"
           if [[ -z "$VERSION" || -z "$ASSET_URL" ]]; then
             echo "Error: Missing version or asset_url in payload"
             exit 1
@@ -26,23 +27,32 @@ jobs:
             echo "Error: Version '$VERSION' does not match semver X.Y.Z"
             exit 1
           fi
-          # Validate asset_url is a GitHub API URL to prevent PAT leakage
+          # Validate asset URLs are GitHub API URLs to prevent PAT leakage
           if [[ ! "$ASSET_URL" =~ ^https://api\.github\.com/repos/packagexlabs/ ]]; then
             echo "Error: asset_url must be a GitHub API URL under packagexlabs org"
             exit 1
           fi
+          if [[ -n "$DIM_URL" && ! "$DIM_URL" =~ ^https://api\.github\.com/repos/packagexlabs/ ]]; then
+            echo "Error: dimensioning_asset_url must be a GitHub API URL under packagexlabs org"
+            exit 1
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "asset_url=$ASSET_URL" >> "$GITHUB_OUTPUT"
+          echo "dimensioning_asset_url=$DIM_URL" >> "$GITHUB_OUTPUT"
+          echo "has_dimensioning=$([ -n "$DIM_URL" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git lfs install
 
-      - name: Download xcframework
+      - name: Download core xcframework
         run: |
           curl -L \
             -H "Authorization: Bearer ${{ secrets.VISION_SDK_IOS_PAT }}" \
@@ -50,32 +60,79 @@ jobs:
             "${{ steps.payload.outputs.asset_url }}" \
             -o VisionSDK.xcframework.zip
 
-      - name: Replace xcframework
+      - name: Replace core xcframework
         run: |
           set -euo pipefail
           rm -rf Sources/VisionSDK.xcframework
-          # List zip contents and reject entries with path traversal
           if unzip -l VisionSDK.xcframework.zip | grep -q '\.\.'; then
             echo "Error: Zip contains path traversal entries"
             exit 1
           fi
-          # Only extract the expected xcframework directory
           unzip VisionSDK.xcframework.zip 'VisionSDK.xcframework/*' -d Sources/
 
-      - name: Validate xcframework structure
+      - name: Validate core xcframework structure
         run: |
           set -euo pipefail
           plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
-            | grep -q '"ios-arm64"' && echo "Device slice OK" || { echo "Error: ios-arm64 device slice missing from XCFramework"; exit 1; }
+            | grep -q '"ios-arm64"' && echo "Device slice OK" || { echo "Error: ios-arm64 device slice missing"; exit 1; }
           plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
-            | grep -q 'ios-arm64_x86_64-simulator' && echo "Simulator slice OK" || { echo "Error: ios-arm64_x86_64-simulator slice missing from XCFramework"; exit 1; }
+            | grep -q 'ios-arm64_x86_64-simulator' && echo "Simulator slice OK" || { echo "Error: Simulator slice missing"; exit 1; }
+
+      - name: Download and unpack dimensioning bundle
+        if: steps.payload.outputs.has_dimensioning == 'true'
+        run: |
+          set -euo pipefail
+          curl -L \
+            -H "Authorization: Bearer ${{ secrets.VISION_SDK_IOS_PAT }}" \
+            -H "Accept: application/octet-stream" \
+            "${{ steps.payload.outputs.dimensioning_asset_url }}" \
+            -o VisionSDKDimensioning-bundle.zip
+
+          if unzip -l VisionSDKDimensioning-bundle.zip | grep -q '\.\.'; then
+            echo "Error: Zip contains path traversal entries"
+            exit 1
+          fi
+
+          # Clear old dimensioning artifacts
+          rm -rf Sources/MVDimensioningCore.xcframework Sources/VisionSDKDimensioning
+          rm -f Sources/MVDimensioning.mlmodelkey
+
+          # Unpack. Bundle structure (from release.yml):
+          #   dimensioning-bundle/
+          #     MVDimensioningCore.xcframework/
+          #     MVDimensioning.mlmodelkey
+          #     VisionSDKDimensioning/*.swift
+          unzip -o VisionSDKDimensioning-bundle.zip -d /tmp/dim-bundle/
+
+          # Move into Sources/
+          cp -a /tmp/dim-bundle/dimensioning-bundle/MVDimensioningCore.xcframework \
+                Sources/
+          cp    /tmp/dim-bundle/dimensioning-bundle/MVDimensioning.mlmodelkey \
+                Sources/
+          mkdir -p Sources/VisionSDKDimensioning
+          cp    /tmp/dim-bundle/dimensioning-bundle/VisionSDKDimensioning/*.swift \
+                Sources/VisionSDKDimensioning/
+
+          rm -rf /tmp/dim-bundle
+          echo "Dimensioning bundle unpacked."
+          ls Sources/VisionSDKDimensioning/
+          ls Sources/MVDimensioningCore.xcframework/
+
+      - name: Track large files with Git LFS
+        if: steps.payload.outputs.has_dimensioning == 'true'
+        run: |
+          # Ensure LFS tracks the MVDimensioningCore binary and any future large xcframeworks.
+          # VisionSDK.xcframework and TensorFlowLiteC.xcframework are under the 100 MB limit
+          # and remain as regular git objects (no change to existing behavior).
+          git lfs track "Sources/MVDimensioningCore.xcframework/**"
+          git add .gitattributes
 
       - name: Bump podspec version
         run: |
           VERSION="${{ steps.payload.outputs.version }}"
-          sed -i '' "/spec\.version/s/\"[0-9][0-9.]*\"/\"${VERSION}\"/" VisionSDK.podspec
+          sed -i '' "/s\.version/s/=.*$/= '${VERSION}'/" VisionSDK.podspec
           echo "Podspec version bumped to $VERSION"
-          grep 'spec.version' VisionSDK.podspec
+          grep "s.version" VisionSDK.podspec
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
@@ -91,6 +148,11 @@ jobs:
         run: |
           VERSION="${{ steps.payload.outputs.version }}"
           git add Sources/VisionSDK.xcframework VisionSDK.podspec
+          if [ "${{ steps.payload.outputs.has_dimensioning }}" = "true" ]; then
+            git add Sources/MVDimensioningCore.xcframework \
+                    Sources/VisionSDKDimensioning \
+                    Sources/MVDimensioning.mlmodelkey
+          fi
           git commit -m "Release VisionSDK v${VERSION}"
           git tag "${VERSION}"
 
