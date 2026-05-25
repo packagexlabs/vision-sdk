@@ -43,14 +43,11 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git lfs install
 
       - name: Download core xcframework
         run: |
@@ -117,15 +114,6 @@ jobs:
           echo "Dimensioning bundle unpacked."
           ls Sources/VisionSDKDimensioning/
           ls Sources/MVDimensioningCore.xcframework/
-
-      - name: Track large files with Git LFS
-        if: steps.payload.outputs.has_dimensioning == 'true'
-        run: |
-          # Ensure LFS tracks the MVDimensioningCore binary and any future large xcframeworks.
-          # VisionSDK.xcframework and TensorFlowLiteC.xcframework are under the 100 MB limit
-          # and remain as regular git objects (no change to existing behavior).
-          git lfs track "Sources/MVDimensioningCore.xcframework/**"
-          git add .gitattributes
 
       - name: Bump podspec version
         run: |
