@@ -1,0 +1,4225 @@
+{
+  "ABIRoot": {
+    "kind": "Root",
+    "name": "VisionSDKDimensioning",
+    "printedName": "VisionSDKDimensioning",
+    "children": [
+      {
+        "kind": "Import",
+        "name": "MVDimensioningCore",
+        "printedName": "MVDimensioningCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningMode",
+        "printedName": "VSDKDimensioningMode",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "offline",
+            "printedName": "offline",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningMode.Type) -> VisionSDKDimensioning.VSDKDimensioningMode",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningMode",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                    "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMode.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningMode",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                        "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode@VSDKDimensioningModeOffline",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningModeO7offlineyA2CmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "ObjC"
+            ],
+            "fixedbinaryorder": 0
+          },
+          {
+            "kind": "Var",
+            "name": "online",
+            "printedName": "online",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningMode.Type) -> VisionSDKDimensioning.VSDKDimensioningMode",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningMode",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                    "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMode.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningMode",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                        "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode@VSDKDimensioningModeOnline",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningModeO6onlineyA2CmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "ObjC"
+            ],
+            "fixedbinaryorder": 1
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(rawValue:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMode?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningMode",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                    "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:21VisionSDKDimensioning20VSDKDimensioningModeO8rawValueACSgSi_tcfc",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningModeO8rawValueACSgSi_tcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "implicit": true,
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "rawValue",
+            "printedName": "rawValue",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning20VSDKDimensioningModeO8rawValueSivp",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningModeO8rawValueSivp",
+            "moduleName": "VisionSDKDimensioning",
+            "implicit": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning20VSDKDimensioningModeO8rawValueSivg",
+                "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningModeO8rawValueSivg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode",
+        "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningModeO",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC",
+          "RawDocComment"
+        ],
+        "enumRawTypeName": "Int",
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "RawRepresentable",
+            "printedName": "RawRepresentable",
+            "children": [
+              {
+                "kind": "TypeWitness",
+                "name": "RawValue",
+                "printedName": "RawValue",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ]
+              }
+            ],
+            "usr": "s:SY",
+            "mangledName": "$sSY"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningConfiguration",
+        "printedName": "VSDKDimensioningConfiguration",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "mode",
+            "printedName": "mode",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningMode",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvp",
+            "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningMode",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                    "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvg",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningMode",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                    "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvs",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvs",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvM",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV4modeAA0C4ModeOvM",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "measurementUnit",
+            "printedName": "measurementUnit",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UnitLength",
+                "printedName": "Foundation.UnitLength",
+                "usr": "c:objc(cs)NSUnitLength"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvp",
+            "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UnitLength",
+                    "printedName": "Foundation.UnitLength",
+                    "usr": "c:objc(cs)NSUnitLength"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvg",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UnitLength",
+                    "printedName": "Foundation.UnitLength",
+                    "usr": "c:objc(cs)NSUnitLength"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvs",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvs",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvM",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV15measurementUnitSo12NSUnitLengthCvM",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "maximumTrackCount",
+            "printedName": "maximumTrackCount",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivp",
+            "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "HasStorage",
+              "AccessControl"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivg",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivs",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivs",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivM",
+                "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV17maximumTrackCountSivM",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(mode:measurementUnit:maximumTrackCount:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningConfiguration",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningConfiguration",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningMode",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                "hasDefaultArg": true,
+                "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UnitLength",
+                "printedName": "Foundation.UnitLength",
+                "hasDefaultArg": true,
+                "usr": "c:objc(cs)NSUnitLength"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV4mode15measurementUnit17maximumTrackCountAcA0C4ModeO_So12NSUnitLengthCSitcfc",
+            "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV4mode15measurementUnit17maximumTrackCountAcA0C4ModeO_So12NSUnitLengthCSitcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Struct",
+        "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV",
+        "mangledName": "$s21VisionSDKDimensioning29VSDKDimensioningConfigurationV",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning"
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningMeasurement",
+        "printedName": "VSDKDimensioningMeasurement",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "id",
+            "printedName": "id",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UUID",
+                "printedName": "Foundation.UUID",
+                "usr": "s:10Foundation4UUIDV"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)id",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC2id10Foundation4UUIDVvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UUID",
+                    "printedName": "Foundation.UUID",
+                    "usr": "s:10Foundation4UUIDV"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)id",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC2id10Foundation4UUIDVvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "timestamp",
+            "printedName": "timestamp",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Date",
+                "printedName": "Foundation.Date",
+                "usr": "s:10Foundation4DateV"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)timestamp",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC9timestamp10Foundation4DateVvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Date",
+                    "printedName": "Foundation.Date",
+                    "usr": "s:10Foundation4DateV"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)timestamp",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC9timestamp10Foundation4DateVvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "length",
+            "printedName": "length",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)length",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC6lengthSo13NSMeasurementCvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "NSMeasurement",
+                    "printedName": "Foundation.NSMeasurement",
+                    "usr": "c:objc(cs)NSMeasurement"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)length",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC6lengthSo13NSMeasurementCvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "width",
+            "printedName": "width",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)width",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC5widthSo13NSMeasurementCvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "NSMeasurement",
+                    "printedName": "Foundation.NSMeasurement",
+                    "usr": "c:objc(cs)NSMeasurement"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)width",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC5widthSo13NSMeasurementCvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "height",
+            "printedName": "height",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)height",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC6heightSo13NSMeasurementCvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "NSMeasurement",
+                    "printedName": "Foundation.NSMeasurement",
+                    "usr": "c:objc(cs)NSMeasurement"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)height",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC6heightSo13NSMeasurementCvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "distanceFromCamera",
+            "printedName": "distanceFromCamera",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)distanceFromCamera",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC18distanceFromCameraSo13NSMeasurementCvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "NSMeasurement",
+                    "printedName": "Foundation.NSMeasurement",
+                    "usr": "c:objc(cs)NSMeasurement"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)distanceFromCamera",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC18distanceFromCameraSo13NSMeasurementCvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "confidence",
+            "printedName": "confidence",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Float",
+                "printedName": "Swift.Float",
+                "usr": "s:Sf"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)confidence",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC10confidenceSfvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Float",
+                    "printedName": "Swift.Float",
+                    "usr": "s:Sf"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)confidence",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC10confidenceSfvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "usedCloudSAM",
+            "printedName": "usedCloudSAM",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)usedCloudSAM",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC12usedCloudSAMSbvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)usedCloudSAM",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC12usedCloudSAMSbvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(id:timestamp:length:width:height:distanceFromCamera:confidence:usedCloudSAM:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningMeasurement",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UUID",
+                "printedName": "Foundation.UUID",
+                "usr": "s:10Foundation4UUIDV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Date",
+                "printedName": "Foundation.Date",
+                "usr": "s:10Foundation4DateV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Float",
+                "printedName": "Swift.Float",
+                "usr": "s:Sf"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)initWithId:timestamp:length:width:height:distanceFromCamera:confidence:usedCloudSAM:",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC2id9timestamp6length5width6height18distanceFromCamera10confidence12usedCloudSAMAC10Foundation4UUIDV_AL4DateVSo13NSMeasurementCA3RSfSbtcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "objc_name": "initWithId:timestamp:length:width:height:distanceFromCamera:confidence:usedCloudSAM:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "volume",
+            "printedName": "volume",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NSMeasurement",
+                "printedName": "Foundation.NSMeasurement",
+                "usr": "c:objc(cs)NSMeasurement"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(py)volume",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC6volumeSo13NSMeasurementCvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "NSMeasurement",
+                    "printedName": "Foundation.NSMeasurement",
+                    "usr": "c:objc(cs)NSMeasurement"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)volume",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC6volumeSo13NSMeasurementCvg",
+                "moduleName": "VisionSDKDimensioning",
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningMeasurement",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement(im)init",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementCACycfc",
+            "moduleName": "VisionSDKDimensioning",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement",
+        "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningMeasurementC",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "Final",
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningTrack",
+        "printedName": "VSDKDimensioningTrack",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "id",
+            "printedName": "id",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "UUID",
+                "printedName": "Foundation.UUID",
+                "usr": "s:10Foundation4UUIDV"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(py)id",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC2id10Foundation4UUIDVvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "UUID",
+                    "printedName": "Foundation.UUID",
+                    "usr": "s:10Foundation4UUIDV"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(im)id",
+                "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC2id10Foundation4UUIDVvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "measurement",
+            "printedName": "measurement",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningMeasurement",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                    "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(py)measurement",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC11measurementAA0C11MeasurementCSgvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningMeasurement",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(im)measurement",
+                "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC11measurementAA0C11MeasurementCSgvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "isStable",
+            "printedName": "isStable",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(py)isStable",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC8isStableSbvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(im)isStable",
+                "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC8isStableSbvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "normalizedScreenRect",
+            "printedName": "normalizedScreenRect",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "CGRect",
+                "printedName": "CoreFoundation.CGRect",
+                "usr": "c:@S@CGRect"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(py)normalizedScreenRect",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC20normalizedScreenRectSo6CGRectVvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "CGRect",
+                    "printedName": "CoreFoundation.CGRect",
+                    "usr": "c:@S@CGRect"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(im)normalizedScreenRect",
+                "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC20normalizedScreenRectSo6CGRectVvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(id:measurement:isStable:normalizedScreenRect:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningTrack",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningTrack",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "UUID",
+                "printedName": "Foundation.UUID",
+                "usr": "s:10Foundation4UUIDV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningMeasurement",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                    "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CGRect",
+                "printedName": "CoreFoundation.CGRect",
+                "usr": "c:@S@CGRect"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(im)initWithId:measurement:isStable:normalizedScreenRect:",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC2id11measurement8isStable20normalizedScreenRectAC10Foundation4UUIDV_AA0C11MeasurementCSgSbSo6CGRectVtcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "objc_name": "initWithId:measurement:isStable:normalizedScreenRect:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningTrack",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningTrack",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack(im)init",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackCACycfc",
+            "moduleName": "VisionSDKDimensioning",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack",
+        "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningTrackC",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "Final",
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningCapabilities",
+        "printedName": "VSDKDimensioningCapabilities",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "lidar",
+            "printedName": "lidar",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(py)lidar",
+            "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC5lidarSbvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(im)lidar",
+                "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC5lidarSbvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "arWorldTracking",
+            "printedName": "arWorldTracking",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(py)arWorldTracking",
+            "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC15arWorldTrackingSbvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(im)arWorldTracking",
+                "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC15arWorldTrackingSbvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "sceneReconstruction",
+            "printedName": "sceneReconstruction",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(py)sceneReconstruction",
+            "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC19sceneReconstructionSbvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(im)sceneReconstruction",
+                "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC19sceneReconstructionSbvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(lidar:arWorldTracking:sceneReconstruction:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningCapabilities",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningCapabilities",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(im)initWithLidar:arWorldTracking:sceneReconstruction:",
+            "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC5lidar15arWorldTracking19sceneReconstructionACSb_S2btcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "objc_name": "initWithLidar:arWorldTracking:sceneReconstruction:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningCapabilities",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningCapabilities",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities(im)init",
+            "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesCACycfc",
+            "moduleName": "VisionSDKDimensioning",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities",
+        "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningCapabilitiesC",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "Final",
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningPhase",
+        "printedName": "VSDKDimensioningPhase",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "idle",
+            "printedName": "idle",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningPhase.Type) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningPhase",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO4idleyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO4idleyA2CmF",
+            "moduleName": "VisionSDKDimensioning"
+          },
+          {
+            "kind": "Var",
+            "name": "initializing",
+            "printedName": "initializing",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningPhase.Type) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningPhase",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO12initializingyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO12initializingyA2CmF",
+            "moduleName": "VisionSDKDimensioning"
+          },
+          {
+            "kind": "Var",
+            "name": "scanning",
+            "printedName": "scanning",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningPhase.Type) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningPhase",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO8scanningyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO8scanningyA2CmF",
+            "moduleName": "VisionSDKDimensioning"
+          },
+          {
+            "kind": "Var",
+            "name": "detected",
+            "printedName": "detected",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningPhase.Type) -> (Swift.Int) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Int) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(trackCount: Swift.Int)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO8detectedyACSi_tcACmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO8detectedyACSi_tcACmF",
+            "moduleName": "VisionSDKDimensioning"
+          },
+          {
+            "kind": "Var",
+            "name": "capturing",
+            "printedName": "capturing",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningPhase.Type) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningPhase",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO9capturingyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO9capturingyA2CmF",
+            "moduleName": "VisionSDKDimensioning"
+          },
+          {
+            "kind": "Var",
+            "name": "captured",
+            "printedName": "captured",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningPhase.Type) -> (VisionSDKDimensioning.VSDKDimensioningMeasurement) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(VisionSDKDimensioning.VSDKDimensioningMeasurement) -> VisionSDKDimensioning.VSDKDimensioningPhase",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningMeasurement",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningPhase",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO8capturedyAcA0C11MeasurementCcACmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO8capturedyAcA0C11MeasurementCcACmF",
+            "moduleName": "VisionSDKDimensioning"
+          },
+          {
+            "kind": "Function",
+            "name": "==",
+            "printedName": "==(_:_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningPhase",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningPhase",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO2eeoiySbAC_ACtFZ",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO2eeoiySbAC_ACtFZ",
+            "moduleName": "VisionSDKDimensioning",
+            "static": true,
+            "declAttributes": [
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO",
+        "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningPhaseO",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningError",
+        "printedName": "VSDKDimensioningError",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "missingCredentials",
+            "printedName": "missingCredentials",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningError.Type) -> VisionSDKDimensioning.VSDKDimensioningError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningError",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO18missingCredentialsyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO18missingCredentialsyA2CmF",
+            "moduleName": "VisionSDKDimensioning"
+          },
+          {
+            "kind": "Var",
+            "name": "notConfigured",
+            "printedName": "notConfigured",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningError.Type) -> VisionSDKDimensioning.VSDKDimensioningError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningError",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO13notConfiguredyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO13notConfiguredyA2CmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "lidarUnavailable",
+            "printedName": "lidarUnavailable",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningError.Type) -> VisionSDKDimensioning.VSDKDimensioningError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningError",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO16lidarUnavailableyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO16lidarUnavailableyA2CmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "arSessionFailed",
+            "printedName": "arSessionFailed",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningError.Type) -> (Swift.String) -> VisionSDKDimensioning.VSDKDimensioningError",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.String) -> VisionSDKDimensioning.VSDKDimensioningError",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(reason: Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO15arSessionFailedyACSS_tcACmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO15arSessionFailedyACSS_tcACmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "noGroundPlane",
+            "printedName": "noGroundPlane",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningError.Type) -> VisionSDKDimensioning.VSDKDimensioningError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningError",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO13noGroundPlaneyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO13noGroundPlaneyA2CmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "captureTimedOut",
+            "printedName": "captureTimedOut",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningError.Type) -> VisionSDKDimensioning.VSDKDimensioningError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningError",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO15captureTimedOutyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO15captureTimedOutyA2CmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "userCancelled",
+            "printedName": "userCancelled",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(VisionSDKDimensioning.VSDKDimensioningError.Type) -> VisionSDKDimensioning.VSDKDimensioningError",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningError",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningError.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningError",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningError",
+                        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO13userCancelledyA2CmF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO13userCancelledyA2CmF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "RawDocComment"
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "toNSError",
+            "printedName": "toNSError()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "NSError",
+                "printedName": "Foundation.NSError",
+                "usr": "c:objc(cs)NSError"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO9toNSErrorSo0F0CyF",
+            "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO9toNSErrorSo0F0CyF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:21VisionSDKDimensioning21VSDKDimensioningErrorO",
+        "mangledName": "$s21VisionSDKDimensioning21VSDKDimensioningErrorO",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Error",
+            "printedName": "Error",
+            "usr": "s:s5ErrorP",
+            "mangledName": "$ss5ErrorP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "SendableMetatype",
+            "printedName": "SendableMetatype",
+            "usr": "s:s16SendableMetatypeP",
+            "mangledName": "$ss16SendableMetatypeP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "CoreML",
+        "printedName": "CoreML",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning"
+      },
+      {
+        "kind": "Import",
+        "name": "MVDimensioningCore",
+        "printedName": "MVDimensioningCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioning",
+        "printedName": "VSDKDimensioning",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "version",
+            "printedName": "version",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "String",
+                "printedName": "Swift.String",
+                "usr": "s:SS"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning16VSDKDimensioningO7versionSSvpZ",
+            "mangledName": "$s21VisionSDKDimensioning16VSDKDimensioningO7versionSSvpZ",
+            "moduleName": "VisionSDKDimensioning",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning16VSDKDimensioningO7versionSSvgZ",
+                "mangledName": "$s21VisionSDKDimensioning16VSDKDimensioningO7versionSSvgZ",
+                "moduleName": "VisionSDKDimensioning",
+                "static": true,
+                "implicit": true,
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Function",
+            "name": "deviceCapabilities",
+            "printedName": "deviceCapabilities()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningCapabilities",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningCapabilities",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningCapabilities"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning16VSDKDimensioningO18deviceCapabilitiesAA0cE0CyFZ",
+            "mangledName": "$s21VisionSDKDimensioning16VSDKDimensioningO18deviceCapabilitiesAA0cE0CyFZ",
+            "moduleName": "VisionSDKDimensioning",
+            "static": true,
+            "declAttributes": [
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "prefetchModels",
+            "printedName": "prefetchModels()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning16VSDKDimensioningO14prefetchModelsyyYaFZ",
+            "mangledName": "$s21VisionSDKDimensioning16VSDKDimensioningO14prefetchModelsyyYaFZ",
+            "moduleName": "VisionSDKDimensioning",
+            "static": true,
+            "declAttributes": [
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Enum",
+        "usr": "s:21VisionSDKDimensioning16VSDKDimensioningO",
+        "mangledName": "$s21VisionSDKDimensioning16VSDKDimensioningO",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "AccessControl"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "VisionSDK",
+        "printedName": "VisionSDK",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "SPIAccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MVDimensioningCore",
+        "printedName": "MVDimensioningCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "VisionSDK",
+        "printedName": "VisionSDK",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "SPIAccessControl"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MVDimensioningCore",
+        "printedName": "MVDimensioningCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Combine",
+        "printedName": "Combine",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning"
+      },
+      {
+        "kind": "Import",
+        "name": "MVDimensioningCore",
+        "printedName": "MVDimensioningCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningSession",
+        "printedName": "VSDKDimensioningSession",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "phase",
+            "printedName": "phase",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningPhase",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC5phaseAA0C5PhaseOvp",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC5phaseAA0C5PhaseOvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "Custom",
+              "ProjectedValueProperty",
+              "SetterAccess",
+              "AccessControl",
+              "Custom"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningPhase",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningPhase",
+                    "usr": "s:21VisionSDKDimensioning21VSDKDimensioningPhaseO"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC5phaseAA0C5PhaseOvg",
+                "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC5phaseAA0C5PhaseOvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "$phase",
+            "printedName": "$phase",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Publisher",
+                "printedName": "Combine.Published<VisionSDKDimensioning.VSDKDimensioningPhase>.Publisher",
+                "usr": "s:7Combine9PublishedV9PublisherV"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC6$phase7Combine9PublishedV9PublisherVyAA0C5PhaseO_Gvp",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC6$phase7Combine9PublishedV9PublisherVyAA0C5PhaseO_Gvp",
+            "moduleName": "VisionSDKDimensioning",
+            "implicit": true,
+            "declAttributes": [
+              "Final",
+              "Custom"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Publisher",
+                    "printedName": "Combine.Published<VisionSDKDimensioning.VSDKDimensioningPhase>.Publisher",
+                    "usr": "s:7Combine9PublishedV9PublisherV"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC6$phase7Combine9PublishedV9PublisherVyAA0C5PhaseO_Gvg",
+                "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC6$phase7Combine9PublishedV9PublisherVyAA0C5PhaseO_Gvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "tracks",
+            "printedName": "tracks",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Array",
+                "printedName": "[VisionSDKDimensioning.VSDKDimensioningTrack]",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningTrack",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningTrack",
+                    "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack"
+                  }
+                ],
+                "usr": "s:Sa"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC6tracksSayAA0C5TrackCGvp",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC6tracksSayAA0C5TrackCGvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "Custom",
+              "ProjectedValueProperty",
+              "SetterAccess",
+              "AccessControl",
+              "Custom"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Array",
+                    "printedName": "[VisionSDKDimensioning.VSDKDimensioningTrack]",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningTrack",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningTrack",
+                        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningTrack"
+                      }
+                    ],
+                    "usr": "s:Sa"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC6tracksSayAA0C5TrackCGvg",
+                "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC6tracksSayAA0C5TrackCGvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "$tracks",
+            "printedName": "$tracks",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Publisher",
+                "printedName": "Combine.Published<Swift.Array<VisionSDKDimensioning.VSDKDimensioningTrack>>.Publisher",
+                "usr": "s:7Combine9PublishedV9PublisherV"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC7$tracks7Combine9PublishedV9PublisherVySayAA0C5TrackCG_Gvp",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC7$tracks7Combine9PublishedV9PublisherVySayAA0C5TrackCG_Gvp",
+            "moduleName": "VisionSDKDimensioning",
+            "implicit": true,
+            "declAttributes": [
+              "Final",
+              "Custom"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Publisher",
+                    "printedName": "Combine.Published<Swift.Array<VisionSDKDimensioning.VSDKDimensioningTrack>>.Publisher",
+                    "usr": "s:7Combine9PublishedV9PublisherV"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC7$tracks7Combine9PublishedV9PublisherVySayAA0C5TrackCG_Gvg",
+                "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC7$tracks7Combine9PublishedV9PublisherVySayAA0C5TrackCG_Gvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "configuration",
+            "printedName": "configuration",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningConfiguration",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningConfiguration",
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvp",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "Custom",
+              "HasStorage",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningConfiguration",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningConfiguration",
+                    "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvg",
+                "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningConfiguration",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningConfiguration",
+                    "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvs",
+                "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvs",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvM",
+                "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAA0C13ConfigurationVvM",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(configuration:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningSession",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningSession",
+                "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningConfiguration",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningConfiguration",
+                "hasDefaultArg": true,
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAcA0C13ConfigurationV_tcfc",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC13configurationAcA0C13ConfigurationV_tcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Custom",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "start",
+            "printedName": "start()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC5startyyYaKF",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC5startyyYaKF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Custom",
+              "Final",
+              "AccessControl"
+            ],
+            "throwing": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "pause",
+            "printedName": "pause()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC5pauseyyF",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC5pauseyyF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Custom",
+              "Final",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "resume",
+            "printedName": "resume()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC6resumeyyF",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC6resumeyyF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Custom",
+              "Final",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "capture",
+            "printedName": "capture()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningMeasurement",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC7captureAA0C11MeasurementCyYaKF",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC7captureAA0C11MeasurementCyYaKF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Custom",
+              "Final",
+              "AccessControl"
+            ],
+            "throwing": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "clearCaptured",
+            "printedName": "clearCaptured()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC13clearCapturedyyF",
+            "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC13clearCapturedyyF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Custom",
+              "Final",
+              "AccessControl"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "s:21VisionSDKDimensioning23VSDKDimensioningSessionC",
+        "mangledName": "$s21VisionSDKDimensioning23VSDKDimensioningSessionC",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "Final",
+          "AccessControl",
+          "Custom",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "ObservableObject",
+            "printedName": "ObservableObject",
+            "children": [
+              {
+                "kind": "TypeWitness",
+                "name": "ObjectWillChangePublisher",
+                "printedName": "ObjectWillChangePublisher",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ObservableObjectPublisher",
+                    "printedName": "Combine.ObservableObjectPublisher",
+                    "usr": "s:7Combine25ObservableObjectPublisherC"
+                  }
+                ]
+              }
+            ],
+            "usr": "s:7Combine16ObservableObjectP",
+            "mangledName": "$s7Combine16ObservableObjectP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "SwiftUI",
+        "printedName": "SwiftUI",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "MVDimensioningCore",
+        "printedName": "MVDimensioningCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningSwiftUIView",
+        "printedName": "VSDKDimensioningSwiftUIView",
+        "children": [
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(configuration:onCapture:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningSwiftUIView",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningSwiftUIView",
+                "usr": "s:21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningConfiguration",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningConfiguration",
+                "hasDefaultArg": true,
+                "usr": "s:21VisionSDKDimensioning29VSDKDimensioningConfigurationV"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((VisionSDKDimensioning.VSDKDimensioningMeasurement) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(VisionSDKDimensioning.VSDKDimensioningMeasurement) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningMeasurement",
+                        "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+                      }
+                    ]
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV13configuration9onCaptureAcA0C13ConfigurationV_yAA0C11MeasurementCcSgtcfc",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV13configuration9onCaptureAcA0C13ConfigurationV_yAA0C11MeasurementCcSgtcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Preconcurrency",
+              "Custom",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Var",
+            "name": "body",
+            "printedName": "body",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "OpaqueTypeArchetype",
+                "printedName": "some SwiftUI.View",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "View",
+                    "printedName": "SwiftUI.View",
+                    "usr": "s:7SwiftUI4ViewP"
+                  }
+                ]
+              }
+            ],
+            "declKind": "Var",
+            "usr": "s:21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV4bodyQrvp",
+            "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV4bodyQrvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Preconcurrency",
+              "Custom",
+              "AccessControl"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpaqueTypeArchetype",
+                    "printedName": "some SwiftUI.View",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "View",
+                        "printedName": "SwiftUI.View",
+                        "usr": "s:7SwiftUI4ViewP"
+                      }
+                    ]
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV4bodyQrvg",
+                "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV4bodyQrvg",
+                "moduleName": "VisionSDKDimensioning",
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Struct",
+        "usr": "s:21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV",
+        "mangledName": "$s21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "Preconcurrency",
+          "Custom",
+          "AccessControl",
+          "RawDocComment"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "View",
+            "printedName": "View",
+            "children": [
+              {
+                "kind": "TypeWitness",
+                "name": "Body",
+                "printedName": "Body",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "OpaqueTypeArchetype",
+                    "printedName": "some SwiftUI.View",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "View",
+                        "printedName": "SwiftUI.View",
+                        "usr": "s:7SwiftUI4ViewP"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "usr": "s:7SwiftUI4ViewP",
+            "mangledName": "$s7SwiftUI4ViewP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Sendable",
+            "printedName": "Sendable",
+            "usr": "s:s8SendableP",
+            "mangledName": "$ss8SendableP"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "UIKit",
+        "printedName": "UIKit",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "SwiftUI",
+        "printedName": "SwiftUI",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning"
+      },
+      {
+        "kind": "Import",
+        "name": "MVDimensioningCore",
+        "printedName": "MVDimensioningCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "ImplementationOnly"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningViewDelegate",
+        "printedName": "VSDKDimensioningViewDelegate",
+        "children": [
+          {
+            "kind": "Function",
+            "name": "dimensioningView",
+            "printedName": "dimensioningView(_:didCapture:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningView",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningView",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningMeasurement",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMeasurement",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningMeasurement"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@VisionSDKDimensioning@objc(pl)VSDKDimensioningViewDelegate(im)dimensioningView:didCapture:",
+            "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningViewDelegateP012dimensioningD0_10didCaptureyAA0cD0C_AA0C11MeasurementCtF",
+            "moduleName": "VisionSDKDimensioning",
+            "genericSig": "<τ_0_0 where τ_0_0 : VisionSDKDimensioning.VSDKDimensioningViewDelegate>",
+            "sugared_genericSig": "<Self where Self : VisionSDKDimensioning.VSDKDimensioningViewDelegate>",
+            "protocolReq": true,
+            "declAttributes": [
+              "ObjC"
+            ],
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "dimensioningView",
+            "printedName": "dimensioningView(_:didFailWithError:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningView",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningView",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSError",
+                "printedName": "Foundation.NSError",
+                "usr": "c:objc(cs)NSError"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@VisionSDKDimensioning@objc(pl)VSDKDimensioningViewDelegate(im)dimensioningView:didFailWithError:",
+            "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningViewDelegateP012dimensioningD0_16didFailWithErroryAA0cD0C_So7NSErrorCtF",
+            "moduleName": "VisionSDKDimensioning",
+            "genericSig": "<τ_0_0 where τ_0_0 : VisionSDKDimensioning.VSDKDimensioningViewDelegate>",
+            "sugared_genericSig": "<Self where Self : VisionSDKDimensioning.VSDKDimensioningViewDelegate>",
+            "protocolReq": true,
+            "declAttributes": [
+              "Optional",
+              "ObjC"
+            ],
+            "reqNewWitnessTableEntry": true,
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Protocol",
+        "usr": "c:@M@VisionSDKDimensioning@objc(pl)VSDKDimensioningViewDelegate",
+        "mangledName": "$s21VisionSDKDimensioning28VSDKDimensioningViewDelegateP",
+        "moduleName": "VisionSDKDimensioning",
+        "genericSig": "<τ_0_0 : AnyObject>",
+        "sugared_genericSig": "<Self : AnyObject>",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          }
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "VSDKDimensioningView",
+        "printedName": "VSDKDimensioningView",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "delegate",
+            "printedName": "delegate",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "WeakStorage",
+                "printedName": "(any VisionSDKDimensioning.VSDKDimensioningViewDelegate)?"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(py)delegate",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC8delegateAA0cD8Delegate_pSgvp",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "Preconcurrency",
+              "Custom",
+              "HasStorage",
+              "ReferenceOwnership",
+              "AccessControl",
+              "ObjC"
+            ],
+            "ownership": 1,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(any VisionSDKDimensioning.VSDKDimensioningViewDelegate)?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningViewDelegate",
+                        "printedName": "any VisionSDKDimensioning.VSDKDimensioningViewDelegate",
+                        "usr": "c:@M@VisionSDKDimensioning@objc(pl)VSDKDimensioningViewDelegate"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)delegate",
+                "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC8delegateAA0cD8Delegate_pSgvg",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "(any VisionSDKDimensioning.VSDKDimensioningViewDelegate)?",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VSDKDimensioningViewDelegate",
+                        "printedName": "any VisionSDKDimensioning.VSDKDimensioningViewDelegate",
+                        "usr": "c:@M@VisionSDKDimensioning@objc(pl)VSDKDimensioningViewDelegate"
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)setDelegate:",
+                "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC8delegateAA0cD8Delegate_pSgvs",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:21VisionSDKDimensioning20VSDKDimensioningViewC8delegateAA0cD8Delegate_pSgvM",
+                "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC8delegateAA0cD8Delegate_pSgvM",
+                "moduleName": "VisionSDKDimensioning",
+                "implicit": true,
+                "declAttributes": [
+                  "Final"
+                ],
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(frame:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningView",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningView",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "CGRect",
+                "printedName": "CoreFoundation.CGRect",
+                "usr": "c:@S@CGRect"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)initWithFrame:",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC5frameACSo6CGRectV_tcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "overriding": true,
+            "objc_name": "initWithFrame:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Preconcurrency",
+              "Custom",
+              "Override",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(coder:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningView?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VSDKDimensioningView",
+                    "printedName": "VisionSDKDimensioning.VSDKDimensioningView",
+                    "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "NSCoder",
+                "printedName": "Foundation.NSCoder",
+                "usr": "c:objc(cs)NSCoder"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)initWithCoder:",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC5coderACSgSo7NSCoderC_tcfc",
+            "moduleName": "VisionSDKDimensioning",
+            "overriding": true,
+            "objc_name": "initWithCoder:",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Preconcurrency",
+              "Custom",
+              "Required",
+              "AccessControl"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningView",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningView",
+                "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)init",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewCACycfc",
+            "moduleName": "VisionSDKDimensioning",
+            "overriding": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Preconcurrency",
+              "Custom",
+              "Convenience",
+              "AccessControl"
+            ],
+            "init_kind": "Convenience"
+          },
+          {
+            "kind": "Function",
+            "name": "configure",
+            "printedName": "configure(delegate:mode:maximumTrackCount:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningViewDelegate",
+                "printedName": "any VisionSDKDimensioning.VSDKDimensioningViewDelegate",
+                "usr": "c:@M@VisionSDKDimensioning@objc(pl)VSDKDimensioningViewDelegate"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "VSDKDimensioningMode",
+                "printedName": "VisionSDKDimensioning.VSDKDimensioningMode",
+                "hasDefaultArg": true,
+                "usr": "c:@M@VisionSDKDimensioning@E@VSDKDimensioningMode"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "hasDefaultArg": true,
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)configureWithDelegate:mode:maximumTrackCount:",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC9configure8delegate4mode17maximumTrackCountyAA0cD8Delegate_p_AA0C4ModeOSitF",
+            "moduleName": "VisionSDKDimensioning",
+            "objc_name": "configureWithDelegate:mode:maximumTrackCount:",
+            "declAttributes": [
+              "Final",
+              "Preconcurrency",
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "startRunning",
+            "printedName": "startRunning()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)startRunning",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC12startRunningyyF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "Preconcurrency",
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "stopRunning",
+            "printedName": "stopRunning()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)stopRunning",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC11stopRunningyyF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "Preconcurrency",
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "deConfigure",
+            "printedName": "deConfigure()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView(im)deConfigure",
+            "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC11deConfigureyyF",
+            "moduleName": "VisionSDKDimensioning",
+            "declAttributes": [
+              "Final",
+              "Preconcurrency",
+              "Custom",
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@VisionSDKDimensioning@objc(cs)VSDKDimensioningView",
+        "mangledName": "$s21VisionSDKDimensioning20VSDKDimensioningViewC",
+        "moduleName": "VisionSDKDimensioning",
+        "declAttributes": [
+          "Preconcurrency",
+          "Custom",
+          "Final",
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)UIView",
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "UIKit.UIView",
+          "UIKit.UIResponder",
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          },
+          {
+            "kind": "Conformance",
+            "name": "__DefaultCustomPlaygroundQuickLookable",
+            "printedName": "__DefaultCustomPlaygroundQuickLookable",
+            "usr": "s:s38__DefaultCustomPlaygroundQuickLookableP",
+            "mangledName": "$ss38__DefaultCustomPlaygroundQuickLookableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "UITraitChangeObservable",
+            "printedName": "UITraitChangeObservable",
+            "usr": "s:5UIKit23UITraitChangeObservableP",
+            "mangledName": "$s5UIKit23UITraitChangeObservableP"
+          }
+        ]
+      }
+    ],
+    "json_format_version": 8
+  },
+  "ConstValues": [
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDKDimensioning\/VSDKDimensioningMode.swift",
+      "kind": "IntegerLiteral",
+      "offset": 516,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDKDimensioning\/VSDKDimensioningMode.swift",
+      "kind": "IntegerLiteral",
+      "offset": 536,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDKDimensioning\/VSDKDimensioningConfiguration.swift",
+      "kind": "IntegerLiteral",
+      "offset": 732,
+      "length": 1,
+      "value": "5"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDKDimensioning\/VSDKDimensioningSession.swift",
+      "kind": "Array",
+      "offset": 648,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDKDimensioning\/VSDKDimensioningSession.swift",
+      "kind": "Array",
+      "offset": 888,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDKDimensioning\/VSDKDimensioningView.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1235,
+      "length": 1,
+      "value": "5"
+    }
+  ]
+}

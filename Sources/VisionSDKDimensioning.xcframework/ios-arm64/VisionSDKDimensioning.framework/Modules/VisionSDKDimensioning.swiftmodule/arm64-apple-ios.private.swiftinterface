@@ -1,0 +1,134 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.3.1 effective-5.10 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
+// swift-module-flags: -target arm64-apple-ios17.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDKDimensioning
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
+import Combine
+import CoreGraphics
+import CoreML
+import Foundation
+import Swift
+import SwiftUI
+import UIKit
+@_spi(VSDKDimensioning) import VisionSDK
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@objc public enum VSDKDimensioningMode : Swift.Int, Swift.Sendable {
+  case offline = 0
+  case online = 1
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public struct VSDKDimensioningConfiguration : Swift.Sendable {
+  public var mode: VisionSDKDimensioning.VSDKDimensioningMode
+  public var measurementUnit: Foundation.UnitLength
+  public var maximumTrackCount: Swift.Int
+  public init(mode: VisionSDKDimensioning.VSDKDimensioningMode = .offline, measurementUnit: Foundation.UnitLength = .centimeters, maximumTrackCount: Swift.Int = 5)
+}
+@objc final public class VSDKDimensioningMeasurement : ObjectiveC.NSObject {
+  @objc final public let id: Foundation.UUID
+  @objc final public let timestamp: Foundation.Date
+  @objc final public let length: Foundation.NSMeasurement
+  @objc final public let width: Foundation.NSMeasurement
+  @objc final public let height: Foundation.NSMeasurement
+  @objc final public let distanceFromCamera: Foundation.NSMeasurement
+  @objc final public let confidence: Swift.Float
+  @objc final public let usedCloudSAM: Swift.Bool
+  @objc public init(id: Foundation.UUID, timestamp: Foundation.Date, length: Foundation.NSMeasurement, width: Foundation.NSMeasurement, height: Foundation.NSMeasurement, distanceFromCamera: Foundation.NSMeasurement, confidence: Swift.Float, usedCloudSAM: Swift.Bool)
+  @objc final public var volume: Foundation.NSMeasurement {
+    @objc get
+  }
+  @objc deinit
+}
+@objc final public class VSDKDimensioningTrack : ObjectiveC.NSObject {
+  @objc final public let id: Foundation.UUID
+  @objc final public let measurement: VisionSDKDimensioning.VSDKDimensioningMeasurement?
+  @objc final public let isStable: Swift.Bool
+  @objc final public let normalizedScreenRect: CoreFoundation.CGRect
+  @objc public init(id: Foundation.UUID, measurement: VisionSDKDimensioning.VSDKDimensioningMeasurement?, isStable: Swift.Bool, normalizedScreenRect: CoreFoundation.CGRect)
+  @objc deinit
+}
+@objc final public class VSDKDimensioningCapabilities : ObjectiveC.NSObject {
+  @objc final public let lidar: Swift.Bool
+  @objc final public let arWorldTracking: Swift.Bool
+  @objc final public let sceneReconstruction: Swift.Bool
+  @objc public init(lidar: Swift.Bool, arWorldTracking: Swift.Bool, sceneReconstruction: Swift.Bool)
+  @objc deinit
+}
+public enum VSDKDimensioningPhase : Swift.Sendable, Swift.Equatable {
+  case idle
+  case initializing
+  case scanning
+  case detected(trackCount: Swift.Int)
+  case capturing
+  case captured(VisionSDKDimensioning.VSDKDimensioningMeasurement)
+  public static func == (lhs: VisionSDKDimensioning.VSDKDimensioningPhase, rhs: VisionSDKDimensioning.VSDKDimensioningPhase) -> Swift.Bool
+}
+public enum VSDKDimensioningError : Swift.Error, Swift.Sendable {
+  case missingCredentials
+  case notConfigured
+  case lidarUnavailable
+  case arSessionFailed(reason: Swift.String)
+  case noGroundPlane
+  case captureTimedOut
+  case userCancelled
+  public func toNSError() -> Foundation.NSError
+}
+public enum VSDKDimensioning {
+  public static let version: Swift.String
+  public static func deviceCapabilities() -> VisionSDKDimensioning.VSDKDimensioningCapabilities
+  public static func prefetchModels() async
+}
+@_Concurrency.MainActor final public class VSDKDimensioningSession : Foundation.ObservableObject {
+  @Combine.Published<VisionSDKDimensioning.VSDKDimensioningPhase> @_projectedValueProperty($phase) @_Concurrency.MainActor final public var phase: VisionSDKDimensioning.VSDKDimensioningPhase {
+    get
+  }
+  @_Concurrency.MainActor final public var $phase: Combine.Published<VisionSDKDimensioning.VSDKDimensioningPhase>.Publisher {
+    get
+  }
+  @Combine.Published<[VisionSDKDimensioning.VSDKDimensioningTrack]> @_projectedValueProperty($tracks) @_Concurrency.MainActor final public var tracks: [VisionSDKDimensioning.VSDKDimensioningTrack] {
+    get
+  }
+  @_Concurrency.MainActor final public var $tracks: Combine.Published<[VisionSDKDimensioning.VSDKDimensioningTrack]>.Publisher {
+    get
+  }
+  @_Concurrency.MainActor final public var configuration: VisionSDKDimensioning.VSDKDimensioningConfiguration
+  @_Concurrency.MainActor public init(configuration: VisionSDKDimensioning.VSDKDimensioningConfiguration = .init())
+  @_Concurrency.MainActor final public func start() async throws
+  @_Concurrency.MainActor final public func pause()
+  @_Concurrency.MainActor final public func resume()
+  @_Concurrency.MainActor final public func capture() async throws -> VisionSDKDimensioning.VSDKDimensioningMeasurement
+  @_Concurrency.MainActor final public func clearCaptured()
+  public typealias ObjectWillChangePublisher = Combine.ObservableObjectPublisher
+  @objc deinit
+}
+@_Concurrency.MainActor @preconcurrency public struct VSDKDimensioningSwiftUIView : SwiftUICore.View {
+  @_Concurrency.MainActor @preconcurrency public init(configuration: VisionSDKDimensioning.VSDKDimensioningConfiguration = .init(), onCapture: ((VisionSDKDimensioning.VSDKDimensioningMeasurement) -> Swift.Void)? = nil)
+  @_Concurrency.MainActor @preconcurrency public var body: some SwiftUICore.View {
+    get
+  }
+  public typealias Body = @_opaqueReturnTypeOf("$s21VisionSDKDimensioning27VSDKDimensioningSwiftUIViewV4bodyQrvp", 0) __
+}
+@objc public protocol VSDKDimensioningViewDelegate {
+  @objc func dimensioningView(_ view: VisionSDKDimensioning.VSDKDimensioningView, didCapture measurement: VisionSDKDimensioning.VSDKDimensioningMeasurement)
+  @objc optional func dimensioningView(_ view: VisionSDKDimensioning.VSDKDimensioningView, didFailWithError error: Foundation.NSError)
+}
+@_inheritsConvenienceInitializers @objc @_Concurrency.MainActor @preconcurrency final public class VSDKDimensioningView : UIKit.UIView {
+  @objc @_Concurrency.MainActor @preconcurrency weak final public var delegate: (any VisionSDKDimensioning.VSDKDimensioningViewDelegate)?
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(frame: CoreFoundation.CGRect)
+  @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
+  @_Concurrency.MainActor @preconcurrency @objc convenience dynamic public init()
+  @objc @_Concurrency.MainActor @preconcurrency final public func configure(delegate: any VisionSDKDimensioning.VSDKDimensioningViewDelegate, mode: VisionSDKDimensioning.VSDKDimensioningMode = .offline, maximumTrackCount: Swift.Int = 5)
+  @objc @_Concurrency.MainActor @preconcurrency final public func startRunning()
+  @objc @_Concurrency.MainActor @preconcurrency final public func stopRunning()
+  @objc @_Concurrency.MainActor @preconcurrency final public func deConfigure()
+  @objc deinit
+}
+extension VisionSDKDimensioning.VSDKDimensioningMode : Swift.Equatable {}
+extension VisionSDKDimensioning.VSDKDimensioningMode : Swift.Hashable {}
+extension VisionSDKDimensioning.VSDKDimensioningMode : Swift.RawRepresentable {}
+extension VisionSDKDimensioning.VSDKDimensioningSession : Swift.Sendable {}
+extension VisionSDKDimensioning.VSDKDimensioningSwiftUIView : Swift.Sendable {}

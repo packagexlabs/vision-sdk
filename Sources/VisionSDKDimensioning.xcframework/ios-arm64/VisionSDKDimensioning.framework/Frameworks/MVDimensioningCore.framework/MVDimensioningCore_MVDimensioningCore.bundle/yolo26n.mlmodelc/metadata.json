@@ -1,0 +1,99 @@
+[
+  {
+    "shortDescription" : "Ultralytics YOLO26n model trained on \/home\/lq\/codes\/ultralytics\/ultralytics\/cfg\/datasets\/coco.yaml",
+    "metadataOutputVersion" : "3.0",
+    "outputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float32",
+        "formattedType" : "MultiArray (Float32 1 × 300 × 6)",
+        "shortDescription" : "",
+        "shape" : "[1, 300, 6]",
+        "name" : "var_1441",
+        "type" : "MultiArray"
+      }
+    ],
+    "version" : "8.4.21",
+    "modelParameters" : [
+
+    ],
+    "author" : "Ultralytics",
+    "specificationVersion" : 6,
+    "storagePrecision" : "Float16",
+    "license" : "AGPL-3.0 License (https:\/\/ultralytics.com\/license)",
+    "mlProgramOperationTypeHistogram" : {
+      "Transpose" : 1,
+      "ReduceMax" : 1,
+      "UpsampleNearestNeighbor" : 2,
+      "Sub" : 2,
+      "FloorDiv" : 2,
+      "Silu" : 87,
+      "Sigmoid" : 1,
+      "Reshape" : 13,
+      "Topk" : 2,
+      "Matmul" : 4,
+      "Cast" : 3,
+      "Softmax" : 2,
+      "Split" : 13,
+      "Concat" : 24,
+      "Add" : 21,
+      "Tile" : 2,
+      "GatherAlongAxis" : 2,
+      "ExpandDims" : 3,
+      "GatherNd" : 1,
+      "Conv" : 102,
+      "Stack" : 1,
+      "MaxPool" : 3,
+      "Mul" : 5
+    },
+    "computePrecision" : "Mixed (Float16, Float32, Int32)",
+    "stateSchema" : [
+
+    ],
+    "isUpdatable" : "0",
+    "availability" : {
+      "macOS" : "12.0",
+      "tvOS" : "15.0",
+      "visionOS" : "1.0",
+      "watchOS" : "8.0",
+      "iOS" : "15.0",
+      "macCatalyst" : "15.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_mlProgram"
+    },
+    "inputSchema" : [
+      {
+        "height" : "640",
+        "colorspace" : "RGB",
+        "isOptional" : "0",
+        "width" : "640",
+        "isColor" : "1",
+        "formattedType" : "Image (Color 640 × 640)",
+        "hasSizeFlexibility" : "0",
+        "type" : "Image",
+        "shortDescription" : "",
+        "name" : "image"
+      }
+    ],
+    "userDefinedMetadata" : {
+      "batch" : "1",
+      "com.github.apple.coremltools.version" : "9.0",
+      "docs" : "https:\/\/docs.ultralytics.com",
+      "imgsz" : "[640, 640]",
+      "names" : "{0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 4: 'airplane', 5: 'bus', 6: 'train', 7: 'truck', 8: 'boat', 9: 'traffic light', 10: 'fire hydrant', 11: 'stop sign', 12: 'parking meter', 13: 'bench', 14: 'bird', 15: 'cat', 16: 'dog', 17: 'horse', 18: 'sheep', 19: 'cow', 20: 'elephant', 21: 'bear', 22: 'zebra', 23: 'giraffe', 24: 'backpack', 25: 'umbrella', 26: 'handbag', 27: 'tie', 28: 'suitcase', 29: 'frisbee', 30: 'skis', 31: 'snowboard', 32: 'sports ball', 33: 'kite', 34: 'baseball bat', 35: 'baseball glove', 36: 'skateboard', 37: 'surfboard', 38: 'tennis racket', 39: 'bottle', 40: 'wine glass', 41: 'cup', 42: 'fork', 43: 'knife', 44: 'spoon', 45: 'bowl', 46: 'banana', 47: 'apple', 48: 'sandwich', 49: 'orange', 50: 'broccoli', 51: 'carrot', 52: 'hot dog', 53: 'pizza', 54: 'donut', 55: 'cake', 56: 'chair', 57: 'couch', 58: 'potted plant', 59: 'bed', 60: 'dining table', 61: 'toilet', 62: 'tv', 63: 'laptop', 64: 'mouse', 65: 'remote', 66: 'keyboard', 67: 'cell phone', 68: 'microwave', 69: 'oven', 70: 'toaster', 71: 'sink', 72: 'refrigerator', 73: 'book', 74: 'clock', 75: 'vase', 76: 'scissors', 77: 'teddy bear', 78: 'hair drier', 79: 'toothbrush'}",
+      "com.github.apple.coremltools.conversion_date" : "2026-03-09",
+      "channels" : "3",
+      "stride" : "32",
+      "date" : "2026-03-09T12:33:56.576169",
+      "args" : "{'batch': 1, 'half': False, 'int8': False, 'dynamic': False, 'nms': False}",
+      "com.github.apple.coremltools.source_dialect" : "TorchScript",
+      "com.github.apple.coremltools.source" : "torch==2.7.0",
+      "task" : "detect",
+      "end2end" : "True"
+    },
+    "generatedClassName" : "yolo26n",
+    "method" : "predict"
+  }
+]

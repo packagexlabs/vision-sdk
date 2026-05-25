@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'VisionSDK'
-  s.version          = '2.2.7'
+  s.version          = '2.2.8'
   s.summary          = "PackageX VisionSDK — barcode/OCR/price-tag scanning and optional 3D box dimensioning."
   s.description      = <<-DESC
     PackageX VisionSDK is a comprehensive scanning framework for iOS. It provides
