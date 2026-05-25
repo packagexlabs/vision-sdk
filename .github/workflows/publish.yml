@@ -118,9 +118,12 @@ jobs:
       - name: Bump podspec version
         run: |
           VERSION="${{ steps.payload.outputs.version }}"
-          sed -i '' "/s\.version/s/=.*$/= '${VERSION}'/" VisionSDK.podspec
+          # Anchor to the actual `s.version = '...'` declaration. The previous
+          # `/s\.version/` regex also matched the source line, which contains
+          # `:tag => s.version.to_s`, and corrupted `s.source` to `'<version>'`.
+          sed -i '' -E "s/^([[:space:]]*s\.version[[:space:]]*=).*\$/\1 '${VERSION}'/" VisionSDK.podspec
           echo "Podspec version bumped to $VERSION"
-          grep "s.version" VisionSDK.podspec
+          grep -E "^[[:space:]]*s\.version" VisionSDK.podspec
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
