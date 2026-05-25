@@ -3,11 +3,11 @@ Pod::Spec.new do |s|
   s.version          = '2.2.4'
   s.summary          = "PackageX VisionSDK — barcode/OCR/price-tag scanning and optional 3D box dimensioning."
   s.description      = <<-DESC
-    Barcode and QR Code scanner framework for iOS. VisionSDK provides a way to
-    detect barcodes and QR codes with both manual and auto capturing modes. It
-    also provides OCR for text detection in offline (without internet) and online
-    (label scanning with Restful API) modes. Optional ARKit/LiDAR-based box
-    dimensioning is available via the Dimensioning subspec (iOS 17+).
+    PackageX VisionSDK is a comprehensive scanning framework for iOS. It provides
+    barcode and QR code detection with both manual and auto capturing modes,
+    OCR for text detection in offline (without internet) and online
+    (shipping-label scanning with Restful API) modes, and optional ARKit/LiDAR-based
+    3D box dimensioning (iOS 17+, opt-in via the Dimensioning subspec).
   DESC
   s.license          = { :type => 'Proprietary' }
   s.homepage         = 'https://github.com/packagexlabs/vision-sdk'
