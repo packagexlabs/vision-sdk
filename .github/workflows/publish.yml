@@ -144,9 +144,18 @@ jobs:
           VERSION="${{ steps.payload.outputs.version }}"
           git add Sources/VisionSDK.xcframework VisionSDK.podspec
           if [ "${{ steps.payload.outputs.has_dimensioning }}" = "true" ]; then
-            git add Sources/MVDimensioningCore.xcframework \
-                    Sources/VisionSDKDimensioning \
+            # Stage both xcframeworks + the model key. The .swift source dir
+            # may also be staged for backwards compatibility but isn't required
+            # by the current vendored-xcframework subspec.
+            git add Sources/VisionSDKDimensioning.xcframework \
+                    Sources/MVDimensioningCore.xcframework \
                     Sources/MVDimensioning.mlmodelkey
+            # If the old source dir still exists (left over from prior
+            # releases that compiled from source), stage its deletion so the
+            # tree matches what the podspec expects.
+            if [ -d Sources/VisionSDKDimensioning ]; then
+              git add Sources/VisionSDKDimensioning
+            fi
           fi
           git commit -m "Release VisionSDK v${VERSION}"
           git tag "${VERSION}"
