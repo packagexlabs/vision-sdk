@@ -30,21 +30,21 @@ Pod::Spec.new do |s|
   end
 
   # --- Dimensioning subspec ---
-  # Dimensioning ships as its own Swift module (`VisionSDKDimensioning`)
-  # built from source against the prebuilt Core xcframework. The wrapper
-  # Swift files use `@_spi(VSDKDimensioning) import VisionSDK` to access
-  # Core's SPI types. Consumers import the module explicitly:
+  # Dimensioning ships as a prebuilt xcframework (its own `VisionSDKDimensioning`
+  # Swift module). Consumers import it explicitly:
   #   import VisionSDKDimensioning
   #
-  # Sources land in Sources/VisionSDKDimensioning/ after publish.yml unpacks
-  # VisionSDKDimensioning-bundle.zip from the vision-sdk-ios release.
+  # CocoaPods does not allow `module_name` on subspecs, so we use the
+  # xcframework's own module identity instead of compiling source files.
+  # publish.yml unpacks the xcframeworks from VisionSDKDimensioning-bundle.zip.
   s.subspec 'Dimensioning' do |d|
     d.dependency 'VisionSDK/Core'
     d.dependency 'PostHog', '~> 3.0'
     d.ios.deployment_target = '17.0'
-    d.module_name           = 'VisionSDKDimensioning'
-    d.source_files          = 'Sources/VisionSDKDimensioning/*.swift'
-    d.vendored_frameworks   = 'Sources/MVDimensioningCore.xcframework'
+    d.vendored_frameworks   = [
+      'Sources/VisionSDKDimensioning.xcframework',
+      'Sources/MVDimensioningCore.xcframework'
+    ]
     d.resources             = 'Sources/MVDimensioning.mlmodelkey'
     d.frameworks            = ['ARKit', 'RealityKit', 'CoreML']
   end

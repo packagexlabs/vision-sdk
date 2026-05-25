@@ -91,28 +91,32 @@ jobs:
           fi
 
           # Clear old dimensioning artifacts
-          rm -rf Sources/MVDimensioningCore.xcframework Sources/VisionSDKDimensioning
+          rm -rf Sources/MVDimensioningCore.xcframework \
+                 Sources/VisionSDKDimensioning.xcframework \
+                 Sources/VisionSDKDimensioning
           rm -f Sources/MVDimensioning.mlmodelkey
 
           # Unpack. Bundle structure (from release.yml):
           #   dimensioning-bundle/
-          #     MVDimensioningCore.xcframework/
+          #     VisionSDKDimensioning.xcframework/  (compiled wrapper module)
+          #     MVDimensioningCore.xcframework/     (vendored ARKit/LiDAR binary)
           #     MVDimensioning.mlmodelkey
-          #     VisionSDKDimensioning/*.swift
+          #     VisionSDKDimensioning/*.swift       (sources, for reference)
           unzip -o VisionSDKDimensioning-bundle.zip -d /tmp/dim-bundle/
 
-          # Move into Sources/
+          # Move xcframeworks + key into Sources/. The podspec vendors both
+          # xcframeworks; the raw Swift sources stay in the bundle for any
+          # future source-distribution consumer but aren't referenced here.
+          cp -a /tmp/dim-bundle/dimensioning-bundle/VisionSDKDimensioning.xcframework \
+                Sources/
           cp -a /tmp/dim-bundle/dimensioning-bundle/MVDimensioningCore.xcframework \
                 Sources/
           cp    /tmp/dim-bundle/dimensioning-bundle/MVDimensioning.mlmodelkey \
                 Sources/
-          mkdir -p Sources/VisionSDKDimensioning
-          cp    /tmp/dim-bundle/dimensioning-bundle/VisionSDKDimensioning/*.swift \
-                Sources/VisionSDKDimensioning/
 
           rm -rf /tmp/dim-bundle
           echo "Dimensioning bundle unpacked."
-          ls Sources/VisionSDKDimensioning/
+          ls Sources/VisionSDKDimensioning.xcframework/
           ls Sources/MVDimensioningCore.xcframework/
 
       - name: Bump podspec version
