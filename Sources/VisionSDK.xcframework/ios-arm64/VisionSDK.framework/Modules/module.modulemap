@@ -7,5 +7,4 @@ framework module VisionSDK {
 
 module VisionSDK.Swift {
   header "VisionSDK-Swift.h"
-  requires objc
 }
