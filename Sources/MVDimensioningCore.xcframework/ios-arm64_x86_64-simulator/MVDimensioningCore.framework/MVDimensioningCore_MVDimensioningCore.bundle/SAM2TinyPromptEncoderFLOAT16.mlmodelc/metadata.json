@@ -1,0 +1,99 @@
+[
+  {
+    "metadataOutputVersion" : "3.0",
+    "storagePrecision" : "Float16",
+    "outputSchema" : [
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float16",
+        "formattedType" : "MultiArray (Float16)",
+        "shortDescription" : "",
+        "shape" : "[]",
+        "name" : "sparse_embeddings",
+        "type" : "MultiArray"
+      },
+      {
+        "hasShapeFlexibility" : "0",
+        "isOptional" : "0",
+        "dataType" : "Float16",
+        "formattedType" : "MultiArray (Float16 1 × 256 × 64 × 64)",
+        "shortDescription" : "",
+        "shape" : "[1, 256, 64, 64]",
+        "name" : "dense_embeddings",
+        "type" : "MultiArray"
+      }
+    ],
+    "modelParameters" : [
+
+    ],
+    "specificationVersion" : 8,
+    "mlProgramOperationTypeHistogram" : {
+      "Ios17.mul" : 10,
+      "Ios17.linear" : 1,
+      "Ios17.cos" : 1,
+      "Ios17.sub" : 2,
+      "Ios17.sin" : 1,
+      "Range1d" : 2,
+      "Shape" : 2,
+      "Ios17.concat" : 3,
+      "Ios17.sliceByIndex" : 4,
+      "Ios17.add" : 6,
+      "Ios16.reduceProd" : 2,
+      "Ios17.equal" : 5,
+      "Ios17.expandDims" : 5,
+      "Ios17.scatter" : 2,
+      "Ios17.reshape" : 10,
+      "Ios17.cast" : 5
+    },
+    "computePrecision" : "Mixed (Float16, Int32)",
+    "isUpdatable" : "0",
+    "stateSchema" : [
+
+    ],
+    "availability" : {
+      "macOS" : "14.0",
+      "tvOS" : "17.0",
+      "visionOS" : "1.0",
+      "watchOS" : "10.0",
+      "iOS" : "17.0",
+      "macCatalyst" : "17.0"
+    },
+    "modelType" : {
+      "name" : "MLModelType_mlProgram"
+    },
+    "userDefinedMetadata" : {
+      "com.github.apple.coremltools.version" : "8.0b2",
+      "com.github.apple.coremltools.source" : "torch==2.4.1",
+      "com.github.apple.coremltools.source_dialect" : "TorchScript"
+    },
+    "inputSchema" : [
+      {
+        "dataType" : "Float16",
+        "hasShapeFlexibility" : "1",
+        "isOptional" : "0",
+        "shapeFlexibility" : "1 × 1...16 × 2",
+        "shapeRange" : "[[1, 1], [1, 16], [2, 2]]",
+        "formattedType" : "MultiArray (Float16 1 × 1 × 2)",
+        "type" : "MultiArray",
+        "shape" : "[1, 1, 2]",
+        "name" : "points",
+        "shortDescription" : ""
+      },
+      {
+        "dataType" : "Float16",
+        "hasShapeFlexibility" : "1",
+        "isOptional" : "0",
+        "shapeFlexibility" : "1 × 1...16",
+        "shapeRange" : "[[1, 1], [1, 16]]",
+        "formattedType" : "MultiArray (Float16 1 × 1)",
+        "type" : "MultiArray",
+        "shape" : "[1, 1]",
+        "name" : "labels",
+        "shortDescription" : ""
+      }
+    ],
+    "generatedClassName" : "SAM2TinyPromptEncoderFLOAT16",
+    "method" : "predict"
+  }
+]
