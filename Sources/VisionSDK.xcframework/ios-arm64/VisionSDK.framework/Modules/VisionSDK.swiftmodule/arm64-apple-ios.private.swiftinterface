@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.3.1 effective-5.10 (swiftlang-6.3.1.1.2 clang-2100.0.123.102)
+// swift-compiler-version: Apple Swift version 6.3.2 effective-5.10 (swiftlang-6.3.2.1.108 clang-2100.1.1.101)
 // swift-module-flags: -target arm64-apple-ios16 -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDK
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.1
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.2
 import AVFoundation
 import Accelerate
 import Combine
@@ -316,18 +316,9 @@ extension VisionSDK.CodeScannerViewDelegate {
     get
     set
   }
-  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxBorderColor: UIKit.UIColor {
-    get
-    set
-  }
-  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxBorderWidth: CoreFoundation.CGFloat {
-    get
-    set
-  }
-  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxFillColor: UIKit.UIColor {
-    get
-    set
-  }
+  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxBorderColor: UIKit.UIColor
+  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxBorderWidth: CoreFoundation.CGFloat
+  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxFillColor: UIKit.UIColor
   @_Concurrency.MainActor @preconcurrency public var videoDevice: AVFoundation.AVCaptureDevice {
     get throws
   }
