@@ -503,7 +503,7 @@ SWIFT_CLASS_NAMED("PriceTagDetectionSettings")
 @interface PriceTagDetectionSettings : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) PriceTagDetectionSettings * _Nonnull default_;)
 + (PriceTagDetectionSettings * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
-- (nonnull instancetype)initWithShouldDisplayOnScreenIndicators:(BOOL)shouldDisplayOnScreenIndicators validTagImage:(UIImage * _Nonnull)validTagImage invalidTagImage:(UIImage * _Nonnull)invalidTagImage OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithShouldDisplayOnScreenIndicators:(BOOL)shouldDisplayOnScreenIndicators validTagImage:(UIImage * _Nullable)validTagImage invalidTagImage:(UIImage * _Nullable)invalidTagImage OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end

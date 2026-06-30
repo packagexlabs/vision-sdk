@@ -282,7 +282,7 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public static var `default`: VisionSDK.CodeScannerView.PriceTagDetectionSettings {
       @objc get
     }
-    @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage = UIImage(named: "vsdkValidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!, invalidTagImage: UIKit.UIImage = UIImage(named: "vsdkInvalidTag", in: Bundle(for: CodeScannerView.self), compatibleWith: nil)!)
+    @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage? = nil, invalidTagImage: UIKit.UIImage? = nil)
     @objc deinit
   }
   @_Concurrency.MainActor @preconcurrency public var focusSettings: VisionSDK.CodeScannerView.FocusSettings {
