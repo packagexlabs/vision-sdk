@@ -227,7 +227,7 @@ import zlib
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
 }
-@_inheritsConvenienceInitializers @objc(CodeScannerView) @_Concurrency.MainActor @preconcurrency public class CodeScannerView : UIKit.UIView {
+@_inheritsConvenienceInitializers @objc(CodeScannerView) @_Concurrency.MainActor @preconcurrency final public class CodeScannerView : UIKit.UIView {
   @objc(FocusSettings) public class FocusSettings : ObjectiveC.NSObject {
     public var focusImage: UIKit.UIImage?
     public var focusImageRect: CoreFoundation.CGRect
@@ -260,6 +260,7 @@ extension VisionSDK.CodeScannerViewDelegate {
     public var documentDetectionConfidence: Swift.Float
     public var secondsToWaitBeforeDocumentCapture: Swift.Double
     public var selectedTemplate: Foundation.Data?
+    public var isImageSharpnessIndicationOn: Swift.Bool
     @objc public static var `default`: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
       @objc get
     }
@@ -285,72 +286,74 @@ extension VisionSDK.CodeScannerViewDelegate {
     @objc public init(shouldDisplayOnScreenIndicators: Swift.Bool = true, validTagImage: UIKit.UIImage? = nil, invalidTagImage: UIKit.UIImage? = nil)
     @objc deinit
   }
-  @_Concurrency.MainActor @preconcurrency public var focusSettings: VisionSDK.CodeScannerView.FocusSettings {
+  @_Concurrency.MainActor @preconcurrency final public var focusSettings: VisionSDK.CodeScannerView.FocusSettings {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
+  @_Concurrency.MainActor @preconcurrency final public var objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings {
+  @_Concurrency.MainActor @preconcurrency final public var cameraSettings: VisionSDK.CodeScannerView.CameraSettings {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings {
+  @_Concurrency.MainActor @preconcurrency final public var priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var sessionPreset: AVFoundation.AVCaptureSession.Preset {
+  @_Concurrency.MainActor @preconcurrency final public var sessionPreset: AVFoundation.AVCaptureSession.Preset {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var captureMode: VisionSDK.CaptureMode {
+  @_Concurrency.MainActor @preconcurrency final public var captureMode: VisionSDK.CaptureMode {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var captureType: VisionSDK.CaptureType {
+  @_Concurrency.MainActor @preconcurrency final public var captureType: VisionSDK.CaptureType {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var isLongDistanceScanningEnabled: Swift.Bool {
+  @_Concurrency.MainActor @preconcurrency final public var isLongDistanceScanningEnabled: Swift.Bool {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var scanMode: VisionSDK.CodeScannerMode {
+  @_Concurrency.MainActor @preconcurrency final public var scanMode: VisionSDK.CodeScannerMode {
     get
   }
-  @_Concurrency.MainActor @preconcurrency public var showCodeBoundingBoxes: Swift.Bool {
+  @_Concurrency.MainActor @preconcurrency final public var showCodeBoundingBoxes: Swift.Bool {
     get
     set
   }
-  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxBorderColor: UIKit.UIColor
-  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxBorderWidth: CoreFoundation.CGFloat
-  @_Concurrency.MainActor @preconcurrency public var barcodeBoundingBoxFillColor: UIKit.UIColor
-  @_Concurrency.MainActor @preconcurrency public var videoDevice: AVFoundation.AVCaptureDevice {
+  @_Concurrency.MainActor @preconcurrency final public var barcodeBoundingBoxBorderColor: UIKit.UIColor
+  @_Concurrency.MainActor @preconcurrency final public var barcodeBoundingBoxBorderWidth: CoreFoundation.CGFloat
+  @_Concurrency.MainActor @preconcurrency final public var barcodeBoundingBoxFillColor: UIKit.UIColor
+  @_Concurrency.MainActor @preconcurrency final public var videoDevice: AVFoundation.AVCaptureDevice {
     get throws
   }
-  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func layoutSubviews()
+  @_Concurrency.MainActor @preconcurrency @objc override final public func layoutSubviews()
   @objc deinit
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(frame: CoreFoundation.CGRect)
   @_Concurrency.MainActor @preconcurrency @objc required dynamic public init?(coder: Foundation.NSCoder)
 }
 extension VisionSDK.CodeScannerView {
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode, isLongDistanceScanningEnabled: Swift.Bool = false)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setFocusSettingsTo(_ focusSettings: VisionSDK.CodeScannerView.FocusSettings)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setObjectDetectionConfigurationTo(_ objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setCameraSettingsTo(_ cameraSettings: VisionSDK.CodeScannerView.CameraSettings)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setPriceTagDetectionSettingsTo(_ priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func setSessionPresetTo(_ sessionPreset: AVFoundation.AVCaptureSession.Preset)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func capturePhoto()
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func capturePhotoUsingPhotoSettings(_ photoSettings: AVFoundation.AVCapturePhotoSettings)
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func startRunning()
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func stopRunning()
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func rescan()
-  @objc @_Concurrency.MainActor @preconcurrency dynamic public func deConfigure()
-  @_Concurrency.MainActor @preconcurrency public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
+  @objc @_Concurrency.MainActor @preconcurrency final public func configure(delegate: any VisionSDK.CodeScannerViewDelegate, sessionPreset: AVFoundation.AVCaptureSession.Preset = .high, captureMode: VisionSDK.CaptureMode = .auto, captureType: VisionSDK.CaptureType = .single, scanMode: VisionSDK.CodeScannerMode = .qrCode, isLongDistanceScanningEnabled: Swift.Bool = false)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setScanModeTo(_ mode: VisionSDK.CodeScannerMode)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setCaptureModeTo(_ mode: VisionSDK.CaptureMode)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setCaptureTypeTo(_ type: VisionSDK.CaptureType)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setFocusSettingsTo(_ focusSettings: VisionSDK.CodeScannerView.FocusSettings)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setObjectDetectionConfigurationTo(_ objectDetectionConfiguration: VisionSDK.CodeScannerView.ObjectDetectionConfiguration)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setCameraSettingsTo(_ cameraSettings: VisionSDK.CodeScannerView.CameraSettings)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setPriceTagDetectionSettingsTo(_ priceTagDetectionSettings: VisionSDK.CodeScannerView.PriceTagDetectionSettings)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setSessionPresetTo(_ sessionPreset: AVFoundation.AVCaptureSession.Preset)
+  @objc @_Concurrency.MainActor @preconcurrency final public func capturePhoto()
+  @objc @_Concurrency.MainActor @preconcurrency final public func capturePhotoUsingPhotoSettings(_ photoSettings: AVFoundation.AVCapturePhotoSettings)
+  @objc @_Concurrency.MainActor @preconcurrency final public func startRunning()
+  @objc @_Concurrency.MainActor @preconcurrency final public func stopRunning()
+  @objc @_Concurrency.MainActor @preconcurrency final public func rescan()
+  @objc @_Concurrency.MainActor @preconcurrency final public func deConfigure()
+  @objc @_Concurrency.MainActor @preconcurrency final public func pauseDetection()
+  @objc @_Concurrency.MainActor @preconcurrency final public func resumeDetection()
+  @_Concurrency.MainActor @preconcurrency final public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
 }
 extension VisionSDK.CodeScannerView : AVFoundation.AVCaptureVideoDataOutputSampleBufferDelegate {
   @_Concurrency.MainActor @preconcurrency @objc final public func captureOutput(_ output: AVFoundation.AVCaptureOutput, didOutput sampleBuffer: CoreMedia.CMSampleBuffer, from connection: AVFoundation.AVCaptureConnection)
 }
 extension VisionSDK.CodeScannerView : AVFoundation.AVCapturePhotoCaptureDelegate {
   @_Concurrency.MainActor @preconcurrency @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVFoundation.AVCapturePhoto, error: (any Swift.Error)?)
-  @_Concurrency.MainActor @preconcurrency @objc dynamic public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
+  @_Concurrency.MainActor @preconcurrency @objc final public func photoOutput(_ output: AVFoundation.AVCapturePhotoOutput, willCapturePhotoFor resolvedSettings: AVFoundation.AVCaptureResolvedPhotoSettings)
 }
 extension AVFoundation.AVCaptureDevice {
   public func set(frameRate: Swift.Double)

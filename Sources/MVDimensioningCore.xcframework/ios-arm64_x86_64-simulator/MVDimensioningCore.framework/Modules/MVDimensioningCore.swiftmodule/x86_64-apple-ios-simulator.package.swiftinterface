@@ -18,7 +18,6 @@ import Foundation/*.ProcessInfo*/
 import Foundation/*.URL*/
 import ImageIO
 import Network
-import PostHog
 import QuartzCore
 import RealityKit
 import Swift

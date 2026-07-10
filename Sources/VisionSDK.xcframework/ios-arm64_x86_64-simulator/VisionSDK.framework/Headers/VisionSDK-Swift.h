@@ -540,6 +540,17 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)stopRunning;
 - (void)rescan;
 - (void)deConfigure;
+/// Pauses all per-frame detection work while keeping the capture session and
+/// preview alive — for moments like “photo captured, showing a loading
+/// spinner” where a full stop/restart of the session would be wasteful and
+/// visually jarring. Reconciles with captureOutput’s existing frame-skip guard
+/// via <code>isAnalysisPaused</code> rather than adding a second, overlapping bail-out
+/// path. Does not reach VisionSDKDimensioning — that module has its own
+/// VSDKDimensioningSession.pause()/.resume(). Overlay-clearing is added in a
+/// later change (see clearDetectionOverlays()).
+- (void)pauseDetection;
+/// Resumes per-frame detection work previously paused via pauseDetection().
+- (void)resumeDetection;
 @end
 
 @class NSError;
@@ -1276,6 +1287,17 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 - (void)stopRunning;
 - (void)rescan;
 - (void)deConfigure;
+/// Pauses all per-frame detection work while keeping the capture session and
+/// preview alive — for moments like “photo captured, showing a loading
+/// spinner” where a full stop/restart of the session would be wasteful and
+/// visually jarring. Reconciles with captureOutput’s existing frame-skip guard
+/// via <code>isAnalysisPaused</code> rather than adding a second, overlapping bail-out
+/// path. Does not reach VisionSDKDimensioning — that module has its own
+/// VSDKDimensioningSession.pause()/.resume(). Overlay-clearing is added in a
+/// later change (see clearDetectionOverlays()).
+- (void)pauseDetection;
+/// Resumes per-frame detection work previously paused via pauseDetection().
+- (void)resumeDetection;
 @end
 
 @class NSError;
