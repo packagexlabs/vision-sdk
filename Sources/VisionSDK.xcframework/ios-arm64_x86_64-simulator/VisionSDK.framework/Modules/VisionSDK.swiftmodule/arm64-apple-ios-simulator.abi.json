@@ -19110,6 +19110,30 @@
       },
       {
         "kind": "Import",
+        "name": "Vision",
+        "printedName": "Vision",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "CoreGraphics",
+        "printedName": "CoreGraphics",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
@@ -38946,6 +38970,41 @@
       "value": "0.2"
     },
     {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
+      "kind": "Array",
+      "offset": 2586,
+      "length": 25,
+      "value": "[\"ARSASY\", \"PASY\", \"ASY\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
+      "kind": "Array",
+      "offset": 2733,
+      "length": 22,
+      "value": "[\"ARISTA\", \"AN\", \"EU\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
+      "kind": "StringLiteral",
+      "offset": 7289,
+      "length": 41,
+      "value": "\"([0-9A-Fa-f]{2}[:\\-]){5}[0-9A-Fa-f]{2}\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
+      "kind": "StringLiteral",
+      "offset": 7951,
+      "length": 93,
+      "value": "\"(?i)\\b(?:Model\\s+Number|Model\\s+No\\.?)[\\s.:]*(?:\\s*\\n\\s*)?([A-Z0-9][A-Z0-9-]{7,25})\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
+      "kind": "StringLiteral",
+      "offset": 8133,
+      "length": 74,
+      "value": "\"(?i)\\b(?:[B8]ox|Carton)\\s*I[D0O][\\s.:]*(?:\\s*\\n\\s*)?([A-Z0-9]{6,})\""
+    },
+    {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/All Couriers\/Deliver It.swift",
       "kind": "StringLiteral",
       "offset": 206,
@@ -40558,21 +40617,21 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "Array",
-      "offset": 56849,
+      "offset": 57124,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 59418,
+      "offset": 59693,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 69994,
+      "offset": 70269,
       "length": 4,
       "value": "true"
     },
