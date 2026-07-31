@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.3.2 effective-5.10 (swiftlang-6.3.2.1.108 clang-2100.1.1.101)
+// swift-compiler-version: Apple Swift version 6.3.3 effective-5.10 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)
 // swift-module-flags: -target arm64-apple-ios16 -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name VisionSDK
-// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.2
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.3
 import AVFoundation
 import Accelerate
 import Combine
@@ -11,6 +11,7 @@ import CoreFoundation
 import CoreGraphics
 import CoreImage
 import CoreML
+import CoreMedia
 import CoreVideo
 import CryptoKit
 import Darwin
@@ -18,6 +19,7 @@ import DeveloperToolsSupport
 import Foundation
 import MachO
 import ObjectiveC
+import QuartzCore
 import Security
 import Swift
 import SwiftUI
@@ -223,6 +225,7 @@ import zlib
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect) -> Swift.Bool
   @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedCode]) -> [Swift.String : Swift.Bool]
   @objc optional func codeScannerViewdidUpdateSceneWithSharpness(_ imageSharpnessScore: Swift.Float, onCameraLiveGuidance: VisionSDK.CameraLiveGuidance)
+  @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didChangeCameraState state: VisionSDK.VSDKCameraState)
 }
 extension VisionSDK.CodeScannerViewDelegate {
   public func codeScannerViewDidDetect(_ text: Swift.Bool, barCode: Swift.Bool, qrCode: Swift.Bool, document: Swift.Bool)
@@ -323,6 +326,23 @@ extension VisionSDK.CodeScannerViewDelegate {
   @_Concurrency.MainActor @preconcurrency final public var videoDevice: AVFoundation.AVCaptureDevice {
     get throws
   }
+  @objc @_Concurrency.MainActor @preconcurrency final public func setZoomRatio(_ ratio: Swift.Float)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setLinearZoom(_ zoomLevel: Swift.Float)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setFlashTurnedOn(_ enabled: Swift.Bool)
+  @objc @_Concurrency.MainActor @preconcurrency final public func getCurrentZoomRatio() -> Swift.Float
+  @objc @_Concurrency.MainActor @preconcurrency final public func getMinZoomRatioAvailable() -> Swift.Float
+  @objc @_Concurrency.MainActor @preconcurrency final public func getMaxZoomRatioAvailable() -> Swift.Float
+  @objc @_Concurrency.MainActor @preconcurrency final public func currentLinearZoom() -> Swift.Float
+  @objc @_Concurrency.MainActor @preconcurrency final public var currentCameraState: VisionSDK.VSDKCameraState {
+    @objc get
+  }
+  @objc @_Concurrency.MainActor @preconcurrency final public func setFocusPoint(_ point: CoreFoundation.CGPoint)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setFocusMode(_ mode: VisionSDK.VSDKFocusMode)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setLensSelection(_ selection: VisionSDK.VSDKLensSelection)
+  @objc @_Concurrency.MainActor @preconcurrency final public func enableTapToFocus()
+  @objc @_Concurrency.MainActor @preconcurrency final public func disableTapToFocus()
+  @objc @_Concurrency.MainActor @preconcurrency final public func enablePinchPanToZoom()
+  @objc @_Concurrency.MainActor @preconcurrency final public func disablePinchPanToZoom()
   @_Concurrency.MainActor @preconcurrency @objc override final public func layoutSubviews()
   @objc deinit
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(frame: CoreFoundation.CGRect)
@@ -777,6 +797,165 @@ public struct VSDKDimensioningCredentials : Swift.Sendable {
 @_spi(VSDKDimensioning) public enum VSDKDimensioningTelemetry {
   @_spi(VSDKDimensioning) public static func report(_ event: VisionSDK.VSDKDimensioningTelemetryEvent)
 }
+@objc public enum VSDKLensFacing : Swift.Int {
+  case back
+  case front
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum VSDKLensKind : Swift.Int {
+  case ultraWide
+  case wide
+  case telephoto
+  case unknown
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum VSDKFocusMode : Swift.Int {
+  case continuous
+  case single
+  case locked
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum VSDKCameraStatus : Swift.Int {
+  case idle
+  case starting
+  case running
+  case interrupted
+  case error
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum VSDKRotationLock : Swift.Int {
+  case followDisplay
+  case lockedPortrait
+  case lockedLandscape
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum VSDKCameraErrorCode : Swift.Int {
+  case permissionDenied
+  case lensUnavailable
+  case configurationFailed
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public let VSDKCameraErrorDomain: Swift.String
+@_hasMissingDesignatedInitializers @objc public class VSDKLens : ObjectiveC.NSObject {
+  @objc final public let id: Swift.String
+  @objc final public let kind: VisionSDK.VSDKLensKind
+  @objc final public let facing: VisionSDK.VSDKLensFacing
+  @objc final public let minZoomRatio: Swift.Float
+  @objc final public let maxZoomRatio: Swift.Float
+  @objc final public let zoomSwitchPoints: [Foundation.NSNumber]
+  @objc final public let hasFlash: Swift.Bool
+  @objc final public let isLogical: Swift.Bool
+  @objc final public let isPinnable: Swift.Bool
+  @objc override dynamic public func isEqual(_ object: Any?) -> Swift.Bool
+  @objc override dynamic public var hash: Swift.Int {
+    @objc get
+  }
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @objc public class VSDKLensSelection : ObjectiveC.NSObject {
+  @objc public static var automatic: VisionSDK.VSDKLensSelection {
+    @objc get
+  }
+  public static func pin(_ lens: VisionSDK.VSDKLens) throws -> VisionSDK.VSDKLensSelection
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @objc public class VSDKCameraConfiguration : ObjectiveC.NSObject {
+  @objc final public let facing: VisionSDK.VSDKLensFacing
+  @objc final public let lens: VisionSDK.VSDKLensSelection
+  @objc final public let rotationLock: VisionSDK.VSDKRotationLock
+  @_inheritsConvenienceInitializers @objc(VSDKCameraConfigurationBuilder) public class Builder : ObjectiveC.NSObject {
+    @objc override dynamic public init()
+    @discardableResult
+    @objc public func facing(_ facing: VisionSDK.VSDKLensFacing) -> VisionSDK.VSDKCameraConfiguration.Builder
+    @discardableResult
+    @objc public func lens(_ selection: VisionSDK.VSDKLensSelection) -> VisionSDK.VSDKCameraConfiguration.Builder
+    @discardableResult
+    @objc public func rotationLock(_ lock: VisionSDK.VSDKRotationLock) -> VisionSDK.VSDKCameraConfiguration.Builder
+    @objc public func build() -> VisionSDK.VSDKCameraConfiguration
+    @objc deinit
+  }
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @objc public class VSDKCameraCapabilities : ObjectiveC.NSObject {
+  @objc public static func snapshot() -> VisionSDK.VSDKCameraCapabilities
+  @objc public func lenses(for facing: VisionSDK.VSDKLensFacing) -> [VisionSDK.VSDKLens]
+  @objc public func zoomStops(for facing: VisionSDK.VSDKLensFacing) -> [Foundation.NSNumber]
+  @objc public func hasTorch(for facing: VisionSDK.VSDKLensFacing) -> Swift.Bool
+  @objc public func supportsFocusPoint(for facing: VisionSDK.VSDKLensFacing) -> Swift.Bool
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @objc public class VSDKCameraState : ObjectiveC.NSObject {
+  @objc final public let status: VisionSDK.VSDKCameraStatus
+  @objc final public let error: Foundation.NSError?
+  @objc final public let warning: Foundation.NSError?
+  @objc final public let facing: VisionSDK.VSDKLensFacing
+  @objc final public let activeLens: VisionSDK.VSDKLens?
+  @objc final public let zoomRatio: Swift.Float
+  @objc final public let minZoomRatio: Swift.Float
+  @objc final public let maxZoomRatio: Swift.Float
+  @objc final public let isTorchEnabled: Swift.Bool
+  @objc final public let focusMode: VisionSDK.VSDKFocusMode
+  @objc final public let isPreviewActive: Swift.Bool
+  @objc deinit
+}
+@objc public protocol VSDKCameraStateObserver {
+  @objc func cameraSession(_ session: VisionSDK.VSDKCameraSession, didChange state: VisionSDK.VSDKCameraState)
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class VSDKCameraSession : ObjectiveC.NSObject {
+  @objc final public let controller: VisionSDK.VSDKCameraController
+  @objc public var currentState: VisionSDK.VSDKCameraState {
+    @objc get
+  }
+  @objc public var previewLayer: AVFoundation.AVCaptureVideoPreviewLayer {
+    @objc get
+  }
+  @objc override dynamic public init()
+  @objc deinit
+  @objc public func addObserver(_ observer: any VisionSDK.VSDKCameraStateObserver)
+  @objc public func removeObserver(_ observer: any VisionSDK.VSDKCameraStateObserver)
+  @objc public func start()
+  @objc public func start(with configuration: VisionSDK.VSDKCameraConfiguration)
+  @objc public func update(with configuration: VisionSDK.VSDKCameraConfiguration)
+  @objc public func stop()
+}
+@_hasMissingDesignatedInitializers @objc public class VSDKCameraController : ObjectiveC.NSObject {
+  @objc public func setZoom(_ ratio: Swift.Float)
+  @objc public func setLinearZoom(_ linear: Swift.Float)
+  @objc public func currentLinearZoom() -> Swift.Float
+  @objc public func setTorchEnabled(_ enabled: Swift.Bool)
+  @objc public func setFocusPoint(_ point: CoreFoundation.CGPoint)
+  @objc public func setFocusMode(_ mode: VisionSDK.VSDKFocusMode)
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers @objc @_Concurrency.MainActor @preconcurrency public class VSDKCameraPreviewView : UIKit.UIView {
+  @objc @_Concurrency.MainActor @preconcurrency public init(session: VisionSDK.VSDKCameraSession)
+  @_Concurrency.MainActor @preconcurrency @objc override dynamic public func layoutSubviews()
+  @objc deinit
+}
 extension VisionSDK.CameraLiveGuidance : Swift.Equatable {}
 extension VisionSDK.CameraLiveGuidance : Swift.Hashable {}
 extension VisionSDK.CameraLiveGuidance : Swift.RawRepresentable {}
@@ -822,3 +1001,21 @@ extension VisionSDK.VSDKAppEnvironment : Swift.RawRepresentable {}
 @_spi(VSDKDimensioning) extension VisionSDK.VSDKDimensioningTelemetryEvent.Kind : Swift.Equatable {}
 @_spi(VSDKDimensioning) extension VisionSDK.VSDKDimensioningTelemetryEvent.Kind : Swift.Hashable {}
 @_spi(VSDKDimensioning) extension VisionSDK.VSDKDimensioningTelemetryEvent.Kind : Swift.RawRepresentable {}
+extension VisionSDK.VSDKLensFacing : Swift.Equatable {}
+extension VisionSDK.VSDKLensFacing : Swift.Hashable {}
+extension VisionSDK.VSDKLensFacing : Swift.RawRepresentable {}
+extension VisionSDK.VSDKLensKind : Swift.Equatable {}
+extension VisionSDK.VSDKLensKind : Swift.Hashable {}
+extension VisionSDK.VSDKLensKind : Swift.RawRepresentable {}
+extension VisionSDK.VSDKFocusMode : Swift.Equatable {}
+extension VisionSDK.VSDKFocusMode : Swift.Hashable {}
+extension VisionSDK.VSDKFocusMode : Swift.RawRepresentable {}
+extension VisionSDK.VSDKCameraStatus : Swift.Equatable {}
+extension VisionSDK.VSDKCameraStatus : Swift.Hashable {}
+extension VisionSDK.VSDKCameraStatus : Swift.RawRepresentable {}
+extension VisionSDK.VSDKRotationLock : Swift.Equatable {}
+extension VisionSDK.VSDKRotationLock : Swift.Hashable {}
+extension VisionSDK.VSDKRotationLock : Swift.RawRepresentable {}
+extension VisionSDK.VSDKCameraErrorCode : Swift.Equatable {}
+extension VisionSDK.VSDKCameraErrorCode : Swift.Hashable {}
+extension VisionSDK.VSDKCameraErrorCode : Swift.RawRepresentable {}
