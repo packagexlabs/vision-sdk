@@ -571,6 +571,7 @@ public typealias InterpreterOptions = VisionSDK.Interpreter.Options
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(OnDeviceOCRManager) public class OnDeviceOCRManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.OnDeviceOCRManager
+  @objc public var shippingLabelOptions: VisionSDK.ShippingLabelOptions
   @objc public func getVSDKLogs() -> Foundation.URL?
   @objc public func reportErrorWith(_ apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .micro, image: CoreImage.CIImage?, reportText: Swift.String, response: Foundation.Data?, reportModel: VisionSDK.VSDKAnalyticsReportModel?, withCompletion completion: ((_ response: Swift.Int) -> ())?)
   @objc public func downloadModel(withApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, forModelClass modelClass: VisionSDK.VSDKModelExternalClass, withModelSize modelSize: VisionSDK.VSDKModelExternalSize = .large, withProgressTracking progress: ((_ currentProgress: Swift.Float, _ totalSize: Swift.Float) -> ())?, withCompletion completion: ((_ error: Foundation.NSError?) -> ())?)
@@ -601,6 +602,15 @@ extension VisionSDK.OnDeviceOCRManager {
   @objc deinit
   final public func encode(to encoder: any Swift.Encoder) throws
   public init(from decoder: any Swift.Decoder) throws
+}
+@objc(ShippingLabelOptions) public class ShippingLabelOptions : ObjectiveC.NSObject {
+  @objc public var parseRecipientAddress: Swift.Bool
+  @objc public var parseSenderAddress: Swift.Bool
+  @objc public static var `default`: VisionSDK.ShippingLabelOptions {
+    @objc get
+  }
+  @objc public init(parseRecipientAddress: Swift.Bool = false, parseSenderAddress: Swift.Bool = false)
+  @objc deinit
 }
 public protocol Delegate : AnyObject {
   typealias CDelegate = Swift.UnsafeMutablePointer<TensorFlowLiteC.TfLiteDelegate>

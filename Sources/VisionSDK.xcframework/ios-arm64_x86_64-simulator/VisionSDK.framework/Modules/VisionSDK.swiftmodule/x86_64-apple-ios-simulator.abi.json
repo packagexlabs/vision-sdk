@@ -4088,6 +4088,13 @@
         "moduleName": "VisionSDK"
       },
       {
+        "kind": "Import",
+        "name": "QuartzCore",
+        "printedName": "QuartzCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
         "kind": "TypeDecl",
         "name": "CameraLiveGuidance",
         "printedName": "CameraLiveGuidance",
@@ -23181,6 +23188,100 @@
             ]
           },
           {
+            "kind": "Var",
+            "name": "shippingLabelOptions",
+            "printedName": "shippingLabelOptions",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ShippingLabelOptions",
+                "printedName": "VisionSDK.ShippingLabelOptions",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDK@objc(cs)OnDeviceOCRManager(py)shippingLabelOptions",
+            "mangledName": "$s9VisionSDK18OnDeviceOCRManagerC20shippingLabelOptionsAA08ShippinggH0Cvp",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ShippingLabelOptions",
+                    "printedName": "VisionSDK.ShippingLabelOptions",
+                    "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDK@objc(cs)OnDeviceOCRManager(im)shippingLabelOptions",
+                "mangledName": "$s9VisionSDK18OnDeviceOCRManagerC20shippingLabelOptionsAA08ShippinggH0Cvg",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ShippingLabelOptions",
+                    "printedName": "VisionSDK.ShippingLabelOptions",
+                    "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDK@objc(cs)OnDeviceOCRManager(im)setShippingLabelOptions:",
+                "mangledName": "$s9VisionSDK18OnDeviceOCRManagerC20shippingLabelOptionsAA08ShippinggH0Cvs",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:9VisionSDK18OnDeviceOCRManagerC20shippingLabelOptionsAA08ShippinggH0CvM",
+                "mangledName": "$s9VisionSDK18OnDeviceOCRManagerC20shippingLabelOptionsAA08ShippinggH0CvM",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
             "kind": "Function",
             "name": "getVSDKLogs",
             "printedName": "getVSDKLogs()",
@@ -25127,6 +25228,406 @@
             "usr": "s:SH",
             "mangledName": "$sSH"
           }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "ShippingLabelOptions",
+        "printedName": "ShippingLabelOptions",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "parseRecipientAddress",
+            "printedName": "parseRecipientAddress",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(py)parseRecipientAddress",
+            "mangledName": "$s9VisionSDK20ShippingLabelOptionsC21parseRecipientAddressSbvp",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(im)parseRecipientAddress",
+                "mangledName": "$s9VisionSDK20ShippingLabelOptionsC21parseRecipientAddressSbvg",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(im)setParseRecipientAddress:",
+                "mangledName": "$s9VisionSDK20ShippingLabelOptionsC21parseRecipientAddressSbvs",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:9VisionSDK20ShippingLabelOptionsC21parseRecipientAddressSbvM",
+                "mangledName": "$s9VisionSDK20ShippingLabelOptionsC21parseRecipientAddressSbvM",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "parseSenderAddress",
+            "printedName": "parseSenderAddress",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(py)parseSenderAddress",
+            "mangledName": "$s9VisionSDK20ShippingLabelOptionsC18parseSenderAddressSbvp",
+            "moduleName": "VisionSDK",
+            "declAttributes": [
+              "HasStorage",
+              "AccessControl",
+              "ObjC"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(im)parseSenderAddress",
+                "mangledName": "$s9VisionSDK20ShippingLabelOptionsC18parseSenderAddressSbvg",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Bool",
+                    "printedName": "Swift.Bool",
+                    "usr": "s:Sb"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(im)setParseSenderAddress:",
+                "mangledName": "$s9VisionSDK20ShippingLabelOptionsC18parseSenderAddressSbvs",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:9VisionSDK20ShippingLabelOptionsC18parseSenderAddressSbvM",
+                "mangledName": "$s9VisionSDK20ShippingLabelOptionsC18parseSenderAddressSbvM",
+                "moduleName": "VisionSDK",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "default",
+            "printedName": "default",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ShippingLabelOptions",
+                "printedName": "VisionSDK.ShippingLabelOptions",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(cpy)default",
+            "mangledName": "$s9VisionSDK20ShippingLabelOptionsC7defaultACvpZ",
+            "moduleName": "VisionSDK",
+            "static": true,
+            "declAttributes": [
+              "Final",
+              "AccessControl",
+              "ObjC"
+            ],
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "ShippingLabelOptions",
+                    "printedName": "VisionSDK.ShippingLabelOptions",
+                    "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(cm)default",
+                "mangledName": "$s9VisionSDK20ShippingLabelOptionsC7defaultACvgZ",
+                "moduleName": "VisionSDK",
+                "static": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(parseRecipientAddress:parseSenderAddress:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ShippingLabelOptions",
+                "printedName": "VisionSDK.ShippingLabelOptions",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "hasDefaultArg": true,
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(im)initWithParseRecipientAddress:parseSenderAddress:",
+            "mangledName": "$s9VisionSDK20ShippingLabelOptionsC21parseRecipientAddress0f6SenderH0ACSb_Sbtcfc",
+            "moduleName": "VisionSDK",
+            "objc_name": "initWithParseRecipientAddress:parseSenderAddress:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init()",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "ShippingLabelOptions",
+                "printedName": "VisionSDK.ShippingLabelOptions",
+                "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions(im)init",
+            "mangledName": "$s9VisionSDK20ShippingLabelOptionsCACycfc",
+            "moduleName": "VisionSDK",
+            "overriding": true,
+            "implicit": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override"
+            ],
+            "init_kind": "Designated"
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@VisionSDK@objc(cs)ShippingLabelOptions",
+        "mangledName": "$s9VisionSDK20ShippingLabelOptionsC",
+        "moduleName": "VisionSDK",
+        "objc_name": "ShippingLabelOptions",
+        "declAttributes": [
+          "AccessControl",
+          "ObjC"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
         ]
       },
       {
@@ -36424,6 +36925,23 @@
         "name": "Foundation",
         "printedName": "Foundation",
         "declKind": "Import",
+        "moduleName": "VisionSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "Import",
+        "name": "QuartzCore",
+        "printedName": "QuartzCore",
+        "declKind": "Import",
+        "moduleName": "VisionSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
         "moduleName": "VisionSDK"
       },
       {
@@ -36930,575 +37448,596 @@
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1388,
+      "length": 3,
+      "value": "200"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "Array",
+      "offset": 1514,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1578,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 13529,
+      "offset": 15385,
       "length": 4,
       "value": "\"_i\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 13566,
+      "offset": 15422,
       "length": 5,
       "value": "\"_mv\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 13759,
+      "offset": 15615,
       "length": 4,
       "value": "\"_i\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 13853,
+      "offset": 15709,
       "length": 22,
       "value": "\"price_tag_extraction\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 13915,
+      "offset": 15771,
       "length": 27,
       "value": "\"shipping_label_extraction\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 13980,
+      "offset": 15836,
       "length": 25,
       "value": "\"shipping_label_matching\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14034,
+      "offset": 15890,
       "length": 27,
       "value": "\"bill_of_lading_extraction\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14097,
+      "offset": 15953,
       "length": 23,
       "value": "\"item_label_extraction\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14155,
+      "offset": 16011,
       "length": 11,
       "value": "\"telemetry\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14247,
+      "offset": 16103,
       "length": 27,
       "value": "\"shipping_label_extraction\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 14527,
+      "offset": 16383,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14648,
+      "offset": 16504,
       "length": 4,
       "value": "\"_i\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14683,
+      "offset": 16539,
       "length": 4,
       "value": "\"_a\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14716,
+      "offset": 16572,
       "length": 4,
       "value": "\"_u\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14746,
+      "offset": 16602,
       "length": 4,
       "value": "\"_m\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14781,
+      "offset": 16637,
       "length": 4,
       "value": "\"_t\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14812,
+      "offset": 16668,
       "length": 5,
       "value": "\"_rt\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14843,
+      "offset": 16699,
       "length": 5,
       "value": "\"_et\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14879,
+      "offset": 16735,
       "length": 6,
       "value": "\"_o_1\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14916,
+      "offset": 16772,
       "length": 6,
       "value": "\"_o_2\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14951,
+      "offset": 16807,
       "length": 5,
       "value": "\"_p1\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 14984,
+      "offset": 16840,
       "length": 4,
       "value": "\"_b\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20187,
+      "offset": 22043,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20235,
+      "offset": 22091,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20278,
+      "offset": 22134,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20330,
+      "offset": 22186,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20379,
+      "offset": 22235,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20431,
+      "offset": 22287,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20478,
+      "offset": 22334,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20528,
+      "offset": 22384,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 20679,
+      "offset": 22535,
       "length": 13,
       "value": "\"tracking_no\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 20727,
+      "offset": 22583,
       "length": 14,
       "value": "\"courier_name\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 20771,
+      "offset": 22627,
       "length": 8,
       "value": "\"weight\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 20818,
+      "offset": 22674,
       "length": 12,
       "value": "\"dimensions\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 20866,
+      "offset": 22722,
       "length": 15,
       "value": "\"receiver_name\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 20920,
+      "offset": 22776,
       "length": 18,
       "value": "\"receiver_address\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 20972,
+      "offset": 22828,
       "length": 13,
       "value": "\"sender_name\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 21022,
+      "offset": 22878,
       "length": 16,
       "value": "\"sender_address\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 22908,
+      "offset": 24764,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 22955,
+      "offset": 24811,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23011,
+      "offset": 24867,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23061,
+      "offset": 24917,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23125,
+      "offset": 24981,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23173,
+      "offset": 25029,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23222,
+      "offset": 25078,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23277,
+      "offset": 25133,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23330,
+      "offset": 25186,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23384,
+      "offset": 25240,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23431,
+      "offset": 25287,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23480,
+      "offset": 25336,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 23521,
+      "offset": 25377,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 23673,
+      "offset": 25529,
       "length": 13,
       "value": "\"referenceNo\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 23720,
+      "offset": 25576,
       "length": 12,
       "value": "\"loadNumber\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 23775,
+      "offset": 25631,
       "length": 21,
       "value": "\"purchaseOrderNumber\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 23833,
+      "offset": 25689,
       "length": 15,
       "value": "\"invoiceNumber\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 23899,
+      "offset": 25755,
       "length": 29,
       "value": "\"customerPurchaseOrderNumber\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 23963,
+      "offset": 25819,
       "length": 13,
       "value": "\"orderNumber\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 24012,
+      "offset": 25868,
       "length": 14,
       "value": "\"billOfLading\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 24068,
+      "offset": 25924,
       "length": 20,
       "value": "\"masterBillOfLading\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 24128,
+      "offset": 25984,
       "length": 18,
       "value": "\"lineBillOfLading\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 24187,
+      "offset": 26043,
       "length": 19,
       "value": "\"houseBillOfLading\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 24240,
+      "offset": 26096,
       "length": 12,
       "value": "\"shippingId\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 24288,
+      "offset": 26144,
       "length": 14,
       "value": "\"shippingDate\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 24330,
+      "offset": 26186,
       "length": 6,
       "value": "\"date\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27177,
+      "offset": 29033,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27222,
+      "offset": 29078,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27266,
+      "offset": 29122,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27309,
+      "offset": 29165,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27354,
+      "offset": 29210,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27406,
+      "offset": 29262,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27457,
+      "offset": 29313,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27509,
+      "offset": 29365,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27662,
+      "offset": 29518,
       "length": 15,
       "value": "\"supplier_name\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27709,
+      "offset": 29565,
       "length": 11,
       "value": "\"item_name\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27751,
+      "offset": 29607,
       "length": 10,
       "value": "\"item_sku\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27791,
+      "offset": 29647,
       "length": 8,
       "value": "\"weight\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27831,
+      "offset": 29687,
       "length": 10,
       "value": "\"quantity\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27880,
+      "offset": 29736,
       "length": 12,
       "value": "\"dimensions\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27930,
+      "offset": 29786,
       "length": 17,
       "value": "\"production_date\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 27986,
+      "offset": 29842,
       "length": 18,
       "value": "\"supplier_address\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 29846,
+      "offset": 31702,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VSDKAnalyticsManager.swift",
       "kind": "StringLiteral",
-      "offset": 29991,
+      "offset": 31847,
       "length": 16,
       "value": "\"document_class\""
     },
@@ -38709,1680 +39248,1680 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1227,
+      "offset": 1245,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1249,
+      "offset": 1267,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1272,
+      "offset": 1290,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1307,
+      "offset": 1325,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1724,
+      "offset": 1742,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1752,
+      "offset": 1770,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1783,
+      "offset": 1801,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1813,
+      "offset": 1831,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1852,
+      "offset": 1870,
       "length": 1,
       "value": "4"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1884,
+      "offset": 1902,
       "length": 1,
       "value": "5"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1914,
+      "offset": 1932,
       "length": 1,
       "value": "6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 1967,
+      "offset": 1985,
       "length": 1,
       "value": "7"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 2011,
+      "offset": 2029,
       "length": 1,
       "value": "8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 2041,
+      "offset": 2059,
       "length": 1,
       "value": "9"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 2075,
+      "offset": 2093,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 2125,
+      "offset": 2143,
       "length": 2,
       "value": "11"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 2184,
+      "offset": 2202,
       "length": 2,
       "value": "12"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4020,
+      "offset": 4038,
       "length": 6,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4036,
+      "offset": 4054,
       "length": 19,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4065,
+      "offset": 4083,
       "length": 3,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4078,
+      "offset": 4096,
       "length": 5,
       "value": "4"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4093,
+      "offset": 4111,
       "length": 8,
       "value": "5"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4111,
+      "offset": 4129,
       "length": 13,
       "value": "6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4220,
+      "offset": 4238,
       "length": 7,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4336,
+      "offset": 4354,
       "length": 8,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4404,
+      "offset": 4422,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4423,
+      "offset": 4441,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4538,
+      "offset": 4556,
       "length": 6,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4614,
+      "offset": 4632,
       "length": 7,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4631,
+      "offset": 4649,
       "length": 7,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4648,
+      "offset": 4666,
       "length": 6,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4664,
+      "offset": 4682,
       "length": 14,
       "value": "4"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4688,
+      "offset": 4706,
       "length": 15,
       "value": "5"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4713,
+      "offset": 4731,
       "length": 23,
       "value": "6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4746,
+      "offset": 4764,
       "length": 6,
       "value": "7"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4762,
+      "offset": 4780,
       "length": 7,
       "value": "8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4779,
+      "offset": 4797,
       "length": 10,
       "value": "9"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4799,
+      "offset": 4817,
       "length": 5,
       "value": "10"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4814,
+      "offset": 4832,
       "length": 4,
       "value": "11"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4828,
+      "offset": 4846,
       "length": 10,
       "value": "12"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4848,
+      "offset": 4866,
       "length": 18,
       "value": "13"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4876,
+      "offset": 4894,
       "length": 17,
       "value": "14"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4903,
+      "offset": 4921,
       "length": 5,
       "value": "15"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4918,
+      "offset": 4936,
       "length": 13,
       "value": "16"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4941,
+      "offset": 4959,
       "length": 5,
       "value": "17"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4956,
+      "offset": 4974,
       "length": 10,
       "value": "18"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4976,
+      "offset": 4994,
       "length": 11,
       "value": "19"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 4997,
+      "offset": 5015,
       "length": 7,
       "value": "20"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5014,
+      "offset": 5032,
       "length": 6,
       "value": "21"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5030,
+      "offset": 5048,
       "length": 2,
       "value": "22"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5042,
+      "offset": 5060,
       "length": 4,
       "value": "23"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5056,
+      "offset": 5074,
       "length": 7,
       "value": "24"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 5073,
+      "offset": 5091,
       "length": 4,
       "value": "25"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 13260,
+      "offset": 13278,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 13319,
+      "offset": 13337,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 13384,
+      "offset": 13402,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 13512,
+      "offset": 13530,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 13598,
+      "offset": 13616,
       "length": 3,
       "value": "0.3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 13728,
+      "offset": 13746,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 13814,
+      "offset": 13832,
       "length": 3,
       "value": "0.3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 13868,
+      "offset": 13886,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 13995,
+      "offset": 14013,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 14081,
+      "offset": 14099,
       "length": 3,
       "value": "0.3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 14431,
+      "offset": 14449,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 14472,
+      "offset": 14490,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 14519,
+      "offset": 14537,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 14611,
+      "offset": 14629,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 14679,
+      "offset": 14697,
       "length": 3,
       "value": "0.3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 14773,
+      "offset": 14791,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 14841,
+      "offset": 14859,
       "length": 3,
       "value": "0.3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 14877,
+      "offset": 14895,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 14968,
+      "offset": 14986,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 15036,
+      "offset": 15054,
       "length": 3,
       "value": "0.3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 16518,
+      "offset": 16536,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 16580,
+      "offset": 16598,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 16635,
+      "offset": 16653,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 16692,
+      "offset": 16710,
       "length": 3,
       "value": "0.5"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 16752,
+      "offset": 16770,
       "length": 3,
       "value": "0.9"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 16820,
+      "offset": 16838,
       "length": 3,
       "value": "3.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 17378,
+      "offset": 17396,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 17558,
+      "offset": 17576,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 17602,
+      "offset": 17620,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 17639,
+      "offset": 17657,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 17678,
+      "offset": 17696,
       "length": 3,
       "value": "0.5"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 17720,
+      "offset": 17738,
       "length": 3,
       "value": "0.9"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 17770,
+      "offset": 17788,
       "length": 3,
       "value": "3.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 18439,
+      "offset": 18457,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 18660,
+      "offset": 18678,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 19259,
+      "offset": 19277,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 20766,
+      "offset": 20784,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 21195,
+      "offset": 21213,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 21713,
+      "offset": 21731,
       "length": 3,
       "value": "3.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 21881,
+      "offset": 21899,
       "length": 4,
       "value": "0.20"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 34623,
+      "offset": 34641,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 34679,
+      "offset": 34697,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 34728,
+      "offset": 34746,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 34778,
+      "offset": 34796,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 37750,
+      "offset": 37768,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 37852,
+      "offset": 37870,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 37914,
+      "offset": 37932,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 37977,
+      "offset": 37995,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 38034,
+      "offset": 38052,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 41163,
+      "offset": 41181,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 42573,
+      "offset": 42591,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 42715,
+      "offset": 42733,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 43137,
+      "offset": 43155,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 43825,
+      "offset": 43843,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 44233,
+      "offset": 44251,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 45156,
+      "offset": 45174,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 45162,
+      "offset": 45180,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 45172,
+      "offset": 45190,
       "length": 2,
       "value": "70"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 45184,
+      "offset": 45202,
       "length": 2,
       "value": "70"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 45226,
+      "offset": 45244,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 45253,
+      "offset": 45271,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 45276,
+      "offset": 45294,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 45395,
+      "offset": 45413,
       "length": 3,
       "value": "1.5"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 45430,
+      "offset": 45448,
       "length": 1,
       "value": "8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 45601,
+      "offset": 45619,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 45628,
+      "offset": 45646,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 46821,
+      "offset": 46839,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 47787,
+      "offset": 47805,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 48311,
+      "offset": 48329,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 48821,
+      "offset": 48839,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49019,
+      "offset": 49037,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49227,
+      "offset": 49245,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49583,
+      "offset": 49601,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49638,
+      "offset": 49656,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49692,
+      "offset": 49710,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49747,
+      "offset": 49765,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49798,
+      "offset": 49816,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49853,
+      "offset": 49871,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 49917,
+      "offset": 49935,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 50234,
+      "offset": 50252,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 51079,
+      "offset": 51097,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 51686,
+      "offset": 51704,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 51809,
+      "offset": 53775,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 51867,
+      "offset": 53833,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 51920,
+      "offset": 53886,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 53408,
+      "offset": 55374,
       "length": 30,
       "value": "\"VNRecognizeTextRequest Error\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 53966,
+      "offset": 55932,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 54334,
+      "offset": 56300,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 55348,
+      "offset": 57314,
       "length": 15,
       "value": "\"error occured\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 57998,
+      "offset": 60125,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 59979,
+      "offset": 62158,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 60140,
+      "offset": 62319,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 61749,
+      "offset": 63928,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 61972,
+      "offset": 64151,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 63195,
+      "offset": 65374,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 63202,
+      "offset": 65381,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 64710,
+      "offset": 66889,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 64716,
+      "offset": 66895,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 64726,
+      "offset": 66905,
       "length": 2,
       "value": "35"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 64738,
+      "offset": 66917,
       "length": 2,
       "value": "35"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 65141,
+      "offset": 67320,
       "length": 23,
       "value": "\"checkmark.circle.fill\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 66269,
+      "offset": 68448,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 66345,
+      "offset": 68524,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 66460,
+      "offset": 68639,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 67457,
+      "offset": 69636,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 68348,
+      "offset": 70527,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 69874,
+      "offset": 72053,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 70891,
+      "offset": 73070,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 71356,
+      "offset": 73535,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 71723,
+      "offset": 73902,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 72017,
+      "offset": 74196,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 73334,
+      "offset": 75513,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 73346,
+      "offset": 75525,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 73444,
+      "offset": 75623,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 73738,
+      "offset": 75917,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 74145,
+      "offset": 76324,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 74290,
+      "offset": 76469,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 74342,
+      "offset": 76521,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 74589,
+      "offset": 76768,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 76371,
+      "offset": 78550,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 76573,
+      "offset": 78752,
       "length": 4,
       "value": "0.85"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 76784,
+      "offset": 78963,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 76914,
+      "offset": 79093,
       "length": 1,
       "value": "8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 77015,
+      "offset": 79194,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 77182,
+      "offset": 79361,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 77244,
+      "offset": 79423,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 77309,
+      "offset": 79488,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 78287,
+      "offset": 80466,
       "length": 2,
       "value": "10"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 78491,
+      "offset": 80670,
       "length": 4,
       "value": "0.85"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 78702,
+      "offset": 80881,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 78832,
+      "offset": 81011,
       "length": 1,
       "value": "8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 78933,
+      "offset": 81112,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "IntegerLiteral",
-      "offset": 79100,
+      "offset": 81279,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 79162,
+      "offset": 81341,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 79227,
+      "offset": 81406,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 79515,
+      "offset": 81694,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 79566,
+      "offset": 81745,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 79955,
+      "offset": 82134,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 80853,
+      "offset": 83032,
       "length": 15,
       "value": "\"error occured\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 81689,
+      "offset": 83868,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "FloatLiteral",
-      "offset": 81822,
+      "offset": 84001,
       "length": 3,
       "value": "0.3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 82017,
+      "offset": 84196,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 82346,
+      "offset": 84525,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 82397,
+      "offset": 84576,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 82750,
+      "offset": 84929,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 82762,
+      "offset": 84941,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 82998,
-      "length": 2,
-      "value": "[]"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "Array",
-      "offset": 83010,
-      "length": 2,
-      "value": "[]"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 83333,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 83375,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "Array",
-      "offset": 83592,
-      "length": 2,
-      "value": "[]"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "Array",
-      "offset": 83639,
-      "length": 2,
-      "value": "[]"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 84836,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 84885,
-      "length": 5,
-      "value": "false"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
-      "offset": 85063,
-      "length": 4,
-      "value": "true"
-    },
-    {
-      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
-      "kind": "BooleanLiteral",
       "offset": 85177,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "Array",
+      "offset": 85189,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 85512,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 85554,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "Array",
+      "offset": 85771,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "Array",
+      "offset": 85818,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 87015,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 87064,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 87242,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 86420,
+      "offset": 87356,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 86515,
+      "offset": 88599,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 86754,
+      "offset": 88694,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
+      "kind": "BooleanLiteral",
+      "offset": 88933,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 87486,
+      "offset": 89665,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 87663,
+      "offset": 89842,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 88138,
+      "offset": 90317,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 88473,
+      "offset": 90652,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 89190,
+      "offset": 91369,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 89383,
+      "offset": 91562,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 89858,
+      "offset": 92037,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 90242,
+      "offset": 92421,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 91059,
+      "offset": 93238,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 91145,
+      "offset": 93324,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 91499,
+      "offset": 93678,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 91974,
+      "offset": 94153,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 93424,
+      "offset": 95603,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 93938,
+      "offset": 96117,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 94795,
+      "offset": 96974,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 94846,
+      "offset": 97025,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "StringLiteral",
-      "offset": 96264,
+      "offset": 98443,
       "length": 31,
       "value": "\"VNDetectBarcodesRequest Error\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 96425,
+      "offset": 98604,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 97492,
+      "offset": 99671,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 97874,
+      "offset": 100053,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 98192,
+      "offset": 100371,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 99139,
+      "offset": 101318,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 100482,
+      "offset": 102661,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 101080,
+      "offset": 103259,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 101291,
+      "offset": 103470,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 101367,
+      "offset": 103546,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "Array",
-      "offset": 101482,
+      "offset": 103661,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/CodeScannerView.swift",
       "kind": "BooleanLiteral",
-      "offset": 104068,
+      "offset": 106247,
       "length": 5,
       "value": "false"
     },
@@ -41172,92 +41711,99 @@
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 3511,
+      "length": 2,
+      "value": "20"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "Dictionary",
-      "offset": 7302,
+      "offset": 7343,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "Dictionary",
-      "offset": 7334,
+      "offset": 7375,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "Dictionary",
-      "offset": 22825,
+      "offset": 22866,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 22960,
+      "offset": 23001,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "Dictionary",
-      "offset": 25393,
+      "offset": 25434,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 25442,
+      "offset": 25483,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 27993,
+      "offset": 28034,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 30364,
+      "offset": 30405,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "Dictionary",
-      "offset": 32860,
+      "offset": 32901,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 32995,
+      "offset": 33036,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 37753,
+      "offset": 37794,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "Dictionary",
-      "offset": 37797,
+      "offset": 37838,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/VisionAPIManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 42736,
+      "offset": 42777,
       "length": 5,
       "value": "false"
     },
@@ -43811,99 +44357,120 @@
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "FloatLiteral",
+      "offset": 48709,
+      "length": 3,
+      "value": "1.0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "FloatLiteral",
+      "offset": 48750,
+      "length": 6,
+      "value": "1000.0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "FloatLiteral",
+      "offset": 48774,
+      "length": 6,
+      "value": "1000.0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 102008,
+      "offset": 99899,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 112536,
+      "offset": 110427,
       "length": 10,
       "value": "\"vertices\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 112681,
+      "offset": 110572,
       "length": 9,
       "value": "\"topLeft\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 112752,
+      "offset": 110643,
       "length": 10,
       "value": "\"topRight\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 112826,
+      "offset": 110717,
       "length": 12,
       "value": "\"bottomLeft\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 112903,
+      "offset": 110794,
       "length": 13,
       "value": "\"bottomRight\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 112972,
+      "offset": 110863,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 112996,
+      "offset": 110887,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 113035,
+      "offset": 110926,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 113060,
+      "offset": 110951,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 113101,
+      "offset": 110992,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 113128,
+      "offset": 111019,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 113170,
+      "offset": 111061,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 113198,
+      "offset": 111089,
       "length": 3,
       "value": "\"y\""
     },
@@ -44918,7 +45485,7 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "BooleanLiteral",
-      "offset": 166216,
+      "offset": 169477,
       "length": 5,
       "value": "false"
     },
@@ -44932,9 +45499,16 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/InfoMixerItemLabel.swift",
       "kind": "FloatLiteral",
-      "offset": 44476,
+      "offset": 44065,
       "length": 3,
       "value": "0.2"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/InfoMixerItemLabel.swift",
+      "kind": "Array",
+      "offset": 68770,
+      "length": 2,
+      "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
@@ -44953,21 +45527,21 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
       "kind": "StringLiteral",
-      "offset": 8204,
+      "offset": 8822,
       "length": 41,
       "value": "\"([0-9A-Fa-f]{2}[:\\-]){5}[0-9A-Fa-f]{2}\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
       "kind": "StringLiteral",
-      "offset": 9107,
+      "offset": 9725,
       "length": 111,
       "value": "\"(?i)(?<!Regulatory\\s)\\b(?:Model\\s+Number|Model\\s+No\\.?)[\\s.:]*(?:\\s*\\n\\s*)?([A-Z0-9][A-Z0-9-]{7,25})\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/AristaGuardrails.swift",
       "kind": "StringLiteral",
-      "offset": 9307,
+      "offset": 9925,
       "length": 74,
       "value": "\"(?i)\\b(?:[B8]ox|Carton)\\s*I[D0O][\\s.:]*(?:\\s*\\n\\s*)?([A-Z0-9]{6,})\""
     },
@@ -46556,51 +47130,79 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "StringLiteral",
-      "offset": 17455,
+      "offset": 20302,
       "length": 65,
       "value": "\"deleting \""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "StringLiteral",
-      "offset": 17492,
+      "offset": 20339,
       "length": 1,
       "value": "\" \""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "StringLiteral",
-      "offset": 17519,
+      "offset": 20366,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 18768,
+      "offset": 21615,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "Array",
-      "offset": 57124,
+      "offset": 60599,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 59693,
+      "offset": 63168,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 70269,
+      "offset": 73744,
       "length": 4,
       "value": "true"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ShippingLabelOptions.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1350,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ShippingLabelOptions.swift",
+      "kind": "BooleanLiteral",
+      "offset": 1384,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager+AddressParsing.swift",
+      "kind": "IntegerLiteral",
+      "offset": 11195,
+      "length": 2,
+      "value": "15"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager+AddressParsing.swift",
+      "kind": "StringLiteral",
+      "offset": 11258,
+      "length": 25,
+      "value": "\"VSDKAddressParseTimeout\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/All Couriers\/Ameriship.swift",
@@ -51771,371 +52373,371 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 15277,
+      "offset": 15912,
       "length": 3,
       "value": "0.7"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 15426,
+      "offset": 16061,
       "length": 4,
       "value": "0.65"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 15433,
+      "offset": 16068,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 15514,
+      "offset": 16149,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 15646,
+      "offset": 16281,
       "length": 5,
       "value": "375.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 15786,
+      "offset": 16421,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 16039,
+      "offset": 16674,
       "length": 4366,
       "value": "\"R6+Dyx4npIMnKxNZXgDJoEj7fp0irBj8ntOIjwmMvJlID4koQlwVCI80NFOHeUwCKqUidaj0bBG0MDW0iJ71jHHlXpzSbkPnbhXxrTANvWt8xJsThay\/p5b1O\/7EAxCcEzlc9g8j7l2egQaHpqo+tbj7C9ox26tpy8f3VtZrrDitp1bMFLRiHUftdcjcaOLpNlH9pieecvaXO2KibVVVMIWMrGr1sA7ayu7LGmV2CsaEFI9VJR3KBgjmVM6ysDVIFf3VM3+TPwhBYn03\/bRk4TEhoDIAZWEPQ1IHnNjFq2PRSw0msRSEJ6r+y5\/3PriOxzWahlmt4vAw\/9\/uIhCza\/uAE3DmBN3jVVHwjZOJJF4TQO9+QBgstz5SL8Q4p6iX0TwxWhyudSYqcqljhiZ19DF8wSDi53zWUJJ2ngMv4NbFpv0onkLI3kp6QXf4uepsrAQ1SPpSBrND2gwieQO8tWomChHSn2LgthnQFeVeekwQHRJpHJfTMXJnAK+gmPMoDKCn97RZMV\/tGnS0JNCdKECl64o92jw311JoX3kvDyVwvHWgQO4o6AZHgt5+whCXCUvR2A38GyzRN7Kpm+3hlIBJN+d5JyX42F8fOGwxAwxTgD\/dcLGHkq6YU7On+U6DjfG2AVbTIFnpFgMg9RywUowpIdWhK4sesY2KZ2HeARe84IKTT6zuMRH6WvtLr4hbu43JI1JLuIEgI48Z77eN2crOB3vdkpt2Qa\/OyPp2t7J4CAlaH68X8xoTxDCHe95VxFkcFDDKJb\/2i3gKmqHRus+hqhwuttYECBUsxyLiL6nMIo2f41uloFLktPjz2v1X6OunUz4122XyKiPhKQL6ZueOh3X78bKuxsH8w7VROmaVFnH\/I0U8qKbrnkcBbEv5o8VB+E60DvivD\/vCG4dBsS1cg3vpODeP7h7xsptGngKQA2bkPEQ8WyD7zKlaF0puIOgksnVpSs2qedzuj\/ItnmuPChq9wxI8Dxt65+CFqgjj6oyv0N+rXEZRC6wpsTjjZpey+IEfC6pRYqTSylXbF0c25uR2jy8UaX+PLxguwqFHdlyYleFxH8dLUhX0lUstA3bNg70ohPH2MHX4wn3eNJdNNkgVKLboiGdG67Tl0dRmzltOgqpFhWu0iIAeeUSHGhsmWNNRu1Fjj4BB4BJz3Ee4KEHRul1iqSAewL946\/mBAxM4XFYa\/dl5UmWy+Ay1jwv2ZrlotiYLvJLtKE6TZqJIt7MMzQBvFkJjiDidiSlJ4zRkWWPt03qR6IeQp0Tb90eyPWbqbwl\/3KMEnaUpCYl5boQuEX0bGsUk3Q3sozwxuoNCOQSDReCSQTaXCdrNdxDZit+9Ryy1Pbj3saYdVVPgcagQRgTOf8eBI0AZqPoUUX1MkPYkdr+jVDOiJ\/AZNAjwWUN9E0yb8vtSgNsuaiCS\/WCy6M2tA1kEXel4lkF\/dqMe13Ks5b7q7GsvHxmoOp5tKEQTjHx\/L1u3pqXfDjceUi\/mkzQ5DRP1HW7dnDlstBnkPDzWq3WSJ25D6eoREJlpIlcgOK5GXlgjfSL\/ODKOuFuXqK7X7ur1OvADtPseh42geAd3WU5xeAJ2L6kG622SP0kPp7dlZx63\/r53qgg+69rEY2cSzwgxz7Gmvv1oGM1\/RnLaBofPcgj\/o7AXSEYQ+jokveCcPD9wo3HczUJglLZXB1eripHMDDwmJoaybWJ6stpHmjTZtqxxofN96OHDToHEFLFmJ7OUl1YbJSXngF7KFi\/T4kp+4obH1di18TMRbNiQfVD2HircfCbYWtANt4WwqRaLJO8SwCuRbvRF8zzRsw3ZidsEJjaiTkwdw9xB67ehqkhJyxrPUAtX1zjuZqBRIv09yfkqyKrGu381qSL5qGEK1LjjSH4BkaMYrqDeqoOERJu3JCrqJ9D13YX1IklhryPSY0hvO7k1spmMiiArVThT7M\/bXMfodv3oYKuki6Iuk4Ux4HMjuMLLIdwxycwcRhsOvHu3xLXayN2t4SWDhomaZr6fS90eDLgekwrd9N2PQit8FGPAs2G6aCmf5E46T1pLxV4gQ8c8nLQXGyY660MUL8QhXVOkAdFdI13W4aj1xCdlHCMAcBgXVvMr+jm4r7D2XsaPmT00oRi\/ulhdTdDjDcxAHPhWtNZa\/ktoXRGtM7P40HPGP+nl\/YzJnIVFIc6\/A7cgr3e+Q+koNlNTHiiM1ceHn60iaRJVPPwKnTmD9b\/PUtxWj7QfiBwPJgSQ8ZMleb2Nzr19csCxTcDtUxdGWQTXZGt0YT3nBPMfuA17Q2Xrhm0niVFQDgOlG0k4yl9sHpWmW6Ob4oQPsJykIQPSQ8h\/iGWSK\/7kXV9QektEcvY919n7\/DOiAWAIVnXGcsAPiN+zNvPXW7Z1cJ0xpd8Q+GA8Zqv1HRVRlDSKT9KvIcR3pPDndoUvoQRkD8NrSBNg6cTc71+AAHGQKtwsps8iRRAsyiCRTW3t6O\/tAeP1eV91soTzChLyD8QjUs6K7XM4qF3SHVojOzkpkKwQ+7W8Mm9wLxuk8jrQUMgIKbNAMFFzv1qs1E\/s\/4X+WhMCoGgKniXsDLHNqyykN+UojMp0vrKAGfRti9WFdaloc+ScaxKD2atJum05eX756Rsu57w637IEx1cM5SVH2opTkLPRb9gGiGAXTkIgXqO7aOLbJwvEtPjjwKXmvPGN1wfW2RSfpQP0dC6ud+ps2ZzB88t0mEOJqSfyL+tIvfvOvd2NmzqtJyfX5rk7tASUtQFR5edAj9hUvgRNV\/dFpvUqUrpX78lyIk5zOOOQtNju\/D92RjmeHPy0rRGYGO2lW1jgX52ufxAw7xVbs76pe0f+TQ\/XQXQF6MmcLghbQCX29SXGvd3fiSJSPXwhNYCMYkrxewxLvmGgMdR3lwIX6wWV0Rg1drzMIfY\/OE3TfKaW6T+wnU+uLRD6EHS+\/8kKcuBCy9x\/MwfRge+SujwZeKRsDOhuwt9Xkt2fvRg7ep9seLcy1ycUnBkNkwcJ3eTWmay9Vt9cHOeG7Wb1DMx9c54wSXjvbLmduPaYxx37\/mPykdGUorfKaharj830n5aT1R2dzi3sw0tD8WRXRhrpsfEw5\/X3RTeS8nBvOCk1wkqkTPu\/NCX68VgvyOBetRd8+7YUyYbLkR4d57l63EUeViEFydghbPt9M64REzrQz1ev88ya2buNfszQSSwlSTVsmK96fgkeBZ29UxOdG8za3O33b2RUVu+6k1RXYZ4\/2cRsD+sqrUDcfqTDCz+dTzTGvG87ae+RMC+YxSo5aPvfrqEFSiPeLl82PIcCsUDv0W1\/jxMFDcOOJS2cd1gW\/iABAu3cQgsteRv5b92Vzni42uJyXrIEZX563tMhOE2hgQOPjZaaRKVBIEZF5OXDC\/ehUq6\/pYGKlXGIxDzjAv+tjPy8r5Z4RwaZrjbqJKopoNl2Jme\/XJyw9kpZ+inBjX0yLWAasudeDPms8XijtCftADPtNAtL+UAP2TUaYsm0NCb0nrkoDo0NptG+QSnLhnWbCNZlVSKT+8kTP0wa+s1bympj5TDCM+jWBjrn1wV6Rh5KDTJWg\/ZcyDM3WwIjY+jVet1bfc2QHvVGkhtwRUCuDPHHMfoOxrOCUrtMlU+mrMYpjL7JzAyzMeImTnQDK8NdUtSC4Yu5veAT72XkeNlkSFCcCqENaeDwkFmkusudmHWzB98LffQqDD2Yz\/BnGE5B62bWhjPCxDf36WL59qs18OVj4Irclju1U2+MnD247hCeT7RUgG06MvgwdUeZKTEYj5T8JDYn+VDvBQW2\/Y79aRf1C9NeIe9ForMtTuRkGCSmRFbrfv8d4KwqK7X5XqPjPh84QjId3DM8u48q5SP+6\/cJRJveWoxFA4w8oURXIi1rb5YCSlXsPmXmMZDfVxc4yo0B\/sb8uNyvTlAGlWoo10uxWrboh2a9j5T9YsGiYhx6fcon7sR+uD\/OhSIfsv+sIcj630wpQYoIBtJTairyRY76Ok9es2V+WBdLbSnRDs1iE9c780E9s9buo8WsKI0dEL8KQrjgpvDY0\/JoO056qKsLJZijlhYkXqOkix\/tpvtnbwEA\/27wa6A2\/sUHMahpbI8e9aCyCEuU1g7c376k88Ffa2ZXpPMiZ4W9TYTZp9G4Jvry03z2oLAQLe\/fkj3EO5ldWwu40KacpHD61StgfZy8QB4HeSKHpgZShHhwhYoIV\/9h9uk78Ut7ENdNO62PUUc4kA71RGPZ9jPsZFE1mzyoqyu2veVvjjrbOxBnISNA7HgwMtNXFuBW03TiB3K8oNlBBosIL+y8zaloUG5nnfu90kw2trDpwfmEy9fUwlfu7dg+3E+YdU96e9\/SvB8ugzYqOZ4=\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 20469,
+      "offset": 21104,
       "length": 4366,
       "value": "\"CkJov1LU+wxsBWsmjoaV8E6+DAx54awLKj81ZU7qrdKogQDqgXYhKVANt3aY3eAf4o\/6+0KH26tAvsmJ1Pb3QeQRZW5Z\/7grTWTl+fpnn3AiSPw2fpOJ2WnVVpsfkdMVVVtmz4sFVYdKZMPIaDLMLBJuGeI0qi60FBX3\/k+PGchP1cnht3TGSgH9sxN0+MvPMUfDnY\/O1VrVvUYDwAuXZzxipkPgYd3qlN\/IH7dZmzGF7gvF4zh0I0rc3eFkORKdhxlBVJgzgW5bziDRl819hp8\/vDG+m67Z67xXpeM3+Bz+p7gH+tls24tl5sv\/OhRmaYW4Fm4ZOypYA6ycG6VLMw0yVkExfZ\/IYBzWYSyrV8QtxIupDh4WLdufxQIKE2KJ2Q15XLp70P3VQSje6aHE0cMChEyITOAsckw6zKsQxTFXOHJTwtSrNhF917MkdrfVPssq6woQJQ1s5ZkYcJomp3u+pU5g7lsYYN3y\/DY58Kjogcm8AAOLAtqfurAXMwH3VWQHnC4QGblYDz0DgxXU2NVnTV4nPnpMPphy4T7D3rNWIHbL33LebBuHtGdNSS7kEO5uVYk3r5+l5q4FvxyYoqjGQBiStOr65YN2yNVfX\/IBiBxtPoldHtQaMsUdRMpFF8M2rWOIOnn4rqDMfBei2tWs0eNixpGS+a8urJoy8jJM0zl3gvqIDPnuo+0\/7SOGNgqB50w3K5zZ3kTsm\/1ojD\/zeAQF2TbUvjb4n3pwf8ECx1nAA29v6u4+YP0eeYPIXwcKe5uWnWsRrvkKWyMstisAFKB7dIbdZXjJjSvZsmYWJ1apJGVfMuckNLENDROEVoTuqjaRNInE01JSI2GYbDluY9mP9ifeOSHi5Sb1ITaVKOMZ9TsACQ4MRA3GO6D9IAJEz4Q1JO9\/yINYFdz4ZhM1j2ICZe\/E5JjUpH736rbjoJf\/PvlqcODMf04ic1FNwB9LITp92F8CnpeMik6efBWus\/lzKj11XRpM0oaMSrZVRpXZsDqoqzZ6KWzn9cs7MgrsxhbNDXw\/ES6s8HT7GprvDqvWiRRwNTkhg2AaAcArYolYO5J4P24jw0HoP3oUVNqsTVkA2PV8m913Ag+bKZb0Pl9vTfqTRud2g1ctWfalKmvwFAU37zonAbzVgqYAKItRxJ514vDuvgCBsGM1Dl46ysDfsqm4m7PqZraNqZi50AdvnfKmdT46goeFtV1UUeXs+FQx7jBFVV0LTekel5W1H+9XXEvIe4NW4swuzRM\/50pWbbPplgZ7R8L7Ze5J5CxYwPg42B7AqBwLsQwU542vr8DidhlKtSe8viF6toWP7ypneETVU5cx4tWsK7o\/aLhMssNRONbrWetrHnfOHXBodxy3OQS7lsZjNMyxrCCKQ0h7PvobQB4wrl4bkgYdAW4Ij7Z+X6\/l4zVgvGHxDu8WuZwb7SYFbHfHhXw2BjXjfciHXKRvQQVTfn2BPJUH44Na5Vr5rKK\/vhOptAXaMYQW64GcvAA2f5Pem6cf0Tu13qxCXEVEA+2ExqIqQ6yGxPliKX542hHT9B0RhS31pzhT9G\/ACpFzlyNPUwS1I\/PoY9\/q\/R3UTozaGgtoc\/+STLEHT\/H2M4YXsVizPlZ5JG15ZTQGkf5hcfF65N\/mHdrXHtLEzygl\/TqgeC+gS9N0mmmft\/ZUd4VI5tDJcEzyjDnmuCIUa9mqz5RrleoKnSWB3Fr98J7FPK6AR9IxSH32quBg8q\/p\/xpsLfDKCeBvX+ATkp82K9wvYyxYC\/N79k+ilIWiZgnUirNfVimiUwURdAU7PL3QwBjXtwieN\/PBML9rWuvR0Pqt\/tgbOXd9LSQ7LlDTzNk6z1\/Lhl\/TSP7tCkZt+FmitYC+6AAPYI6ZQrPKc73z2HUmeJ3CpkG2IqS81L\/DdXfadsM3XSR8c4NPGZBN6aLN678AsnrcvLyQBWtEEwyr1gPfNRori99gyoUDCzv14yh3pn7WBmp0uwhKkX10\/rmrcpnOoaQFzrJbx\/9n70kgH\/\/ycq+ufVsg4aTbV3hMCDvKPOpmO56CEKnUPTSs15OkviW7M00top8ujBHn4\/UTMsrXv+h1jurLnfG76fI+UbWGTr6sK9D4\/5yKrvifEODKAJVf4l\/\/fqbEOGPH8Z3LXHoh8W2YQfIFSc2kC2HRGqpyCfPyy2DsaZmsBYP0gZ7OKlpsnB1gyisOLDn9j0zBpGSbsqI8bYg3iAT+5F6ZAkm1MplVyriVcGQEWjkQUuhXTmDR+9xP3n0UZWcqh1VscxpTA0QSAYsISzyt8Do7gvEA9ENxnEtXt6SSodg4QAQtCgCVyikcoh2lVtOdFc8uw64+JADlr9FEsHrnYVznwhWmLcWKksVgRTdKYx63PYklOCvYiO2cVru4hSpfNiUuWqB0H43WB15JMh4KPNaPVdY3yjjfVV17MJ0rZP5ewdQXnrWC03+6Ks4sk8Kl+EJdFNcrk1FSp6IoYbKMy3ecFzB0b+ABpn6kw0z8cW+cHf\/SwiCw9T\/IOZAzvp2kdNAcv4JLlfqxezUSMaL33Q08+mOjkFh27CJFL4p2cduJ1IWj6vZeJ\/ccUeK7UqFbAPkC18n9TmaJT3d6vkKSt4nB6VQRfP2aBLhX5Yxv6\/qfx5Z2wrV5brX7u9gwensr3DJhIrG+L9Y4dgVpbc3ldA0TyT1Qt7vzFBM06Y7EI+IV3qBEJdgouGkVZhcubA8GdcWhV0px9JpwhpX6sJ\/\/xaS8nHvyE5LUTtWTwFD8dCT91CQECc9nbPjKyfCG0zP5g1cm+bIG2wuG1d9rlQ7935KrFlYBbpGNoOvEqg2XzLJnokHOAQjaGJdjEepyuPP2mrdVpdkvzzc9mVas57M0LmEMzdE3MQ1otdiHgc916khkuZ5+hVkWluDNmRNqCNznAuDYjtJmtqhA9muWhcLS3TjwAhVoiTLj9W895QfS36eDsPDYSzhxJqeTj8b8v9fBde13SlWX1KsMLGe4tfY0voUBCmwFXWoCFJX7GXC8W5jBZ6vsAVqBZgIP6x+JrE9wllhpkq33Fbcf29dLKUcCxNRAsNYsCY\/NCEN1vv5mFBhe1WGhiEWwGsaMAjNoRSNR\/\/dXNIMp2n5smadr\/cupabT02aRJ6O4dh8YljyABCJONoUIvKPYP7hus\/93oITlD\/PS2eWf6REvq1oGAY1pi2R0cElU51JbKQFus6o22J0ztpgqL+U9to2TTWGNZrRC+snxN+6dcsNeHi+INoURCk8cWn9xn4\/MIMiKjEi0yUKgi9mzzqGOoN3nxEZSvbs7qa\/6ZzdRoeyusoXAhMPFVVazRUFkoVc9NfuaucU5yGL3v8qJfnPywzjB0pdFp8YSMptzeywE\/N4zJAXGO8mb5CLs2KKAdh8A4RbAz5ct0u6ILyzXH8EpKNvT3xcegqn6LlHyT\/+SFKgSxorOVIrYv9tEQ7+9z0bhNhLAHcX4mNwTD9s\/rvoScMCu39lFpj7v0bjJ3VjqhOUfiRc8N+z0yZNDabOzFMiQVecg3b7BplPw+nAP9dHwZ7vF3ZXLntiuWvnEKnOu1GsrtPZ+7o1lF6uWYGc4MAew5eOMp9bwLMhrLqpOsh9YHXdpayUys47ad0+9Cr5fo7LDqED\/k1doFoKyWHaBGwzeUXv6zTM+vnhB15YS+5FFRkYT9op93SXb0SK1sh8Ru2D\/9r3OorkEa9eD5UIvYEmIQg0b8IHLvm+ztX9n8HjQVhTyJs4h2fy18jXT7m4lU2eoYGso+kfYN89jzrKv0M8he7XnWDtdGWytQz75ioGHFR+eC9vUSrEPfSgyFvqaed7KiJkbsp43DGULu+ZlcZ+OsAUV4bBf6+gLvbqzzapbX5g7InNWaFqTzTSn\/Msj3BIuZJQ34XFO4VPCxTh5QfHFUl6bMIRDHGW+IFj3Z5hAaOXTW73GuFXwa\/3Nook0\/q7n5zl04uAmz2iFG053Z\/BE1cR8gxAcrT3infj\/5xGKLfnKG+h6cgr0G\/iyENk4dbmwPxFpC6LbwF9k+TjoUX4h2ugdO8rLPoku7fwAMVaayh1s\/9neGochCjEDkKQfKfTYPAxb2d3Q+xs9fTD5rXMWV68xG2xu3SKtCzXeWxdh1gA2A4CXYVu7LfMFGA7JHsJvjmzWBD7YM0DVlIY+PUAtvxhWIpnxysCq+P2DIgEjfCo0V4pHyviYs39oLqD4KyZPamA5xPiFGiWzbq7JaNzLFgVZhrvYgprcIJ256d1uWkKk1Q+lxgakMghSU5rdr1P5URjREJbFp5OrWYM75MQ+H6FPesKyaYrLYP+eaxoFILYfH4CjfUOziXt9FDRzwZjIYamh80rtyF8I8zp+eXlPMOexxnbmhY+p1RHoCVQg=\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 24899,
+      "offset": 25534,
       "length": 4366,
       "value": "\"KhykicdCxpVu5Itg1AonQisVvWFqdis1+GqD14l7woOu830fSDYAkbj6mDhuhaIfRMN+1P5O6p1kzq7HVShtkQSPtBM6x8JN9bFrfR9fDebo\/\/qrZ74uYHpGZTpWGRA0t1Oox9H46EeRSskEE514yhxBOnXhqSRMgXcaD58lR9MyHNxnJmlFlaS3iZVYcvFZEvOlweE4+AAHDr27yxmfCokT5zxq32Iw\/IQwvLrJ3D5QLt4QvK9NokHRqnFUrMBxnGZ9DfIF8zhNEn5KIEEZJVacZ8cfSHmMkjF9v\/zWV+PIhTrWKiaNH16hvt+uVGuPUshUN5eUtkLoFGhnHLKtU0eAZeb3dw7t4PIgK7CaMy1r0y5dBG5Oy23B0IWMknuxutjMf2pzrRfcm0dYhse0lUoanYFr2IyiJifZ8fGxIQjK8EAJRZL3P5I0\/WnmCmQAdMCFc49tLHzFPTCx4MG7clgilRUHUerb4v2\/4\/W2bx1hJoOT3w+jePsBw6wtsN4a1Rs+uPErfqRiNQNleZEPcmnWpSN2hirepGSFDYKwg1saJ7u8RAUaFDjZkAvV5Yfq\/ChQqrLN3Aq8KPq8KzNzJV5xnp8UZVmqv\/gORuN2qcbzsMsAABcugg9H697Q07zLhP7SJCq2liiTvYaTFrtMLHwdXCpd4VPcRPf\/0pHGX5XHPLzHzolabeIukWBBZcidHpbUnCUSSOHVh9YYkMyX1mCik\/HKCgZMY6MYQRdL+ytCr+VtE6ZZNjENn6cnBdq8mToLI6p7kFd\/ySIAc\/KjP9r8+TfIWk4lSrmx\/vIuyV3tGlTzFfVQP5HmGGgnkjMl+op\/sue1lB2A8UJJV1mXFPf8RU7z5S8cu45rNSnm8g\/Mgru9Knk6r4s3ei0HZWszg5pNuCVn202XDD1XzUIiNm+XYP\/zHaFciGpWBtD4HQuq9qkq+oEHm3Vi2Pmp5dVVNdVwUeHuPOqVI9sro8gkSmHyLcO\/6XUWvTtuHDyMTFjMvbTXSmtmItGJWfr5EMoKUzoJN0UjD8NOkn\/Xedv5TjDtd7dT93uIR5F\/Xf4B9raUnnAIGOKJeltsB9qYeUcBSEYMXbY23f5KrxGams3ZD+6QLAS4dI7o0YMcJd8Je1ruwVJRimC1q4qthk0KDvElGXcuKhquulqOAQK0NlVzp5DPrsdBUPnP3cwRlIaKGYg1bMu\/P+2uDrvIsd0o\/YEc+bCQ+iecSGVfJ9Z2qKBD1rj4mNf4L55QZfyAqvu2TUGDqf9x30GwzoLF\/rA5dWht39hDknIRWzRrVTTgLWYqIvMl0fklHZmYZV1FlvajArrUYTi6XoEPLRX69x3wEVe4BmEwoL+xkgs2mS+JEIiteNFw17iNuQntjjz0YJoqUVJizv+ZRSlfvbehmbmSqT2CaYzUewvH9vJjcjKCuAYwidSY1+00Yo4NdUHQXXqjcYLekG7kwMFW8\/6Bn9TSsFTjewVYT8Vb3m+mu\/nbKlefG9jlJjj1+O0pn6txsVevNk7+pS0FJ8W1Oe9nOmgIX6L6cIitA2Q3FsbnX4KvfmWhIXSETcbjTfXjNs4P6fx4Egse6k3x2l4NYXjn7AEuwRk\/e3mycvaoa1MBq1SXcDOL3p4YABSoZt7TrXPC0HsBzEI21RF\/QTn9NOn5dQMzqyQtYxBKDdkamtxEJpebmszP+v64gOAEYjhBgv1t\/jQW9b\/yItiDZk5ZMwNIfgIPXsx36lr+S27MFdXpkPPGLRRep6Bzox8wUwPlhs7UXci60F7Ji4G2f8W1ZAuYhEkEoiOChlwHcHDY6KsiUXX+VX9UDRm\/zJEy3KyyKa0bkcY\/v+fXr9xvu2W4CYbsyXnIiAoYJmyuKYu7I4t+IDKKPwt0mh8WRg0H3yqDBYeneQhpzNJJdFBDwslrRyilvwIbGmqpZc9hxo\/M4g5SZH8ckngOgdzm0JOJgKqSP8Kq8YQ5H+P3qvcxvsxeQ9seuYf3OnLh1\/INSsxJu9Hr72AA08QB2687+WBrIYZxomES7v7NYq+NU4sxKXq9MsUEEc5ehcD5iUqSe3SWqv7Y+QMGEOdV2lkv+7h6Kc37YHXWxv638NIYwD62Rn38eAe58fisAkQAwwlXxoVBVlzDJ5XFVD1v\/y2q9IAplWCRVowpQC3xmeTUeH2vYtyI3NNALjc8H23AM5vwHAHLn1xmPEA+qdjsaztr3VLrlxYPgR8y0hSieRHbqM76+8kFWpULYYR8bqNSV9ghVfB7Pjmnq2LOAEA3N+JFokKGWHH5BIRERXZlF5gcPzxVmNeyrd3TIjLkPot631yiZX+9+Yvc0\/tt1X3IhIig1TQ1oHY7oGPHvPVncxnvyv+WuPIHYflMO6De0AvEjnhlhGX3y+gAKF8LL659d9s89a3NczJ+DVC99gjLYGang4ORVb8SvUf1rA11DpkppBtRnX1zRgqvJoFA0tqneKQVkyyEzEiB4ulThdsahK3QUE9J3Eqw+03oGystu78Y\/xSHzfq38EUl\/t1\/QsvrP4z2TB\/EIHmxVhdBnM8hwihyE\/NawkdzJ6N+1edN5V9pBrbJK51aWgEUkDR9C\/x+aAFi9kIXqzVqWCyNyq\/qNaBQa\/xVjxVaWbxnnQUSy9V81Kj3Np9W05rUjitSLL7gum3nOg13F5HGI0g4lJH50EtEZr04F+uXoJSF1bPjssLbeGZI3NMi7wnRiQQ1EJAjEK0bqXLw0rBGT6VIx8FX0L3NFj3KobZLufBfaL3dMixyiIkcVS3tNJpsh9uwkkitK+kbqaFvY\/5dTm3I++YjDAb3CzchNvZSSdoqKIUdmV2HDDzRT1PsYcOOhOFSNfC2A\/TCsVqJKNS0hJLyXOdj9\/e\/1BrJie1G84Mkdb5sXxbxGlYePgPEPmShWEKeA1Ug3MlZ1Ckvjex6hrP5C\/38ioHU29CUxdHsO7X41rdu+Jo2fEUHgrvATWzpSsTUlVbXkRiAb\/77KQoAkUfvzaL+g\/vtYNMA59BxigX\/frBKmWNHIGyKGWZi9em0ob2+cM5IkO6vheZ5h3qvg+2tQ5Z8LbaMAEvIw0N1YGL4WcFOl2ddU9wMpPPvCNHgQfytwGkxxZHbkz4ojGygYqIeyc63y6jCKUYqzFI1y03bbevGzh0y1sKuTh+ZtKMop58qKsKGLUxjJBRAIRpDKTroYhokrmSP5jXuRc+8Y\/j3e6Y09OvQQPPizcpGI0RmEAamKtKqGh1WvimM\/I4ER1a2qVuZVrA\/qT9Yk1EbHaUdPEI9BZPbNyGy8qdwUqqQgGdtA7F330bqvc1I8Rv2XZ\/dPG1URDOd8VHZVJThzWYHDlRn8krutIqs2dCPCYgcqYzGI9StEEzbaJ6L+NTjHD7WIka0xQCoTZR9rwsC6iBGcdBDFSMvYioelXmNCWmAyQ0HTWz\/vnDOF4rFxB+F6p5letusEjDEVEyPatEUwvj7ILWxfxq2OKO4wSzzukdy5gYTJuG777OD+AP6i3IgeCNa9suc46RGEJ83L2c+uxr93GPob5l+vkIruUTyu9d75oCG8B2CtBjyKLm0ID6N49GVR6SvoNus9eMMk0KTSYH04kBKEDElC3IFA1sZvk9Ast2U0n82rwwC86LvSOE9NLfJM0lOvmQXu42yOmBr+n41j6G0kAFY1japDUjvvBFfT1fMZ3hqomzceLXAT5hUYoYl8g8uMEmnTAOeUn6piDnLzGJyvlIMrzEHc9J4DgLzV60pXKwKiLWeuRT9CCgu\/bDu+SGm6W9gShgHymflEokk1Vc1ksqMManhONJQgSFzQx2yAvQhvXQWoca1Me2eFhu6lSpXumYQNL7jA1n20m+62\/9e+96KdlqXvA5Y4fVHn+lE8FrO87NPM4cNrPBn4T1\/UwcVnqwH\/Q4QvQJX2DSJDqfAmmVvMyaRUXx5Y73sPQhabvrCwE3eOeP7zfB2CpepiFrrwHa\/4GmW6YGzmTXRRp9djXBxoKqow\/0Qx7sGmL13FkJ2I5lSCsYFRLHuB70s8GFKSAx2L4EYqp\/YX2PePXCJa432XMO3sjUuP\/iylcKlh0wi12X8Jy6f6f1qqvjd175Y7BKFHtHG5XdpcZV8Cr2nP78qE2qXjUKLiUNaI+UM\/MQLYdlBzEHnayN2nGtRxmnwHo0O0cubT2ViGTcYhKIYNyHUVYSDvX7Cp84zcx2hiO\/933Wf3wQypJHd5HYnTAav8YwzBmgiLlMkS4TevvB\/glEHqUmUHaR0mVApX4qVs4RfMleWonK+NsT8VO9W8jMPT4mSKn7uGuAtzU\/pLsSHJa7F1xGZoBXjtvxHCCW3W+FA+2lJa\/OiRed8WI1NfXR9Sn2LO9PG94OFy13kl8M7p0K1FHFZNzRojM8=\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 36125,
+      "offset": 36760,
       "length": 3326,
       "value": "\"-----BEGIN PRIVATE KEY-----\nMIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQCuktWv6l8PhC3f\n02V9bVeupGVqyZ\/6wWF7\/\/YeENx\/eu4PBGhI0TYd4ag\/+U02AfDU5+ByTK8Y5iX+\nOzZ1u2Xr+ctYbrv1G8FXbYcU0MR0QoMXcCXThbaHwyJJDh9Z64DKS+pAdMr8l0UM\nAxwyuNYmtkspqoRSscKiNzAWvMMxreDR4K\/3Xeh4rWKNrijiMSgY0tVtvlHs1jvC\njgdn9Jrvxc9odHRH90QkuvOMGAjhFNbpWPNttsmtKHIteLw9a0SuL6ZSNr3tjAcZ\nu4oziU5FlOlqdriQAlrXQfNuYTW+AnVDNLZfBM9NP9bPkFpbM\/s+84XbIgjiMKEi\nzt\/LVkrm6DLQGTq+tEMWZoyv2+\/JX2i577mFWkFjm46t\/jn8dzsKD7F2SF+qZ+B\/\nBH9HCj\/9p6dHTyI9UIK\/VHl5TGusOnK0mtdxexgAXEjHuD5vDilqiaiAy95sv3Qk\nn0feWIpCY8PLOnfsgY8RYYSYYi7sVKOg+Z2h4jNgrbH7nnhp+gYuSrgvyo9Jg7SE\ntrcOf5ILgdMUkAUsTvkeJlflldvIdFW3x8a\/UfpB9GChLYa1aro3EtLD+EhhrzK2\nFiz\/E1SkB7xULx+lsRCHpABOfgukjsQLbwQURIrtookgx4WvexoZpNQSuWTMaBOB\nqFu+u6\/65HVA3yCx3\/vyzt5uPuKZtQIDAQABAoICACguYuHhO60aGub8RM1oV\/i6\nHR\/Ftb1lOldstEz6S45KELZDKO+tu9uH346OBsAKFVEj5+zXCqxb+N256lCR6CU2\n8x9xKXECyO8jJibb4IPz9TF1Xjd\/\/OHlv6P6DKxJQPUPISVh3IDkHn\/jzV89XQk\/\nBzDZbyiLgsWMl1R8cR8jqu4T3dy9cC8qlVcQAZgCgXypNnfSiQ\/OxaWDxF+glPLg\nYFtmBoez+arMnxcdRxnrjoXaM\/mKS4RAHXuq4QTwBjhjflBJClE9XDsHiAlRrsLk\nQg9\/sP5wlFEcfHfpBxIrhasI3HslY8OfkIVo7+szHT7BlYs5G7tYPxaAcFFglM+M\nPA486qQMX6iA29wky0dEGrroR+1IsliPGmQ9furXo0JVASUgn6wjhk15M9\/bUiO0\nFbLovktOkf3fnQevyQNpNaEHUkF3jTKW\/ip81NIAFw3WrdIZgp3cWoo4YnIU2sI9\nRuiwRUjVeAmyBhxJj7SkyTwlvrIQGbjYqYCXu0asCC4xYXH4aunyhv3+FoqPmFoj\nSkfVUTVYre3GcjxJR3+r92V+bj7rNIuiPz2P4lh5oQI\/c3d6MK2Ee6jQjJJc3gZn\nl++XXfB4LiinUE9BzKgELEF8Q\/rwgHbIcC+8YAbdH5Khvu639G2QIT68StPjGCng\nmkvGthRa1h+vmN8NXBrxAoIBAQDrZv0\/z2cW1WlaATTFu0yHfjB8Tj05psW7l\/R0\n2nfwK3pAZ\/5EHIESwYmuxMPLN3b1qvElJ8HARs1\/D2TNWCO5LbYb0ty9hNmE2Vp3\nl7hChX5W89oHzeJm08To2b4AdkXHcJ+eIXaCAuUAExfsy6K3xRIhXIi9msXW739o\n1nOP2wIVHZLC6W8TcylzFDGFFhu\/RnnHrXxC\/xLKz3WGR4oeWu+B6rYn6MFH683q\nUy1nRcnXHm2dPVg8jxswHnfDMuPXx1yKIB4HqGLxV6s3zzORWdQdKdvM0LZfU56n\nDadYXSKb2EQx33I0FMHPnsOVInEazwkypD\/opZo1YRSxec+pAoIBAQC92Ug66WDh\ng0g\/xA3GBKDVIgpjaOEV4EUkfDrzjMYV+xqJApzFezZhQZin41gTtvim8pqRG6+K\nIvBSSgIV\/x9H1Ixd2gNAOUdwkb4aTMUwPm2swkQXKxGBFlAibDe5nzloq8KIA+3K\n7CaB8j0urZMsijra9JIKLy52spQ4NukliBxkLb8eW2uk11aCzUnPws3DtpBAGR7\/\nPDt20n7Z066iTB3nQBDYNYSY9W9pQIIQySx9QpCFc3+utrFFftYIyZKtaw6vo3TJ\ns1hOrs457ND201UJI\/cAipCVOOHxxL7TnsCNdWnb49r8rmKdjx0ca5i559ro6f4F\ncveoODUJA\/EtAoIBAHl3niwEAGTW4FLSFoIFYLr1kV1DHfKWrKddBIYbiRIDzURY\npOpObwfXmAz3eTRuPVMMzvvmJOLrZfQvZEtVNLHD9Zkr2D1uxLL5WOYnAqxIp+WE\nVLf8M9vtYEjqulEQtnbwFV0KVVVG2xWLxKeqeB8tcGqIjgKQT4\/V6z+UkPLlBpEQ\nvn8W5vr5TKUWAWtz+gNcAVDYoysK5Y6DOFh+p7V8JOQ70ZyMTNeoxIsqOl50s27u\nQ4+EbPhqu5O71P6DTvAz7ftUEUrQR6XTIAVfRHO3D22xALsR41kTE+WNdRFylX4n\nPSEi9JINN+jDOpbEu+oidNONz3Bjq0vp+TyO52kCggEBAJkM7EAiGSp0zfAqO\/hh\njs+EK9\/Mk3kxXkx1oojp+l+KGfBOnNhP5p0tZsYib8UlAvyEJLvLGA9C739Hjrrw\n++TKo4ad1XUXOFK2DA3jyiyEh6J40q\/i1q+8r0mw+JO6m2uY3LEOicvH6ZtlEJHq\n+PU1UxFljb6MHucuPHO9QOQzAMB6aNMuXG998o5stY66u2uGaHBkUCrwAfhe5kjx\ncJ4CwzDE40+KhaVSaEjv6mth423wFdagMFVHj045XI+lAYyw\/Bv4qJRa81wrbLIi\nCqyR3sIJrn1POBQ00WI5fKXaG91uxLKy1L5UT8g5sfxRecSV+FNBILp\/3sxM0+S6\nutkCggEBAKUfBKiTFIXWGjgSxX6HjfG\/nMcv6PIaycphYOBRSxenafx3uP0vvEBN\nmiXcfpSyBvPehwAOVcqElR8BYYYnbPnxHG1b01OPqUknf+1xLIFV6y8u2QF0OvtO\nois0WanEgLkyt0\/dVtiKoDeQtL0swnGJt3etegpSo\/9rRFWCUQ44jFNtQ1NuEdhU\nj93Oz\/1KZxCi5bTV1ilv\/ORFyoD6XDE1Tp1\/nyIPARypWaPKNq\/Fv0C7OpxHAlPW\n7QAk85vJzsi4e1Xhp37biLNKoRDqSKdKEd7xnXf2wxDyBWqvswA+797ExlJf+flw\n\/XF4PALq9QdCgTSILyJ2RvEX2O4LE\/g=\n-----END PRIVATE KEY-----\n\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 39615,
+      "offset": 40250,
       "length": 1,
       "value": "4"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 39640,
+      "offset": 40275,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 39728,
+      "offset": 40363,
       "length": 13,
       "value": "\"threadCount\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 39932,
+      "offset": 40567,
       "length": 3,
       "value": "256"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 39975,
+      "offset": 40610,
       "length": 3,
       "value": "512"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 40008,
+      "offset": 40643,
       "length": 3,
       "value": "224"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 40061,
+      "offset": 40696,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 40064,
+      "offset": 40699,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42570,
+      "offset": 43205,
       "length": 7,
       "value": "\"vocab\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42584,
+      "offset": 43219,
       "length": 6,
       "value": "\"json\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42709,
+      "offset": 43344,
       "length": 8,
       "value": "\"merges\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "StringLiteral",
-      "offset": 42724,
+      "offset": 43359,
       "length": 5,
       "value": "\"txt\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43051,
+      "offset": 43686,
       "length": 6,
       "value": "1024.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43094,
+      "offset": 43729,
       "length": 6,
       "value": "1024.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 43149,
+      "offset": 43784,
       "length": 3,
       "value": "300"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 43204,
+      "offset": 43839,
       "length": 1,
       "value": "6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43255,
+      "offset": 43890,
       "length": 4,
       "value": "0.25"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43334,
+      "offset": 43969,
       "length": 6,
       "value": "1024.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43377,
+      "offset": 44012,
       "length": 5,
       "value": "768.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 43431,
+      "offset": 44066,
       "length": 3,
       "value": "300"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 43486,
+      "offset": 44121,
       "length": 1,
       "value": "6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43537,
+      "offset": 44172,
       "length": 4,
       "value": "0.07"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43625,
+      "offset": 44260,
       "length": 5,
       "value": "640.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43667,
+      "offset": 44302,
       "length": 5,
       "value": "640.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 43717,
+      "offset": 44352,
       "length": 3,
       "value": "300"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "IntegerLiteral",
-      "offset": 43896,
+      "offset": 44531,
       "length": 1,
       "value": "6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 43943,
+      "offset": 44578,
       "length": 4,
       "value": "0.25"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 44049,
+      "offset": 44684,
       "length": 4,
       "value": "0.05"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "FloatLiteral",
-      "offset": 44145,
+      "offset": 44780,
       "length": 4,
       "value": "0.15"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 44273,
+      "offset": 44908,
       "length": 888,
       "value": "[\"S-O\", \"S-O_COURIER_NAME\", \"S-O_COURIER_TRACKING_NO\", \"S-O_EXTRA_DIMENSION\", \"S-O_EXTRA_WEIGHT\", \"S-O_LABEL_SHIPMENT_TYPE\", \"S-R_ADDRESS_BUILDING\", \"S-R_ADDRESS_CITY\", \"S-R_ADDRESS_COUNTRY\", \"S-R_ADDRESS_FLOOR\", \"S-R_ADDRESS_OFFICE_NO\", \"S-R_ADDRESS_STATE\", \"S-R_ADDRESS_STREET\", \"S-R_ADDRESS_ZIP_CODE\", \"S-R_PERSON_BUSINESS_NAME\", \"S-R_PERSON_NAME\", \"S-R_PERSON_PHONE\", \"S-S_ADDRESS_BUILDING\", \"S-S_ADDRESS_CITY\", \"S-S_ADDRESS_COUNTRY\", \"S-S_ADDRESS_FLOOR\", \"S-S_ADDRESS_OFFICE_NO\", \"S-S_ADDRESS_STATE\", \"S-S_ADDRESS_STREET\", \"S-S_ADDRESS_ZIP_CODE\", \"S-S_PERSON_BUSINESS_NAME\", \"S-S_PERSON_NAME\", \"S-S_PERSON_PHONE\", \"S-O_PURCHASE_ORDER\", \"S-O_REFERENCE_NUMBER\", \"S-R_ADDRESS_PO_BOX\", \"S-S_ADDRESS_PO_BOX\", \"S-O_RMA_NUMBER\", \"S-O_INVOICE_NUMBER\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 45213,
+      "offset": 45848,
       "length": 315,
       "value": "[\"S-R_ADDRESS_CITY\", \"S-R_ADDRESS_STATE\", \"S-R_ADDRESS_ZIP_CODE\", \"S-R_PERSON_BUSINESS_NAME\", \"S-R_PERSON_NAME\", \"S-R_PERSON_PHONE\", \"S-S_ADDRESS_CITY\", \"S-S_ADDRESS_STATE\", \"S-S_ADDRESS_ZIP_CODE\", \"S-S_PERSON_BUSINESS_NAME\", \"S-S_PERSON_NAME\", \"S-S_PERSON_PHONE\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 45577,
+      "offset": 46212,
       "length": 319,
       "value": "[\"S-R_PERSON_NAME\", \"S-R_PERSON_BUSINESS_NAME\", \"S-R_ADDRESS_BUILDING\", \"S-R_ADDRESS_STREET\", \"S-R_ADDRESS_FLOOR\", \"S-R_ADDRESS_OFFICE_NO\", \"S-R_ADDRESS_PO_BOX\", \"S-R_ADDRESS_CITY\", \"S-R_ADDRESS_STATE\", \"S-R_ADDRESS_ZIP_CODE\", \"S-R_ADDRESS_COUNTRY\", \"S-R_PERSON_PHONE\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 45951,
+      "offset": 46586,
       "length": 56,
       "value": "[\"S-O_PURCHASE_ORDER\", \"S-O_REFERENCE_NUMBER\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 46053,
+      "offset": 46688,
       "length": 88,
       "value": "[\"S-O_COURIER_NAME\", \"S-O_COURIER_TRACKING_NO\", \"S-O_LABEL_SHIPMENT_TYPE\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 46188,
+      "offset": 46823,
       "length": 120,
       "value": "[\"invoice\", \"item_label\", \"bol\", \"receipt\", \"other_document\", \"unknown\", \"shipping_label\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 46349,
+      "offset": 46984,
       "length": 784,
       "value": "[\"O\", \"SUPPLIER_NAME\", \"ITEM_NAME\", \"SUPPLIER_ADDRESS\", \"MODEL\", \"SERIAL_NUMBERS\", \"ORIGIN_COUNTRY\", \"ITEM_NUMBER\", \"ITEM_SKU\", \"MAC_ID\", \"PRODUCTION_DATE\", \"ITEM_DIMENSION\", \"PURCHASE_ORDER\", \"CUSTOMER_SKU\", \"QUANTITY\", \"ITEM_WEIGHT\", \"PACKAGED_WEIGHT\", \"CARTON_NUMBER\", \"PACKAGED_DIMENSION\", \"SALES_ORDER\", \"COLOR\", \"LOT_NUMBER\", \"SUPPLIER_NUMBER\", \"SUPPLIER_ITEM_NUMBER\", \"CUSTOMER_NAME\", \"CUSTOMER_ADDRESS\", \"CUSTOMER_NUMBER\", \"CUSTOMER_ITEM_NUMBER\", \"CARTON_ID\", \"REFERENCE\", \"JOB_ID\", \"SSCC\", \"CLEI_CODE\", \"VERSION\", \"UPC\", \"GTIN\", \"SIZE\", \"EXPIRATION_DATE\", \"ITEM_PRICE\", \"ITEM_VOLUME\", \"ITEM_CHEMICAL_FORMULA\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 47168,
+      "offset": 47803,
       "length": 1629,
       "value": "[\"S-O\", \"S-SUPPLIER_NAME\", \"S-ITEM_NAME\", \"S-SUPPLIER_ADDRESS\", \"S-MODEL\", \"S-SERIAL_NUMBERS\", \"S-ORIGIN_COUNTRY\", \"S-ITEM_NUMBER\", \"S-ITEM_SKU\", \"S-MAC_ID\", \"S-PRODUCTION_DATE\", \"S-ITEM_DIMENSION\", \"S-PURCHASE_ORDER\", \"S-CUSTOMER_SKU\", \"S-QUANTITY\", \"S-ITEM_WEIGHT\", \"S-PACKAGED_WEIGHT\", \"S-CARTON_NUMBER\", \"S-PACKAGED_DIMENSION\", \"S-SALES_ORDER\", \"S-COLOR\", \"S-LOT_NUMBER\", \"S-SUPPLIER_NUMBER\", \"S-SUPPLIER_ITEM_NUMBER\", \"S-CUSTOMER_NAME\", \"S-CUSTOMER_ADDRESS\", \"S-CUSTOMER_NUMBER\", \"S-CUSTOMER_ITEM_NUMBER\", \"S-CARTON_ID\", \"S-REFERENCE\", \"S-JOBID\", \"S-SSCC\", \"S-CLEI_CODE\", \"S-VERSION\", \"S-UPC\", \"S-GTIN\", \"S-SIZE\", \"S-EXPIRATION_DATE\", \"S-ITEM_PRICE\", \"S-ITEM_VOLUME\", \"S-ITEM_CHEMICAL_FORMULA\", \"S-BATCH_NUMBER\", \"S-BOL_NUMBER\", \"S-R_PERSON_NAME\", \"S-R_PERSON_PHONE\", \"S-R_PERSON_BUSINESS_NAME\", \"S-R_ADDRESS_OFFICE_NO\", \"S-R_ADDRESS_BUILDING\", \"S-R_ADDRESS_STREET\", \"S-R_ADDRESS_FLOOR\", \"S-R_ADDRESS_CITY\", \"S-R_ADDRESS_ZIP_CODE\", \"S-R_ADDRESS_STATE\", \"S-R_ADDRESS_COUNTRY\", \"S-R_ADDRESS_PO_BOX\", \"S-S_PERSON_NAME\", \"S-S_PERSON_PHONE\", \"S-S_PERSON_BUSINESS_NAME\", \"S-S_ADDRESS_OFFICE_NO\", \"S-S_ADDRESS_BUILDING\", \"S-S_ADDRESS_STREET\", \"S-S_ADDRESS_FLOOR\", \"S-S_ADDRESS_CITY\", \"S-S_ADDRESS_ZIP_CODE\", \"S-S_ADDRESS_STATE\", \"S-S_ADDRESS_COUNTRY\", \"S-S_ADDRESS_PO_BOX\", \"S-O_LABEL_SHIPMENT_TYPE\", \"S-O_COURIER_TRACKING_NO\", \"S-O_INVOICE_NUMBER\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 48854,
+      "offset": 49489,
       "length": 253,
       "value": "[\"MODEL\", \"SERIAL_NUMBERS\", \"ITEM_NUMBER\", \"ITEM_SKU\", \"MAC_ID\", \"PURCHASE_ORDER\", \"CUSTOMER_SKU\", \"QUANTITY\", \"SALES_ORDER\", \"SUPPLIER_ITEM_NUMBER\", \"CUSTOMER_ITEM_NUMBER\", \"REFERENCE\", \"CLEI_CODE\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 49158,
+      "offset": 49793,
       "length": 279,
       "value": "[\"S-MODEL\", \"S-SERIAL_NUMBERS\", \"S-ITEM_NUMBER\", \"S-ITEM_SKU\", \"S-MAC_ID\", \"S-PURCHASE_ORDER\", \"S-CUSTOMER_SKU\", \"S-QUANTITY\", \"S-SALES_ORDER\", \"S-SUPPLIER_ITEM_NUMBER\", \"S-CUSTOMER_ITEM_NUMBER\", \"S-REFERENCE\", \"S-CLEI_CODE\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 49474,
+      "offset": 50109,
       "length": 603,
       "value": "[\"O\", \"MASTER_BILL_OF_LADING\", \"LOAD_NO\", \"QUANTITY_TABLE_HEADER\", \"DESCRIPTION_TABLE_HEADER\", \"INVOICE_KEY\", \"SHIPPING_DATE\", \"WEIGHT_TABLE_HEADER\", \"PRICE\", \"OTHERS_TABLE_HEADERS\", \"PO_NO\", \"HOUSE_BILL_OF_LADING\", \"TRAK_NO\", \"REF_NO\", \"LINE_BILL_OF_LADING\", \"BILL_OF_LADING\", \"INVOICE\", \"SKU_TABLE_HEADER\", \"REF_NO_KEY\", \"WEIGHT\", \"PRICE_TABLE_HEADER\", \"SHIPPING_ID\", \"LOAD_NO_KEY\", \"DESCRIPTION\", \"PO_NO_KEY\", \"OTHER_TABLE_VALUES\", \"SKU\", \"QUANTITY\", \"ORDER_NO\", \"ORDER_NO_KEY\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 50110,
+      "offset": 50745,
       "length": 38,
       "value": "[\"value\", \"key\", \"pair\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Array",
-      "offset": 50178,
+      "offset": 50813,
       "length": 3690,
       "value": "[\"usps\", \"ups\", \"ecms\", \"amazon\", \"purolator\", \"fedex\", \"canada_post\", \"canpar\", \"lasership\", \"cdl\", \"china_ems\", \"china_post\", \"dhl\", \"dynamex\", \"equick-cn\", \"fastway\", \"australia-post\", \"hongkong-post\", \"india-post\", \"japan-post\", \"jd\", \"mark3\", \"max_express\", \"ontrac\", \"royal-mail\", \"sf-express\", \"singapore-post\", \"sto-express\", \"tnt\", \"yto-express\", \"yun-express\", \"zto-express\", \"colissimo\", \"dpd\", \"star-track\", \"hermes\", \"parcel-force\", \"postnl\", \"yodel\", \"gls\", \"collect-plus\", \"transworld\", \"crawfords-delivery-services\", \"whistl\", \"an-post\", \"wish-post\", \"city-air-express\", \"sagawa-express\", \"fukuyama-transportation\", \"skyworldwide\", \"toll-group\", \"ide-express\", \"road-express\", \"endeavour\", \"overnight-express\", \"rhyme-express\", \"yuantong-express\", \"best-express\", \"deppon\", \"tmall\", \"netease\", \"unitop\", \"chronopost\", \"newzealand-post\", \"ninja-van\", \"pos-laju\", \"city-link\", \"lel-express\", \"gdex\", \"blibli\", \"tokopedia\", \"tiki\", \"j&t-express\", \"jne\", \"surpostal\", \"mercado\", \"webpack\", \"andreani\", \"correios\", \"correo-argentino\", \"nacex\", \"urbano\", \"correos\", \"247-express\", \"chilexpress\", \"flash-express\", \"kerry-express\", \"shopee-xpress\", \"thailand-post\", \"viettel-post\", \"wsp-express\", \"zoom-express\", \"inpost\", \"espana\", \"poczta_polska\", \"blue-express\", \"olva\", \"aramex\", \"nhat-tin-logistics\", \"bpost\", \"vietnam-post\", \"ocs\", \"dawn-wing\", \"the-courier-guy\", \"ccd-courier\", \"bex-express\", \"2go-express\", \"jrs-express\", \"geodis\", \"lso\", \"statovernight\", \"bring\", \"sr-group\", \"pentagon-freight\", \"loomis-express\", \"logi-trans\", \"jetpak\", \"db-schenker\", \"merkesdal\", \"kuehne-nagel\", \"postnord\", \"nor-lines\", \"envialia\", \"mrw\", \"correos-express\", \"redur\", \"ctt\", \"sending\", \"dtdc\", \"bluedart\", \"shree-maruti\", \"swiss-post\", \"yamato-transport\", \"office-depot\", \"leopards\", \"gpo\", \"m&p\", \"tcs\", \"keeney\", \"couriersplease\", \"intelcom\", \"posteitaliane\", \"la_poste\", \"colis_prive\", \"deutsche_post\", \"brt\", \"ciblex\", \"ics\", \"staples\", \"tforce\", \"veho\", \"nbc\", \"novex\", \"atlas-couriers\", \"grand-and-toy\", \"corporate-couriers-logistics\", \"nz-couriers\", \"abc\", \"tph\", \"momo\", \"korea-post\", \"urgent-couriers\", \"lawton-connect\", \"crown\", \"abbott-communications\", \"hsinchu-logistics\", \"pitt-ohio-express\", \"dksh\", \"seur\", \"ems_belpost\", \"kce\", \"quill-dot-com\", \"parcel-post\", \"cdek\", \"ppl\", \"old\", \"uzpost\", \"my-toll\", \"uline\", \"coordinadora\", \"trans-o-flex\", \"k-parcel\", \"t-force\", \"collicare-logistics\", \"speedx\", \"lax\", \"lex\", \"team-global-express\", \"logistiq\", \"global-chinese\", \"micro-precision\", \"airways-freight\", \"better-trucks\", \"border-express-delivery\", \"sendle\", \"tdt\", \"thanh-cong-express\", \"deliver-it\", \"team-global-express\", \"logistiq\", \"global-chinese\", \"micro-precision\", \"airways-freight\", \"better-trucks\", \"border-express-delivery\", \"sendle\", \"tdt\", \"thanh-cong-express\", \"inland-logistics\", \"arc-best\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/Constants.swift",
       "kind": "Dictionary",
-      "offset": 53898,
+      "offset": 54533,
       "length": 5780,
       "value": "[(\"usps\", \"usps\"), (\"ups\", \"ups\"), (\"ecms\", \"ecms\"), (\"amazon-fba-us\", \"amazon_mws\"), (\"purolator\", \"purolator\"), (\"fedex\", \"fedex\"), (\"canada-post\", \"canada_post\"), (\"canpar\", \"canpar\"), (\"cdl\", \"cdl\"), (\"china-ems\", \"china_ems\"), (\"china-post\", \"china_post\"), (\"dhl\", \"dhl\"), (\"dynamex\", \"dynamex\"), (\"equick-cn\", \"equick-cn\"), (\"fastway\", \"fastway\"), (\"australia-post\", \"australia_post\"), (\"hong-kong-post\", \"hongkong_post\"), (\"india-post\", \"india_post\"), (\"japan-post\", \"jp_post\"), (\"jd\", \"jd\"), (\"lasership\", \"lasership\"), (\"mark3\", \"mark3\"), (\"maxx\", \"max_express\"), (\"ontrac\", \"ontrac\"), (\"royal-mail\", \"royal_mail\"), (\"sf-express\", \"sf_express\"), (\"singapore-post\", \"singapore_post\"), (\"sto-express\", \"sto_express\"), (\"tnt\", \"tnt\"), (\"yto-express\", \"yto_express\"), (\"yunexpress\", \"yun_express\"), (\"zto-express\", \"zto_express\"), (\"dpd\", \"dpd\"), (\"star-track\", \"star_track\"), (\"hermes\", \"hermes\"), (\"parcel-force\", \"parcel_force\"), (\"postnl\", \"post_nl\"), (\"yodel\", \"yodel\"), (\"gls\", \"gso\"), (\"colissimo\", \"colissimo\"), (\"collect-plus\", \"collect_plus\"), (\"transworld\", \"transworld\"), (\"crawfords-delivery-services\", \"crawfords_delivery_services\"), (\"whistl\", \"whistl\"), (\"an-post\", \"an_post\"), (\"wish-post\", \"wish_post\"), (\"city-air-express\", \"city_air_express\"), (\"sagawa-express\", \"sagawa_express\"), (\"fukuyama-transportation\", \"fukuyama_transportation\"), (\"skyworldwide\", \"skyworldwide\"), (\"toll-group\", \"toll_group\"), (\"ide-express\", \"ide_express\"), (\"road-express\", \"road_express\"), (\"endeavour\", \"endeavour\"), (\"overnight-express\", \"overnight_express\"), (\"rhyme-express\", \"rhyme_express\"), (\"yuantong-express\", \"yuantong_express\"), (\"best-express\", \"best_express\"), (\"deppon\", \"deppon\"), (\"tmall\", \"tmall\"), (\"netease\", \"netease\"), (\"unitop\", \"unitop\"), (\"chronopost\", \"chronopost\"), (\"newzealand-post\", \"newzealand_post\"), (\"ninja-van\", \"ninja_van\"), (\"pos-laju\", \"pos_laju\"), (\"city-link\", \"city_link\"), (\"lel-express\", \"lel_express\"), (\"gdex\", \"gdex\"), (\"blibli\", \"blibli\"), (\"tokopedia\", \"tokopedia\"), (\"tiki\", \"tiki\"), (\"j&t-express\", \"j&t_express\"), (\"jne\", \"jne\"), (\"surpostal\", \"surpostal\"), (\"mercado\", \"mercado\"), (\"webpack\", \"webpack\"), (\"andreani\", \"andreani\"), (\"urbano\", \"urbano\"), (\"correos\", \"correos\"), (\"247express\", \"247_express\"), (\"chilexpress\", \"chile_express\"), (\"flash-express\", \"flash_express\"), (\"kerry-express\", \"kerry_express\"), (\"shopee-xpress\", \"shopee_xpress\"), (\"thailand-post\", \"thailand_post\"), (\"viettel-post\", \"viettel_post\"), (\"wsp-express\", \"wsp_express\"), (\"zoom-express\", \"zoom_express\"), (\"inpost\", \"inpost\"), (\"poczta-polska\", \"poczta_polska\"), (\"blue-express\", \"blue_express\"), (\"olva-courier\", \"olva\"), (\"aramex\", \"aramex\"), (\"nhat-tin-logistics\", \"nhat_tin_logistics\"), (\"bpost\", \"bpost\"), (\"vietnam-post\", \"vietnam_post\"), (\"ocs\", \"ocs\"), (\"dawn-wing\", \"dawn_wing\"), (\"the-courier-guy\", \"the_courier_guy\"), (\"ccd-courier\", \"ccd_couier\"), (\"bex-express\", \"bex_express\"), (\"2go-express\", \"2GO Express\"), (\"jrs-express\", \"JRS Express\"), (\"geodis\", \"GEODIS\"), (\"lso\", \"lso\"), (\"statovernight\", \"statovernight\"), (\"bring\", \"bring\"), (\"sr-group\", \"sr_group\"), (\"pentagon-freight\", \"pentagon_freight\"), (\"loomis-express\", \"loomis_express\"), (\"logi-trans\", \"logi_trans\"), (\"jetpak\", \"jetpak\"), (\"db-schenker\", \"db_schenker\"), (\"merkesdal\", \"merkesdal\"), (\"kuehne-nagel\", \"kuehne_nagel\"), (\"nor-lines\", \"nor_lines\"), (\"envialia\", \"envialia\"), (\"nacex\", \"nacex\"), (\"mrw\", \"mrw\"), (\"correos-express\", \"correo_express\"), (\"redur\", \"redur\"), (\"ctt\", \"ctt\"), (\"sending\", \"sending\"), (\"dtdc\", \"dtdc\"), (\"bluedart\", \"bluedart\"), (\"shree-maruti\", \"shree_maruti\"), (\"swiss-post\", \"swiss_post\"), (\"yamato\", \"kuroneko_yamato\"), (\"office-depot\", \"office_depot\"), (\"leopard\", \"leopards\"), (\"gpo\", \"gpo\"), (\"m&p\", \"m&p\"), (\"tcs\", \"tcs\"), (\"keeney\", \"keeney\"), (\"couriers-please\", \"couriers_please\"), (\"intelcom\", \"intelcom\"), (\"posteitaliane\", \"posteitaliane\"), (\"la-poste\", \"la_poste\"), (\"colis-prive\", \"colis_prive\"), (\"deutsche-post\", \"deutsche_post\"), (\"brt\", \"brt\"), (\"ciblex\", \"ciblex\"), (\"ics\", \"ics\"), (\"staples\", \"staples\"), (\"tforce\", \"tforce\"), (\"veho\", \"veho\"), (\"nbc\", \"nbc\"), (\"novex\", \"novex\"), (\"atlas-courier\", \"atlas_courier\"), (\"grand-and-toy\", \"grand_and_toy\"), (\"corporate-couriers-logistics\", \"corporate_couriers_logistics\"), (\"nz-couriers\", \"nz_couriers\"), (\"abc\", \"abc\"), (\"tph\", \"tph\"), (\"momo\", \"momo\"), (\"urgent-couriers\", \"urgent_couriers\"), (\"lawton-connect\", \"lawton_connect\"), (\"crown\", \"crown\"), (\"abbott\", \"abbott_communications\"), (\"rl-carriers\", \"rl_carriers\"), (\"hct\", \"hsinchu_logistics\"), (\"pitt-ohio-express\", \"pitt_ohio_express\"), (\"dksh\", \"dksh\"), (\"seur\", \"seur\"), (\"ems-belpost\", \"ems_belpost\"), (\"korea-post\", \"korea_post\"), (\"ace-courier\", \"ace_couriers\"), (\"uline\", \"uline\"), (\"speed-post\", \"speed-post\"), (\"quill\", \"quill\"), (\"ppl\", \"ppl\"), (\"trans-o-flex\", \"trans_o_flex\"), (\"uzpost\", \"uzpost\"), (\"old\", \"old\"), (\"parcel-post\", \"parcel_post\"), (\"poczta_polska\", \"poczta_polska\"), (\"my-toll\", \"my_toll\"), (\"coordinadora\", \"coordinadora\"), (\"kce\", \"kce\"), (\"cdek\", \"cdek\"), (\"collicare-logistics\", \"collicare_logistics\"), (\"correo-argentino\", \"correo_argentino\"), (\"lax\", \"lax\"), (\"lex\", \"lex\"), (\"postnord\", \"postnord\"), (\"team-global-express\", \"team_global_express\"), (\"logistiq\", \"logistiq\"), (\"flight-path-services\", \"flight_path_services\"), (\"cainiao\", \"cainiao\"), (\"uniuni\", \"uniuni\"), (\"roadie\", \"roadie\")]"
     },
@@ -52296,560 +52898,560 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 42166,
+      "offset": 37379,
       "length": 3,
       "value": "0.7"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47164,
+      "offset": 42377,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47500,
+      "offset": 42713,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47513,
+      "offset": 42726,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47528,
+      "offset": 42741,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47541,
+      "offset": 42754,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47574,
+      "offset": 42787,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 47611,
+      "offset": 42824,
       "length": 3,
       "value": "0.8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 47649,
+      "offset": 42862,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47964,
+      "offset": 43177,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47979,
+      "offset": 43192,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47996,
+      "offset": 43209,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 48011,
+      "offset": 43224,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 48046,
+      "offset": 43259,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 48085,
+      "offset": 43298,
       "length": 3,
       "value": "0.8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48123,
+      "offset": 43336,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48327,
+      "offset": 43540,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48385,
+      "offset": 43598,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48521,
+      "offset": 43734,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48954,
+      "offset": 44167,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48973,
+      "offset": 44186,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49137,
+      "offset": 44350,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49145,
+      "offset": 44358,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49219,
+      "offset": 44432,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49243,
+      "offset": 44456,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49453,
+      "offset": 44666,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49461,
+      "offset": 44674,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49605,
+      "offset": 44818,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49614,
+      "offset": 44827,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49646,
+      "offset": 44859,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49654,
+      "offset": 44867,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49710,
+      "offset": 44923,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49753,
+      "offset": 44966,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49781,
+      "offset": 44994,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49831,
+      "offset": 45044,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49855,
+      "offset": 45068,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 50061,
+      "offset": 45274,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50071,
+      "offset": 45284,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 50198,
+      "offset": 45411,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50207,
+      "offset": 45420,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 50239,
+      "offset": 45452,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50249,
+      "offset": 45462,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 50305,
+      "offset": 45518,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50355,
+      "offset": 45568,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50378,
+      "offset": 45591,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 50433,
+      "offset": 45646,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 50452,
+      "offset": 45665,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 50643,
+      "offset": 45856,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50652,
+      "offset": 45865,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "Array",
-      "offset": 50723,
+      "offset": 45936,
       "length": 13,
       "value": "[\":\", \" in \"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 50960,
+      "offset": 46173,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51016,
+      "offset": 46229,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51121,
+      "offset": 46334,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51220,
+      "offset": 46433,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51243,
+      "offset": 46456,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 51305,
+      "offset": 46518,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51493,
+      "offset": 46706,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 51690,
+      "offset": 46903,
       "length": 3,
       "value": "0.6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "Array",
-      "offset": 51756,
+      "offset": 46969,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 51828,
+      "offset": 47041,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51866,
+      "offset": 47079,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51876,
+      "offset": 47089,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51888,
+      "offset": 47101,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 51898,
+      "offset": 47111,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 52017,
+      "offset": 47230,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 52032,
+      "offset": 47245,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 52049,
+      "offset": 47262,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 52064,
+      "offset": 47277,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 52192,
+      "offset": 47405,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 52213,
+      "offset": 47426,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 52393,
+      "offset": 47606,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 53143,
+      "offset": 48356,
       "length": 4,
       "value": "0.01"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 53529,
+      "offset": 48742,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 53858,
+      "offset": 49071,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 53879,
+      "offset": 49092,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 53902,
+      "offset": 49115,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 53923,
+      "offset": 49136,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 53954,
+      "offset": 49167,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 54045,
+      "offset": 49258,
       "length": 3,
       "value": "0.6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 54275,
+      "offset": 49488,
       "length": 3,
       "value": "\" \""
     },

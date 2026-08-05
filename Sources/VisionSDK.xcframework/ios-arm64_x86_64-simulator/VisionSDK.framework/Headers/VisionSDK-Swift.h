@@ -759,6 +759,7 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOffline = 1,
 };
 
+@class ShippingLabelOptions;
 @class NSURL;
 SWIFT_ENUM_FWD_DECL(NSInteger, VSDKModelExternalClass)
 SWIFT_ENUM_FWD_DECL(NSInteger, VSDKModelExternalSize)
@@ -767,6 +768,11 @@ SWIFT_CLASS_NAMED("OnDeviceOCRManager")
 @interface OnDeviceOCRManager : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRManager * _Nonnull shared;)
 + (OnDeviceOCRManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
+/// Opt-in cloud address-parsing refinement for shipping-label OCR results. Both flags
+/// default <code>false</code> – see <code>ShippingLabelOptions</code>. Consumers set this directly on the
+/// singleton (not a per-call parameter) so <code>extractDataFromImageUsing</code>‘s existing @objc
+/// selector doesn’t change.
+@property (nonatomic, strong) ShippingLabelOptions * _Nonnull shippingLabelOptions;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (NSURL * _Nullable)getVSDKLogs SWIFT_WARN_UNUSED_RESULT;
@@ -796,6 +802,17 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 SWIFT_CLASS_NAMED("SLReportModel")
 @interface SLReportModel : VSDKAnalyticsReportModel
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+SWIFT_CLASS_NAMED("ShippingLabelOptions")
+@interface ShippingLabelOptions : NSObject
+@property (nonatomic) BOOL parseRecipientAddress;
+@property (nonatomic) BOOL parseSenderAddress;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) ShippingLabelOptions * _Nonnull default_;)
++ (ShippingLabelOptions * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithParseRecipientAddress:(BOOL)parseRecipientAddress parseSenderAddress:(BOOL)parseSenderAddress OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 typedef SWIFT_ENUM(NSInteger, VSDKAppEnvironment, open) {
@@ -1783,6 +1800,7 @@ typedef SWIFT_ENUM(NSInteger, OCRMode, open) {
   OCRModeOffline = 1,
 };
 
+@class ShippingLabelOptions;
 @class NSURL;
 SWIFT_ENUM_FWD_DECL(NSInteger, VSDKModelExternalClass)
 SWIFT_ENUM_FWD_DECL(NSInteger, VSDKModelExternalSize)
@@ -1791,6 +1809,11 @@ SWIFT_CLASS_NAMED("OnDeviceOCRManager")
 @interface OnDeviceOCRManager : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRManager * _Nonnull shared;)
 + (OnDeviceOCRManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
+/// Opt-in cloud address-parsing refinement for shipping-label OCR results. Both flags
+/// default <code>false</code> – see <code>ShippingLabelOptions</code>. Consumers set this directly on the
+/// singleton (not a per-call parameter) so <code>extractDataFromImageUsing</code>‘s existing @objc
+/// selector doesn’t change.
+@property (nonatomic, strong) ShippingLabelOptions * _Nonnull shippingLabelOptions;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 - (NSURL * _Nullable)getVSDKLogs SWIFT_WARN_UNUSED_RESULT;
@@ -1820,6 +1843,17 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) OnDeviceOCRM
 SWIFT_CLASS_NAMED("SLReportModel")
 @interface SLReportModel : VSDKAnalyticsReportModel
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+SWIFT_CLASS_NAMED("ShippingLabelOptions")
+@interface ShippingLabelOptions : NSObject
+@property (nonatomic) BOOL parseRecipientAddress;
+@property (nonatomic) BOOL parseSenderAddress;
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=default) ShippingLabelOptions * _Nonnull default_;)
++ (ShippingLabelOptions * _Nonnull)default SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)initWithParseRecipientAddress:(BOOL)parseRecipientAddress parseSenderAddress:(BOOL)parseSenderAddress OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 typedef SWIFT_ENUM(NSInteger, VSDKAppEnvironment, open) {
