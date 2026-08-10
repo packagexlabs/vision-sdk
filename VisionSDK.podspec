@@ -39,7 +39,10 @@ Pod::Spec.new do |s|
   # publish.yml unpacks the xcframeworks from VisionSDKDimensioning-bundle.zip.
   s.subspec 'Dimensioning' do |d|
     d.dependency 'VisionSDK/Core'
-    d.dependency 'PostHog', '~> 3.0'
+    # No PostHog dependency: MVDimensioningCore.xcframework statically embeds
+    # its own copy, and VisionSDK never imports PostHog itself. Declaring it
+    # here pulled in a second copy -- both a duplicate-class hazard and, via
+    # `~> 3.0`, a path to PostHog >= 3.69, which breaks CocoaPods consumers.
     d.ios.deployment_target = '17.0'
     d.vendored_frameworks   = [
       'Sources/VisionSDKDimensioning.xcframework',
