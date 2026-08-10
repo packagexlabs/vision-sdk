@@ -487,6 +487,22 @@ SWIFT_CLASS_NAMED("CodeScannerView")
 /// linear->ratio conversion to apply-time against whatever range is live then. Same
 /// pre-configure and rebind-persistence behavior as <code>setZoomRatio(_:)</code> above.
 - (void)setLinearZoom:(float)zoomLevel;
+/// Duration-based ramped zoom (tap-to-zoom parity): eases <code>videoZoomFactor</code> from its current
+/// value to <code>ratio</code> over approximately <code>durationMs</code>, via <code>AVCaptureDevice.ramp( toVideoZoomFactor:withRate:)</code>, instead of the hard jump <code>setZoomRatio(_:)</code> above produces
+/// at a lens crossover. Replaces consumers synthesizing intermediates on a JS timer (~9
+/// bridge crossings per tap-to-zoom). Duration-based, not rate-based: Android has no rate
+/// concept, only duration, so this is what the two platforms can share. Routes to
+/// <code>VSDKCameraController.rampZoom(_:durationMs:)</code> -> <code>RuntimeSettingsApplying. applyZoomRampIfRunning</code> -> the bound camera, the same applier seam every other runtime
+/// setting already goes through.
+/// State feedback is optimistic, not KVO-frame-accurate: the reported <code>zoomRatio</code> (via
+/// <code>didChangeCameraState</code>/<code>getCurrentZoomRatio()</code>) jumps to the TARGET the instant the ramp
+/// starts, then is corrected to the ACTUAL settled <code>videoZoomFactor</code> once the device reports
+/// the ramp complete. Mid-ramp, the reported ratio therefore LEADS the physical device –
+/// deliberately, so a consumer gating a preview-reveal on
+/// <code>abs(reportedZoom - requestedZoom) < 0.05</code> is satisfied at ramp START rather than waiting
+/// out the whole ramp. We do not KVO-observe the device’s zoom factor continuously to emit
+/// true intermediate values – not worth the complexity/cost this soon.
+- (void)rampZoomRatio:(float)ratio durationMs:(NSInteger)durationMs;
 /// Android parity: <code>VisionCameraView.setFlashTurnedOn(enabled: Bool)</code>. Routes to
 /// <code>VSDKCameraController.setTorchEnabled(_:)</code>, same persistence discipline as the zoom setters
 /// above (desired value stored in <code>RuntimeSettingsStore</code>, re-applied on every bind).
@@ -634,6 +650,16 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 /// session actually reaching IDLE must do so via VSDKCameraStateObserver, not by assuming
 /// this call has finished by the time it returns.
 - (void)stopRunning;
+/// Same as <code>stopRunning()</code> above, but invokes <code>completion</code> once the camera session has
+/// genuinely finished tearing down – <code>AVCaptureSession.stopRunning()</code> has actually returned
+/// (inside <code>gateway.unbind</code>‘s completion), not merely once this call has been scheduled.
+/// Additive (fixes the consumer-reported wedge): consumers navigating between two camera
+/// screens previously had no observable “the old session is actually gone” signal and worked
+/// around it with a hardcoded ~400ms gap. <code>completion</code> always fires exactly once, including
+/// the already-.idle no-op path below. Kept as an independent body (not a delegation to/from
+/// <code>stopRunning()</code> above) so both stay literal, exact matches for this file’s existing
+/// source-shape regression tests.
+- (void)stopRunningWithCompletion:(void (^ _Nonnull)(void))completion;
 /// C1/Resolved ambiguity #5: rescan() NEVER stops-then-starts – it never did. Today’s
 /// <code>guard !session.isRunning else { return }</code> IS the no-stop invariant, just phrased as an
 /// early return instead of an explicit call; this reproduces the same net effect by calling
@@ -642,6 +668,12 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong, getter=defau
 /// branches are all no-ops). RN’s every-scan call pattern depends on this.
 - (void)rescan;
 - (void)deConfigure;
+/// Same as <code>deConfigure()</code> above, but invokes <code>completion</code> once the camera session has
+/// genuinely finished tearing down – see <code>stopRunning(completion:)</code>’s doc comment for the
+/// exact contract (same underlying <code>cameraSession.stop(completion:)</code> signal). Kept as an
+/// independent body, not a delegation to/from <code>deConfigure()</code> above, for the same reason as
+/// <code>stopRunning(completion:)</code>.
+- (void)deConfigureWithCompletion:(void (^ _Nonnull)(void))completion;
 /// Pauses all per-frame detection work while keeping the capture session and
 /// preview alive — for moments like “photo captured, showing a loading
 /// spinner” where a full stop/restart of the session would be wasteful and
@@ -859,6 +891,11 @@ SWIFT_CLASS_NAMED("Builder")
 SWIFT_CLASS("_TtC9VisionSDK20VSDKCameraController")
 @interface VSDKCameraController : NSObject
 - (void)setZoom:(float)ratio;
+/// Fix 3 (tap-to-zoom parity): duration-based ramped zoom, replacing consumers synthesizing
+/// intermediates on a JS timer (~9 bridge crossings per tap). Same hop/persistence discipline
+/// as setZoom above – the ramp TARGET is stored as the new desired zoom (RAW, clamped only
+/// at apply-time), so it survives a rebind exactly like an instant setZoom(_:) would.
+- (void)rampZoom:(float)ratio durationMs:(NSInteger)durationMs;
 - (void)setLinearZoom:(float)linear;
 - (float)currentLinearZoom SWIFT_WARN_UNUSED_RESULT;
 - (void)setTorchEnabled:(BOOL)enabled;
@@ -872,6 +909,17 @@ typedef SWIFT_ENUM(NSInteger, VSDKCameraErrorCode, open) {
   VSDKCameraErrorCodePermissionDenied = 0,
   VSDKCameraErrorCodeLensUnavailable = 1,
   VSDKCameraErrorCodeConfigurationFailed = 2,
+/// Append-only (fixes consumer-reported wedge): an AVCaptureSession interruption or runtime
+/// error arrived while a bind was still in flight (STARTING) – the in-flight bind can never
+/// meaningfully complete, so this surfaces as ERROR (retryable via start()/update(), Android
+/// parity: non-terminal CameraStatus.ERROR) instead of leaving status stuck at STARTING
+/// forever with nothing ever emitted.
+  VSDKCameraErrorCodeSessionInterrupted = 3,
+/// Append-only: AVCaptureSessionRuntimeError while RUNNING – a genuine device/session
+/// failure, distinct from a benign interruption (e.g. app backgrounding), which still
+/// auto-recovers via .interrupted exactly as before. Previously indistinguishable: both fed
+/// the same zero-arg interruption listener and both silently auto-retried.
+  VSDKCameraErrorCodeSessionRuntimeError = 4,
 };
 
 @class VSDKCameraSession;
@@ -897,6 +945,21 @@ SWIFT_CLASS("_TtC9VisionSDK17VSDKCameraSession")
 - (void)startWith:(VSDKCameraConfiguration * _Nonnull)configuration;
 - (void)updateWith:(VSDKCameraConfiguration * _Nonnull)configuration;
 - (void)stop;
+/// Additive teardown-complete signal (fixes consumer-reported wedge: navigating between two
+/// camera screens had no observable “the old session is actually gone” signal, so consumers
+/// worked around it with a hardcoded ~400ms gap). <code>completion</code> fires once
+/// <code>SessionReconciler.stop(completion:)</code>’s own completion has run – i.e. AFTER
+/// <code>AVCaptureSession.stopRunning()</code> has actually returned (inside <code>gateway.unbind</code>’s
+/// completion), not merely once this call has been scheduled – delivered on the main queue,
+/// same as every <code>VSDKCameraStateObserver</code> callback. The plain <code>stop()</code> above is unchanged
+/// and still safe to call standalone: it ALSO now emits a matching <code>VSDKCameraState</code>
+/// (status <code>.idle</code>, <code>isReleased == true</code>) to any registered <code>VSDKCameraStateObserver</code> at the
+/// same moment, for consumers that only watch the state stream rather than call this
+/// completion-carrying overload directly. Consumer contract: call this (or <code>stop()</code> + watch
+/// for <code>isReleased == true</code>) and wait for the signal before dropping the last strong
+/// reference to this session – <code>deinit</code> below is a last-resort safety net, not the intended
+/// teardown signal.
+- (void)stopWithCompletion:(void (^ _Nonnull)(void))completion;
 @end
 
 SWIFT_ENUM_FWD_DECL(NSInteger, VSDKCameraStatus)
@@ -918,6 +981,18 @@ SWIFT_CLASS("_TtC9VisionSDK15VSDKCameraState")
 /// reset to <code>false</code> on every (re)bind/stop/interrupt/error. See SessionReconciler for the
 /// only place this ever flips true.
 @property (nonatomic, readonly) BOOL isPreviewActive;
+/// Teardown-complete lifecycle signal (additive; fixes the consumer-reported wedge:
+/// navigating between two camera screens had no observable “the old session is actually
+/// gone” signal, so consumers worked around it with a hardcoded ~400ms gap). <code>false</code> on
+/// every emitted state EXCEPT the one specific <code>.idle</code> snapshot SessionReconciler.stop()
+/// emits from inside <code>gateway.unbind</code>‘s own completion – i.e. AFTER
+/// <code>AVCaptureSession.stopRunning()</code> has actually returned, not merely after stop() was
+/// called. Deliberately NOT a new <code>VSDKCameraStatus</code> case: <code>status</code> stays <code>.idle</code> in both the
+/// synchronous and the teardown-complete emission, so nothing that already compares
+/// <code>status == .idle</code> / <code>!= .idle</code> (CodeScannerView’s re-entrancy guards, among others)
+/// changes behavior – this field is purely additive observation, mirroring
+/// <code>isPreviewActive</code>’s own “flips once, on the specific frame that earns it” shape.
+@property (nonatomic, readonly) BOOL isReleased;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end

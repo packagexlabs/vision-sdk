@@ -328,6 +328,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   }
   @objc @_Concurrency.MainActor @preconcurrency final public func setZoomRatio(_ ratio: Swift.Float)
   @objc @_Concurrency.MainActor @preconcurrency final public func setLinearZoom(_ zoomLevel: Swift.Float)
+  @objc @_Concurrency.MainActor @preconcurrency final public func rampZoomRatio(_ ratio: Swift.Float, durationMs: Swift.Int)
   @objc @_Concurrency.MainActor @preconcurrency final public func setFlashTurnedOn(_ enabled: Swift.Bool)
   @objc @_Concurrency.MainActor @preconcurrency final public func getCurrentZoomRatio() -> Swift.Float
   @objc @_Concurrency.MainActor @preconcurrency final public func getMinZoomRatioAvailable() -> Swift.Float
@@ -362,8 +363,10 @@ extension VisionSDK.CodeScannerView {
   @objc @_Concurrency.MainActor @preconcurrency final public func capturePhotoUsingPhotoSettings(_ photoSettings: AVFoundation.AVCapturePhotoSettings)
   @objc @_Concurrency.MainActor @preconcurrency final public func startRunning()
   @objc @_Concurrency.MainActor @preconcurrency final public func stopRunning()
+  @objc(stopRunningWithCompletion:) @_Concurrency.MainActor @preconcurrency final public func stopRunning(completion: @escaping () -> Swift.Void)
   @objc @_Concurrency.MainActor @preconcurrency final public func rescan()
   @objc @_Concurrency.MainActor @preconcurrency final public func deConfigure()
+  @objc(deConfigureWithCompletion:) @_Concurrency.MainActor @preconcurrency final public func deConfigure(completion: @escaping () -> Swift.Void)
   @objc @_Concurrency.MainActor @preconcurrency final public func pauseDetection()
   @objc @_Concurrency.MainActor @preconcurrency final public func resumeDetection()
   @_Concurrency.MainActor @preconcurrency final public func exifOrientationFromDeviceOrientation() -> ImageIO.CGImagePropertyOrientation
@@ -845,6 +848,8 @@ public struct VSDKDimensioningCredentials : Swift.Sendable {
   case permissionDenied
   case lensUnavailable
   case configurationFailed
+  case sessionInterrupted
+  case sessionRuntimeError
   public init?(rawValue: Swift.Int)
   public typealias RawValue = Swift.Int
   public var rawValue: Swift.Int {
@@ -912,6 +917,7 @@ public let VSDKCameraErrorDomain: Swift.String
   @objc final public let isTorchEnabled: Swift.Bool
   @objc final public let focusMode: VisionSDK.VSDKFocusMode
   @objc final public let isPreviewActive: Swift.Bool
+  @objc final public let isReleased: Swift.Bool
   @objc deinit
 }
 @objc public protocol VSDKCameraStateObserver {
@@ -933,9 +939,11 @@ public let VSDKCameraErrorDomain: Swift.String
   @objc public func start(with configuration: VisionSDK.VSDKCameraConfiguration)
   @objc public func update(with configuration: VisionSDK.VSDKCameraConfiguration)
   @objc public func stop()
+  @objc(stopWithCompletion:) public func stop(completion: @escaping () -> Swift.Void)
 }
 @_hasMissingDesignatedInitializers @objc public class VSDKCameraController : ObjectiveC.NSObject {
   @objc public func setZoom(_ ratio: Swift.Float)
+  @objc public func rampZoom(_ ratio: Swift.Float, durationMs: Swift.Int)
   @objc public func setLinearZoom(_ linear: Swift.Float)
   @objc public func currentLinearZoom() -> Swift.Float
   @objc public func setTorchEnabled(_ enabled: Swift.Bool)
