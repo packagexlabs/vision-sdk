@@ -13,14 +13,14 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/packagexlabs/vision-sdk'
   s.author           = { 'PackageX' => 'engineering@packagex.io' }
   s.swift_version    = '5.0'
-  s.platform         = :ios, '13.0'
+  s.platform         = :ios, '16.0'
   s.source           = { :git => 'https://github.com/packagexlabs/vision-sdk.git', :tag => s.version.to_s }
   s.default_subspecs = 'Core'
 
   # --- Core subspec ---
   # Prebuilt binary. No source_files -- VisionSDK.xcframework is the module.
   s.subspec 'Core' do |c|
-    c.ios.deployment_target = '13.0'
+    c.ios.deployment_target = '16.0'
     c.vendored_frameworks   = [
       'Sources/VisionSDK.xcframework',
       'Sources/TensorFlowLiteC.xcframework'
