@@ -48,7 +48,10 @@ Pod::Spec.new do |s|
       'Sources/VisionSDKDimensioning.xcframework',
       'Sources/MVDimensioningCore.xcframework'
     ]
-    d.resources             = 'Sources/MVDimensioning.mlmodelkey'
+    # No d.resources: as of VisionSDK 2.7.0 the bundled YOLO + SAM2 models ship
+    # unencrypted inside MVDimensioningCore.xcframework, so MVDimensioning.mlmodelkey
+    # is gone along with the Apple ModelKeyServerService round-trip and its
+    # team-ID gate. Third-party teams now work offline from first launch.
     d.frameworks            = ['ARKit', 'RealityKit', 'CoreML']
   end
 end

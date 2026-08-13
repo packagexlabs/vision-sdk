@@ -94,13 +94,11 @@ jobs:
           rm -rf Sources/MVDimensioningCore.xcframework \
                  Sources/VisionSDKDimensioning.xcframework \
                  Sources/VisionSDKDimensioning
-          rm -f Sources/MVDimensioning.mlmodelkey
 
           # Unpack. Bundle structure (from release.yml):
           #   dimensioning-bundle/
           #     VisionSDKDimensioning.xcframework/  (compiled wrapper module)
           #     MVDimensioningCore.xcframework/     (vendored ARKit/LiDAR binary)
-          #     MVDimensioning.mlmodelkey
           #     VisionSDKDimensioning/*.swift       (sources, for reference)
           unzip -o VisionSDKDimensioning-bundle.zip -d /tmp/dim-bundle/
 
@@ -110,8 +108,6 @@ jobs:
           cp -a /tmp/dim-bundle/dimensioning-bundle/VisionSDKDimensioning.xcframework \
                 Sources/
           cp -a /tmp/dim-bundle/dimensioning-bundle/MVDimensioningCore.xcframework \
-                Sources/
-          cp    /tmp/dim-bundle/dimensioning-bundle/MVDimensioning.mlmodelkey \
                 Sources/
 
           rm -rf /tmp/dim-bundle
@@ -189,8 +185,7 @@ jobs:
             # may also be staged for backwards compatibility but isn't required
             # by the current vendored-xcframework subspec.
             git add Sources/VisionSDKDimensioning.xcframework \
-                    Sources/MVDimensioningCore.xcframework \
-                    Sources/MVDimensioning.mlmodelkey
+                    Sources/MVDimensioningCore.xcframework
             # If the old source dir still exists (left over from prior
             # releases that compiled from source), stage its deletion so the
             # tree matches what the podspec expects.
