@@ -119,6 +119,42 @@ jobs:
           ls Sources/VisionSDKDimensioning.xcframework/
           ls Sources/MVDimensioningCore.xcframework/
 
+      - name: Strip PostHog import from MVDimensioningCore interfaces
+        run: |
+          # MVDimensioningCore ships no binary .swiftmodule, so consumers compile
+          # against the textual .swiftinterface and every `import` in it must
+          # resolve. Upstream emits a bare `import PostHog` even though PostHog is
+          # statically linked into the binary already (nm: ~1090 defined, 0
+          # undefined) and no public signature references a PostHog type.
+          #
+          # Left in place it forces `d.dependency 'PostHog'` in the podspec, and
+          # `~> 3.0` now resolves to 3.69.0 — which sets
+          # BUILD_LIBRARY_FOR_DISTRIBUTION = YES in its pod_target_xcconfig and
+          # breaks every clean CocoaPods install with:
+          #   PostHog.swiftinterface:11:19: underlying Objective-C module 'PostHog' not found
+          #
+          # Stripping the line drops PostHog from the consumer dependency graph
+          # entirely. Must run on EVERY release — the bundle is re-downloaded above.
+          stripped=0
+          while IFS= read -r f; do
+            if grep -q '^import PostHog$' "$f"; then
+              perl -i -ne 'print unless /^import PostHog$/' "$f"
+              stripped=$((stripped + 1))
+            fi
+          done < <(find Sources/MVDimensioningCore.xcframework -name '*.swiftinterface')
+          echo "Stripped 'import PostHog' from $stripped interface file(s)."
+
+          if grep -rq '^import PostHog$' Sources/MVDimensioningCore.xcframework --include='*.swiftinterface'; then
+            echo "Error: 'import PostHog' still present after strip." >&2
+            exit 1
+          fi
+
+          # Guard: the podspec must not reintroduce the dependency.
+          if grep -q "dependency 'PostHog'" VisionSDK.podspec; then
+            echo "Error: VisionSDK.podspec declares a PostHog dependency; see the note in the Dimensioning subspec." >&2
+            exit 1
+          fi
+
       - name: Bump podspec version
         run: |
           VERSION="${{ steps.payload.outputs.version }}"

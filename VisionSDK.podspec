@@ -37,9 +37,25 @@ Pod::Spec.new do |s|
   # CocoaPods does not allow `module_name` on subspecs, so we use the
   # xcframework's own module identity instead of compiling source files.
   # publish.yml unpacks the xcframeworks from VisionSDKDimensioning-bundle.zip.
+  #
+  # PostHog is deliberately NOT a dependency. MVDimensioningCore.xcframework
+  # statically links its own copy (nm: ~1090 defined, 0 undefined), so nothing
+  # is needed at link time. The dependency existed only to satisfy a bare
+  # `import PostHog` line in MVDimensioningCore's .swiftinterface — the
+  # xcframework ships no binary .swiftmodule, so consumers compile from the
+  # textual interface and every import in it must resolve.
+  #
+  # That one line cost us real breakage: `~> 3.0` resolves to PostHog 3.69.0,
+  # which added BUILD_LIBRARY_FOR_DISTRIBUTION = YES to its pod_target_xcconfig
+  # and fails every clean (uncached) CocoaPods install with
+  #   PostHog.swiftinterface:11:19: underlying Objective-C module 'PostHog' not found
+  # Pinning below 3.69 only defers it. The import is now stripped from all nine
+  # .swiftinterface files (enforced by the "Strip PostHog import" step in
+  # .github/workflows/publish.yml), so PostHog leaves the consumer dependency
+  # graph entirely. Nothing in the public API references a PostHog type, so
+  # stripping is signature-safe. Do not re-add this dependency.
   s.subspec 'Dimensioning' do |d|
     d.dependency 'VisionSDK/Core'
-    d.dependency 'PostHog', '~> 3.0'
     d.ios.deployment_target = '17.0'
     d.vendored_frameworks   = [
       'Sources/VisionSDKDimensioning.xcframework',
