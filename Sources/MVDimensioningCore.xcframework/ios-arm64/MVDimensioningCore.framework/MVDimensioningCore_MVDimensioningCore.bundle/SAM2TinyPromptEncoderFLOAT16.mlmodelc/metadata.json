@@ -64,8 +64,8 @@
     },
     "userDefinedMetadata" : {
       "com.github.apple.coremltools.version" : "8.0b2",
-      "com.github.apple.coremltools.source" : "torch==2.4.1",
-      "com.github.apple.coremltools.source_dialect" : "TorchScript"
+      "com.github.apple.coremltools.source_dialect" : "TorchScript",
+      "com.github.apple.coremltools.source" : "torch==2.4.1"
     },
     "inputSchema" : [
       {

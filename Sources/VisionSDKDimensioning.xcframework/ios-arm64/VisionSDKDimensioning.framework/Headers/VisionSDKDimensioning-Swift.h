@@ -346,9 +346,6 @@ extern "C" {
 #if __has_warning("-Watimport-in-framework-header")
 #pragma clang diagnostic ignored "-Watimport-in-framework-header"
 #endif
-@import CoreFoundation;
-@import ObjectiveC;
-@import UIKit;
 #endif
 
 #endif // defined(__OBJC__)
@@ -370,84 +367,6 @@ extern "C" {
 #endif
 
 #if defined(__OBJC__)
-
-SWIFT_CLASS("_TtC21VisionSDKDimensioning28VSDKDimensioningCapabilities")
-@interface VSDKDimensioningCapabilities : NSObject
-@property (nonatomic, readonly) BOOL lidar;
-@property (nonatomic, readonly) BOOL arWorldTracking;
-@property (nonatomic, readonly) BOOL sceneReconstruction;
-- (nonnull instancetype)initWithLidar:(BOOL)lidar arWorldTracking:(BOOL)arWorldTracking sceneReconstruction:(BOOL)sceneReconstruction OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-@class NSUUID;
-@class NSDate;
-@class NSMeasurement;
-SWIFT_CLASS("_TtC21VisionSDKDimensioning27VSDKDimensioningMeasurement")
-@interface VSDKDimensioningMeasurement : NSObject
-@property (nonatomic, readonly, copy) NSUUID * _Nonnull id;
-@property (nonatomic, readonly, copy) NSDate * _Nonnull timestamp;
-@property (nonatomic, readonly, strong) NSMeasurement * _Nonnull length;
-@property (nonatomic, readonly, strong) NSMeasurement * _Nonnull width;
-@property (nonatomic, readonly, strong) NSMeasurement * _Nonnull height;
-@property (nonatomic, readonly, strong) NSMeasurement * _Nonnull distanceFromCamera;
-@property (nonatomic, readonly) float confidence;
-@property (nonatomic, readonly) BOOL usedCloudSAM;
-- (nonnull instancetype)initWithId:(NSUUID * _Nonnull)id timestamp:(NSDate * _Nonnull)timestamp length:(NSMeasurement * _Nonnull)length width:(NSMeasurement * _Nonnull)width height:(NSMeasurement * _Nonnull)height distanceFromCamera:(NSMeasurement * _Nonnull)distanceFromCamera confidence:(float)confidence usedCloudSAM:(BOOL)usedCloudSAM OBJC_DESIGNATED_INITIALIZER;
-@property (nonatomic, readonly, strong) NSMeasurement * _Nonnull volume;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-/// Binary toggle for dimensioning processing location — mirrors VSDK’s <code>OCRMode</code>.
-/// <ul>
-///   <li>
-///     <code>offline</code>: on-device only. No network, no apiKey required.
-///   </li>
-///   <li>
-///     <code>online</code>: cloud-augmented segmentation. Requires <code>VSDKConstants.apiKey</code>
-///     to be set before the session is started; otherwise the session throws
-///     <code>VSDKDimensioningError.missingCredentials</code>.
-///   </li>
-/// </ul>
-typedef SWIFT_ENUM(NSInteger, VSDKDimensioningMode, open) {
-  VSDKDimensioningModeOffline = 0,
-  VSDKDimensioningModeOnline = 1,
-};
-
-SWIFT_CLASS("_TtC21VisionSDKDimensioning21VSDKDimensioningTrack")
-@interface VSDKDimensioningTrack : NSObject
-@property (nonatomic, readonly, copy) NSUUID * _Nonnull id;
-@property (nonatomic, readonly, strong) VSDKDimensioningMeasurement * _Nullable measurement;
-@property (nonatomic, readonly) BOOL isStable;
-@property (nonatomic, readonly) CGRect normalizedScreenRect;
-- (nonnull instancetype)initWithId:(NSUUID * _Nonnull)id measurement:(VSDKDimensioningMeasurement * _Nullable)measurement isStable:(BOOL)isStable normalizedScreenRect:(CGRect)normalizedScreenRect OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-@end
-
-@protocol VSDKDimensioningViewDelegate;
-@class NSCoder;
-SWIFT_CLASS("_TtC21VisionSDKDimensioning20VSDKDimensioningView")
-@interface VSDKDimensioningView : UIView
-@property (nonatomic, weak) id <VSDKDimensioningViewDelegate> _Nullable delegate;
-- (nonnull instancetype)initWithFrame:(CGRect)frame OBJC_DESIGNATED_INITIALIZER;
-- (nullable instancetype)initWithCoder:(NSCoder * _Nonnull)coder OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)init;
-- (void)configureWithDelegate:(id <VSDKDimensioningViewDelegate> _Nonnull)delegate mode:(enum VSDKDimensioningMode)mode maximumTrackCount:(NSInteger)maximumTrackCount;
-- (void)startRunning;
-- (void)stopRunning;
-- (void)deConfigure;
-@end
-
-@class NSError;
-SWIFT_PROTOCOL("_TtP21VisionSDKDimensioning28VSDKDimensioningViewDelegate_")
-@protocol VSDKDimensioningViewDelegate
-- (void)dimensioningView:(VSDKDimensioningView * _Nonnull)view didCapture:(VSDKDimensioningMeasurement * _Nonnull)measurement;
-@optional
-- (void)dimensioningView:(VSDKDimensioningView * _Nonnull)view didFailWithError:(NSError * _Nonnull)error;
-@end
 
 #endif // defined(__OBJC__)
 #if __has_attribute(external_source_symbol)

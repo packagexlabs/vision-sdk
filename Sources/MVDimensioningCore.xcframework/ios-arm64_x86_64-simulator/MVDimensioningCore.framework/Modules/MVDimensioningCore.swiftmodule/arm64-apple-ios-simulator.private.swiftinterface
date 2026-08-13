@@ -1,7 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 6.3.2 effective-5.10 (swiftlang-6.3.2.1.108 clang-2100.1.1.101)
+// swift-compiler-version: Apple Swift version 6.3.3 effective-5.10 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)
 // swift-module-flags: -target arm64-apple-ios17.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -O -enable-experimental-feature DebugDescriptionMacro -module-name MVDimensioningCore -package-name release_package
-// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.2
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.3
 import ARKit
 import Accelerate
 import AudioToolbox
@@ -40,11 +40,22 @@ public struct DimensioningConfiguration : Swift.Sendable {
     case cloud(url: Foundation.URL, apiKey: Swift.String? = nil, sdkID: Swift.String? = nil)
     case localFirstThenCloud(url: Foundation.URL, apiKey: Swift.String? = nil, sdkID: Swift.String? = nil)
   }
+  public enum OverlayMode : Swift.Sendable {
+    case builtIn
+    case none
+    case callback
+    public static func == (a: MVDimensioningCore.DimensioningConfiguration.OverlayMode, b: MVDimensioningCore.DimensioningConfiguration.OverlayMode) -> Swift.Bool
+    public func hash(into hasher: inout Swift.Hasher)
+    public var hashValue: Swift.Int {
+      get
+    }
+  }
   public var segmentationBackend: MVDimensioningCore.DimensioningConfiguration.SegmentationBackend
   public var measurementUnit: Foundation.UnitLength
   public var maximumTrackCount: Swift.Int
   public var enableTelemetry: Swift.Bool
-  public init(segmentationBackend: MVDimensioningCore.DimensioningConfiguration.SegmentationBackend = .localOnly, measurementUnit: Foundation.UnitLength = .centimeters, maximumTrackCount: Swift.Int = 5, enableTelemetry: Swift.Bool = false)
+  public var overlayMode: MVDimensioningCore.DimensioningConfiguration.OverlayMode
+  public init(segmentationBackend: MVDimensioningCore.DimensioningConfiguration.SegmentationBackend = .localOnly, measurementUnit: Foundation.UnitLength = .centimeters, maximumTrackCount: Swift.Int = 5, enableTelemetry: Swift.Bool = false, overlayMode: MVDimensioningCore.DimensioningConfiguration.OverlayMode = .builtIn)
 }
 @_Concurrency.MainActor final public class DimensioningSession : Foundation.ObservableObject {
   @Combine.Published<MVDimensioningCore.DimensioningPhase> @_projectedValueProperty($phase) @_Concurrency.MainActor final public var phase: MVDimensioningCore.DimensioningPhase {
@@ -59,16 +70,26 @@ public struct DimensioningConfiguration : Swift.Sendable {
   @_Concurrency.MainActor final public var $tracks: Combine.Published<[MVDimensioningCore.DimensioningTrack]>.Publisher {
     get
   }
+  @Combine.Published<MVDimensioningCore.DimensioningTrackingState> @_projectedValueProperty($trackingState) @_Concurrency.MainActor final public var trackingState: MVDimensioningCore.DimensioningTrackingState {
+    get
+  }
+  @_Concurrency.MainActor final public var $trackingState: Combine.Published<MVDimensioningCore.DimensioningTrackingState>.Publisher {
+    get
+  }
   @_Concurrency.MainActor final public var configuration: MVDimensioningCore.DimensioningConfiguration {
     get
     set
   }
   @_Concurrency.MainActor weak final public var telemetry: (any MVDimensioningCore.DimensioningTelemetrySink)?
+  @_Concurrency.MainActor final public var onMeasurementUpdate: ((MVDimensioningCore.DimensioningUpdate) -> Swift.Void)?
+  @_Concurrency.MainActor final public var onOverlayUpdate: ((MVDimensioningCore.DimensioningOverlayFrame) -> Swift.Void)?
   @_Concurrency.MainActor public init(configuration: MVDimensioningCore.DimensioningConfiguration = .init(), telemetry: (any MVDimensioningCore.DimensioningTelemetrySink)? = nil)
   @_Concurrency.MainActor final public func start() async throws
   @_Concurrency.MainActor final public func pause()
   @_Concurrency.MainActor final public func resume()
   @_Concurrency.MainActor final public func capture() async throws -> MVDimensioningCore.DimensioningMeasurement
+  @_Concurrency.MainActor final public func captureAll() async throws -> [MVDimensioningCore.DimensioningMeasurement]
+  @_Concurrency.MainActor final public func shutdown() async
   @_Concurrency.MainActor final public func clearCaptured()
   public typealias ObjectWillChangePublisher = Combine.ObservableObjectPublisher
   @objc deinit
@@ -107,6 +128,7 @@ public enum DimensioningEvent : Swift.Sendable {
 }
 public struct DimensioningMeasurement : Swift.Sendable, Swift.Hashable, Swift.Identifiable {
   public let id: Foundation.UUID
+  public let trackId: Foundation.UUID
   public let timestamp: Foundation.Date
   public let length: Foundation.Measurement<Foundation.UnitLength>
   public let width: Foundation.Measurement<Foundation.UnitLength>
@@ -114,8 +136,14 @@ public struct DimensioningMeasurement : Swift.Sendable, Swift.Hashable, Swift.Id
   public let distanceFromCamera: Foundation.Measurement<Foundation.UnitLength>
   public let confidence: Swift.Float
   public let usedCloudSAM: Swift.Bool
-  public init(id: Foundation.UUID = UUID(), timestamp: Foundation.Date = Date(), length: Foundation.Measurement<Foundation.UnitLength>, width: Foundation.Measurement<Foundation.UnitLength>, height: Foundation.Measurement<Foundation.UnitLength>, distanceFromCamera: Foundation.Measurement<Foundation.UnitLength>, confidence: Swift.Float, usedCloudSAM: Swift.Bool = false)
+  public let imageData: Foundation.Data?
+  public let imagePixelSize: CoreFoundation.CGSize
+  public let boxVertices2D: [CoreFoundation.CGPoint]
+  public init(id: Foundation.UUID = UUID(), timestamp: Foundation.Date = Date(), length: Foundation.Measurement<Foundation.UnitLength>, width: Foundation.Measurement<Foundation.UnitLength>, height: Foundation.Measurement<Foundation.UnitLength>, distanceFromCamera: Foundation.Measurement<Foundation.UnitLength>, confidence: Swift.Float, usedCloudSAM: Swift.Bool = false, trackId: Foundation.UUID? = nil, imageData: Foundation.Data? = nil, imagePixelSize: CoreFoundation.CGSize = .zero, boxVertices2D: [CoreFoundation.CGPoint] = [])
   public var volume: Foundation.Measurement<Foundation.UnitVolume> {
+    get
+  }
+  public var image: UIKit.UIImage? {
     get
   }
   public static func == (a: MVDimensioningCore.DimensioningMeasurement, b: MVDimensioningCore.DimensioningMeasurement) -> Swift.Bool
@@ -142,6 +170,53 @@ public enum DimensioningPhase : Swift.Sendable, Swift.Equatable {
   case captured(MVDimensioningCore.DimensioningMeasurement)
   public static func == (a: MVDimensioningCore.DimensioningPhase, b: MVDimensioningCore.DimensioningPhase) -> Swift.Bool
 }
+public enum DimensioningTrackingState : Swift.Sendable, Swift.Equatable {
+  case searching
+  case groundFound
+  case boxDetected
+  case stable
+  public static func == (a: MVDimensioningCore.DimensioningTrackingState, b: MVDimensioningCore.DimensioningTrackingState) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public struct DimensioningUpdate : Swift.Sendable {
+  public let trackingState: MVDimensioningCore.DimensioningTrackingState
+  public let tracks: [MVDimensioningCore.DimensioningTrack]
+  public let primaryTrackId: Foundation.UUID?
+  public init(trackingState: MVDimensioningCore.DimensioningTrackingState, tracks: [MVDimensioningCore.DimensioningTrack], primaryTrackId: Foundation.UUID?)
+}
+public struct DimensioningOverlay : Swift.Sendable {
+  public let trackId: Foundation.UUID
+  public let isSelected: Swift.Bool
+  public let isStable: Swift.Bool
+  public let boxVertices2D: [CoreFoundation.CGPoint]
+  public let contour2D: [CoreFoundation.CGPoint]
+  public let boundingBox: CoreFoundation.CGRect
+  public init(trackId: Foundation.UUID, isSelected: Swift.Bool, isStable: Swift.Bool, boxVertices2D: [CoreFoundation.CGPoint], contour2D: [CoreFoundation.CGPoint], boundingBox: CoreFoundation.CGRect)
+}
+public struct DimensioningPlaneOverlay : Swift.Sendable {
+  public let id: Foundation.UUID
+  public let isSelected: Swift.Bool
+  public let center2D: CoreFoundation.CGPoint?
+  public let boundary2D: [CoreFoundation.CGPoint]
+  public init(id: Foundation.UUID, isSelected: Swift.Bool, center2D: CoreFoundation.CGPoint?, boundary2D: [CoreFoundation.CGPoint])
+}
+public struct DimensioningHUD : Swift.Sendable {
+  public let trackingState: MVDimensioningCore.DimensioningTrackingState
+  public let statusText: Swift.String
+  public let guidanceText: Swift.String?
+  public let isCapturing: Swift.Bool
+  public let groundPlanePrompt: Swift.String?
+  public init(trackingState: MVDimensioningCore.DimensioningTrackingState, statusText: Swift.String, guidanceText: Swift.String?, isCapturing: Swift.Bool, groundPlanePrompt: Swift.String?)
+}
+public struct DimensioningOverlayFrame : Swift.Sendable {
+  public let boxes: [MVDimensioningCore.DimensioningOverlay]
+  public let planes: [MVDimensioningCore.DimensioningPlaneOverlay]
+  public let hud: MVDimensioningCore.DimensioningHUD
+  public init(boxes: [MVDimensioningCore.DimensioningOverlay], planes: [MVDimensioningCore.DimensioningPlaneOverlay], hud: MVDimensioningCore.DimensioningHUD)
+}
 public enum DimensioningError : Swift.Error, Swift.Sendable {
   case lidarUnavailable
   case arSessionFailed(reason: Swift.String)
@@ -156,11 +231,14 @@ public struct DimensioningCapabilities : Swift.Sendable {
   public init(lidar: Swift.Bool, arWorldTracking: Swift.Bool, sceneReconstruction: Swift.Bool)
 }
 @_Concurrency.MainActor @preconcurrency public struct DimensioningView : SwiftUICore.View {
-  @_Concurrency.MainActor @preconcurrency public init(configuration: MVDimensioningCore.DimensioningConfiguration = .init(), telemetry: (any MVDimensioningCore.DimensioningTelemetrySink)? = nil, onCapture: ((MVDimensioningCore.DimensioningMeasurement) -> Swift.Void)? = nil)
+  @_Concurrency.MainActor @preconcurrency public init(configuration: MVDimensioningCore.DimensioningConfiguration = .init(), telemetry: (any MVDimensioningCore.DimensioningTelemetrySink)? = nil, onCapture: ((MVDimensioningCore.DimensioningMeasurement) -> Swift.Void)? = nil, onMeasurementUpdate: ((MVDimensioningCore.DimensioningUpdate) -> Swift.Void)? = nil, onOverlayUpdate: ((MVDimensioningCore.DimensioningOverlayFrame) -> Swift.Void)? = nil)
   @_Concurrency.MainActor @preconcurrency public var body: some SwiftUICore.View {
     get
   }
   public typealias Body = @_opaqueReturnTypeOf("$s18MVDimensioningCore16DimensioningViewV4bodyQrvp", 0) __
 }
+extension MVDimensioningCore.DimensioningConfiguration.OverlayMode : Swift.Equatable {}
+extension MVDimensioningCore.DimensioningConfiguration.OverlayMode : Swift.Hashable {}
 extension MVDimensioningCore.DimensioningSession : Swift.Sendable {}
+extension MVDimensioningCore.DimensioningTrackingState : Swift.Hashable {}
 extension MVDimensioningCore.DimensioningView : Swift.Sendable {}
