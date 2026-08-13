@@ -119,6 +119,47 @@ jobs:
           ls Sources/VisionSDKDimensioning.xcframework/
           ls Sources/MVDimensioningCore.xcframework/
 
+      - name: Guard against PostHog reintroduction
+        if: steps.payload.outputs.has_dimensioning == 'true'
+        run: |
+          set -euo pipefail
+          # The step above overwrites Sources/MVDimensioningCore.xcframework with
+          # whatever the vision-sdk-ios release bundled, so the PostHog fix has to
+          # be re-asserted on every publish rather than assumed.
+          #
+          # Background: MVDimensioningCore ships no binary .swiftmodule, so
+          # consumers compile against its textual .swiftinterface and every
+          # `import` in it must resolve. Upstream emits a bare `import PostHog`
+          # even though PostHog is statically linked into the binary already
+          # (nm: ~1090 defined, 0 undefined) and no public signature references a
+          # PostHog type. Left in, it forces `d.dependency 'PostHog'` back into
+          # the podspec -- and `~> 3.0` now resolves to 3.69.0, which sets
+          # BUILD_LIBRARY_FOR_DISTRIBUTION = YES in its pod_target_xcconfig and
+          # breaks every clean CocoaPods install with:
+          #   PostHog.swiftinterface:11:19: underlying Objective-C module 'PostHog' not found
+          stripped=0
+          while IFS= read -r f; do
+            if grep -q '^import PostHog$' "$f"; then
+              perl -i -ne 'print unless /^import PostHog$/' "$f"
+              stripped=$((stripped + 1))
+            fi
+          done < <(find Sources/MVDimensioningCore.xcframework -name '*.swiftinterface')
+
+          if [ "$stripped" -gt 0 ]; then
+            echo "::warning::Re-stripped 'import PostHog' from $stripped interface file(s) -- the release bundle reintroduced it. Check vision-sdk-ios/scripts/refresh-dimensioning.sh."
+          else
+            echo "No 'import PostHog' present -- bundle is already clean."
+          fi
+
+          if grep -rq '^import PostHog$' Sources/MVDimensioningCore.xcframework --include='*.swiftinterface'; then
+            echo "Error: 'import PostHog' survived the strip." >&2
+            exit 1
+          fi
+          if grep -q "dependency 'PostHog'" VisionSDK.podspec; then
+            echo "Error: VisionSDK.podspec reintroduced the PostHog dependency (see the Dimensioning subspec comment)." >&2
+            exit 1
+          fi
+
       - name: Bump podspec version
         run: |
           VERSION="${{ steps.payload.outputs.version }}"
