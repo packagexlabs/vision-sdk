@@ -4,6 +4,32 @@
 // swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.3.3
 @_exported import MVDimensioningCore
 import Swift
+import SwiftUI
+import VisionSDK
 import _Concurrency
 import _StringProcessing
 import _SwiftConcurrencyShims
+public enum DimensioningGateError : Swift.Error {
+  case featureNotEnabled
+  public static func == (a: VisionSDKDimensioning.DimensioningGateError, b: VisionSDKDimensioning.DimensioningGateError) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum DimensioningGate {
+  public static var isEntitled: Swift.Bool {
+    get
+  }
+  @_Concurrency.MainActor public static func makeSession(configuration: MVDimensioningCore.DimensioningConfiguration = .init(), telemetry: (any MVDimensioningCore.DimensioningTelemetrySink)? = nil) throws -> MVDimensioningCore.DimensioningSession
+}
+@_Concurrency.MainActor @preconcurrency public struct GatedDimensioningView : SwiftUICore.View {
+  @_Concurrency.MainActor @preconcurrency public init(configuration: MVDimensioningCore.DimensioningConfiguration = .init(), telemetry: (any MVDimensioningCore.DimensioningTelemetrySink)? = nil, onCapture: ((MVDimensioningCore.DimensioningMeasurement) -> Swift.Void)? = nil, onMeasurementUpdate: ((MVDimensioningCore.DimensioningUpdate) -> Swift.Void)? = nil, onOverlayUpdate: ((MVDimensioningCore.DimensioningOverlayFrame) -> Swift.Void)? = nil)
+  @_Concurrency.MainActor @preconcurrency public var body: some SwiftUICore.View {
+    get
+  }
+  public typealias Body = @_opaqueReturnTypeOf("$s21VisionSDKDimensioning21GatedDimensioningViewV4bodyQrvp", 0) __
+}
+extension VisionSDKDimensioning.DimensioningGateError : Swift.Equatable {}
+extension VisionSDKDimensioning.DimensioningGateError : Swift.Hashable {}
+extension VisionSDKDimensioning.GatedDimensioningView : Swift.Sendable {}

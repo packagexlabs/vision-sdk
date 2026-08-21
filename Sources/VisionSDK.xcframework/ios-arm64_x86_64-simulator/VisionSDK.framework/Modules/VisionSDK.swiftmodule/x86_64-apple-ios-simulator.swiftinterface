@@ -17,6 +17,7 @@ import CryptoKit
 import Darwin
 import DeveloperToolsSupport
 import Foundation
+import ImageIO
 import MachO
 import ObjectiveC
 import QuartzCore
@@ -789,6 +790,11 @@ public struct VSDKDimensioningCredentials : Swift.Sendable {
   public let cloudURL: Foundation.URL
   public init(apiKey: Swift.String, sdkID: Swift.String, cloudURL: Foundation.URL)
   public static var current: VisionSDK.VSDKDimensioningCredentials {
+    get
+  }
+}
+public enum VSDKDimensioningGate {
+  public static var isEntitled: Swift.Bool {
     get
   }
 }
