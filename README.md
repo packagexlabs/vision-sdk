@@ -920,72 +920,31 @@ targets: [
 import VisionSDK
 import VisionSDKDimensioning
 
-// Required only for `.online` mode (cloud-assisted segmentation)
-VSDKConstants.apiKey = "YOUR_API_KEY"
-
-// Capability check
-let caps = VSDKDimensioning.deviceCapabilities()
+// Capability check — all-false on simulator (ARKit + LiDAR are device-only)
+let caps = Dimensioning.deviceCapabilities()
 guard caps.lidar else { /* hide dimensioning UI */ return }
-
-// Pre-warm CoreML decryption keys + JIT compilation
-Task { await VSDKDimensioning.prefetchModels() }
 ```
 
-### UIKit / Objective-C Usage
+Models ship **unencrypted** inside the framework as of 2.7.0, so there is no
+decryption-key fetch, no network round-trip on first launch, and no Apple
+Developer Team requirement. Warming them at launch is optional and only saves
+the first capture's Core ML compile cost.
 
-```swift
-import UIKit
-import VisionSDKDimensioning
-
-class DimensioningViewController: UIViewController, VSDKDimensioningViewDelegate {
-
-    private let dimView = VSDKDimensioningView()
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        dimView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(dimView)
-        NSLayoutConstraint.activate([
-            dimView.topAnchor.constraint(equalTo: view.topAnchor),
-            dimView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            dimView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            dimView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-        ])
-        dimView.configure(delegate: self, mode: .offline, maximumTrackCount: 3)
-        dimView.startRunning()
-    }
-
-    // MARK: - VSDKDimensioningViewDelegate
-
-    func dimensioningView(_ view: VSDKDimensioningView,
-                          didCapture measurement: VSDKDimensioningMeasurement) {
-        print(measurement.length, measurement.width, measurement.height)
-    }
-
-    func dimensioningView(_ view: VSDKDimensioningView, didFailWithError error: NSError) {
-        // error.domain == "io.packagex.visionsdk.dimensioning"
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        dimView.deConfigure()
-    }
-}
-```
-
-### SwiftUI / async-await Usage
+### SwiftUI Usage
 
 ```swift
 import SwiftUI
 import VisionSDKDimensioning
 
-// Quick path — declarative camera with capture callback
 struct DimCameraView: View {
     var body: some View {
-        VSDKDimensioningSwiftUIView(
-            configuration: .init(mode: .offline, measurementUnit: .centimeters),
-            onCapture: { measurement in
-                print(measurement.length, measurement.width, measurement.height)
+        DimensioningView(
+            configuration: DimensioningConfiguration(
+                segmentationBackend: .localOnly,
+                measurementUnit: .centimeters
+            ),
+            onCapture: { m in
+                print(m.length, m.width, m.height)
             }
         )
         .ignoresSafeArea()
@@ -993,51 +952,137 @@ struct DimCameraView: View {
 }
 ```
 
-For full lifecycle control — `pause()` / `resume()` / `await capture()`, observable `phase` and `tracks` — use `VSDKDimensioningSession` directly.
+Live guidance and custom overlays are opt-in via two more callbacks:
+
+```swift
+var config = DimensioningConfiguration()
+config.overlayMode = .callback          // .builtIn (default) | .none | .callback
+
+DimensioningView(
+    configuration: config,
+    onCapture: { m in save(m) },
+    onMeasurementUpdate: { update in
+        // update.trackingState: .searching -> .groundFound -> .boxDetected -> .stable
+        // update.tracks, update.primaryTrackId
+    },
+    onOverlayUpdate: { frame in
+        // frame.boxes / frame.planes / frame.hud — view-space geometry,
+        // only when overlayMode == .callback
+    }
+)
+```
+
+### UIKit Usage
+
+There is no UIKit view. Host the SwiftUI one:
+
+```swift
+let controller = UIHostingController(
+    rootView: DimensioningView(onCapture: { m in print(m.length) })
+)
+addChild(controller)
+view.addSubview(controller.view)
+controller.didMove(toParent: self)
+```
+
+### Programmatic Session
+
+```swift
+let session = DimensioningSession(configuration: .init(maximumTrackCount: 5))
+try await session.start()
+let one  = try await session.capture()      // primary box
+let all  = try await session.captureAll()   // one result per tracked box
+session.pause(); session.resume()
+await session.shutdown()                    // releases the camera; see below
+```
+
+`DimensioningSession` publishes `phase`, `tracks` and `trackingState`, and takes
+`onMeasurementUpdate` / `onOverlayUpdate` closures. It runs headless — use
+`DimensioningView` when you need the rendered preview.
 
 ### Configuration
 
-All fields are on `VSDKDimensioningConfiguration`:
+All fields are on `DimensioningConfiguration`:
 
 | Field | Type | Default | Notes |
 |---|---|---|---|
-| `mode` | `VSDKDimensioningMode` | `.offline` | `.offline` runs entirely on-device. `.online` augments the pipeline with a cloud-side path (requires `VSDKConstants.apiKey`). |
-| `measurementUnit` | `UnitLength` | `.centimeters` | Any `Foundation.UnitLength` — pass `.inches`, `.millimeters`, etc. |
+| `segmentationBackend` | `SegmentationBackend` | `.localOnly` | `.localOnly` runs entirely on-device. `.cloud(url:apiKey:sdkID:)` and `.localFirstThenCloud(url:apiKey:sdkID:)` take credentials at the call site. |
+| `measurementUnit` | `UnitLength` | `.centimeters` | Any `Foundation.UnitLength` — `.inches`, `.millimeters`, etc. |
 | `maximumTrackCount` | `Int` | `5` | Cap on simultaneous tracked boxes. |
+| `overlayMode` | `OverlayMode` | `.builtIn` | `.none` hides the built-in graphics; `.callback` suppresses them and streams geometry to `onOverlayUpdate`. |
+| `enableTelemetry` | `Bool` | `false` | Gates event delivery to your `DimensioningTelemetrySink`. |
 
 ### Result
 
 ```swift
-struct VSDKDimensioningMeasurement {
+struct DimensioningMeasurement {
     let id: UUID
+    let trackId: UUID                            // stable id of the physical box
     let timestamp: Date
-    let length, width, height: NSMeasurement   // unit matches `measurementUnit`
-    let distanceFromCamera: NSMeasurement       // meters
-    let confidence: Float                       // 0...1
+    let length, width, height: Measurement<UnitLength>   // unit matches `measurementUnit`
+    let distanceFromCamera: Measurement<UnitLength>
+    let confidence: Float                        // 0...1
     let usedCloudSAM: Bool
-    var volume: NSMeasurement { get }           // cubic meters
+    let imageData: Data?                         // captured frame, portrait-up JPEG
+    let imagePixelSize: CGSize
+    let boxVertices2D: [CGPoint]                 // 8 corners in image pixel space
+    var volume: Measurement<UnitVolume> { get }
+    var image: UIImage? { get }
 }
 ```
 
-Convert on the fly with `measurement.length.converting(to: .inches).doubleValue`.
+`boxVertices2D` order: indices 0–3 are the base face, 4–7 the top face, with
+corner *k* sitting under corner *k+4* — enough to draw the measured box over the
+captured photo. Convert units with `measurement.length.converted(to: .inches)`.
 
 ### Errors
 
-All cases live under `domain = "io.packagex.visionsdk.dimensioning"`:
+`DimensioningError` is a Swift enum thrown by `DimensioningSession`:
 
-| Case | Code | Trigger |
-|---|---|---|
-| `.missingCredentials` | 0 | `.online` mode started without `VSDKConstants.apiKey` |
-| `.notConfigured` | 1 | `startRunning()` called before `configure(...)` |
-| `.lidarUnavailable` | 2 | Non-LiDAR device or simulator |
-| `.arSessionFailed(reason)` | 3 | ARKit session interruption |
-| `.noGroundPlane` | 4 | No anchorable horizontal surface |
-| `.captureTimedOut` | 5 | `capture()` never reached a stable measurement |
-| `.userCancelled` | 6 | Cancellation propagated from the session |
+| Case | Trigger |
+|---|---|
+| `.lidarUnavailable` | Non-LiDAR device |
+| `.arSessionFailed(reason:)` | ARKit session interruption |
+| `.noGroundPlane` | No anchorable horizontal surface |
+| `.captureTimedOut` | `capture()` never reached a stable measurement |
+| `.userCancelled` | Cancellation propagated from the session |
+
+On the simulator `start()` does **not** throw — it returns normally and then
+never produces tracks or captures. Gate on `deviceCapabilities().lidar` rather
+than expecting an error.
+
+### Telemetry
+
+Pass a `DimensioningTelemetrySink` in the configuration to receive
+`measurementCaptured` / `measurementAborted` events with timing, confidence and
+cross-check diagnostics. The SDK has no analytics backend of its own and makes
+no telemetry network calls.
 
 ### Important: Capture Session Conflict
 
-`VSDKDimensioningView` and `VSDKDimensioningSession` own their own `ARSession`. ARKit and `AVCaptureSession` cannot share the camera, so you must stop the regular `CodeScannerView` before presenting any dimensioning UI, and vice versa.
+`DimensioningView` and `DimensioningSession` own their own `ARSession`. ARKit and
+`AVCaptureSession` cannot share the camera, so stop the regular `CodeScannerView`
+before presenting any dimensioning UI, and vice versa. `await session.shutdown()`
+resolves once the camera is actually released — a reliable handoff point.
+
+### Migrating from 2.6.x
+
+The `VSDK`-prefixed wrapper is gone; `import VisionSDKDimensioning` now
+re-exports MVDimensioning's own API.
+
+| 2.6.x | 2.7.0 |
+|---|---|
+| `VSDKDimensioning.deviceCapabilities()` | `Dimensioning.deviceCapabilities()` |
+| `VSDKDimensioning.prefetchModels()` | removed — models ship unencrypted |
+| `VSDKDimensioningSwiftUIView` | `DimensioningView` |
+| `VSDKDimensioningView` (UIKit) + delegate | `DimensioningView` in a `UIHostingController` |
+| `VSDKDimensioningSession` | `DimensioningSession` |
+| `VSDKDimensioningConfiguration` | `DimensioningConfiguration` |
+| `VSDKDimensioningMeasurement` | `DimensioningMeasurement` (`Measurement`, not `NSMeasurement`) |
+| `mode: .online` (read `VSDKConstants.apiKey`) | `segmentationBackend: .cloud(url:apiKey:sdkID:)` |
+
+`.online` no longer falls back to `VSDKConstants.apiKey` — pass credentials at
+the call site.
 
 
 # VisionSDK Android Integration
