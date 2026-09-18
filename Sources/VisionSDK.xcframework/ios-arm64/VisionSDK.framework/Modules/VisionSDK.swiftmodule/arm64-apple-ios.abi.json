@@ -44804,142 +44804,254 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 560,
+      "offset": 1385,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 15378,
+      "offset": 17814,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 18798,
+      "offset": 21234,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 48709,
+      "offset": 51145,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 48750,
+      "offset": 51186,
       "length": 6,
       "value": "1000.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 48774,
+      "offset": 51210,
       "length": 6,
       "value": "1000.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "Array",
-      "offset": 99899,
+      "offset": 102335,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110427,
+      "offset": 112863,
       "length": 10,
       "value": "\"vertices\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110572,
+      "offset": 113008,
       "length": 9,
       "value": "\"topLeft\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110643,
+      "offset": 113079,
       "length": 10,
       "value": "\"topRight\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110717,
+      "offset": 113153,
       "length": 12,
       "value": "\"bottomLeft\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110794,
+      "offset": 113230,
       "length": 13,
       "value": "\"bottomRight\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110863,
+      "offset": 113299,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110887,
+      "offset": 113323,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110926,
+      "offset": 113362,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110951,
+      "offset": 113387,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 110992,
+      "offset": 113428,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 111019,
+      "offset": 113455,
       "length": 3,
       "value": "\"y\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 111061,
+      "offset": 113497,
       "length": 3,
       "value": "\"x\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 111089,
+      "offset": 113525,
       "length": 3,
       "value": "\"y\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 115861,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 115883,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "Array",
+      "offset": 115899,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "Array",
+      "offset": 116110,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "BooleanLiteral",
+      "offset": 116749,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "BooleanLiteral",
+      "offset": 117007,
+      "length": 4,
+      "value": "true"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "Array",
+      "offset": 117519,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "Array",
+      "offset": 117639,
+      "length": 2,
+      "value": "[]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "FloatLiteral",
+      "offset": 117759,
+      "length": 6,
+      "value": "1000.0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "IntegerLiteral",
+      "offset": 118141,
+      "length": 1,
+      "value": "0"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "StringLiteral",
+      "offset": 118339,
+      "length": 150,
+      "value": "\"🔁 [IL-SECTION-REOCR] \""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "StringLiteral",
+      "offset": 118386,
+      "length": 1,
+      "value": "\": \""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "StringLiteral",
+      "offset": 118407,
+      "length": 1,
+      "value": "\"\/\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "StringLiteral",
+      "offset": 118433,
+      "length": 7,
+      "value": "\" section(s) missing \""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "StringLiteral",
+      "offset": 118471,
+      "length": 2,
+      "value": "\" -> \""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ItemLabelsExtraction\/ItemLabelProcessor.swift",
+      "kind": "StringLiteral",
+      "offset": 118488,
+      "length": 2,
+      "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/All Couriers\/Cycle1.swift",
@@ -45966,7 +46078,7 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalOCRResponseILModel.swift",
       "kind": "BooleanLiteral",
-      "offset": 169477,
+      "offset": 170788,
       "length": 5,
       "value": "false"
     },
@@ -46937,6 +47049,34 @@
       "value": "\"\""
     },
     {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/CiscoEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 2314,
+      "length": 16,
+      "value": "[\"serialNumber\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/CiscoEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 2349,
+      "length": 16,
+      "value": "[\"serialNumber\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/CiscoEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 2381,
+      "length": 23,
+      "value": "[\"mac\", \"serialNumber\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/CiscoEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 2423,
+      "length": 14,
+      "value": "[\"partNumber\"]"
+    },
+    {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LocalCourierExtraction\/Couriers\/All Couriers\/Estafeta.swift",
       "kind": "StringLiteral",
       "offset": 203,
@@ -47639,23 +47779,30 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "Array",
-      "offset": 64428,
+      "offset": 69010,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 66997,
+      "offset": 71674,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 77573,
+      "offset": 82250,
       "length": 4,
       "value": "true"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/OnDeviceOCRManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 84299,
+      "length": 1,
+      "value": "8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/ShippingLabelOptions.swift",
@@ -52259,350 +52406,441 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "StringLiteral",
-      "offset": 477,
+      "offset": 676,
+      "length": 9,
+      "value": "\"bizlink\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 705,
+      "length": 9,
+      "value": "\"wintech\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 733,
+      "length": 8,
+      "value": "\"nvidia\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 762,
+      "length": 10,
+      "value": "\"ericsson\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 792,
       "length": 9,
       "value": "\"unknown\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Array",
-      "offset": 697,
+      "offset": 1012,
       "length": 825,
       "value": "[\"serial_number\", \"part_number\", \"model_number\", \"quantity\", \"manufacturing_date\", \"country_of_origin\", \"product_name\", \"description\", \"revision\", \"regulatory_model\", \"clei\", \"fru\", \"tan\", \"fcc_id\", \"mac_address\", \"sales_order\", \"customer_po\", \"container\", \"power_supply\", \"features\", \"logo\", \"hw_id\", \"virtual_lpn\", \"assembly_revision\", \"lead_time\", \"licensing\", \"order_number\", \"mfgn\", \"plant\", \"manufacturing_part_number\", \"upc\", \"hpe_order\", \"prdn\", \"overpack_id\", \"smartway_transport\", \"rmn\", \"system_serial\", \"ccin\", \"hw_date\", \"ic\", \"carton_id\", \"facility\", \"assembly_date\", \"mfg_id\", \"label_version\", \"length\", \"color\", \"qc\", \"control_number\", \"ship_group\", \"scheduled_ship_date\", \"audit_date\", \"machine_type_full\", \"machine_type\"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Dictionary",
-      "offset": 1764,
+      "offset": 2079,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Array",
-      "offset": 1834,
+      "offset": 2149,
       "length": 8452,
       "value": "[(\"Afghanistan\", [\"afghanistan\"]), (\"Albania\", [\"albania\"]), (\"Algeria\", [\"algeria\"]), (\"Andorra\", [\"andorra\"]), (\"Angola\", [\"angola\"]), (\"Antigua and Barbuda\", [\"antigua and barbuda\", \"antigua\"]), (\"Argentina\", [\"argentina\"]), (\"Armenia\", [\"armenia\"]), (\"Australia\", [\"australia\"]), (\"Austria\", [\"austria\"]), (\"Azerbaijan\", [\"azerbaijan\"]), (\"Bahamas\", [\"bahamas\"]), (\"Bahrain\", [\"bahrain\"]), (\"Bangladesh\", [\"bangladesh\"]), (\"Barbados\", [\"barbados\"]), (\"Belarus\", [\"belarus\"]), (\"Belgium\", [\"belgium\"]), (\"Belize\", [\"belize\"]), (\"Benin\", [\"benin\"]), (\"Bhutan\", [\"bhutan\"]), (\"Bolivia\", [\"bolivia\"]), (\"Bosnia and Herzegovina\", [\"bosnia and herzegovina\", \"bosnia\"]), (\"Botswana\", [\"botswana\"]), (\"Brazil\", [\"brazil\", \"brasil\"]), (\"Brunei\", [\"brunei\"]), (\"Bulgaria\", [\"bulgaria\"]), (\"Burkina Faso\", [\"burkina faso\"]), (\"Burundi\", [\"burundi\"]), (\"Cabo Verde\", [\"cabo verde\", \"cape verde\"]), (\"Cambodia\", [\"cambodia\"]), (\"Cameroon\", [\"cameroon\"]), (\"Canada\", [\"canada\"]), (\"Central African Republic\", [\"central african republic\"]), (\"Chad\", [\"chad\"]), (\"Chile\", [\"chile\"]), (\"China\", [\"china\", \"p.r.c.\", \"p.r.c\", \"prc\", \"peoples republic of china\", \"people's republic of china\"]), (\"Colombia\", [\"colombia\"]), (\"Comoros\", [\"comoros\"]), (\"Congo\", [\"congo\"]), (\"Costa Rica\", [\"costa rica\"]), (\"Cote d'Ivoire\", [\"cote d'ivoire\", \"ivory coast\"]), (\"Croatia\", [\"croatia\"]), (\"Cuba\", [\"cuba\"]), (\"Cyprus\", [\"cyprus\"]), (\"Czech Republic\", [\"czech republic\", \"czechia\"]), (\"Democratic Republic of the Congo\", [\"democratic republic of the congo\"]), (\"Denmark\", [\"denmark\"]), (\"Djibouti\", [\"djibouti\"]), (\"Dominica\", [\"dominica\"]), (\"Dominican Republic\", [\"dominican republic\"]), (\"East Timor\", [\"east timor\", \"timor-leste\"]), (\"Ecuador\", [\"ecuador\"]), (\"Egypt\", [\"egypt\"]), (\"El Salvador\", [\"el salvador\"]), (\"Equatorial Guinea\", [\"equatorial guinea\"]), (\"Eritrea\", [\"eritrea\"]), (\"Estonia\", [\"estonia\"]), (\"Eswatini\", [\"eswatini\", \"swaziland\"]), (\"Ethiopia\", [\"ethiopia\"]), (\"Fiji\", [\"fiji\"]), (\"Finland\", [\"finland\"]), (\"France\", [\"france\"]), (\"Gabon\", [\"gabon\"]), (\"Gambia\", [\"gambia\"]), (\"Georgia\", [\"georgia\"]), (\"Germany\", [\"germany\", \"deutschland\"]), (\"Ghana\", [\"ghana\"]), (\"Greece\", [\"greece\"]), (\"Grenada\", [\"grenada\"]), (\"Guatemala\", [\"guatemala\"]), (\"Guinea\", [\"guinea\"]), (\"Guinea-Bissau\", [\"guinea-bissau\"]), (\"Guyana\", [\"guyana\"]), (\"Haiti\", [\"haiti\"]), (\"Honduras\", [\"honduras\"]), (\"Hungary\", [\"hungary\"]), (\"Iceland\", [\"iceland\"]), (\"India\", [\"india\"]), (\"Indonesia\", [\"indonesia\"]), (\"Iran\", [\"iran\"]), (\"Iraq\", [\"iraq\"]), (\"Ireland\", [\"ireland\"]), (\"Israel\", [\"israel\"]), (\"Italy\", [\"italy\"]), (\"Jamaica\", [\"jamaica\"]), (\"Japan\", [\"japan\"]), (\"Jordan\", [\"jordan\"]), (\"Kazakhstan\", [\"kazakhstan\"]), (\"Kenya\", [\"kenya\"]), (\"Kiribati\", [\"kiribati\"]), (\"Kuwait\", [\"kuwait\"]), (\"Kyrgyzstan\", [\"kyrgyzstan\"]), (\"Laos\", [\"laos\"]), (\"Latvia\", [\"latvia\"]), (\"Lebanon\", [\"lebanon\"]), (\"Lesotho\", [\"lesotho\"]), (\"Liberia\", [\"liberia\"]), (\"Libya\", [\"libya\"]), (\"Liechtenstein\", [\"liechtenstein\"]), (\"Lithuania\", [\"lithuania\"]), (\"Luxembourg\", [\"luxembourg\"]), (\"Madagascar\", [\"madagascar\"]), (\"Malawi\", [\"malawi\"]), (\"Malaysia\", [\"malaysia\"]), (\"Maldives\", [\"maldives\"]), (\"Mali\", [\"mali\"]), (\"Malta\", [\"malta\"]), (\"Marshall Islands\", [\"marshall islands\"]), (\"Mauritania\", [\"mauritania\"]), (\"Mauritius\", [\"mauritius\"]), (\"Mexico\", [\"mexico\"]), (\"Micronesia\", [\"micronesia\"]), (\"Moldova\", [\"moldova\"]), (\"Monaco\", [\"monaco\"]), (\"Mongolia\", [\"mongolia\"]), (\"Montenegro\", [\"montenegro\"]), (\"Morocco\", [\"morocco\"]), (\"Mozambique\", [\"mozambique\"]), (\"Myanmar\", [\"myanmar\", \"burma\"]), (\"Namibia\", [\"namibia\"]), (\"Nauru\", [\"nauru\"]), (\"Nepal\", [\"nepal\"]), (\"Netherlands\", [\"netherlands\", \"holland\"]), (\"New Zealand\", [\"new zealand\"]), (\"Nicaragua\", [\"nicaragua\"]), (\"Niger\", [\"niger\"]), (\"Nigeria\", [\"nigeria\"]), (\"North Korea\", [\"north korea\", \"dprk\"]), (\"North Macedonia\", [\"north macedonia\", \"macedonia\"]), (\"Norway\", [\"norway\"]), (\"Oman\", [\"oman\"]), (\"Pakistan\", [\"pakistan\"]), (\"Palau\", [\"palau\"]), (\"Palestine\", [\"palestine\"]), (\"Panama\", [\"panama\"]), (\"Papua New Guinea\", [\"papua new guinea\"]), (\"Paraguay\", [\"paraguay\"]), (\"Peru\", [\"peru\"]), (\"Philippines\", [\"philippines\"]), (\"Poland\", [\"poland\"]), (\"Portugal\", [\"portugal\"]), (\"Qatar\", [\"qatar\"]), (\"Romania\", [\"romania\"]), (\"Russia\", [\"russia\", \"russian federation\"]), (\"Rwanda\", [\"rwanda\"]), (\"Saint Kitts and Nevis\", [\"saint kitts and nevis\"]), (\"Saint Lucia\", [\"saint lucia\"]), (\"Saint Vincent and the Grenadines\", [\"saint vincent and the grenadines\"]), (\"Samoa\", [\"samoa\"]), (\"San Marino\", [\"san marino\"]), (\"Sao Tome and Principe\", [\"sao tome and principe\"]), (\"Saudi Arabia\", [\"saudi arabia\"]), (\"Senegal\", [\"senegal\"]), (\"Serbia\", [\"serbia\"]), (\"Seychelles\", [\"seychelles\"]), (\"Sierra Leone\", [\"sierra leone\"]), (\"Singapore\", [\"singapore\"]), (\"Slovakia\", [\"slovakia\"]), (\"Slovenia\", [\"slovenia\"]), (\"Solomon Islands\", [\"solomon islands\"]), (\"Somalia\", [\"somalia\"]), (\"South Africa\", [\"south africa\"]), (\"South Korea\", [\"south korea\", \"republic of korea\"]), (\"South Sudan\", [\"south sudan\"]), (\"Spain\", [\"spain\"]), (\"Sri Lanka\", [\"sri lanka\"]), (\"Sudan\", [\"sudan\"]), (\"Suriname\", [\"suriname\"]), (\"Sweden\", [\"sweden\"]), (\"Switzerland\", [\"switzerland\"]), (\"Syria\", [\"syria\"]), (\"Taiwan\", [\"taiwan\", \"r.o.c.\", \"r.o.c\", \"roc\", \"chinese taipei\"]), (\"Tajikistan\", [\"tajikistan\"]), (\"Tanzania\", [\"tanzania\"]), (\"Thailand\", [\"thailand\"]), (\"Togo\", [\"togo\"]), (\"Tonga\", [\"tonga\"]), (\"Trinidad and Tobago\", [\"trinidad and tobago\"]), (\"Tunisia\", [\"tunisia\"]), (\"Turkey\", [\"turkey\", \"turkiye\"]), (\"Turkmenistan\", [\"turkmenistan\"]), (\"Tuvalu\", [\"tuvalu\"]), (\"Uganda\", [\"uganda\"]), (\"Ukraine\", [\"ukraine\"]), (\"United Arab Emirates\", [\"united arab emirates\", \"uae\"]), (\"United Kingdom\", [\"united kingdom\", \"great britain\"]), (\"United States\", [\"united states\", \"united states of america\"]), (\"Uruguay\", [\"uruguay\"]), (\"Uzbekistan\", [\"uzbekistan\"]), (\"Vanuatu\", [\"vanuatu\"]), (\"Vatican City\", [\"vatican city\"]), (\"Venezuela\", [\"venezuela\"]), (\"Vietnam\", [\"vietnam\", \"viet nam\"]), (\"Yemen\", [\"yemen\"]), (\"Zambia\", [\"zambia\"]), (\"Zimbabwe\", [\"zimbabwe\"])]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Array",
-      "offset": 26037,
+      "offset": 42348,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Array",
-      "offset": 30499,
+      "offset": 52598,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 58937,
+      "length": 26,
+      "value": "\"H[I1l|][WV][I1l|V]?r?e\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 59237,
+      "length": 43,
+      "value": "\"\\(\\s*21P\\s*\\)|\\(\\s*1V\\s*\\)|\\(\\s*1P\\s*\\)\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 59336,
+      "length": 49,
+      "value": "\"Er[il1]c?ss[o0]n|KGP\\s*L[o0]g[il1]st|\\bERIC\\b\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 59448,
+      "length": 276,
+      "value": "[\"MFG'?S?\\s*Ser[il1]al\", \"MFG'?S?\\s*[ID]?[el]?scr\", \"Pr[o0]du[ce]t\\s*I\\W?D\\s*\/\\s*MFG\", \"\\bAsset\\b\", \"CASE\\s*I\\W?D\", \"CUST\\s*PR[O0]DUCT\\s*I\\W?D\", \"MFG\\s*PR[O0]DUCT\\s*I\\W?D\", \"CUST\\s*P[O0]\\b\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 59797,
+      "length": 42,
+      "value": "\"Nv[il1]d[il1]a|MSN4700|MQM9700|MSN4600\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "StringLiteral",
+      "offset": 60907,
+      "length": 11,
+      "value": "\"MT\\d{2}\""
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 61068,
+      "length": 63,
+      "value": "[\"[Cc]art[o0]n\\s*I\\W?D\", \"\\bP\\W?N\\b\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 61211,
+      "length": 270,
+      "value": "[\"\\bPN\\b\", \"Descr[il1]pt[il1][o0]n\", \"Ser[il1]al\\s*N[ou]mber\", \"Suppl[il1]er\\s*PN\", \"\\bRev\\b\", \"[O0]r[il1]g[il1]n\", \"[Cc]art[o0]n\\s*I\\W?D\", \"\\bQTY\\b\", \"M[o0]del\\s*N[ou]mber\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
+      "kind": "Array",
+      "offset": 61749,
+      "length": 208,
+      "value": "[\"[QO0G]\\W{0,2}TY\", \"\\bC[o0]de\\b\", \"\\bN\\.?\\s?W\\.?\\b\", \"\\bG\\.?\\s?W\\.?\\b\", \"\\bP\\W?O\\b\", \"\\bP\\W?N\\.\", \"\\bS\\W?N\\.\", \"\\bREV\\.\"]"
+    },
+    {
+      "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 33335,
+      "offset": 62904,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "StringLiteral",
-      "offset": 33373,
+      "offset": 62942,
       "length": 17,
       "value": "\"(?:^|[^a-zA-Z])\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "StringLiteral",
-      "offset": 33440,
+      "offset": 63009,
       "length": 17,
       "value": "\"(?:[^a-zA-Z]|$)\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Array",
-      "offset": 33628,
+      "offset": 63197,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 34507,
+      "offset": 64076,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 34542,
+      "offset": 64111,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 34576,
+      "offset": 64145,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Array",
-      "offset": 34832,
+      "offset": 64401,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "Array",
-      "offset": 35174,
+      "offset": 64743,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 35554,
+      "offset": 65123,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36217,
+      "offset": 65786,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36254,
+      "offset": 65823,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36639,
+      "offset": 66208,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36647,
+      "offset": 66216,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 36653,
+      "offset": 66222,
       "length": 3,
       "value": "2.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36666,
+      "offset": 66235,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36781,
+      "offset": 66350,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36789,
+      "offset": 66358,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 36795,
+      "offset": 66364,
       "length": 3,
       "value": "2.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 36808,
+      "offset": 66377,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "StringLiteral",
-      "offset": 37204,
+      "offset": 66773,
       "length": 3,
       "value": "\" \""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 37241,
+      "offset": 66810,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 37352,
+      "offset": 66921,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 37361,
+      "offset": 66930,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "BooleanLiteral",
-      "offset": 37436,
+      "offset": 67005,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "BooleanLiteral",
-      "offset": 37651,
+      "offset": 67220,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "BooleanLiteral",
-      "offset": 37775,
+      "offset": 67344,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38405,
+      "offset": 67974,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38442,
+      "offset": 68011,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38759,
+      "offset": 68328,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38767,
+      "offset": 68336,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 38773,
+      "offset": 68342,
       "length": 3,
       "value": "2.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38786,
+      "offset": 68355,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38905,
+      "offset": 68474,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38913,
+      "offset": 68482,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 38919,
+      "offset": 68488,
       "length": 3,
       "value": "2.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 38932,
+      "offset": 68501,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 39610,
+      "offset": 69179,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 39636,
+      "offset": 69205,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 39655,
+      "offset": 69224,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 39692,
+      "offset": 69261,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 39718,
+      "offset": 69287,
       "length": 3,
       "value": "1.0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "IntegerLiteral",
-      "offset": 39737,
+      "offset": 69306,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/OCR\/LabelClassifier\/UnifiedEntityExtractor.swift",
       "kind": "FloatLiteral",
-      "offset": 39879,
+      "offset": 69448,
       "length": 4,
       "value": "0.80"
     },
@@ -53470,560 +53708,560 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 37379,
+      "offset": 38583,
       "length": 3,
       "value": "0.7"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 42377,
+      "offset": 43581,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42713,
+      "offset": 43917,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42726,
+      "offset": 43930,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42741,
+      "offset": 43945,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42754,
+      "offset": 43958,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 42787,
+      "offset": 43991,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 42824,
+      "offset": 44028,
       "length": 3,
       "value": "0.8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 42862,
+      "offset": 44066,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 43177,
+      "offset": 44381,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 43192,
+      "offset": 44396,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 43209,
+      "offset": 44413,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 43224,
+      "offset": 44428,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 43259,
+      "offset": 44463,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 43298,
+      "offset": 44502,
       "length": 3,
       "value": "0.8"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 43336,
+      "offset": 44540,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 43540,
+      "offset": 44744,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 43598,
+      "offset": 44802,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 43734,
+      "offset": 44938,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 44167,
+      "offset": 45371,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 44186,
+      "offset": 45390,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 44350,
+      "offset": 45554,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44358,
+      "offset": 45562,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44432,
+      "offset": 45636,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44456,
+      "offset": 45660,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 44666,
+      "offset": 45870,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44674,
+      "offset": 45878,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 44818,
+      "offset": 46022,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44827,
+      "offset": 46031,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 44859,
+      "offset": 46063,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44867,
+      "offset": 46071,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 44923,
+      "offset": 46127,
       "length": 5,
       "value": "\"key\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44966,
+      "offset": 46170,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 44994,
+      "offset": 46198,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45044,
+      "offset": 46248,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45068,
+      "offset": 46272,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45274,
+      "offset": 46478,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45284,
+      "offset": 46488,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45411,
+      "offset": 46615,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45420,
+      "offset": 46624,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45452,
+      "offset": 46656,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45462,
+      "offset": 46666,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45518,
+      "offset": 46722,
       "length": 7,
       "value": "\"value\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45568,
+      "offset": 46772,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45591,
+      "offset": 46795,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45646,
+      "offset": 46850,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45665,
+      "offset": 46869,
       "length": 15,
       "value": "\"boundingBoxes\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 45856,
+      "offset": 47060,
       "length": 6,
       "value": "\"pair\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 45865,
+      "offset": 47069,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "Array",
-      "offset": 45936,
+      "offset": 47140,
       "length": 13,
       "value": "[\":\", \" in \"]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 46173,
+      "offset": 47377,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 46229,
+      "offset": 47433,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 46334,
+      "offset": 47538,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 46433,
+      "offset": 47637,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 46456,
+      "offset": 47660,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 46518,
+      "offset": 47722,
       "length": 6,
       "value": "\"text\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 46706,
+      "offset": 47910,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 46903,
+      "offset": 48107,
       "length": 3,
       "value": "0.6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "Array",
-      "offset": 46969,
+      "offset": 48173,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 47041,
+      "offset": 48245,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47079,
+      "offset": 48283,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47089,
+      "offset": 48293,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47101,
+      "offset": 48305,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47111,
+      "offset": 48315,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47230,
+      "offset": 48434,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47245,
+      "offset": 48449,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47262,
+      "offset": 48466,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47277,
+      "offset": 48481,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47405,
+      "offset": 48609,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 47426,
+      "offset": 48630,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "BooleanLiteral",
-      "offset": 47606,
+      "offset": 48810,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 48356,
+      "offset": 49560,
       "length": 4,
       "value": "0.01"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 48742,
+      "offset": 49946,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49071,
+      "offset": 50275,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49092,
+      "offset": 50296,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49115,
+      "offset": 50319,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49136,
+      "offset": 50340,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "IntegerLiteral",
-      "offset": 49167,
+      "offset": 50371,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "FloatLiteral",
-      "offset": 49258,
+      "offset": 50462,
       "length": 3,
       "value": "0.6"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/OnDeviceOCR\/KeyValueModel\/KeyValueProcessor.swift",
       "kind": "StringLiteral",
-      "offset": 49488,
+      "offset": 50692,
       "length": 3,
       "value": "\" \""
     },
