@@ -78,7 +78,7 @@ class SdkExtractionRepository @Inject constructor(
         processing: Processing,
         size: ModelSize,
         wildCard: Boolean,
-    ): Extraction = withContext(Dispatchers.Default) {
+    ): Extraction = withContext(Dispatchers.IO) {   // the *ApiCallSync / on-device calls block for seconds
         if (!wildCard) return@withContext Extraction(type, extractOne(bitmap, codes, type, processing, size))
 
         // Wild card, as the original demo: classify on-device (DC · micro, always), then dispatch
