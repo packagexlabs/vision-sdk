@@ -29,7 +29,7 @@ private fun decodeItemNames(raw: String?): Map<String, String> =
 
 @Singleton
 class DataStoreItemCatalogRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     appScope: CoroutineScope,
 ) : ItemCatalogRepository {
 

@@ -25,8 +25,11 @@ data class Prefs(
     val processing: Processing = Processing.Cloud,
     val autoCapture: Boolean = false,
     val sound: Boolean = true,
-    val parseRecipient: Boolean = false,
-    val parseSender: Boolean = false,
+    // iOS DemoModel.swift:67-68 default both to true.
+    val parseRecipient: Boolean = true,
+    val parseSender: Boolean = true,
+    // iOS DemoModel.swift:66.
+    val wildCard: Boolean = false,
 )
 
 interface PreferencesRepository {
@@ -48,6 +51,7 @@ private object PrefKeys {
     val sound = booleanPreferencesKey("v5.pref.sound")
     val parseRecipient = booleanPreferencesKey("v5.pref.parseRecipient")
     val parseSender = booleanPreferencesKey("v5.pref.parseSender")
+    val wildCard = booleanPreferencesKey("v5.pref.wildCard")
 }
 
 private fun decodePrefs(p: Preferences): Prefs = Prefs(
@@ -59,13 +63,14 @@ private fun decodePrefs(p: Preferences): Prefs = Prefs(
     processing = p[PrefKeys.processing]?.let { runCatching { Processing.valueOf(it) }.getOrNull() } ?: Processing.Cloud,
     autoCapture = p[PrefKeys.autoCapture] ?: false,
     sound = p[PrefKeys.sound] ?: true,
-    parseRecipient = p[PrefKeys.parseRecipient] ?: false,
-    parseSender = p[PrefKeys.parseSender] ?: false,
+    parseRecipient = p[PrefKeys.parseRecipient] ?: true,
+    parseSender = p[PrefKeys.parseSender] ?: true,
+    wildCard = p[PrefKeys.wildCard] ?: false,
 )
 
 @Singleton
 class DataStorePreferencesRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : PreferencesRepository {
 
     override val prefs: Flow<Prefs> = context.dataStore.data.map(::decodePrefs)
@@ -83,6 +88,7 @@ class DataStorePreferencesRepository @Inject constructor(
             p[PrefKeys.sound] = next.sound
             p[PrefKeys.parseRecipient] = next.parseRecipient
             p[PrefKeys.parseSender] = next.parseSender
+            p[PrefKeys.wildCard] = next.wildCard
         }
     }
 }

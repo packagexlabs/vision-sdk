@@ -11,6 +11,7 @@ sealed class ScanError(val title: String, val message: String) {
     data object Network : ScanError("Download failed", "Download failed. Check the connection.")
     data class NotLicensed(val detail: String) : ScanError("Not enabled for this key", detail)
     data object Blur : ScanError("Image too blurry", "Hold steady and try again.")
+    data class UnsupportedDocument(val detail: String) : ScanError("Unsupported document", detail)
     data class Other(val detail: String) : ScanError("Scanner error", detail)
 
     companion object {
@@ -20,6 +21,7 @@ sealed class ScanError(val title: String, val message: String) {
             is VisionSDKException.ItemRetrievalNotEligible,
             is VisionSDKException.SubscriptionExpiredException -> NotLicensed(e.message ?: "Not enabled for this key")
             is VisionSDKException.BlurImageDetected -> Blur
+            is UnsupportedDocumentException -> UnsupportedDocument(e.message ?: "We do not support extraction of this document type yet!")
             is VisionSDKException -> Other(e.errorMessage)
             else -> Other(e.message ?: "Unknown error")
         }

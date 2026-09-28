@@ -22,7 +22,7 @@ interface ReportRepository {
 
 @Singleton
 class SdkReportRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val secrets: Secrets,
 ) : ReportRepository {
 
