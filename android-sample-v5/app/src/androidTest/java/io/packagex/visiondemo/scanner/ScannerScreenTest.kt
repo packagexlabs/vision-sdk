@@ -35,4 +35,10 @@ class ScannerScreenTest {
         rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(codeInFrame = false), cameraView = {}) {} } }
         rule.onNodeWithText("Code detected", substring = true).assertDoesNotExist()
     }
+
+    @Test
+    fun codeDetectedShowsWhenInFrame() {
+        rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(codeInFrame = true), cameraView = {}) {} } }
+        rule.onNodeWithText("Code detected", substring = true).assertExists()
+    }
 }

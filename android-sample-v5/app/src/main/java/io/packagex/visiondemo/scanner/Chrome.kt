@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -17,17 +18,21 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,19 +47,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -78,6 +94,7 @@ import io.packagex.visiondemo.model.isCode
 import io.packagex.visiondemo.model.isDocument
 import io.packagex.visiondemo.model.viewfinder
 import io.packagex.visiondemo.model.zooms
+import kotlin.math.roundToInt
 
 /**
  * Camera chrome: top icons, hint, context chip, capture-mode pill, zoom presets, mode dial and
@@ -89,7 +106,11 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
     val usesScanner = ownerFor(state.mode) == CameraOwner.Scanner
     Column(modifier = modifier.fillMaxSize()) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp).padding(top = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
+                .padding(horizontal = 14.dp)
+                .padding(top = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -132,7 +153,13 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
         }
 
         ModeDial(selected = state.mode, onSelect = { onAction(ScannerAction.SetMode(it)) })
-        ShutterRow(state = state, onAction = onAction, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
+        ShutterRow(
+            state = state,
+            onAction = onAction,
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                .padding(top = 12.dp, bottom = 8.dp),
+        )
     }
 }
 
@@ -145,11 +172,15 @@ fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifie
         val multiLive = state.prefs.multi && (state.mode == ScanMode.Barcode || state.mode == ScanMode.QR)
         val visible = f != null && !multiLive && state.result == null && !state.gated && !state.permissionDenied
         if (f != null && visible) {
+            val insets = WindowInsets.safeDrawing.asPaddingValues()
+            val insetTop = insets.calculateTopPadding()
+            val insetBottom = insets.calculateBottomPadding()
+            val contentHeight = maxHeight - insetTop - insetBottom
             val sx = maxWidth / 390.dp
-            val sy = maxHeight / 844.dp
+            val sy = contentHeight / 844.dp
             val bottomReserve = bottomReserveDp(state)
-            val top = f.y.dp * sy
-            val maxBottom = maxHeight - bottomReserve
+            val top = insetTop + f.y.dp * sy
+            val maxBottom = maxHeight - insetBottom - bottomReserve
             val height = maxOf(60.dp, minOf(f.height.dp * sy, maxBottom - top))
             val left = f.x.dp * sx
             val width = f.width.dp * sx
@@ -228,7 +259,7 @@ private fun ContextChip(label: String, sub: String, onClick: () -> Unit) {
     ) {
         Text(label, style = montserrat(13.sp), color = Color.White)
         if (sub.isNotEmpty()) Text(sub, style = montserrat(13.sp, FontWeight.Medium), color = PX.Lilac)
-        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+        Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(10.dp))
     }
 }
 
@@ -274,33 +305,69 @@ private fun ZoomPresets(zooms: List<Float>, current: Float, onZoom: (Float) -> U
 }
 
 /** Horizontally scrolling mode names, all always composed (not lazy) so every label is present
- *  in the tree at once, as iOS's plain `HStack` inside a `ScrollView`. */
+ *  in the tree at once, as iOS's plain `HStack` inside a `ScrollView`. The selection is kept
+ *  centred (iOS `proxy.scrollTo(selected, anchor: .center)`) and the edges fade out (iOS's
+ *  gradient `.mask`). */
 @Composable
 private fun ModeDial(selected: ScanMode, onSelect: (ScanMode) -> Unit) {
     val scrollState = rememberScrollState()
-    Row(
-        modifier = Modifier.fillMaxWidth().height(44.dp).horizontalScroll(scrollState).padding(horizontal = 160.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    var viewportWidth by remember { mutableIntStateOf(0) }
+    val itemOffsets = remember { mutableStateMapOf<ScanMode, Pair<Int, Int>>() }
+
+    LaunchedEffect(selected, viewportWidth) {
+        val (start, width) = itemOffsets[selected] ?: return@LaunchedEffect
+        if (viewportWidth == 0) return@LaunchedEffect
+        val target = (start + width / 2) - viewportWidth / 2
+        scrollState.animateScrollTo(target.coerceIn(0, scrollState.maxValue))
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .onSizeChanged { viewportWidth = it.width }
+            .edgeFadeMask(),
     ) {
-        ScanMode.entries.forEach { m ->
-            val requester = remember { BringIntoViewRequester() }
-            val isSelected = m == selected
-            LaunchedEffect(isSelected) { if (isSelected) requester.bringIntoView() }
-            Text(
-                m.label,
-                style = montserrat(14.sp, if (isSelected) FontWeight.Bold else FontWeight.Medium),
-                color = if (isSelected) Color.White else Color.White.copy(alpha = 0.62f),
-                modifier = Modifier
-                    .bringIntoViewRequester(requester)
-                    .height(44.dp)
-                    .wrapContentHeight(Alignment.CenterVertically)
-                    .padding(horizontal = 12.dp)
-                    .clickable { onSelect(m) },
-            )
+        Row(
+            modifier = Modifier.fillMaxSize().horizontalScroll(scrollState).padding(horizontal = 160.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            ScanMode.entries.forEach { m ->
+                val isSelected = m == selected
+                Text(
+                    m.label,
+                    style = montserrat(14.sp, if (isSelected) FontWeight.Bold else FontWeight.Medium),
+                    color = if (isSelected) Color.White else Color.White.copy(alpha = 0.62f),
+                    modifier = Modifier
+                        .onGloballyPositioned { coords ->
+                            itemOffsets[m] = coords.positionInParent().x.roundToInt() to coords.size.width
+                        }
+                        .height(44.dp)
+                        .wrapContentHeight(Alignment.CenterVertically)
+                        .padding(horizontal = 12.dp)
+                        .clickable { onSelect(m) },
+                )
+            }
         }
     }
 }
+
+/** iOS `ModeDial`'s edge fade: transparent at 0%/100%, opaque from 11% to 89%. */
+private fun Modifier.edgeFadeMask(): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        drawRect(
+            brush = Brush.horizontalGradient(
+                0f to Color.Transparent,
+                0.11f to Color.Black,
+                0.89f to Color.Black,
+                1f to Color.Transparent,
+            ),
+            blendMode = BlendMode.DstIn,
+        )
+    }
 
 @Composable
 private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
@@ -326,6 +393,7 @@ private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit,
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(12.dp))
+                        .border(2.dp, Color.White, RoundedCornerShape(12.dp))
                         .clickable { onAction(ScannerAction.ReopenLast) }
                         .semantics { contentDescription = "Open last result" },
                 )
@@ -397,7 +465,6 @@ private fun bottomReserveDp(state: ScannerUiState): Dp {
     val pills = (state.mode.isCode || state.mode.isDocument || state.mode.zooms.isNotEmpty()) && !state.gated
     val chip = chipFor(state)
     return 56.dp + 80.dp + (if (pills) 56.dp else 0.dp) + (if (chip != null) 54.dp else 0.dp) + 14.dp
-
 }
 
 private fun hintFor(state: ScannerUiState): String {

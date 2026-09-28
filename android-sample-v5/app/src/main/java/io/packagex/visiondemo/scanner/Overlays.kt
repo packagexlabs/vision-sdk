@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -51,7 +52,10 @@ import io.packagex.visiondemo.model.ScanMode
 @Composable
 fun GateCard(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.background(Color.White, RoundedCornerShape(20.dp)).padding(20.dp),
+        modifier = modifier
+            .shadow(12.dp, RoundedCornerShape(20.dp), ambientColor = Color.Black.copy(alpha = 0.25f), spotColor = Color.Black.copy(alpha = 0.25f))
+            .background(Color.White, RoundedCornerShape(20.dp))
+            .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Icon(Icons.Filled.Lock, contentDescription = null, tint = PX.Purple, modifier = Modifier.size(36.dp))
@@ -115,7 +119,10 @@ fun AlertCard(alert: Alert, onAction: (ScannerAction) -> Unit, modifier: Modifie
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier.background(Color.White, RoundedCornerShape(20.dp)).padding(20.dp),
+            modifier = Modifier
+                .shadow(12.dp, RoundedCornerShape(20.dp), ambientColor = Color.Black.copy(alpha = 0.25f), spotColor = Color.Black.copy(alpha = 0.25f))
+                .background(Color.White, RoundedCornerShape(20.dp))
+                .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(alert.title, style = montserrat(17.sp), color = PX.Ink)
