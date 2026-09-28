@@ -101,6 +101,7 @@ class ScannerViewModel @Inject constructor(
         // While a local write is in flight the repo can still emit the value from before it; skip those.
         viewModelScope.launch { prefs.prefs.collect { if (prefWrites == 0) setPrefs(it) } }
         viewModelScope.launch { models.states.collect { m -> _state.update { it.copy(models = m) } } }
+        viewModelScope.launch { models.versions.collect { v -> _state.update { it.copy(modelVersions = v) } } }
         viewModelScope.launch { catalog.items.collect { i -> _state.update { it.copy(items = i) } } }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
@@ -130,7 +131,7 @@ class ScannerViewModel @Inject constructor(
                 prefWrites++
                 viewModelScope.launch { try { prefs.update(a.t) } finally { prefWrites-- } }
             }
-            ScannerAction.ToggleTorch -> setTorch(!s.torch)
+            ScannerAction.ToggleTorch -> { setTorch(!s.torch); toast(if (s.torch) "Torch on" else "Torch off") }
             ScannerAction.ToggleAuto -> toggleAuto()
             is ScannerAction.Report -> sendReport(a.fields, a.message)
             ScannerAction.CancelProcessing -> cancelProcessing()
@@ -167,6 +168,16 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.SendFeedback -> sendFeedback(a.entries, a.comment)
             ScannerAction.ClearTags -> _state.update { it.copy(tags = emptyList()) }
             is ScannerAction.Zoom -> setZoom(a.ratio)
+            ScannerAction.OpenItemList -> openItemList()
+            is ScannerAction.SetDetectionEnabled -> setDetection(a.on)
+            ScannerAction.ResetSettings -> resetSettings()
+            ScannerAction.FlipCamera -> flipCamera()
+            is ScannerAction.Focus -> focus(a.x, a.y)
+            ScannerAction.PickPhoto -> if (s.mode == ScanMode.Ocr) _effects.trySend(ScannerEffect.PickPhoto)
+            is ScannerAction.ImportPhoto -> if (s.mode == ScanMode.Ocr) {   // the mode may have changed while the picker was up
+                toast("Image picked from Photos")
+                runOcr(a.bitmap, emptyList())
+            }
         }
     }
 
@@ -195,7 +206,7 @@ class ScannerViewModel @Inject constructor(
         camera.claim(ownerFor(s.mode))
         if (!usesScanner) return
         applyConfig()
-        if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) camera.resumeDetection()
+        if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) resumeDetection()
         if (s.mode.gated) checkEntitlement(s.mode)
     }
 
@@ -204,6 +215,41 @@ class ScannerViewModel @Inject constructor(
         val p = s.prefs
         val auto = p.autoCapture && (s.mode.isCode || s.mode.isDocument)
         camera.apply(scannerConfig(s.mode, p.multi, p.showBoxes), frame, if (auto) ScanningMode.Auto else ScanningMode.Manual)
+        if (!s.detectionEnabled) camera.pauseDetection()   // configuring may resume detection (iOS :259)
+    }
+
+    /** Detection runs only while enabled in Settings › Advanced (iOS `detectionEnabled`). */
+    private fun resumeDetection() { if (s.detectionEnabled) camera.resumeDetection() }
+
+    private fun setDetection(on: Boolean) {
+        _state.update { it.copy(detectionEnabled = on) }
+        if (!usesScanner) return
+        // Resumes only where detection would run anyway; under Settings it resumes once the sheet closes.
+        if (!on) camera.pauseDetection() else if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) camera.resumeDetection()
+    }
+
+    /** iOS SettingsSheet `reset()` (Sheets.swift:161-166). */
+    private fun resetSettings() {
+        onAction(ScannerAction.UpdatePrefs(resetPrefs))
+        setDetection(true)
+        toast("Settings reset to defaults")
+    }
+
+    /** iOS `flipCamera`: a facing switch turns the torch off and resets the zoom. */
+    private fun flipCamera() {
+        if (!usesScanner) return
+        val front = !s.frontCamera
+        setTorch(false)
+        _state.update { it.copy(frontCamera = front, zoom = 1f) }
+        camera.lens(front)
+        toast(if (front) "Front camera" else "Back camera")
+    }
+
+    /** Tap-to-focus and its ring, only on the live camera (iOS CameraScreen :17-21). */
+    private fun focus(x: Float, y: Float) {
+        if (!usesScanner || s.result != null || s.sheet != null || s.alert != null) return
+        camera.focus(x, y)
+        _state.update { it.copy(focus = FocusTap(x, y, (it.focus?.id ?: 0) + 1)) }
     }
 
     private fun setPrefs(p: Prefs) {
@@ -252,6 +298,7 @@ class ScannerViewModel @Inject constructor(
 
     private fun shutter() {
         if (s.phase != Phase.Idle || s.result != null || pendingShow != null || s.gated || s.permissionDenied) return
+        if (!s.detectionEnabled && usesScanner) return toast("Detection is paused. Resume it in Settings › Advanced.")
         when (s.mode) {
             // ponytail: rows come from the AR controller (Task 11); until then there are never any markers.
             ScanMode.Ar -> toast("No markers yet. Point at barcodes first.")
@@ -264,10 +311,16 @@ class ScannerViewModel @Inject constructor(
             ScanMode.Barcode, ScanMode.QR, ScanMode.Ocr -> {
                 // Wild card prepares its own models (iOS :427).
                 if (s.mode == ScanMode.Ocr && !s.prefs.wildCard && !cloudSelected(s.prefs) && !ensureModelReady()) return
+                flashOnce()
                 _state.update { it.copy(phase = Phase.Scanning) }
                 camera.capture()
             }
         }
+    }
+
+    private fun flashOnce() {
+        _state.update { it.copy(flash = true) }
+        viewModelScope.launch { delay(150); _state.update { it.copy(flash = false) } }
     }
 
     private fun toggleAuto() {
@@ -296,7 +349,7 @@ class ScannerViewModel @Inject constructor(
                 // A multiple-scan onScanResult already carries every code, so both cases show the list (iOS .multi / .code).
                 show(ScanResult.Codes(e.codes.map { it.toDetected() }))
             }
-            is ScanEvent.Boxes -> onBoxes(e.codes)
+            is ScanEvent.Boxes -> onBoxes(if (s.mode == ScanMode.QR) e.qr else e.barcodes + e.qr)   // iOS :945
             is ScanEvent.Captured -> if (s.mode == ScanMode.Ocr) runOcr(e.bitmap, e.codes) else _state.update { it.copy(phase = Phase.Idle) }
             is ScanEvent.PriceTag -> {   // iOS codeScannerViewDidCapturePrice: collect unique tags; the shutter shows them
                 if (s.mode != ScanMode.Price) return
@@ -414,6 +467,12 @@ class ScannerViewModel @Inject constructor(
         if (usesScanner) camera.pauseDetection()   // nothing to detect under the drawer
     }
 
+    /** Retrieval drawer's "Open item list": iOS sets `result = nil` (no rescan), then opens the list. */
+    private fun openItemList() {
+        _state.update { it.copy(result = null, resultExpanded = false) }
+        openSheet(SheetKind.Items)
+    }
+
     private fun reopenLast() {
         val (m, r) = s.lastResult ?: return
         if (m != s.mode || s.result != null || pendingShow != null) return
@@ -427,7 +486,7 @@ class ScannerViewModel @Inject constructor(
         }
         _state.update { it.copy(result = null, resultExpanded = false) }   // price tags stay until ClearTags / mode switch (iOS)
         if (usesScanner) {
-            if (s.sheet == null || s.sheet == SheetKind.Items) camera.resumeDetection()
+            if (s.sheet == null || s.sheet == SheetKind.Items) resumeDetection()
             camera.rescan()
         }
     }
@@ -478,7 +537,7 @@ class ScannerViewModel @Inject constructor(
             _state.update { it.copy(pendingSheet = null) }
             presentSheet(next)
         } else if (usesScanner && s.result == null) {
-            camera.resumeDetection()
+            resumeDetection()
         }
     }
 
@@ -486,7 +545,7 @@ class ScannerViewModel @Inject constructor(
     private fun presentSheet(k: SheetKind) {
         _state.update { it.copy(sheet = k) }
         if (!usesScanner || s.result != null) return
-        if (k == SheetKind.Items) camera.resumeDetection() else camera.pauseDetection()
+        if (k == SheetKind.Items) resumeDetection() else camera.pauseDetection()
     }
 
     // MARK: Item retrieval list
@@ -515,20 +574,6 @@ class ScannerViewModel @Inject constructor(
                 a.thenLoad -> toast("Model loaded")
             }
         }
-    }
-
-    /** Runs [block]; returns the user-facing error (null on success, and for a cancelled download, which toasts itself). */
-    private suspend fun runCatchingModel(block: suspend () -> Unit): String? = try {
-        block()
-        null
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: VisionSDKException.ModelDownloadCancelledException) {
-        null
-    } catch (e: IOException) {
-        "Download failed. Check the connection."
-    } catch (e: Exception) {
-        (e as? VisionSDKException)?.errorMessage ?: e.message ?: "Something went wrong"
     }
 
     private fun setZoom(ratio: Float) {

@@ -12,6 +12,9 @@ import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visionsdk.dto.ScannedCodeResult
+import io.packagex.visionsdk.exceptions.VisionSDKException
+import kotlinx.coroutines.CancellationException
+import java.io.IOException
 
 /** Pure rules behind [ScannerViewModel], ported from iOS `DemoModel`. */
 
@@ -33,6 +36,25 @@ internal fun activeModel(p: Prefs): Pair<DocType, ModelSize>? = when (p.docType)
     DocType.BOL, DocType.IL -> p.docType to ModelSize.Large
     DocType.SL -> DocType.SL to p.modelSize
     else -> null
+}
+
+/** Settings "Reset to defaults" (iOS Sheets.swift:161-166; `detectionEnabled` is reset by the ViewModel). */
+internal val resetPrefs: (Prefs) -> Prefs = {
+    it.copy(multi = false, showBoxes = true, showHints = true, wildCard = false, parseRecipient = true, parseSender = true, modelSize = ModelSize.Micro)
+}
+
+/** Runs [block]; returns the user-facing error (null on success, and for a cancelled download, which toasts itself). */
+internal suspend fun runCatchingModel(block: suspend () -> Unit): String? = try {
+    block()
+    null
+} catch (e: CancellationException) {
+    throw e
+} catch (e: VisionSDKException.ModelDownloadCancelledException) {
+    null
+} catch (e: IOException) {
+    "Download failed. Check the connection."
+} catch (e: Exception) {
+    (e as? VisionSDKException)?.errorMessage ?: e.message ?: "Something went wrong"
 }
 
 internal val useCloud: (Prefs) -> Prefs = { it.copy(processing = Processing.Cloud) }

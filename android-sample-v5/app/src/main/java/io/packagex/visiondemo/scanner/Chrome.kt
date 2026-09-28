@@ -37,11 +37,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -111,7 +113,7 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                 .padding(horizontal = 14.dp)
                 .padding(top = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (usesScanner) {
@@ -121,13 +123,17 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
                     label = "Torch",
                     onClick = { onAction(ScannerAction.ToggleTorch) },
                 )
-            } else {
-                Spacer(Modifier.size(44.dp))
+                RoundIcon(
+                    icon = Icons.Filled.Cameraswitch,
+                    label = if (state.frontCamera) "Use back camera" else "Use front camera",
+                    onClick = { onAction(ScannerAction.FlipCamera) },
+                )
             }
+            Spacer(Modifier.weight(1f))
             RoundIcon(icon = Icons.Filled.Tune, label = "Settings", onClick = { onAction(ScannerAction.OpenSheet(SheetKind.Settings)) })
         }
 
-        if (!state.permissionDenied) {
+        if (state.prefs.showHints && !state.permissionDenied) {
             HintBar(text = hintFor(state))
         }
 
@@ -375,7 +381,7 @@ private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit,
         Box(modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = shutterLabel(state) }) {
             Shutter(
                 ringColor = if (state.prefs.autoCapture) PX.Neon else Color.White.copy(alpha = 0.92f),
-                dimmed = state.gated || state.paused,
+                dimmed = state.gated || state.paused || !state.detectionEnabled,
                 onTap = { onAction(ScannerAction.Shutter) },
                 onLongPress = { onAction(ScannerAction.ToggleAuto) },
             )
@@ -385,7 +391,21 @@ private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit,
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Spacer(Modifier.size(48.dp))
+            if (state.mode == ScanMode.Ocr) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(PX.Glass, RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onAction(ScannerAction.PickPhoto) }
+                        .semantics { contentDescription = "Import from Photos" },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Outlined.Photo, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                }
+            } else {
+                Spacer(Modifier.size(48.dp))
+            }
             val last = state.lastResult
             if (last != null && last.first == state.mode) {
                 LastThumb(
@@ -426,7 +446,7 @@ private fun shutterLabel(state: ScannerUiState): String = when {
  *  (SDK `Indications` events aren't stored), so `codeInFrame` stands in for `codeSeen` everywhere,
  *  as its own doc comment intends ("...or anywhere in view (other modes)"). */
 private fun ScannerUiState.isLive(): Boolean =
-    !permissionDenied && result == null && phase == Phase.Idle && sheet == null && alert == null && !gated && !paused
+    !permissionDenied && result == null && phase == Phase.Idle && sheet == null && alert == null && detectionEnabled && !gated && !paused
 
 private fun cornerColor(state: ScannerUiState): Color = when {
     state.feedback == Feedback.Error -> PX.Red
@@ -469,6 +489,7 @@ private fun bottomReserveDp(state: ScannerUiState): Dp {
 
 private fun hintFor(state: ScannerUiState): String {
     if (state.gated) return "Authentication required"
+    if (!state.detectionEnabled && ownerFor(state.mode) == CameraOwner.Scanner) return "Detection paused"
     when (state.phase) {
         Phase.Scanning -> return "Capturing…"
         Phase.Processing -> return if (state.mode == ScanMode.DocAcq) {

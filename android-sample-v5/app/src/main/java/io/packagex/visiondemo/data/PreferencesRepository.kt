@@ -18,6 +18,8 @@ import javax.inject.Singleton
 data class Prefs(
     val multi: Boolean = false,
     val showBoxes: Boolean = true,
+    // iOS DemoModel.swift:64: the hint line above the camera.
+    val showHints: Boolean = true,
     val docType: DocType = DocType.SL,
     val modelSize: ModelSize = ModelSize.Micro,
     val processing: Processing = Processing.Cloud,
@@ -41,6 +43,7 @@ internal val Context.dataStore by preferencesDataStore(name = "v5")
 private object PrefKeys {
     val multi = booleanPreferencesKey("v5.pref.multi")
     val showBoxes = booleanPreferencesKey("v5.pref.showBoxes")
+    val showHints = booleanPreferencesKey("v5.pref.showHints")
     val docType = stringPreferencesKey("v5.pref.docType")
     val modelSize = stringPreferencesKey("v5.pref.modelSize")
     val processing = stringPreferencesKey("v5.pref.processing")
@@ -54,6 +57,7 @@ private object PrefKeys {
 private fun decodePrefs(p: Preferences): Prefs = Prefs(
     multi = p[PrefKeys.multi] ?: false,
     showBoxes = p[PrefKeys.showBoxes] ?: true,
+    showHints = p[PrefKeys.showHints] ?: true,
     docType = p[PrefKeys.docType]?.let { runCatching { DocType.valueOf(it) }.getOrNull() } ?: DocType.SL,
     modelSize = p[PrefKeys.modelSize]?.let { runCatching { ModelSize.valueOf(it) }.getOrNull() } ?: ModelSize.Micro,
     processing = p[PrefKeys.processing]?.let { runCatching { Processing.valueOf(it) }.getOrNull() } ?: Processing.Cloud,
@@ -76,6 +80,7 @@ class DataStorePreferencesRepository @Inject constructor(
             val next = transform(decodePrefs(p))
             p[PrefKeys.multi] = next.multi
             p[PrefKeys.showBoxes] = next.showBoxes
+            p[PrefKeys.showHints] = next.showHints
             p[PrefKeys.docType] = next.docType.name
             p[PrefKeys.modelSize] = next.modelSize.name
             p[PrefKeys.processing] = next.processing.name

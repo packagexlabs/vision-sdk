@@ -68,7 +68,7 @@ internal fun ocrResult(x: Extraction, bitmap: Bitmap?, p: Prefs, cloudSelected: 
         cloud -> "Cloud · $secs s"
         else -> "On-device · ${if (p.wildCard || activeModel(p)?.second == ModelSize.Large) "large" else "micro"} · $secs s"
     }
-    return OcrOutcome.Done(ScanResult.Ocr(r, bitmap, title, subtitle))
+    return OcrOutcome.Done(ScanResult.Ocr(r.copy(cloud = cloud), bitmap, title, subtitle))
 }
 
 /** iOS `finishOCR`'s error branch. */

@@ -35,12 +35,10 @@ import io.packagex.visiondemo.scanner.onDevice
  * Ported from iOS `UI/Sheets.swift` `SettingsSheet`. Grouping follows iOS: `wildCard`/`parseRecipient`/
  * `parseSender` sit under "Vision Scanner" with auto capture (Sheets.swift:94-99); Processing is its own
  * group (the brief's explicit Settings row list; iOS itself only has this control in `DocTypeSheet`).
- * "Reset to defaults" resets the `Prefs` fields iOS resets that exist on Android (Sheets.swift:161-166).
- * Rows not carried over, because Android's [ScannerUiState] / `Prefs` have no matching field: "Show
- * detection hints" (no `showHints`), the static symbologies grid, and the "Advanced" section's
- * detection-enabled / AR-debug toggles and environment row (no `detectionEnabled` or AR debug state on
- * [ScannerUiState] -- Task 11). "On-device models" content moves to its own sheet here (the "Models" row
- * below), including "Check for updates".
+ * "Reset to defaults" is [ScannerAction.ResetSettings] (Sheets.swift:161-166). "Advanced" carries
+ * "Detection enabled". Rows not carried over: the static symbologies grid, and the "Advanced" section's
+ * AR-debug toggles and environment row (no AR debug state on [ScannerUiState] -- Task 11). "On-device
+ * models" content moves to its own sheet here (the "Models" row below), including "Check for updates".
  */
 @Composable
 fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
@@ -58,6 +56,12 @@ fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             desc = "Outlines codes in multiple scan and on labels in Vision Scanner.",
             checked = p.showBoxes,
             onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(showBoxes = checked) }) },
+        )
+        ToggleRow(
+            title = "Show detection hints",
+            desc = "Shows a line of guidance above the camera.",
+            checked = p.showHints,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(showHints = checked) }) },
         )
     }
 
@@ -123,23 +127,17 @@ fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
 
     // AR debug toggles (iOS ARDebugRows): skipped -- ScannerUiState carries no AR debug state (Task 11).
 
-    // iOS `reset()` (Sheets.swift:161-166) also resets showHints/detectionEnabled; those fields don't
-    // exist on Prefs/ScannerUiState yet and will be added when AR debug integration lands (Task 11).
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        LinkLabel("Reset to defaults") {
-            onAction(
-                ScannerAction.UpdatePrefs {
-                    it.copy(
-                        multi = false,
-                        showBoxes = true,
-                        wildCard = false,
-                        parseRecipient = true,
-                        parseSender = true,
-                        modelSize = ModelSize.Micro,
-                    )
-                },
-            )
-        }
+        LinkLabel("Reset to defaults") { onAction(ScannerAction.ResetSettings) }
+    }
+
+    Group("Advanced") {
+        ToggleRow(
+            title = "Detection enabled",
+            desc = "Pause or resume detection on the active scanner.",
+            checked = state.detectionEnabled,
+            onCheckedChange = { onAction(ScannerAction.SetDetectionEnabled(it)) },
+        )
     }
 
     ModelsRow(onAction)

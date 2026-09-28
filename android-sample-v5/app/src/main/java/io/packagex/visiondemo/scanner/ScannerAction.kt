@@ -1,5 +1,6 @@
 package io.packagex.visiondemo.scanner
 
+import android.graphics.Bitmap
 import android.graphics.RectF
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.Prefs
@@ -66,8 +67,25 @@ sealed interface ScannerAction {
     /** Price drawer's "Clear tags". */
     data object ClearTags : ScannerAction
 
+    /** Retrieval drawer's "Open item list": closes the result without rescanning, then opens Items. */
+    data object OpenItemList : ScannerAction
+
+    // Settings
+    /** Settings › Advanced "Detection enabled". */
+    data class SetDetectionEnabled(val on: Boolean) : ScannerAction
+    /** Settings "Reset to defaults". */
+    data object ResetSettings : ScannerAction
+
     // Camera chrome
     data class Zoom(val ratio: Float) : ScannerAction
+    /** Front / back camera. */
+    data object FlipCamera : ScannerAction
+    /** Tap on the camera, in view-normalized (0..1) coordinates. */
+    data class Focus(val x: Float, val y: Float) : ScannerAction
+    /** Vision Scanner's Photos button: asks the UI to open the picker ([ScannerEffect.PickPhoto]). */
+    data object PickPhoto : ScannerAction
+    /** An image picked from Photos: extracted like a capture (Vision Scanner only). */
+    data class ImportPhoto(val bitmap: Bitmap) : ScannerAction
 }
 
 sealed interface ScannerEffect {
@@ -75,4 +93,6 @@ sealed interface ScannerEffect {
     data object Haptic : ScannerEffect
     /** Put [text] on the clipboard with `ClipDescription.EXTRA_IS_SENSITIVE = true` (scanned values can be personal data). */
     data class Copy(val text: String) : ScannerEffect
+    /** Open the system photo picker; send [ScannerAction.ImportPhoto] with the picked image. */
+    data object PickPhoto : ScannerEffect
 }

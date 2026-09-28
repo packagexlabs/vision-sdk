@@ -26,6 +26,10 @@ interface Camera {
     fun rescan()
     fun torch(on: Boolean)
     fun zoom(ratio: Float)
+    /** Front or back lens (iOS `flipCamera`). */
+    fun lens(front: Boolean)
+    /** Focus at a point in view-normalized (0..1) display coordinates. */
+    fun focus(x: Float, y: Float)
     /** [PausePolicy.resume]: false (still paused) while the device is critically hot. */
     fun resume(): Boolean
     /** [PausePolicy.userActive]: resets the idle timer. */

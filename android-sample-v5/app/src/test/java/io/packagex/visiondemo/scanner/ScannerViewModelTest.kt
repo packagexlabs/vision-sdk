@@ -461,4 +461,133 @@ class ScannerViewModelTest {
         v.onAction(ScannerAction.TorchRetry); v.onAction(ScannerAction.Retry)
         assertEquals(1, cam.captures)   // the old "Try again" closure did not run
     }
+
+    // --- integration ---
+
+    @Test fun resetRestoresHintsAndDetection() = runTest {
+        val v = vm()
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(showHints = false, multi = true) }); v.onAction(ScannerAction.SetDetectionEnabled(false))
+        assertFalse(v.state.value.prefs.showHints)
+        v.effects.test {
+            v.onAction(ScannerAction.ResetSettings)
+            assertEquals(ScannerEffect.Toast("Settings reset to defaults"), awaitItem())
+        }
+        advanceUntilIdle()
+        assertTrue(v.state.value.prefs.showHints); assertFalse(v.state.value.prefs.multi); assertTrue(v.state.value.detectionEnabled)
+    }
+
+    @Test fun detectionOffPausesAndGuardsTheShutter() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.PermissionResult(true))
+        v.onAction(ScannerAction.SetDetectionEnabled(false)); assertTrue(cam.detectionPaused)
+        v.effects.test {
+            v.onAction(ScannerAction.Shutter)
+            assertEquals(ScannerEffect.Toast("Detection is paused. Resume it in Settings › Advanced."), awaitItem())
+        }
+        assertEquals(0, cam.captures)
+        v.onAction(ScannerAction.SetMode(ScanMode.QR)); assertTrue(cam.detectionPaused)   // a mode switch does not resume it
+        v.onAction(ScannerAction.OpenSheet(SheetKind.Items)); assertTrue(cam.detectionPaused)
+        v.onAction(ScannerAction.DismissSheet); v.onAction(ScannerAction.SheetDismissed); assertTrue(cam.detectionPaused)
+        v.onAction(ScannerAction.SetDetectionEnabled(true)); assertFalse(cam.detectionPaused)
+    }
+
+    @Test fun enablingDetectionUnderSettingsResumesOnDismiss() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetDetectionEnabled(false))
+        v.onAction(ScannerAction.OpenSheet(SheetKind.Settings)); v.onAction(ScannerAction.SetDetectionEnabled(true))
+        assertTrue(cam.detectionPaused)   // still covered by the sheet
+        v.onAction(ScannerAction.DismissSheet); v.onAction(ScannerAction.SheetDismissed); assertFalse(cam.detectionPaused)
+    }
+
+    @Test fun modelVersionsReachTheState() = runTest {
+        val models = FakeModels(mapOf((DocType.SL to ModelSize.Micro) to ModelState.Loaded), mapOf((DocType.SL to ModelSize.Micro) to "2025-05-05"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), models, FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"))
+        advanceUntilIdle()
+        assertEquals("2025-05-05", v.state.value.modelVersions[DocType.SL to ModelSize.Micro])
+    }
+
+    @Test fun torchToggleToasts() = runTest {
+        val v = vm()
+        v.effects.test {
+            v.onAction(ScannerAction.ToggleTorch); assertEquals(ScannerEffect.Toast("Torch on"), awaitItem())
+            v.onAction(ScannerAction.ToggleTorch); assertEquals(ScannerEffect.Toast("Torch off"), awaitItem())
+        }
+    }
+
+    @Test fun openItemListClosesWithoutRescanAndOpensItems() = runTest {
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"))
+        val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
+        v.onAction(ScannerAction.Shutter); advanceTimeBy(400)
+        assertTrue(v.state.value.result is ScanResult.Retrieval); assertTrue(cam.detectionPaused)
+        val rescans = cam.rescans
+        v.onAction(ScannerAction.OpenItemList)
+        assertNull(v.state.value.result); assertEquals(SheetKind.Items, v.state.value.sheet)
+        assertEquals(rescans, cam.rescans); assertFalse(cam.detectionPaused)   // the list reads codes in view
+    }
+
+    @Test fun ocrResultCarriesTheProcessingUsed() = runTest {
+        val cloud = vm(); val cam = cloud.camera as FakeCamera
+        cloud.onAction(ScannerAction.SetMode(ScanMode.Ocr)); cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        assertTrue((cloud.state.value.result as ScanResult.Ocr).result.cloud)
+
+        val wild = vm(FakeExtraction("""{"data":{"inference":{"item_name":"Bolt"}}}""", routedType = DocType.IL)); val cam2 = wild.camera as FakeCamera
+        wild.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true) }); wild.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        cam2.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        assertFalse((wild.state.value.result as ScanResult.Ocr).result.cloud)   // wild card read the item label on-device
+    }
+
+    @Test fun flipCameraSwitchesLensAndResetsTorchAndZoom() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.ToggleTorch); v.onAction(ScannerAction.Zoom(2f))
+        v.effects.test {
+            skipItems(1)   // "Torch on"
+            v.onAction(ScannerAction.FlipCamera)
+            assertEquals(ScannerEffect.Toast("Front camera"), awaitItem())
+        }
+        assertTrue(cam.front); assertTrue(v.state.value.frontCamera)
+        assertFalse(v.state.value.torch); assertFalse(cam.torchOn); assertEquals(1f, v.state.value.zoom)
+        v.onAction(ScannerAction.FlipCamera); assertFalse(cam.front)
+    }
+
+    @Test fun focusOnlyOnTheLiveCamera() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.Focus(0.25f, 0.5f))
+        assertEquals(0.25f to 0.5f, cam.focusPoint); assertEquals(FocusTap(0.25f, 0.5f, 1), v.state.value.focus)
+        v.onAction(ScannerAction.OpenSheet(SheetKind.Settings)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
+        assertEquals(0.25f to 0.5f, cam.focusPoint); assertEquals(1, v.state.value.focus?.id)
+        v.onAction(ScannerAction.SetMode(ScanMode.Ar)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
+        assertEquals(0.25f to 0.5f, cam.focusPoint)
+    }
+
+    @Test fun shutterFlashesWhite() = runTest {
+        val v = vm()
+        v.onAction(ScannerAction.Shutter); assertTrue(v.state.value.flash)
+        advanceTimeBy(151); assertFalse(v.state.value.flash)
+    }
+
+    @Test fun photoImportRunsOcrOnlyInVisionScanner() = runTest {
+        val x = FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}"""); val v = vm(x)
+        v.effects.test {
+            v.onAction(ScannerAction.PickPhoto); v.onAction(ScannerAction.ImportPhoto(fakeBitmap()))
+            expectNoEvents()
+            v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+            v.onAction(ScannerAction.PickPhoto); assertEquals(ScannerEffect.PickPhoto, awaitItem())
+            v.onAction(ScannerAction.ImportPhoto(fakeBitmap())); assertEquals(ScannerEffect.Toast("Image picked from Photos"), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+        advanceUntilIdle()
+        assertEquals(1, x.calls); assertEquals("1Z", (v.state.value.result as ScanResult.Ocr).result.primary?.value)
+    }
+
+    @Test fun qrModeDrawsOnlyQrBoxes() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(multi = true) })
+        val bar = code("BAR"); val qr = code("QR")
+        cam.emit(ScanEvent.Boxes(listOf(bar), listOf(qr), null)); runCurrent()
+        assertEquals(listOf("BAR", "QR"), v.state.value.boxes.map { it.value })
+        v.onAction(ScannerAction.SetMode(ScanMode.QR))
+        cam.emit(ScanEvent.Boxes(listOf(bar), listOf(qr), null)); runCurrent()
+        assertEquals(listOf("QR"), v.state.value.boxes.map { it.value })
+    }
 }

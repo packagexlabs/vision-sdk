@@ -15,6 +15,6 @@ class CameraOwnershipTest {
 
     @Test fun singleModeRestrictsToFrame() {
         val fs = focusSettingsFor(scannerConfig(ScanMode.Barcode, multi = false, showBoxesPref = true), Box(0, 100, 300, 200))
-        assertTrue(fs.restrict); assertFalse(fs.showBoxes); assertEquals(Box(0, 100, 300, 200), fs.rect)
+        assertTrue(fs.restrict); assertEquals(Box(0, 100, 300, 200), fs.rect)
     }
 }

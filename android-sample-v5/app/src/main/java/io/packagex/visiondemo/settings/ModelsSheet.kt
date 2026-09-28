@@ -31,6 +31,7 @@ import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.SheetScaffold
 import io.packagex.visiondemo.designsystem.VisionTheme
 import io.packagex.visiondemo.designsystem.inter
+import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
@@ -54,19 +55,25 @@ fun ModelsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
 
     Column {
         modelRows.forEach { (t, s) ->
-            ModelRow(t = t, s = s, state = state.models[t to s] ?: ModelState.NotDownloaded, onAction = onAction)
+            ModelRow(t = t, s = s, state = state.models[t to s] ?: ModelState.NotDownloaded, version = state.modelVersions[t to s], onAction = onAction)
         }
     }
 }
 
 @Composable
-private fun ModelRow(t: DocType, s: ModelSize, state: ModelState, onAction: (ScannerAction) -> Unit) {
+private fun ModelRow(t: DocType, s: ModelSize, state: ModelState, version: String?, onAction: (ScannerAction) -> Unit) {
     Column(Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("${t.label} · ${modelSizeLabel(s)}", style = inter(14.sp, FontWeight.Medium), color = PX.Ink)
                 val (label, tone) = statusFor(state)
-                Badge(text = label, tone = tone)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Badge(text = label, tone = tone)
+                    // iOS Sheets.swift:182.
+                    if (version != null && (state == ModelState.Loaded || state == ModelState.Downloaded)) {
+                        Text(version, style = mono(11.sp), color = PX.Muted)
+                    }
+                }
             }
             when (state) {
                 ModelState.NotDownloaded -> ModelActionButton("Download", ActionKind.Primary) { onAction(ScannerAction.DownloadModel(t, s)) }

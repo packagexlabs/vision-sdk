@@ -13,6 +13,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.ScannerConfig
 import io.packagex.visionsdk.config.CameraOrientationMode
+import io.packagex.visionsdk.core.CameraLensFace
 import io.packagex.visionsdk.config.CameraSettings
 import io.packagex.visionsdk.config.FocusSettings
 import io.packagex.visionsdk.core.ScanningMode
@@ -40,7 +41,7 @@ enum class CameraOwner { None, Scanner, Ar, Document }
 internal fun scannerMustStop(owner: CameraOwner) = owner != CameraOwner.Scanner
 
 /** Plain-Kotlin stand-in for [FocusSettings]'s `RectF` fields -- JVM-testable without android.graphics. */
-internal data class FocusSpec(val rect: Box, val restrict: Boolean, val showBoxes: Boolean)
+internal data class FocusSpec(val rect: Box, val restrict: Boolean)
 
 /** Pure focus-region rule, factored out so it's testable without a real [VisionCameraView]. */
 internal fun focusSettingsFor(config: ScannerConfig, frame: Box?): FocusSpec {
@@ -48,7 +49,6 @@ internal fun focusSettingsFor(config: ScannerConfig, frame: Box?): FocusSpec {
     return FocusSpec(
         rect = if (useFrame) frame!! else Box(0, 0, 0, 0),
         restrict = useFrame,
-        showBoxes = config.showBoxes,
     )
 }
 
@@ -76,6 +76,8 @@ class CameraController @Inject constructor(
      *  throws [VisionSDKException.FocusRegionManagerNotAvailable] before the camera has started. */
     private var lastSpec: FocusSpec? = null
     private var started = false
+    private var nthFrame = 10
+    private var lensFace: CameraLensFace = CameraLensFace.Back
 
     init {
         view.setScannerCallback(object : ScannerCallback {
@@ -88,7 +90,7 @@ class CameraController @Inject constructor(
                 qrCodeBoundingBoxes: List<ScannedCodeResult>,
                 documentBoundingBox: Rect?,
             ) {
-                _events.tryEmit(ScanEvent.Boxes(barcodeBoundingBoxes + qrCodeBoundingBoxes, documentBoundingBox))
+                _events.tryEmit(ScanEvent.Boxes(barcodeBoundingBoxes, qrCodeBoundingBoxes, documentBoundingBox))
             }
 
             override fun onScanResult(barcodeList: List<ScannedCodeResult>) {
@@ -153,8 +155,9 @@ class CameraController @Inject constructor(
 
     override fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) {
         config.detection?.let { view.configure(it, scanning, config.multiple) }
-        view.setCameraSettings(CameraSettings(nthFrameToProcess = config.nthFrame, orientationMode = CameraOrientationMode.PORTRAIT))
-        view.enableTapToFocus()
+        nthFrame = config.nthFrame
+        applyCameraSettings()
+        // No enableTapToFocus: the SDK would draw its own focus square over the app's ring; taps go through focus().
         view.enablePinchPanToZoom()
         val frameBox = frame?.let { Box(it.left.toInt(), it.top.toInt(), it.right.toInt(), it.bottom.toInt()) }
         lastSpec = focusSettingsFor(config, frameBox)
@@ -168,7 +171,7 @@ class CameraController @Inject constructor(
                 context = ctx,
                 focusImageRect = RectF(spec.rect.left.toFloat(), spec.rect.top.toFloat(), spec.rect.right.toFloat(), spec.rect.bottom.toFloat()),
                 shouldScanInFocusImageRect = spec.restrict,
-                showCodeBoundariesInMultipleScan = spec.showBoxes,
+                showCodeBoundariesInMultipleScan = false,   // the app draws the boxes (BoxesOverlay)
                 showDocumentBoundaries = false,
             ),
         )
@@ -180,6 +183,15 @@ class CameraController @Inject constructor(
     override fun rescan() = view.rescan()
     override fun torch(on: Boolean) = view.setFlashTurnedOn(on)
     override fun zoom(ratio: Float) = view.setZoomRatio(ratio)
+    override fun lens(front: Boolean) {
+        lensFace = if (front) CameraLensFace.Front else CameraLensFace.Back
+        applyCameraSettings()
+    }
+    override fun focus(x: Float, y: Float) = view.setFocusPoint(x, y)
+
+    private fun applyCameraSettings() {
+        view.setCameraSettings(CameraSettings(nthFrameToProcess = nthFrame, cameraLensFace = lensFace, orientationMode = CameraOrientationMode.PORTRAIT))
+    }
     override fun resume(): Boolean = policy.resume()
     override fun userActive() = policy.userActive()
 }

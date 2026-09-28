@@ -71,6 +71,8 @@ internal suspend fun refreshedState(current: ModelState, isLoaded: suspend () ->
 
 interface ModelRepository {
     val states: StateFlow<Map<Pair<DocType, ModelSize>, ModelState>>
+    /** Version of each model on disk (`ModelInfo.version`); iOS `modelVersion` (DemoModel.swift:727). */
+    val versions: StateFlow<Map<Pair<DocType, ModelSize>, String>>
     suspend fun refresh()
     suspend fun download(t: DocType, s: ModelSize, thenLoad: Boolean)
     suspend fun load(t: DocType, s: ModelSize)
@@ -93,6 +95,9 @@ class SdkModelRepository @Inject constructor(
     )
     override val states: StateFlow<Map<Pair<DocType, ModelSize>, ModelState>> = _states
 
+    private val _versions = MutableStateFlow<Map<Pair<DocType, ModelSize>, String>>(emptyMap())
+    override val versions: StateFlow<Map<Pair<DocType, ModelSize>, String>> = _versions
+
     override suspend fun refresh() {
         val updated = withContext(Dispatchers.IO) {
             modelRows.associateWith { (t, s) ->
@@ -105,6 +110,9 @@ class SdkModelRepository @Inject constructor(
             }
         }
         _states.value = updated
+        updated.forEach { (key, state) ->
+            if (state == ModelState.Loaded || state == ModelState.Downloaded) ocrModuleFor(key.first, key.second)?.let { refreshVersion(key.first, key.second, it) }
+        }
     }
 
     override suspend fun download(t: DocType, s: ModelSize, thenLoad: Boolean) {
@@ -115,6 +123,7 @@ class SdkModelRepository @Inject constructor(
                 setIfStillDownloading(t, s, ModelState.Downloading(progress.progress))
             }
             setState(t, s, ModelState.Downloaded)
+            refreshVersion(t, s, module)
             if (thenLoad) load(t, s)
         } catch (e: CancellationException) {
             throw e
@@ -153,6 +162,7 @@ class SdkModelRepository @Inject constructor(
         val module = ocrModuleFor(t, s) ?: return
         manager.deleteModel(module)
         setState(t, s, ModelState.NotDownloaded)
+        _versions.value = _versions.value - (t to s)
     }
 
     override suspend fun checkUpdates(): String {
@@ -171,6 +181,11 @@ class SdkModelRepository @Inject constructor(
         }
         refresh()
         return if (failures == 0) "All downloaded models are up to date" else "$failures update check${if (failures == 1) "" else "s"} failed"
+    }
+
+    private suspend fun refreshVersion(t: DocType, s: ModelSize, module: OCRModule) {
+        val v = withContext(Dispatchers.IO) { manager.findDownloadedModel(module)?.version }
+        _versions.value = if (v == null) _versions.value - (t to s) else _versions.value + ((t to s) to v)
     }
 
     private fun setState(t: DocType, s: ModelSize, state: ModelState) {

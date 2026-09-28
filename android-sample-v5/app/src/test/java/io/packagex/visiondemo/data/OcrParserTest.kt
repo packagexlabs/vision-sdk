@@ -32,4 +32,10 @@ class OcrParserTest {
     }
 
     @Test fun invalidJsonGivesEmptyResult() = assertTrue(OcrParser.parse("not json", DocType.SL).fields.isEmpty())
+
+    @Test fun monoFollowsIosRegex() {
+        val r = OcrParser.parse(sl, DocType.SL)
+        assertTrue(r.fields.first { it.key == "weight" }.mono)          // "2 lb"
+        assertTrue(!r.fields.first { it.key == "provider_name" }.mono)  // "UPS"
+    }
 }

@@ -15,7 +15,12 @@ data class OcrField(
     val vertices: List<List<Double>>?,
     /** On-device `validated_by` for the boxed entity (BARCODE, APRIORI, ML), when present. */
     val validatedBy: List<String>
-)
+) {
+    /** Numbers, weights, dates and codes are shown in the mono font (iOS `OCRField.mono`). */
+    val mono: Boolean get() = MONO_VALUE.matches(value)
+}
+
+private val MONO_VALUE = Regex("^[\\d\\s.,×xX#/:-]+[A-Za-z]{0,3}$")
 
 /** A flat table of rows (e.g. BOL `inference.tables`, VLM invoice/receipt line items). */
 data class OcrTable(val title: String, val headers: List<String>, val rows: List<List<String>>)
@@ -27,5 +32,7 @@ data class OcrResult(
     val tables: List<OcrTable>,
     /** The field shown large at the top of the result. */
     val primary: OcrField?,
-    val rawJson: String
+    val rawJson: String,
+    /** Read in the cloud (the processing actually used, including the wild-card route); iOS `OCRResult.cloud`. */
+    val cloud: Boolean = false,
 )

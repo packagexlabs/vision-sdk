@@ -50,9 +50,13 @@ class FakePreferences(initial: Prefs = Prefs()) : PreferencesRepository {
 }
 
 /** In-memory [ModelRepository]: state transitions without touching ModelManager/the SDK. */
-class FakeModels(initial: Map<Pair<DocType, ModelSize>, ModelState> = emptyMap()) : ModelRepository {
+class FakeModels(
+    initial: Map<Pair<DocType, ModelSize>, ModelState> = emptyMap(),
+    versions: Map<Pair<DocType, ModelSize>, String> = emptyMap(),
+) : ModelRepository {
     private val _states = MutableStateFlow(initial)
     override val states: StateFlow<Map<Pair<DocType, ModelSize>, ModelState>> = _states
+    override val versions = MutableStateFlow(versions)
     var updatesMessage: String = "All downloaded models are up to date"
 
     override suspend fun refresh() {}
@@ -143,6 +147,9 @@ class FakeCamera : Camera {
     var captures = 0
     var rescans = 0
     var userActiveCalls = 0
+    var front = false
+    var focusPoint: Pair<Float, Float>? = null
+    var zoomRatio = 1f
     /** Critically hot: [resume] refuses, like [io.packagex.visiondemo.camera.PausePolicy.resume]. */
     var hot = false
 
@@ -155,7 +162,9 @@ class FakeCamera : Camera {
     override fun capture() { captures++ }
     override fun rescan() { rescans++ }
     override fun torch(on: Boolean) { torchOn = on }
-    override fun zoom(ratio: Float) {}
+    override fun zoom(ratio: Float) { zoomRatio = ratio }
+    override fun lens(front: Boolean) { this.front = front }
+    override fun focus(x: Float, y: Float) { focusPoint = x to y }
     override fun resume(): Boolean {
         if (hot) return false
         pausedFlow.value = false

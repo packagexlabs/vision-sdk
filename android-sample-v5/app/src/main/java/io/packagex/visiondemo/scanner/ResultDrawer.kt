@@ -88,7 +88,6 @@ import io.packagex.visiondemo.model.OcrField
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.OcrTable
 import io.packagex.visiondemo.model.ScanResult
-import io.packagex.visiondemo.model.SheetKind
 
 /**
  * Bottom drawer with the result of the last capture; drag handle (or a drag gesture) toggles
@@ -103,6 +102,8 @@ import io.packagex.visiondemo.model.SheetKind
 fun ResultDrawer(
     result: ScanResult,
     tags: List<PriceTag> = emptyList(),
+    /** `ScannerUiState.items.size`, for the retrieval subtitle (iOS `model.items.count`). */
+    itemCount: Int = 0,
     expanded: Boolean,
     onAction: (ScannerAction) -> Unit,
 ) {
@@ -172,7 +173,7 @@ fun ResultDrawer(
                 Box(Modifier.width(40.dp).height(5.dp).clip(RoundedCornerShape(50)).background(PX.SwitchOff))
             }
 
-            DrawerHeader(result = result, tags = tags, onReport = { reportOpen = true }, onClose = { onAction(ScannerAction.CloseResult) })
+            DrawerHeader(result = result, tags = tags, itemCount = itemCount, onReport = { reportOpen = true }, onClose = { onAction(ScannerAction.CloseResult) })
 
             Column(
                 modifier = Modifier
@@ -225,8 +226,8 @@ fun ResultDrawer(
 // region Header / footer
 
 @Composable
-private fun DrawerHeader(result: ScanResult, tags: List<PriceTag>, onReport: () -> Unit, onClose: () -> Unit) {
-    val (title, subtitle, ok) = titlesFor(result, tags)
+private fun DrawerHeader(result: ScanResult, tags: List<PriceTag>, itemCount: Int, onReport: () -> Unit, onClose: () -> Unit) {
+    val (title, subtitle, ok) = titlesFor(result, tags, itemCount)
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -304,7 +305,7 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, onAction: (Sc
 
 private fun canReport(result: ScanResult): Boolean = result is ScanResult.Ocr && result.result.docType.reportSupported
 
-private fun titlesFor(result: ScanResult, tags: List<PriceTag>): Triple<String, String, Boolean> = when (result) {
+private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int): Triple<String, String, Boolean> = when (result) {
     is ScanResult.Codes -> {
         val n = result.codes.size
         if (n <= 1) {
@@ -323,7 +324,7 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>): Triple<String, 
         val n = result.codes.count { it.second }
         Triple(
             if (n == 0) "No listed items found" else "$n listed item${if (n == 1) "" else "s"} found",
-            "$n code${if (n == 1) "" else "s"} in list",
+            "$itemCount codes in list",
             true,
         )
     }
@@ -413,8 +414,7 @@ private fun RetrievalContent(codes: List<Pair<String, Boolean>>, onAction: (Scan
             }
         }
     }
-    // Controller wires this to the Items sheet as part of the ScannerRoute/ScannerScreen integration step.
-    LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenSheet(SheetKind.Items)) }
+    LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenItemList) }
 }
 
 @Composable
@@ -478,13 +478,9 @@ private fun OcrContent(
         }
     }
 
-    // iOS :182 (`o.cloud, o.docType.vlmPrompt == nil`), not gated on `boxed`. Android's `OcrResult`
-    // carries no `cloud` flag, so "cloud" is read from the subtitle iOS itself composed
-    // ("Cloud · …" vs "On-device · …" / "Cloud · VLM" — see task-7-report.md); the VLM-prompt-type
-    // exclusion (Tire/ID card/Plate) is derived from `DocType`, as asked.
-    val isCloud = scan.subtitle.startsWith("Cloud", ignoreCase = true)
+    // iOS :182 (`o.cloud, o.docType.vlmPrompt == nil`), not gated on `boxed`.
     val isVlmPromptType = o.docType == DocType.Tire || o.docType == DocType.IdCard || o.docType == DocType.Plate
-    if (isCloud && !isVlmPromptType) {
+    if (o.cloud && !isVlmPromptType) {
         Text(
             "Cloud results do not include field locations. Switch to On-device to see linked boxes.",
             style = inter(13.sp), color = PX.Text2,
@@ -579,9 +575,8 @@ private fun OcrFieldRow(
             } else {
                 val edited = entry?.edited
                 val shown = edited ?: field.value
-                // iOS :209/:146: `f.mono ? .mono(13) : .inter(14, .medium)`. Android's `OcrField` has
-                // no `mono` flag, so it's approximated with iOS's own regex against the shown value.
-                Text(shown, style = if (isMonoValue(shown)) mono(13.sp) else inter(14.sp, FontWeight.Medium), color = PX.Ink)
+                // iOS :209: `f.mono ? .mono(13) : .inter(14, .medium)`, from the original value.
+                Text(shown, style = if (field.mono) mono(13.sp) else inter(14.sp, FontWeight.Medium), color = PX.Ink)
                 if (edited != null && edited != field.value) {
                     Text(field.value, style = inter(12.sp), color = PX.Muted, textDecoration = TextDecoration.LineThrough)
                 }
@@ -672,10 +667,6 @@ private fun colorFor(validatedBy: List<String>): Color = when {
     validatedBy.isNotEmpty() -> iosBlue
     else -> PX.Purple
 }
-
-/** iOS `OCRField.mono` (Types.swift :146): digits/whitespace/`.,×xX#/:-`, optionally trailing ≤3 letters. */
-private val monoValueRegex = Regex("^[\\d\\s.,×xX#/:-]+[A-Za-z]{0,3}$")
-private fun isMonoValue(value: String): Boolean = monoValueRegex.matches(value)
 
 /**
  * On-device responses carry raw vertices (TL, TR, BL, BR) in the *captured image's own pixel

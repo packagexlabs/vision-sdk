@@ -5,13 +5,16 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.PersistableBundle
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -42,8 +46,11 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.inter
+import io.packagex.visiondemo.settings.SheetHost
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
@@ -61,6 +68,17 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         viewModel.onAction(ScannerAction.PermissionResult(granted))
+    }
+
+    // Vision Scanner's Photos button (iOS PhotosPicker): the picked image is extracted like a capture.
+    val scope = rememberCoroutineScope()
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val bitmap = withContext(Dispatchers.IO) { runCatching { decodeBitmap(context, uri) }.getOrNull() }
+                if (bitmap != null) viewModel.onAction(ScannerAction.ImportPhoto(bitmap))
+            }
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -92,6 +110,7 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 }
                 ScannerEffect.Haptic -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 is ScannerEffect.Copy -> copyToClipboard(context, effect.text)
+                ScannerEffect.PickPhoto -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }
         }
     }
@@ -103,12 +122,20 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
             cameraView = {
                 Box(
                     modifier = Modifier.fillMaxSize().pointerInput(Unit) {
-                        // Observed on the Initial pass without consuming, so the SDK's own
-                        // tap-to-focus (dispatched to the embedded AndroidView) still fires.
+                        // Observed on the Initial pass without consuming, so the SDK's pinch-to-zoom
+                        // (dispatched to the embedded AndroidView) still works. A single-finger tap
+                        // focuses there and draws the ring (iOS SpatialTapGesture, :17-21).
                         awaitEachGesture {
-                            awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                            val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
                             viewModel.onAction(ScannerAction.UserActive)
-                            waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                            var tap = true
+                            do {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                if (event.changes.size > 1 || event.changes.any { (it.position - down.position).getDistance() > viewConfiguration.touchSlop }) tap = false
+                            } while (event.changes.any { it.pressed })
+                            if (tap && size.width > 0 && size.height > 0) {
+                                viewModel.onAction(ScannerAction.Focus(down.position.x / size.width, down.position.y / size.height))
+                            }
                         }
                     },
                 ) {
@@ -119,6 +146,8 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                     }
                 }
             },
+            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.resultExpanded, viewModel::onAction) } },
+            sheets = { SheetHost(state, viewModel::onAction) },
             onAction = viewModel::onAction,
         )
         SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.TopCenter).padding(top = 96.dp)) { data ->
@@ -136,6 +165,12 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
         }
     }
 }
+
+/** A picked photo as a software bitmap (the extraction reads its pixels), upright per its EXIF. */
+private fun decodeBitmap(context: Context, uri: Uri): Bitmap =
+    ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)) { decoder, _, _ ->
+        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+    }
 
 /** [ScannerEffect.Copy]: scanned values can be personal data, so the clip is marked sensitive. */
 private fun copyToClipboard(context: Context, text: String) {

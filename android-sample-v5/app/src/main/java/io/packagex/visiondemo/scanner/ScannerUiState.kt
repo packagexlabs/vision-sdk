@@ -47,7 +47,20 @@ data class ScannerUiState(
     val resultExpanded: Boolean = false,
     /** Zoom preset in use (reset to 1 on mode switch). */
     val zoom: Float = 1f,
+    /** Settings › Advanced "Detection enabled"; not persisted (iOS `detectionEnabled`). */
+    val detectionEnabled: Boolean = true,
+    /** Version of each downloaded model, for the Models sheet rows. */
+    val modelVersions: Map<Pair<DocType, ModelSize>, String> = emptyMap(),
+    /** 150 ms white capture flash (iOS `flash`). */
+    val flash: Boolean = false,
+    /** The front lens is in use (iOS `frontCamera`). */
+    val frontCamera: Boolean = false,
+    /** Last tap-to-focus point, for the focus ring; a new [FocusTap.id] restarts the ring. */
+    val focus: FocusTap? = null,
 )
+
+/** Tap-to-focus point in view-normalized (0..1) coordinates. */
+data class FocusTap(val x: Float, val y: Float, val id: Int)
 
 data class Alert(val title: String, val message: String, val actions: List<AlertAction>)
 

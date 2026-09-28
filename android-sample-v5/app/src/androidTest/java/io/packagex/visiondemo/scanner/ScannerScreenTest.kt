@@ -4,7 +4,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.designsystem.VisionTheme
+import io.packagex.visiondemo.model.ScanMode
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -40,5 +42,25 @@ class ScannerScreenTest {
     fun codeDetectedShowsWhenInFrame() {
         rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(codeInFrame = true), cameraView = {}) {} } }
         rule.onNodeWithText("Code detected", substring = true).assertExists()
+    }
+
+    @Test
+    fun hintsHiddenWhenPrefOff() {
+        rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(prefs = Prefs(showHints = false)), cameraView = {}) {} } }
+        rule.onNodeWithText("Align the code inside the frame").assertDoesNotExist()
+    }
+
+    @Test
+    fun detectionOffShowsPausedHint() {
+        rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(detectionEnabled = false), cameraView = {}) {} } }
+        rule.onNodeWithText("Detection paused").assertExists()
+    }
+
+    @Test
+    fun visionScannerOffersPhotoImport() {
+        var got: ScannerAction? = null
+        rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(mode = ScanMode.Ocr), cameraView = {}) { got = it } } }
+        rule.onNodeWithContentDescription("Import from Photos").performClick()
+        assertEquals(ScannerAction.PickPhoto, got)
     }
 }
