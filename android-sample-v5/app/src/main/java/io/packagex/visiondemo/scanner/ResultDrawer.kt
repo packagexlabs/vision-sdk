@@ -1,5 +1,6 @@
 package io.packagex.visiondemo.scanner
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.RectF
 import androidx.compose.animation.core.Spring
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -46,14 +48,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +68,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.zIndex
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.OcrParser
 import io.packagex.visiondemo.data.PriceTag
@@ -99,10 +106,13 @@ fun ResultDrawer(
     expanded: Boolean,
     onAction: (ScannerAction) -> Unit,
 ) {
-    var reportOpen by remember { mutableStateOf(false) }
-    var zoomedImage by remember { mutableStateOf<Bitmap?>(null) }
+    // Report/zoom overlays and item-label feedback are keyed on `result` so a new capture (a new
+    // ScanResult instance) always starts from a clean drawer, even if the drawer composable itself
+    // survives the swap (e.g. a rapid ReopenLast).
+    var reportOpen by remember(result) { mutableStateOf(false) }
+    var zoomedImage by remember(result) { mutableStateOf<Bitmap?>(null) }
     // Item-label field feedback (the original's extended view): per-field thumbs and corrections,
-    // overall comment. Reset whenever a new result is shown.
+    // overall comment.
     var ilFeedback by remember(result) { mutableStateOf(mapOf<String, ItemLabelFeedback.Entry>()) }
     var ilComment by remember(result) { mutableStateOf("") }
     var editingField by remember(result) { mutableStateOf<String?>(null) }
@@ -114,6 +124,12 @@ fun ResultDrawer(
         animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
         label = "resultDrawerHeight",
     )
+    val currentOnAction by rememberUpdatedState(onAction)
+    val density = LocalDensity.current
+    // iOS thresholds are in points (:37-40); drag deltas from detectVerticalDragGestures are px, so
+    // the dp thresholds must go through density, not be compared to raw px directly.
+    val dragUpThresholdPx = with(density) { 40.dp.toPx() }
+    val dragDownThresholdPx = with(density) { 60.dp.toPx() }
 
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -121,6 +137,12 @@ fun ResultDrawer(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .fillMaxHeight(heightFraction)
+                .shadow(
+                    elevation = 12.dp,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                    ambientColor = PX.Ink.copy(alpha = 0.18f),
+                    spotColor = PX.Ink.copy(alpha = 0.18f),
+                )
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                 .background(Color.White)
                 .pointerInput(expanded) {
@@ -128,9 +150,9 @@ fun ResultDrawer(
                         onDragStart = { dragTotal = 0f },
                         onDragEnd = {
                             when {
-                                dragTotal < -40f && !expanded -> onAction(ScannerAction.ToggleExpanded)
-                                dragTotal > 60f && expanded -> onAction(ScannerAction.ToggleExpanded)
-                                dragTotal > 60f && !expanded -> onAction(ScannerAction.CloseResult)
+                                dragTotal < -dragUpThresholdPx && !expanded -> currentOnAction(ScannerAction.ToggleExpanded)
+                                dragTotal > dragDownThresholdPx && expanded -> currentOnAction(ScannerAction.ToggleExpanded)
+                                dragTotal > dragDownThresholdPx && !expanded -> currentOnAction(ScannerAction.CloseResult)
                             }
                         },
                     ) { change, amount -> dragTotal += amount; change.consume() }
@@ -169,12 +191,19 @@ fun ResultDrawer(
                         onFeedbackChange = { id, e -> ilFeedback = ilFeedback + (id to e) },
                         ilComment = ilComment,
                         onCommentChange = { ilComment = it },
-                        onSubmitFeedback = { onAction(ScannerAction.SendFeedback(ilFeedback, ilComment)); ilComment = "" },
+                        onSubmitFeedback = {
+                            // iOS clears the comment only when the async result starts with "Feedback
+                            // sent" (:369-378). The VM's SendFeedback surface only emits a Toast effect —
+                            // it doesn't hand the submit message back to the UI — so we can't gate on
+                            // that here; keep the comment and just reset the editing state, as iOS does
+                            // unconditionally before the async call.
+                            editingField = null
+                            onAction(ScannerAction.SendFeedback(ilFeedback, ilComment))
+                        },
                         editingField = editingField,
                         onEditingChange = { editingField = it },
                         selectedField = selectedField,
                         onSelectedChange = { selectedField = it },
-                        onZoom = { zoomedImage = it },
                     )
                     ScanResult.Price -> PriceContent(tags, onAction)
                     is ScanResult.Retrieval -> RetrievalContent(result.codes, onAction)
@@ -232,15 +261,37 @@ private fun DrawerHeader(result: ScanResult, tags: List<PriceTag>, onReport: () 
 
 @Composable
 private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, onAction: (ScannerAction) -> Unit) {
+    val context = LocalContext.current
     Column {
         HorizontalDivider(color = PX.Hairline)
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 10.dp, bottom = 20.dp),
         ) {
+            // iOS `ShareLink` (:74-78): the Android share sheet, with the same summary text as Copy.
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, PX.Purple, RoundedCornerShape(12.dp))
+                    .clickable {
+                        val send = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, summaryFor(result, tags))
+                        }
+                        context.startActivity(Intent.createChooser(send, null))
+                    }
+                    .semantics { contentDescription = "Share" },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.Share, contentDescription = null, tint = PX.Purple, modifier = Modifier.size(20.dp))
+            }
             Box(Modifier.weight(1f)) {
+                // Label "to clipboard" so the VM's "Copied <label>" toast reads "Copied to clipboard",
+                // matching iOS's fixed string (:83).
                 PXButton(title = "Copy", kind = PXButtonKind.Secondary) {
-                    onAction(ScannerAction.Copy("Result", summaryFor(result, tags)))
+                    onAction(ScannerAction.Copy("to clipboard", summaryFor(result, tags)))
                 }
             }
             Box(Modifier.weight(1f)) {
@@ -256,10 +307,15 @@ private fun canReport(result: ScanResult): Boolean = result is ScanResult.Ocr &&
 private fun titlesFor(result: ScanResult, tags: List<PriceTag>): Triple<String, String, Boolean> = when (result) {
     is ScanResult.Codes -> {
         val n = result.codes.size
-        // The symbology/value already appear in the dark card below, so the subtitle stays generic
-        // (Android's `DetectedCode` carries no capture-timing field to show here, unlike iOS).
-        if (n <= 1) Triple("Code detected", "Barcode", true)
-        else Triple("$n codes detected", "Multiple scan", true)
+        if (n <= 1) {
+            // iOS picks the title from `model.mode == .qr` (:99), which isn't available here (the
+            // signature has no mode param) — approximate from the code's own symbology instead.
+            val symbology = result.codes.firstOrNull()?.symbology.orEmpty()
+            val title = if (symbology.contains("QR", ignoreCase = true)) "QR code detected" else "Barcode detected"
+            Triple(title, symbology, true)
+        } else {
+            Triple("$n codes detected", "Multiple scan", true)
+        }
     }
     is ScanResult.Ocr -> Triple(result.title, result.subtitle, true)
     ScanResult.Price -> Triple("Found ${tags.size} Items", "${tags.count { !it.valid }} invalid", true)
@@ -267,7 +323,7 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>): Triple<String, 
         val n = result.codes.count { it.second }
         Triple(
             if (n == 0) "No listed items found" else "$n listed item${if (n == 1) "" else "s"} found",
-            "${result.codes.size} code${if (result.codes.size == 1) "" else "s"} in view",
+            "$n code${if (n == 1) "" else "s"} in list",
             true,
         )
     }
@@ -276,13 +332,19 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>): Triple<String, 
 }
 
 private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when (result) {
-    is ScanResult.Codes -> result.codes.joinToString("\n") { "${it.symbology}\t${it.value}" }
+    // iOS :415-416: `.code` is the value only, `.multi` is every value, one per line.
+    is ScanResult.Codes -> result.codes.joinToString("\n") { it.value }
     is ScanResult.Ocr -> {
-        val fields = result.result.fields.joinToString("\n") { f -> "${f.section?.let { "$it · " }.orEmpty()}${f.label}: ${f.value}" }
-        val tables = result.result.tables.joinToString("\n") { t ->
-            (listOf(t.title, t.headers.joinToString("\t")) + t.rows.map { it.joinToString("\t") }).joinToString("\n")
+        val documentClass = OcrParser.documentClass(result.result.rawJson)
+        if (documentClass != null) {
+            documentClass
+        } else {
+            val fields = result.result.fields.joinToString("\n") { f -> "${f.section?.let { "$it · " }.orEmpty()}${f.label}: ${f.value}" }
+            val tables = result.result.tables.joinToString("\n") { t ->
+                (listOf(t.title, t.headers.joinToString("\t")) + t.rows.map { it.joinToString("\t") }).joinToString("\n")
+            }
+            listOf(fields, tables).filter { it.isNotBlank() }.joinToString("\n")
         }
-        listOf(fields, tables).filter { it.isNotBlank() }.joinToString("\n")
     }
     ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
     is ScanResult.Retrieval -> result.codes.joinToString("\n") { "${it.first}\t${if (it.second) "In list" else "Not in list"}" }
@@ -351,6 +413,7 @@ private fun RetrievalContent(codes: List<Pair<String, Boolean>>, onAction: (Scan
             }
         }
     }
+    // Controller wires this to the Items sheet as part of the ScannerRoute/ScannerScreen integration step.
     LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenSheet(SheetKind.Items)) }
 }
 
@@ -387,7 +450,6 @@ private fun OcrContent(
     onEditingChange: (String?) -> Unit,
     selectedField: String?,
     onSelectedChange: (String?) -> Unit,
-    onZoom: (Bitmap) -> Unit,
 ) {
     val o = scan.result
     val documentClass = remember(o.rawJson) { OcrParser.documentClass(o.rawJson) }
@@ -398,13 +460,14 @@ private fun OcrContent(
 
     val image = scan.image
     val feedbackOn = o.docType == DocType.IL
-    val hasOnDeviceAlt = o.docType == DocType.SL || o.docType == DocType.BOL || o.docType == DocType.IL || o.docType == DocType.DC
     val hasFieldBoxes = o.fields.any { it.vertices != null }
     val boxed = image != null && hasFieldBoxes
 
     if (hasFieldBoxes) {
+        // iOS only opens `ImageViewer` from document-acquisition page thumbnails (Task 12); the OCR
+        // boxed image itself is not a zoom target, so no click handler is wired here.
         image?.let { img ->
-            BoxedOcrImage(image = img, fields = o.fields, selected = selectedField, onSelect = onSelectedChange, onZoom = { onZoom(img) })
+            BoxedOcrImage(image = img, fields = o.fields, selected = selectedField, onSelect = onSelectedChange)
             if (o.fields.any { it.validatedBy.isNotEmpty() }) ValidationLegend()
         }
     }
@@ -415,7 +478,13 @@ private fun OcrContent(
         }
     }
 
-    if (!boxed && hasOnDeviceAlt && scan.subtitle.startsWith("Cloud")) {
+    // iOS :182 (`o.cloud, o.docType.vlmPrompt == nil`), not gated on `boxed`. Android's `OcrResult`
+    // carries no `cloud` flag, so "cloud" is read from the subtitle iOS itself composed
+    // ("Cloud · …" vs "On-device · …" / "Cloud · VLM" — see task-7-report.md); the VLM-prompt-type
+    // exclusion (Tire/ID card/Plate) is derived from `DocType`, as asked.
+    val isCloud = scan.subtitle.startsWith("Cloud", ignoreCase = true)
+    val isVlmPromptType = o.docType == DocType.Tire || o.docType == DocType.IdCard || o.docType == DocType.Plate
+    if (isCloud && !isVlmPromptType) {
         Text(
             "Cloud results do not include field locations. Switch to On-device to see linked boxes.",
             style = inter(13.sp), color = PX.Text2,
@@ -437,8 +506,8 @@ private fun OcrContent(
                     modifier = Modifier.padding(top = 14.dp, bottom = 2.dp),
                 )
             }
-            // Shown large above already; skip it here so its value isn't duplicated verbatim.
-            if (o.primary != null && f.id == o.primary.id) return@forEachIndexed
+            // iOS :183-238 shows the primary field again here (large card above + full row below);
+            // ported as-is, ambiguous-test risk handled on the test side (assertCountEquals).
             OcrFieldRow(
                 field = f,
                 index = i,
@@ -450,7 +519,8 @@ private fun OcrContent(
                 onEditToggle = { onEditingChange(if (editingField == f.id) null else f.id) },
                 onEditChange = { onFeedbackChange(f.id, ItemLabelFeedback.Entry(it, ilFeedback[f.id]?.thumbs)) },
                 onThumbs = { onFeedbackChange(f.id, ItemLabelFeedback.Entry(ilFeedback[f.id]?.edited ?: f.value, it)) },
-                onCopy = { onAction(ScannerAction.Copy(f.label, ilFeedback[f.id]?.edited ?: f.value)) },
+                // iOS :222 always copies the original `f.value`, even mid-edit.
+                onCopy = { onAction(ScannerAction.Copy(f.label, f.value)) },
             )
         }
     }
@@ -508,7 +578,10 @@ private fun OcrFieldRow(
                 )
             } else {
                 val edited = entry?.edited
-                Text(edited ?: field.value, style = inter(14.sp, FontWeight.Medium), color = PX.Ink)
+                val shown = edited ?: field.value
+                // iOS :209/:146: `f.mono ? .mono(13) : .inter(14, .medium)`. Android's `OcrField` has
+                // no `mono` flag, so it's approximated with iOS's own regex against the shown value.
+                Text(shown, style = if (isMonoValue(shown)) mono(13.sp) else inter(14.sp, FontWeight.Medium), color = PX.Ink)
                 if (edited != null && edited != field.value) {
                     Text(field.value, style = inter(12.sp), color = PX.Muted, textDecoration = TextDecoration.LineThrough)
                 }
@@ -526,45 +599,59 @@ private fun OcrFieldRow(
     }
 }
 
-/** Captured image with numbered, tappable field boxes (on-device results only). Tap to zoom full-screen. */
+/**
+ * Captured image with numbered, tappable field boxes (on-device results only). Not a zoom target —
+ * iOS only opens `ImageViewer` from document-acquisition page thumbnails (Task 12).
+ */
 @Composable
-private fun BoxedOcrImage(image: Bitmap, fields: List<OcrField>, selected: String?, onSelect: (String?) -> Unit, onZoom: () -> Unit) {
+private fun BoxedOcrImage(image: Bitmap, fields: List<OcrField>, selected: String?, onSelect: (String?) -> Unit) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(image.width.toFloat() / image.height.toFloat())
             .clip(RoundedCornerShape(12.dp)),
     ) {
-        Image(
-            bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.FillBounds,
-            modifier = Modifier.fillMaxSize().clickable(onClick = onZoom),
-        )
+        Image(bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize())
         fields.forEachIndexed { i, f ->
             val rect = fieldBox(f, image.width, image.height) ?: return@forEachIndexed
             val on = selected == f.id
             val tint = if (on) PX.Neon else colorFor(f.validatedBy)
+            val boxX = maxWidth * rect.left
+            val boxY = maxHeight * rect.top
             Box(
                 modifier = Modifier
-                    .offset(x = maxWidth * rect.left, y = maxHeight * rect.top)
+                    .offset(x = boxX, y = boxY)
                     .size(width = maxWidth * (rect.right - rect.left), height = maxHeight * (rect.bottom - rect.top))
+                    .zIndex(if (on) 1f else 0f)
                     .clip(RoundedCornerShape(4.dp))
                     .background(tint.copy(alpha = if (on) 0.3f else 0.16f))
                     .border(2.dp, tint, RoundedCornerShape(4.dp))
                     .clickable { onSelect(if (on) null else f.id) },
+            )
+            // iOS :449-453: the number chip is a separate overlay above-left of the box (offset
+            // -2/-14), always neon/purple — not the box's own validated_by tint — and must sit
+            // outside the box's clip so it isn't cropped.
+            Box(
+                modifier = Modifier
+                    .offset(x = boxX - 2.dp, y = boxY - 14.dp)
+                    .zIndex(if (on) 1f else 0f)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(if (on) PX.Neon else PX.Purple),
             ) {
                 Text(
                     "${i + 1}", style = montserrat(9.sp), color = if (on) PX.Ink else Color.White,
-                    modifier = Modifier.background(tint, RoundedCornerShape(3.dp)).padding(horizontal = 4.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
             }
         }
     }
 }
 
+/** iOS `sourceColor`/legend colours (Types.swift :141-145): system green/red/blue. */
 @Composable
 private fun ValidationLegend() {
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        listOf("Barcode" to Color(0xFF2E7D32), "Rule" to Color(0xFFC62828), "ML" to Color(0xFF1565C0)).forEach { (label, c) ->
+        listOf("Barcode" to iosGreen, "Rule" to iosRed, "ML" to iosBlue).forEach { (label, c) ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 Box(Modifier.size(width = 12.dp, height = 10.dp).clip(RoundedCornerShape(2.dp)).border(2.dp, c, RoundedCornerShape(2.dp)))
                 Text(label, style = inter(12.sp), color = PX.Muted)
@@ -573,12 +660,22 @@ private fun ValidationLegend() {
     }
 }
 
+private val iosGreen = Color(0xFF34C759)
+private val iosRed = Color(0xFFFF3B30)
+private val iosBlue = Color(0xFF007AFF)
+
+/** iOS `OCRField.sourceColor` (Types.swift :141-145): BARCODE -> green, APRIORI -> red, any other
+ *  non-empty validated_by -> blue, none -> the default purple box tint. */
 private fun colorFor(validatedBy: List<String>): Color = when {
-    "BARCODE" in validatedBy -> Color(0xFF2E7D32)
-    "APRIORI" in validatedBy -> Color(0xFFC62828)
-    "ML" in validatedBy -> Color(0xFF1565C0)
+    "BARCODE" in validatedBy -> iosGreen
+    "APRIORI" in validatedBy -> iosRed
+    validatedBy.isNotEmpty() -> iosBlue
     else -> PX.Purple
 }
+
+/** iOS `OCRField.mono` (Types.swift :146): digits/whitespace/`.,×xX#/:-`, optionally trailing ≤3 letters. */
+private val monoValueRegex = Regex("^[\\d\\s.,×xX#/:-]+[A-Za-z]{0,3}$")
+private fun isMonoValue(value: String): Boolean = monoValueRegex.matches(value)
 
 /**
  * On-device responses carry raw vertices (TL, TR, BL, BR) in the *captured image's own pixel

@@ -1,6 +1,8 @@
 package io.packagex.visiondemo.scanner
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import io.packagex.visiondemo.data.OcrParser
@@ -18,7 +20,9 @@ class ResultDrawerTest {
     @Test fun ocrPrimaryAndFieldsShown() {
         val r = OcrParser.parse("""{"data":{"inference":{"tracking_number":"1Z9","provider_name":"UPS"}}}""", DocType.SL)
         rule.setContent { VisionTheme { ResultDrawer(ScanResult.Ocr(r, null), expanded = true) {} } }
-        rule.onNodeWithText("1Z9").assertExists()
+        // iOS :183-238 shows the primary field both in its own large card and again in the field
+        // list below, so "1Z9" (the primary tracking number) is expected twice.
+        rule.onAllNodesWithText("1Z9").assertCountEquals(2)
         rule.onNodeWithText("Courier").assertExists()
     }
 
@@ -46,6 +50,8 @@ class ResultDrawerTest {
         )
         rule.setContent { VisionTheme { ResultDrawer(ScanResult.Codes(listOf(code)), expanded = true) {} } }
         rule.onNodeWithText("1234567890").assertExists()
-        rule.onNodeWithText("UPC-A").assertExists()
+        // The header subtitle and the dark card's label both show the symbology (iOS :99's
+        // `c.symbology` appears in the subtitle; the card mirrors it as its label).
+        rule.onAllNodesWithText("UPC-A").assertCountEquals(2)
     }
 }
