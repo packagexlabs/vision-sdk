@@ -106,7 +106,6 @@ fun DocumentReview(
 
 /** iOS: "<w> × <h> px · " + the quality warning, or "Sharp[ · creases and curl corrected] · exports as a searchable PDF". */
 internal fun pageNote(page: DocumentPage): String {
-    if (page.failed) return "Processing failed. Showing the page as captured."
     val img = page.enhanced ?: page.page ?: page.original
     val note = page.quality?.warning ?: "Sharp${if (page.wasDewarped) " · creases and curl corrected" else ""} · exports as a searchable PDF"
     return "${img.width} × ${img.height} px · $note"

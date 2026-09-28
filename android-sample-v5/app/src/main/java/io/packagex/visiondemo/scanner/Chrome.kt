@@ -117,7 +117,7 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (usesScanner) {
+            if (usesScanner || state.mode == ScanMode.DocAcq) {   // Document Acquisition has its own camera (iOS usesScanner)
                 RoundIcon(
                     icon = if (state.torch) Icons.Filled.FlashOn else Icons.Filled.FlashOff,
                     on = state.torch,

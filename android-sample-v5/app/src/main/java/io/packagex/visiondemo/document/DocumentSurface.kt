@@ -67,14 +67,15 @@ fun DocumentSurface(controller: DocumentController, paused: Boolean, showQuad: B
             if (Build.VERSION.SDK_INT < 31) Box(Modifier.fillMaxSize().background(PX.Ink.copy(alpha = 0.7f)))
         } else if (showQuad) {
             val quad by controller.quad.collectAsStateWithLifecycle()
-            quad?.let { QuadOutline(it) }
+            quad?.let { QuadOutline(it, mirrored = controller.front) }
         }
     }
 }
 
-/** The quad in analysis-frame px, mapped onto the FILL_CENTER preview (from the original's QuadOverlayView). */
+/** The quad in analysis-frame px, mapped onto the FILL_CENTER preview (from the original's QuadOverlayView);
+ *  [mirrored] for the front lens, whose preview PreviewView mirrors. */
 @Composable
-private fun QuadOutline(q: DocumentQuad) {
+private fun QuadOutline(q: DocumentQuad, mirrored: Boolean) {
     Canvas(Modifier.fillMaxSize()) {
         if (q.frameWidth == 0 || q.frameHeight == 0) return@Canvas
         val (rotW, rotH) = if (q.rotationDegrees % 180 == 0) q.frameWidth.toFloat() to q.frameHeight.toFloat() else q.frameHeight.toFloat() to q.frameWidth.toFloat()
@@ -89,7 +90,7 @@ private fun QuadOutline(q: DocumentQuad) {
                 270 -> c.y to (q.frameWidth - c.x)
                 else -> c.x to c.y
             }
-            val x = rx * scale + dx
+            val x = (rx * scale + dx).let { if (mirrored) size.width - it else it }
             val y = ry * scale + dy
             if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
         }

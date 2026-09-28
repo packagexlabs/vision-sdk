@@ -15,6 +15,7 @@ import io.packagex.visiondemo.data.ModelRepository
 import io.packagex.visiondemo.data.PreferencesRepository
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.ReportRepository
+import io.packagex.visiondemo.document.CaptureStart
 import io.packagex.visiondemo.document.DocumentCamera
 import io.packagex.visiondemo.document.DocumentPage
 import io.packagex.visiondemo.model.DocType
@@ -187,8 +188,11 @@ class FakeDocument : DocumentCamera {
     override var detecting = false
     var captures = 0
     var exports = 0
-    /** The shutter finds a page (the controller refuses without one). */
-    var pageInView = true
+    /** What the next shutter press starts. */
+    var captureStart = CaptureStart.Started
+    var torchOn = false
+    var front = false
+    var focusPoint: Pair<Float, Float>? = null
     var exportFails = false
 
     fun still(bitmap: Bitmap? = fakeBitmap()) { channel.trySend(bitmap) }
@@ -196,12 +200,19 @@ class FakeDocument : DocumentCamera {
         quad.value = if (seen) DocumentQuad(emptyList(), true, 1f, 100, 100, 0, true, 0f, 0f, 0f, 0f, 0f, false, false) else null
     }
 
-    override fun capture(): Boolean { if (pageInView) captures++; return pageInView }
+    override fun capture(): CaptureStart { if (captureStart == CaptureStart.Started) captures++; return captureStart }
+    override fun torch(on: Boolean) { torchOn = on }
+    override fun lens(front: Boolean) { this.front = front }
+    override fun focus(x: Float, y: Float) { focusPoint = x to y }
     var zoomRatio = 1f
     override fun zoom(ratio: Float) { zoomRatio = ratio }
     override suspend fun process(original: Bitmap, index: Int) = DocumentPage(original, index)
+    var exportedPages: List<DocumentPage> = emptyList()
+    var exportDelayMs = 0L
     override suspend fun exportPdf(pages: List<DocumentPage>, enhanced: Boolean): File? {
         exports++
+        exportedPages = pages
+        if (exportDelayMs > 0) delay(exportDelayMs)
         return if (exportFails) null else File("Document.pdf")
     }
 }

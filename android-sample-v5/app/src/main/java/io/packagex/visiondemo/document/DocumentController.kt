@@ -12,6 +12,7 @@ import android.graphics.Rect
 import android.util.Log
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -63,14 +65,38 @@ interface DocumentCamera {
     var auto: Boolean
     /** Live corner detection (and so auto capture) runs only while true: off under the drawer, sheets and processing. */
     var detecting: Boolean
-    /** Shutter: false when no page is in view (or a capture is already running). */
-    fun capture(): Boolean
+    /** Shutter. */
+    fun capture(): CaptureStart
     /** Zoom preset; kept across rebinds. */
     fun zoom(ratio: Float)
+    /** Torch; kept across rebinds (off on a lens without a flash). */
+    fun torch(on: Boolean)
+    /** Front or back lens (iOS `flipCamera`); rebinds when bound. */
+    fun lens(front: Boolean)
+    /** Tap-to-focus at a view-normalized (0..1) point. */
+    fun focus(x: Float, y: Float)
     /** Dewarp, quality and enhance for one captured page. */
     suspend fun process(original: Bitmap, index: Int): DocumentPage
     /** Recognises the text layers and writes a searchable PDF under cache/docs; null on failure. */
     suspend fun exportPdf(pages: List<DocumentPage>, enhanced: Boolean): File?
+}
+
+/** What a shutter press started. */
+enum class CaptureStart { Started, Busy, NoPage }
+
+/** No Document Acquisition (the default for callers that don't use it). */
+object NoDocumentCamera : DocumentCamera {
+    override val quad: StateFlow<DocumentQuad?> = MutableStateFlow(null)
+    override val stills: Flow<Bitmap?> = emptyFlow()
+    override var auto = false
+    override var detecting = false
+    override fun capture() = CaptureStart.NoPage
+    override fun zoom(ratio: Float) {}
+    override fun torch(on: Boolean) {}
+    override fun lens(front: Boolean) {}
+    override fun focus(x: Float, y: Float) {}
+    override suspend fun process(original: Bitmap, index: Int) = DocumentPage(original, index)
+    override suspend fun exportPdf(pages: List<DocumentPage>, enhanced: Boolean): File? = null
 }
 
 /**
@@ -109,10 +135,15 @@ class DocumentController @Inject constructor(
     private var imageCapture: ImageCapture? = null
     private var camera: Camera? = null
     private var zoomRatio = 1f
+    private var torchOn = false
+    /** The lens in use; the preview mirrors the front lens, so the outline must too. */
+    var front = false
+        private set
     /** bind() was called and unbind() not since; the provider future may complete after an unbind. */
     private var wanted = false
+    private var bound: Pair<LifecycleOwner, PreviewView>? = null
 
-    private var scanner: DocumentScanner? = null
+    @Volatile private var scanner: DocumentScanner? = null
 
     /**
      * Second detector for the captured still: single inference, no Kalman/1€/ROI/
@@ -134,56 +165,60 @@ class DocumentController @Inject constructor(
         )
     }
 
-    /** After an auto-capture the page must leave the frame before the next one arms. */
-    @Volatile private var armed = true
-    private var invalidFrames = 0
+    private val gate = AutoCaptureGate(STILL_FRAMES, STILL_FRACTION)
 
     @Volatile private var lastQuad: DocumentQuad? = null
 
     @Volatile private var capturing = false
-    private var stillFrames = 0
-    private var stillRef: List<PointF>? = null
 
     /** Main thread. Claim [io.packagex.visiondemo.camera.CameraOwner.Document] first so the SDK camera is stopped. */
     fun bind(owner: LifecycleOwner, preview: PreviewView) {
         wanted = true
+        bound = owner to preview
         val future = ProcessCameraProvider.getInstance(ctx)
         future.addListener({
-            if (!wanted) return@addListener
-            val p = future.get()
-            provider = p
+            // The corner model loads off the main thread; binding is main-thread only.
             if (scanner == null) scanner = DocumentScanner.fromAsset(ctx)
-            // Same 4:3 for analysis and still so the quad scales straight across.
-            val fourByThree = ResolutionSelector.Builder().setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY).build()
-            val pv = Preview.Builder().setResolutionSelector(fourByThree).build().also { it.surfaceProvider = preview.surfaceProvider }
-            val an = ImageAnalysis.Builder()
-                .setResolutionSelector(fourByThree)
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-                .build()
-            val cap = ImageCapture.Builder()
-                .setResolutionSelector(fourByThree)
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
-                .setJpegQuality(97)
-                .build()
-            try {
-                // The SDK camera is stopped while Document Acquisition owns the sensor.
-                p.unbindAll()
-                camera = p.bindToLifecycle(owner, CameraSelector.DEFAULT_BACK_CAMERA, pv, an, cap)
-                    .also { it.cameraControl.setZoomRatio(zoomRatio) }
-                useCases = listOf(pv, an, cap)
-                analysis = an
-                imageCapture = cap
-                applyAnalyzer()
-            } catch (e: Exception) {
-                Log.e(TAG, "bind failed", e)
+            main.execute { if (wanted && bound == owner to preview) bindNow(future.get(), owner, preview) }
+        }, analysisExecutor)
+    }
+
+    private fun bindNow(p: ProcessCameraProvider, owner: LifecycleOwner, preview: PreviewView) {
+        provider = p
+        // Same 4:3 for analysis and still so the quad scales straight across.
+        val fourByThree = ResolutionSelector.Builder().setAspectRatioStrategy(AspectRatioStrategy.RATIO_4_3_FALLBACK_AUTO_STRATEGY).build()
+        val pv = Preview.Builder().setResolutionSelector(fourByThree).build().also { it.surfaceProvider = preview.surfaceProvider }
+        val an = ImageAnalysis.Builder()
+            .setResolutionSelector(fourByThree)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+            .build()
+        val cap = ImageCapture.Builder()
+            .setResolutionSelector(fourByThree)
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY)
+            .setJpegQuality(97)
+            .build()
+        try {
+            // The SDK camera is stopped while Document Acquisition owns the sensor.
+            p.unbindAll()
+            val selector = if (front) CameraSelector.DEFAULT_FRONT_CAMERA else CameraSelector.DEFAULT_BACK_CAMERA
+            camera = p.bindToLifecycle(owner, selector, pv, an, cap).also {
+                it.cameraControl.setZoomRatio(zoomRatio)
+                if (it.cameraInfo.hasFlashUnit()) it.cameraControl.enableTorch(torchOn)
             }
-        }, main)
+            useCases = listOf(pv, an, cap)
+            analysis = an
+            imageCapture = cap
+            applyAnalyzer()
+        } catch (e: Exception) {
+            Log.e(TAG, "bind failed", e)
+        }
     }
 
     /** Main thread. Releases only this pipeline's use cases (the SDK camera may already be restarting). */
     fun unbind() {
         wanted = false
+        bound = null
         analysis?.clearAnalyzer()
         if (useCases.isNotEmpty()) provider?.unbind(*useCases.toTypedArray())
         useCases = emptyList()
@@ -196,9 +231,8 @@ class DocumentController @Inject constructor(
 
     private fun applyAnalyzer() {
         val an = analysis ?: return
-        stillFrames = 0
-        stillRef = null
         if (detecting) {
+            gate.detectionOn()   // Add page / Retake / closing the drawer re-arms auto capture
             scanner?.let { s ->
                 s.reset()
                 an.setAnalyzer(analysisExecutor, DocumentAnalyzer(s) { q -> onQuad(q) })
@@ -219,34 +253,13 @@ class DocumentController @Inject constructor(
             it.x > q.frameWidth * EDGE_MARGIN && it.x < q.frameWidth * (1 - EDGE_MARGIN) &&
                 it.y > q.frameHeight * EDGE_MARGIN && it.y < q.frameHeight * (1 - EDGE_MARGIN)
         }
-        if (!q.valid) {
-            if (++invalidFrames >= 5) armed = true
-        } else {
-            invalidFrames = 0
-        }
-        if (!auto || capturing || !q.valid || !inside || !armed) {
-            stillFrames = 0
-            stillRef = null
-            return
-        }
-        // Auto-capture: every corner within STILL_FRACTION of the frame diagonal
-        // of where it was when the hold started, for STILL_FRAMES analysis frames.
-        val pts = q.corners.map { PointF(it.x, it.y) }
-        val ref = stillRef
-        val tol = STILL_FRACTION * hypot(q.frameWidth.toFloat(), q.frameHeight.toFloat())
-        if (ref == null || pts.indices.any { hypot(pts[it].x - ref[it].x, pts[it].y - ref[it].y) > tol }) {
-            stillRef = pts
-            stillFrames = 0
-            return
-        }
-        stillFrames++
-        if (stillFrames >= STILL_FRAMES) main.execute { capture() }
+        if (gate.frame(q.valid, inside, q.corners.map { it.x to it.y }, q.frameWidth, q.frameHeight, auto, capturing)) main.execute { capture() }
     }
 
-    override fun capture(): Boolean {
-        val q = lastQuad ?: return false
-        if (!q.valid || capturing) return false
-        val cap = imageCapture ?: return false
+    override fun capture(): CaptureStart {
+        if (capturing) return CaptureStart.Busy
+        val q = lastQuad?.takeIf { it.valid } ?: return CaptureStart.NoPage
+        val cap = imageCapture ?: return CaptureStart.NoPage
         capturing = true
         cap.takePicture(
             main,
@@ -254,7 +267,7 @@ class DocumentController @Inject constructor(
                 override fun onCaptureSuccess(image: ImageProxy) {
                     cropExecutor.execute {
                         val page = runCatching { image.use { cropToQuad(it, q) } }.onFailure { Log.e(TAG, "crop failed", it) }.getOrNull()
-                        if (page != null) armed = false
+                        if (page != null) gate.captured()
                         capturing = false
                         _stills.trySend(page)
                     }
@@ -267,7 +280,27 @@ class DocumentController @Inject constructor(
                 }
             },
         )
-        return true
+        return CaptureStart.Started
+    }
+
+    override fun torch(on: Boolean) {
+        torchOn = on
+        camera?.let { if (it.cameraInfo.hasFlashUnit()) it.cameraControl.enableTorch(on) }
+    }
+
+    override fun lens(front: Boolean) {
+        if (front == this.front) return
+        this.front = front
+        val (owner, preview) = bound ?: return
+        unbind()
+        bind(owner, preview)
+    }
+
+    override fun focus(x: Float, y: Float) {
+        val (_, preview) = bound ?: return
+        val cam = camera ?: return
+        val point = preview.meteringPointFactory.createPoint(x * preview.width, y * preview.height)
+        cam.cameraControl.startFocusAndMetering(FocusMeteringAction.Builder(point).build())
     }
 
     override fun zoom(ratio: Float) {
@@ -282,7 +315,8 @@ class DocumentController @Inject constructor(
     override suspend fun exportPdf(pages: List<DocumentPage>, enhanced: Boolean): File? = withContext(Dispatchers.IO) {
         pages.forEach(session::recognize)
         val dir = File(ctx.cacheDir, "docs").apply { mkdirs() }
-        dir.listFiles()?.forEach { it.delete() }   // only the latest export is kept
+        // Keep the last few exports (a share target may still be reading one); cache/ is the system's to clear.
+        dir.listFiles()?.sortedByDescending { it.lastModified() }?.drop(KEPT_EXPORTS - 1)?.forEach { it.delete() }
         val stamp = SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss", Locale.US).format(Date())
         File(dir, "Document-$stamp.pdf").takeIf { DocumentPdf.write(pages, enhanced, it) }
     }
@@ -501,6 +535,9 @@ class DocumentController @Inject constructor(
 
     private companion object {
         const val TAG = "DocumentController"
+
+        /** Exported PDFs kept in cache/docs, the new one included. */
+        const val KEPT_EXPORTS = 3
 
         /** Analysis frames the quad must hold within [STILL_FRACTION] before auto-capture. */
         const val STILL_FRAMES = 12

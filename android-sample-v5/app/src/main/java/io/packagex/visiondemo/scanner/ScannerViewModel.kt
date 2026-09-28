@@ -20,8 +20,10 @@ import io.packagex.visiondemo.data.ReportRepository
 import io.packagex.visiondemo.data.ScanError
 import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.designsystem.PXButtonKind
+import io.packagex.visiondemo.document.CaptureStart
 import io.packagex.visiondemo.document.DocumentCamera
 import io.packagex.visiondemo.document.DocumentPages
+import io.packagex.visiondemo.document.NoDocumentCamera
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.ModelState
@@ -65,7 +67,7 @@ class ScannerViewModel @Inject constructor(
     private val entitlement: EntitlementRepository,
     private val catalog: ItemCatalogRepository,
     secrets: Secrets,
-    internal val document: DocumentCamera,
+    internal val document: DocumentCamera = NoDocumentCamera,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ScannerUiState(missingKey = if (secrets.isMissing) secrets.missingMessage else null))
     val state: StateFlow<ScannerUiState> = _state.asStateFlow()
@@ -99,9 +101,14 @@ class ScannerViewModel @Inject constructor(
 
     /** Document Acquisition's pages (iOS `docPages` / `docExported`). */
     private val docPages = DocumentPages()
+    private var docExport: Job? = null
+    /** The SDK camera's lens when Document Acquisition took over; restored in the state on leaving. */
+    private var sdkFront = false
 
     private val s get() = _state.value
     private val usesScanner get() = ownerFor(s.mode) == CameraOwner.Scanner
+    /** A camera the user drives (torch, flip, focus): the SDK scanner, or Document Acquisition's (iOS usesScanner). */
+    private val ownCamera get() = usesScanner || s.mode == ScanMode.DocAcq
 
     init {
         // While a local write is in flight the repo can still emit the value from before it; skip those.
@@ -201,8 +208,12 @@ class ScannerViewModel @Inject constructor(
         retry = null
         clearInView()
         dismissing = false
-        if (s.torch) camera.torch(false)
-        if (s.mode == ScanMode.DocAcq) docPages.reset()   // iOS setMode: the pages are dropped on leaving
+        setTorch(false)
+        if (s.mode == ScanMode.DocAcq) {
+            docPages.reset()   // iOS setMode: the pages are dropped on leaving
+            _state.update { it.copy(frontCamera = sdkFront) }   // a flip in Document Acquisition stays with its camera
+        }
+        if (m == ScanMode.DocAcq) { sdkFront = s.frontCamera; document.lens(s.frontCamera) }
         setZoom(1f)
         _state.update {
             it.copy(
@@ -249,18 +260,18 @@ class ScannerViewModel @Inject constructor(
 
     /** iOS `flipCamera`: a facing switch turns the torch off and resets the zoom. */
     private fun flipCamera() {
-        if (!usesScanner) return
+        if (!ownCamera) return
         val front = !s.frontCamera
         setTorch(false)
         _state.update { it.copy(frontCamera = front, zoom = 1f) }
-        camera.lens(front)
+        if (s.mode == ScanMode.DocAcq) document.lens(front) else camera.lens(front)
         toast(if (front) "Front camera" else "Back camera")
     }
 
     /** Tap-to-focus and its ring, only on the live camera (iOS CameraScreen :17-21). */
     private fun focus(x: Float, y: Float) {
-        if (!usesScanner || s.result != null || s.sheet != null || s.alert != null) return
-        camera.focus(x, y)
+        if (!ownCamera || s.result != null || s.sheet != null || s.alert != null) return
+        if (s.mode == ScanMode.DocAcq) document.focus(x, y) else camera.focus(x, y)
         _state.update { it.copy(focus = FocusTap(x, y, (it.focus?.id ?: 0) + 1)) }
     }
 
@@ -282,7 +293,7 @@ class ScannerViewModel @Inject constructor(
     private fun setTorch(on: Boolean) {
         if (on == s.torch) return
         _state.update { it.copy(torch = on) }
-        camera.torch(on)
+        if (s.mode == ScanMode.DocAcq) document.torch(on) else camera.torch(on)
     }
 
     /**
@@ -315,11 +326,10 @@ class ScannerViewModel @Inject constructor(
             // ponytail: rows come from the AR controller (Task 11); until then there are never any markers.
             ScanMode.Ar -> toast("No markers yet. Point at barcodes first.")
             ScanMode.Price -> show(ScanResult.Price)   // iOS shows the drawer even with no tags yet
-            ScanMode.DocAcq -> if (document.capture()) {
-                flashOnce()
-                _state.update { it.copy(phase = Phase.Scanning) }
-            } else {
-                toast("Fit the page inside the frame")
+            ScanMode.DocAcq -> when (document.capture()) {
+                CaptureStart.Started -> { flashOnce(); _state.update { it.copy(phase = Phase.Scanning) } }
+                CaptureStart.Busy -> {}   // an auto capture is already taking the page
+                CaptureStart.NoPage -> toast("Fit the page inside the frame")
             }
             ScanMode.Retrieval -> {
                 if (s.items.isEmpty()) return _state.update { it.copy(alert = noItemsAlert) }
@@ -631,11 +641,12 @@ class ScannerViewModel @Inject constructor(
         }
     }
 
-    /** iOS ResultDrawer `exportPDF`: the next capture after an export starts a new document. */
+    /** iOS ResultDrawer `exportPDF`: the pages the drawer shows; the next capture after an export starts a new document. */
     private fun exportPdf(enhanced: Boolean) {
-        val pages = docPages.pages.takeIf { it.isNotEmpty() } ?: return
+        if (docExport?.isActive == true) return
+        val pages = (s.result as? ScanResult.Document)?.pages?.takeIf { it.isNotEmpty() } ?: return
         if (pages.any { it.lines == null }) toast("Preparing searchable PDF…")
-        viewModelScope.launch {
+        docExport = viewModelScope.launch {
             val file = document.exportPdf(pages, enhanced) ?: return@launch toast("PDF export failed")
             docPages.exported = true
             _effects.trySend(ScannerEffect.SharePdf(file))

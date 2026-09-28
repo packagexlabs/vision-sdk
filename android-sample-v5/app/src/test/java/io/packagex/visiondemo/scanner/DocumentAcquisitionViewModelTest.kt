@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.data.Secrets
+import io.packagex.visiondemo.document.CaptureStart
 import io.packagex.visiondemo.fakes.FakeCamera
 import io.packagex.visiondemo.fakes.FakeCatalog
 import io.packagex.visiondemo.fakes.FakeDocument
@@ -79,12 +80,53 @@ class DocumentAcquisitionViewModelTest {
     }
 
     @Test fun shutterWithoutAPageToasts() = runTest {
-        enterDocAcq(); doc.pageInView = false
+        enterDocAcq(); doc.captureStart = CaptureStart.NoPage
         v.effects.test {
             v.onAction(ScannerAction.Shutter); advanceUntilIdle()
             assertEquals(ScannerEffect.Toast("Fit the page inside the frame"), awaitItem())
         }
         assertEquals(Phase.Idle, v.state.value.phase)
+    }
+
+    @Test fun shutterDuringAnAutoCaptureIsSilent() = runTest {
+        enterDocAcq(); doc.captureStart = CaptureStart.Busy
+        v.effects.test {
+            v.onAction(ScannerAction.Shutter); advanceUntilIdle()
+            expectNoEvents()
+        }
+        assertEquals(Phase.Idle, v.state.value.phase)
+        assertEquals(listOf(1), capturePage())   // the auto capture's page still arrives
+    }
+
+    @Test fun torchFlipAndFocusDriveTheDocumentCamera() = runTest {
+        enterDocAcq()
+        v.onAction(ScannerAction.ToggleTorch); advanceUntilIdle(); assertTrue(doc.torchOn); assertFalse(cam.torchOn)
+        v.onAction(ScannerAction.FlipCamera); advanceUntilIdle()
+        assertTrue(doc.front); assertFalse(cam.front); assertFalse(doc.torchOn); assertTrue(v.state.value.frontCamera)
+        v.onAction(ScannerAction.Focus(0.25f, 0.5f)); advanceUntilIdle()
+        assertEquals(0.25f to 0.5f, doc.focusPoint); assertNull(cam.focusPoint); assertEquals(0.25f, v.state.value.focus?.x)
+        v.onAction(ScannerAction.ToggleTorch); v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
+        assertFalse(doc.torchOn); assertFalse(v.state.value.frontCamera)   // the SDK camera keeps its own (back) lens
+    }
+
+    @Test fun exportUsesTheShownPages() = runTest {
+        enterDocAcq(); capturePage()
+        v.onAction(ScannerAction.RescanDocument(dropLast = false)); capturePage()
+        v.onAction(ScannerAction.RescanDocument(dropLast = true)); advanceUntilIdle()
+        v.onAction(ScannerAction.ReopenLast); advanceUntilIdle()
+        v.onAction(ScannerAction.ExportPdf(enhanced = true)); advanceUntilIdle()
+        assertEquals(listOf(1, 2), doc.exportedPages.map { it.index })
+        v.onAction(ScannerAction.CloseResult)
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); v.onAction(ScannerAction.SetMode(ScanMode.DocAcq)); advanceUntilIdle()
+        v.onAction(ScannerAction.ReopenLast); advanceUntilIdle()
+        v.onAction(ScannerAction.ExportPdf(enhanced = true)); advanceUntilIdle()
+        assertEquals(2, doc.exports); assertEquals(listOf(1, 2), doc.exportedPages.map { it.index })
+    }
+
+    @Test fun oneExportAtATime() = runTest {
+        enterDocAcq(); capturePage(); doc.exportDelayMs = 1_000
+        v.onAction(ScannerAction.ExportPdf(enhanced = true)); v.onAction(ScannerAction.ExportPdf(enhanced = true)); advanceUntilIdle()
+        assertEquals(1, doc.exports)
     }
 
     @Test fun failedCaptureReturnsToIdle() = runTest {
