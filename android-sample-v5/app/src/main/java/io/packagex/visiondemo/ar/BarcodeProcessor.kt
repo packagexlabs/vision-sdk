@@ -8,6 +8,7 @@ import android.util.Log
 import com.packagexlabs.visionbarcodescanner.ScannerCallback
 import com.packagexlabs.visionbarcodescanner.VisionBarcodeScanner
 import com.packagexlabs.visionbarcodescanner.model.BarcodeState
+import io.packagex.visiondemo.BuildConfig
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
@@ -145,7 +146,7 @@ class BarcodeProcessor(
                         Detection(payload, tb.formatName ?: "Barcode", rx, ry)
                     }
                 if (detections.isNotEmpty()) {
-                    Log.d("MarkerDiag", "BATCH dets=${detections.size}")
+                    if (BuildConfig.DEBUG) Log.d("MarkerDiag", "BATCH dets=${detections.size}")
                     onResult(detections)
                 }
             } catch (t: Throwable) {

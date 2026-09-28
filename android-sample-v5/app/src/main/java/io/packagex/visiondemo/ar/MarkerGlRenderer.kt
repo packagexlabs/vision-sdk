@@ -31,7 +31,7 @@ private const val PULSE_MS = 700L
  * frame, in the same [ArBarcodeRenderer.onDrawFrame] call that draws the
  * camera background.
  *
- * This used to be a separate [MarkerOverlayView] invalidated via
+ * This used to be a separate overlay View invalidated via
  * `postInvalidateOnAnimation`, which lands 1-2 vsyncs after the camera frame
  * it corresponds to and was visible as marker swim during a pan. Drawing here
  * keeps markers locked to the frame that produced their projection.

@@ -14,6 +14,7 @@ import com.google.ar.core.Point
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
+import io.packagex.visiondemo.BuildConfig
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -40,17 +41,11 @@ class ArBarcodeRenderer(
     private val barcodeProcessor: BarcodeProcessor,
     density: Float,
     private val onStatus: (ScannerStatus) -> Unit,
-    private val onDebug: ((ScreenDebug?) -> Unit)? = null,
 ) : GLSurfaceView.Renderer {
     @Volatile
     var session: Session? = null
 
     private val markerRenderer = MarkerGlRenderer(density)
-
-    /** Draw ARCore's planes + feature points on the overlay (debug). */
-    @Volatile
-    var showTrackingDebug = false
-    private var debugSent = false
 
     /**
      * SKU -> item name, edited from the Items sheet on the main thread while this
@@ -368,13 +363,6 @@ class ArBarcodeRenderer(
             pendingBatches.clear()
         }
 
-        if (showTrackingDebug) {
-            onDebug?.invoke(buildTrackingDebug(session, frame, camera))
-            debugSent = true
-        } else if (debugSent) {
-            onDebug?.invoke(null)
-            debugSent = false // clear the last painted geometry once
-        }
         maybePushStatus(camera)
     }
 
@@ -418,7 +406,7 @@ class ArBarcodeRenderer(
         // is already a real measurement. Gating placement on a plane just delayed
         // the first marker for no accuracy gain.
         if (!mapReady) return
-        android.util.Log.d("MarkerDiag", "MAP-READY after ${warmUp.frames} tracked frames")
+        if (BuildConfig.DEBUG) android.util.Log.d("MarkerDiag", "MAP-READY after ${warmUp.frames} tracked frames")
     }
 
     private fun updateMotionEstimate(
@@ -527,7 +515,7 @@ class ArBarcodeRenderer(
                         markers[i] = b
                     }
                     markers.removeAt(j)
-                    android.util.Log.d(
+                    if (BuildConfig.DEBUG) android.util.Log.d(
                         "MarkerDiag",
                         "MERGE payload=${a.payload.hashCode()} markers=${markers.size}",
                     )
@@ -583,15 +571,17 @@ class ArBarcodeRenderer(
                 // Placement trades "always places something (often wrong)"
                 // for "places only what it can measure" — this quantifies
                 // the cost of that trade.
-                hitKindCounts.merge(
-                    hit?.trackable?.javaClass?.simpleName ?: "NONE",
-                    1,
-                    Int::plus,
-                )
-                if (SystemClock.uptimeMillis() - lastHitStatMs > 3000) {
-                    lastHitStatMs = SystemClock.uptimeMillis()
-                    android.util.Log.d("HitDiag", "hits=$hitKindCounts")
-                    hitKindCounts.clear()
+                if (BuildConfig.DEBUG) {
+                    hitKindCounts.merge(
+                        hit?.trackable?.javaClass?.simpleName ?: "NONE",
+                        1,
+                        Int::plus,
+                    )
+                    if (SystemClock.uptimeMillis() - lastHitStatMs > 3000) {
+                        lastHitStatMs = SystemClock.uptimeMillis()
+                        android.util.Log.d("HitDiag", "hits=$hitKindCounts")
+                        hitKindCounts.clear()
+                    }
                 }
                 if (hit == null) continue
                 val h = hit.hitPose
@@ -657,7 +647,7 @@ class ArBarcodeRenderer(
         val nowMs = SystemClock.uptimeMillis()
         if (reprojN > 0 && nowMs - lastReprojLogMs > 2000) {
             lastReprojLogMs = nowMs
-            android.util.Log.d(
+            if (BuildConfig.DEBUG) android.util.Log.d(
                 "ReprojDiag",
                 "n=%d mean=%.1fcm max=%.1fcm dist=%.2fm gate=%s".format(
                     reprojN,
@@ -872,7 +862,7 @@ class ArBarcodeRenderer(
         val birthPose =
             com.google.ar.core
                 .Pose(consensusPos, h.rotationQuaternion)
-        android.util.Log.d(
+        if (BuildConfig.DEBUG) android.util.Log.d(
             "BirthDiag",
             "payload=%d n=%d spread=%.1fcm dist=%.2fm".format(
                 det.payload.hashCode(),
@@ -901,7 +891,7 @@ class ArBarcodeRenderer(
         )
         lastPayload = det.payload
         mergePending = true
-        android.util.Log.d(
+        if (BuildConfig.DEBUG) android.util.Log.d(
             "MarkerDiag",
             "CREATE payload=${det.payload.hashCode()} markers=${markers.size} type=${hit.trackable.javaClass.simpleName}",
         )
@@ -939,99 +929,11 @@ class ArBarcodeRenderer(
 
     private val screenDeadbandPx = 4f
 
-    // ---- tracking-geometry debug overlay ---------------------------------
-    private val dbgLocal = FloatArray(3)
-    private val dbgWorld = FloatArray(3)
-    private val maxDebugPoints = 300
-    private val dbgPoints = FloatArray(maxDebugPoints * 3)
 
-    /** Projects a world point with the matrices already in viewMatrix/projMatrix. */
-    private fun projectToScreen(
-        x: Float,
-        y: Float,
-        z: Float,
-        out: FloatArray,
-        at: Int,
-    ): Boolean {
-        worldPoint[0] = x
-        worldPoint[1] = y
-        worldPoint[2] = z
-        worldPoint[3] = 1f
-        Matrix.multiplyMV(clipPoint, 0, viewMatrix, 0, worldPoint, 0)
-        Matrix.multiplyMV(worldPoint, 0, projMatrix, 0, clipPoint, 0)
-        val w = worldPoint[3]
-        if (w <= 0f) return false
-        out[at] = (worldPoint[0] / w + 1f) / 2f * viewportWidth
-        out[at + 1] = (1f - worldPoint[1] / w) / 2f * viewportHeight
-        return true
-    }
-
-    /**
-     * Debug-only, so per-frame allocation is acceptable here. Plane polygons
-     * come from Plane.getPolygon() (x,z pairs in the plane's local frame,
-     * about centerPose); the point cloud from Frame.acquirePointCloud()
-     * (x,y,z,confidence quads), which must be released.
-     */
-    private fun buildTrackingDebug(
-        session: Session,
-        frame: Frame,
-        camera: Camera,
-    ): ScreenDebug {
-        val planes = ArrayList<FloatArray>()
-        for (plane in session.getAllTrackables(Plane::class.java)) {
-            if (plane.trackingState != TrackingState.TRACKING || plane.subsumedBy != null) continue
-            val poly = plane.polygon ?: continue
-            val nVerts = poly.limit() / 2
-            if (nVerts < 3) continue
-            val screen = FloatArray(nVerts * 2)
-            val pose = plane.centerPose
-            var ok = true
-            for (v in 0 until nVerts) {
-                dbgLocal[0] = poly.get(v * 2)
-                dbgLocal[1] = 0f
-                dbgLocal[2] = poly.get(v * 2 + 1)
-                pose.transformPoint(dbgLocal, 0, dbgWorld, 0)
-                if (!projectToScreen(dbgWorld[0], dbgWorld[1], dbgWorld[2], screen, v * 2)) {
-                    // vertex behind the camera (floor planes usually extend behind us):
-                    // reuse the previous vertex rather than losing the whole polygon
-                    if (v == 0) {
-                        ok = false
-                        break
-                    }
-                    screen[v * 2] = screen[v * 2 - 2]
-                    screen[v * 2 + 1] = screen[v * 2 - 1]
-                }
-            }
-            if (ok) planes.add(screen)
-        }
-
-        var count = 0
-        try {
-            frame.acquirePointCloud().use { pc ->
-                val buf = pc.points
-                val n = buf.limit() / 4
-                var i = 0
-                while (i < n && count < maxDebugPoints) {
-                    val x = buf.get(i * 4)
-                    val y = buf.get(i * 4 + 1)
-                    val z = buf.get(i * 4 + 2)
-                    val conf = buf.get(i * 4 + 3)
-                    if (projectToScreen(x, y, z, dbgPoints, count * 3)) {
-                        dbgPoints[count * 3 + 2] = conf
-                        count++
-                    }
-                    i++
-                }
-            }
-        } catch (_: Exception) {
-            // point cloud not available this frame — planes alone still draw
-        }
-        return ScreenDebug(planes, dbgPoints.copyOf(count * 3), count)
-    }
 
     private fun projectMarkers(camera: Camera): List<ScreenMarker> {
         if (markers.isEmpty()) return emptyList()
-        logDrift()
+        if (BuildConfig.DEBUG) logDrift()
 
         val result = ArrayList<ScreenMarker>(markers.size)
         val names = catalog.get()
