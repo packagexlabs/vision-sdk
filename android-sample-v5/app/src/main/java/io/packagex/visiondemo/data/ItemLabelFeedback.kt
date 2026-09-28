@@ -18,6 +18,7 @@ import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
+import java.net.MalformedURLException
 import java.net.URL
 import java.util.UUID
 
@@ -99,34 +100,39 @@ object ItemLabelFeedback {
                 if (type != null) body.write("Content-Type: $type\r\n".toByteArray())
                 body.write("\r\n".toByteArray()); body.write(data); body.write("\r\n".toByteArray())
             }
-            val jpeg = ByteArrayOutputStream().also { image.compress(Bitmap.CompressFormat.JPEG, 80, it) }.toByteArray()
-            part("image", jpeg, filename = "feedback_image.jpg", type = "image/jpeg")
+            val png = ByteArrayOutputStream().also { image.compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
+            part("image", png, filename = "feedback_image.png", type = "image/png")
             val now = System.currentTimeMillis() / 1000.0
             part("feedback_data", payload(r, entries, now).toString().toByteArray())
             val text = comment.trim()
             if (text.isNotEmpty()) part("user_feedback_text", text.toByteArray())
             body.write("--$boundary--\r\n".toByteArray())
 
-            val conn = URL("$server/submit-feedback").openConnection() as HttpURLConnection
-            conn.requestMethod = "POST"
-            conn.doOutput = true
-            conn.connectTimeout = 30_000
-            conn.readTimeout = 30_000
-            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
             try {
-                conn.outputStream.use { it.write(body.toByteArray()) }
-                val code = conn.responseCode
-                val responseText = (if (code in 200..201) conn.inputStream else conn.errorStream)?.bufferedReader()?.readText().orEmpty()
-                val json = runCatching { Json.parseToJsonElement(responseText) as? JsonObject }.getOrNull()
-                when {
-                    code !in 200..201 -> "Server error: ${(json?.get("message") as? JsonPrimitive)?.content ?: "code $code"}"
-                    (json?.get("status") as? JsonPrimitive)?.content != "success" -> "Server responded with unexpected format"
-                    else -> "Feedback sent · ${(json["total_entities"] as? JsonPrimitive)?.content ?: r.fields.size} entities"
+                val conn = (URL("$server/submit-feedback").openConnection() as HttpURLConnection).apply {
+                    requestMethod = "POST"
+                    doOutput = true
+                    connectTimeout = 30_000
+                    readTimeout = 30_000
+                    setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
                 }
+                try {
+                    conn.outputStream.use { it.write(body.toByteArray()) }
+                    val code = conn.responseCode
+                    val responseText = (if (code in 200..201) conn.inputStream else conn.errorStream)?.bufferedReader()?.readText().orEmpty()
+                    val json = runCatching { Json.parseToJsonElement(responseText) as? JsonObject }.getOrNull()
+                    when {
+                        code !in 200..201 -> "Server error: ${(json?.get("message") as? JsonPrimitive)?.content ?: "code $code"}"
+                        (json?.get("status") as? JsonPrimitive)?.content != "success" -> "Server responded with unexpected format"
+                        else -> "Feedback sent · ${(json["total_entities"] as? JsonPrimitive)?.content ?: r.fields.size} entities"
+                    }
+                } finally {
+                    conn.disconnect()
+                }
+            } catch (e: MalformedURLException) {
+                "Invalid feedback server URL"
             } catch (e: Exception) {
                 "Network error: ${e.message}"
-            } finally {
-                conn.disconnect()
             }
         }
 
