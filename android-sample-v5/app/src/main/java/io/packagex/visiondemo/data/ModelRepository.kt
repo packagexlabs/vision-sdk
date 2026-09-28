@@ -110,8 +110,12 @@ class SdkModelRepository @Inject constructor(
             }
         }
         _states.value = updated
-        updated.forEach { (key, state) ->
-            if (state == ModelState.Loaded || state == ModelState.Downloaded) ocrModuleFor(key.first, key.second)?.let { refreshVersion(key.first, key.second, it) }
+        // Rebuilt from scratch, so a row that is no longer on disk loses its version.
+        _versions.value = withContext(Dispatchers.IO) {
+            updated.filterValues { it == ModelState.Loaded || it == ModelState.Downloaded }.keys.mapNotNull { key ->
+                val module = ocrModuleFor(key.first, key.second) ?: return@mapNotNull null
+                manager.findDownloadedModel(module)?.let { key to it.version }
+            }.toMap()
         }
     }
 

@@ -3,16 +3,16 @@ package io.packagex.visiondemo.fakes
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
-import io.packagex.visiondemo.camera.Camera
 import io.packagex.visiondemo.camera.CameraOwner
+import io.packagex.visiondemo.camera.DetectionGatedCamera
 import io.packagex.visiondemo.camera.ScanEvent
 import io.packagex.visiondemo.data.EntitlementRepository
 import io.packagex.visiondemo.data.Extraction
 import io.packagex.visiondemo.data.ExtractionRepository
 import io.packagex.visiondemo.data.ItemCatalogRepository
 import io.packagex.visiondemo.data.ModelRepository
-import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PreferencesRepository
+import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.ReportRepository
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
@@ -131,8 +131,9 @@ class FakeEntitlement(private val allowed: Boolean = true) : EntitlementReposito
         if (allowed) Result.success(Unit) else Result.failure(IllegalStateException("not entitled"))
 }
 
-/** Records what the ViewModel asked of the camera; [emit] feeds SDK events (buffered until collected). */
-class FakeCamera : Camera {
+/** Records what the ViewModel asked of the camera; [emit] feeds SDK events (buffered until collected).
+ *  Like the SDK, a rescan or facing switch clears the detection pause; [DetectionGatedCamera] re-applies it. */
+class FakeCamera : DetectionGatedCamera() {
     private val channel = Channel<ScanEvent>(Channel.UNLIMITED)
     override val events: Flow<ScanEvent> = channel.receiveAsFlow()
     val pausedFlow = MutableStateFlow(false)
@@ -156,14 +157,14 @@ class FakeCamera : Camera {
     fun emit(event: ScanEvent) { channel.trySend(event) }
 
     override fun claim(owner: CameraOwner) { this.owner = owner }
-    override fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { lastConfig = config; lastScanning = scanning }
-    override fun pauseDetection() { detectionPaused = true }
-    override fun resumeDetection() { detectionPaused = false }
+    override fun sdkApply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { lastConfig = config; lastScanning = scanning }
+    override fun sdkPauseDetection() { detectionPaused = true }
+    override fun sdkResumeDetection() { detectionPaused = false }
     override fun capture() { captures++ }
-    override fun rescan() { rescans++ }
+    override fun sdkRescan() { rescans++; detectionPaused = false }
     override fun torch(on: Boolean) { torchOn = on }
     override fun zoom(ratio: Float) { zoomRatio = ratio }
-    override fun lens(front: Boolean) { this.front = front }
+    override fun sdkLens(front: Boolean) { this.front = front; detectionPaused = false }
     override fun focus(x: Float, y: Float) { focusPoint = x to y }
     override fun resume(): Boolean {
         if (hot) return false

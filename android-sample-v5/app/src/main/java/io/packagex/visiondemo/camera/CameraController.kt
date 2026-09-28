@@ -13,9 +13,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.ScannerConfig
 import io.packagex.visionsdk.config.CameraOrientationMode
-import io.packagex.visionsdk.core.CameraLensFace
 import io.packagex.visionsdk.config.CameraSettings
 import io.packagex.visionsdk.config.FocusSettings
+import io.packagex.visionsdk.core.CameraLensFace
 import io.packagex.visionsdk.core.ScanningMode
 import io.packagex.visionsdk.core.pricetag.PriceTagData
 import io.packagex.visionsdk.dto.ScannedCodeResult
@@ -60,7 +60,7 @@ internal fun focusSettingsFor(config: ScannerConfig, frame: Box?): FocusSpec {
 class CameraController @Inject constructor(
     @param:ApplicationContext private val ctx: Context,
     private val scope: CoroutineScope,
-) : Camera {
+) : DetectionGatedCamera() {
     override val view: VisionCameraView = VisionCameraView(ctx)
 
     private val _events = MutableSharedFlow<ScanEvent>(extraBufferCapacity = 16)
@@ -118,6 +118,7 @@ class CameraController @Inject constructor(
             override fun onCameraStarted() {
                 started = true
                 applyFocusSpec()
+                reapplyPause()
                 _events.tryEmit(ScanEvent.Started)
             }
 
@@ -141,8 +142,12 @@ class CameraController @Inject constructor(
 
         scope.launch(Dispatchers.Main) {
             policy.paused.collect { paused ->
-                if (paused) view.stopCamera()
-                else if (_owner.value == CameraOwner.Scanner) view.startCamera()
+                if (paused) {
+                    view.stopCamera()
+                } else if (_owner.value == CameraOwner.Scanner) {
+                    view.startCamera()
+                    reapplyPause()
+                }
             }
         }
     }
@@ -150,10 +155,15 @@ class CameraController @Inject constructor(
     /** Stops the scanner camera unless [owner] is [CameraOwner.Scanner]. */
     override fun claim(owner: CameraOwner) {
         _owner.value = owner
-        if (scannerMustStop(owner)) view.stopCamera() else if (!policy.paused.value) view.startCamera()
+        if (scannerMustStop(owner)) {
+            view.stopCamera()
+        } else if (!policy.paused.value) {
+            view.startCamera()
+            reapplyPause()
+        }
     }
 
-    override fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) {
+    override fun sdkApply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) {
         config.detection?.let { view.configure(it, scanning, config.multiple) }
         nthFrame = config.nthFrame
         applyCameraSettings()
@@ -177,13 +187,13 @@ class CameraController @Inject constructor(
         )
     }
 
-    override fun pauseDetection() = view.pauseDetection()
-    override fun resumeDetection() = view.resumeDetection()
+    override fun sdkPauseDetection() = view.pauseDetection()
+    override fun sdkResumeDetection() = view.resumeDetection()
     override fun capture() = view.capture()
-    override fun rescan() = view.rescan()
+    override fun sdkRescan() = view.rescan()
     override fun torch(on: Boolean) = view.setFlashTurnedOn(on)
     override fun zoom(ratio: Float) = view.setZoomRatio(ratio)
-    override fun lens(front: Boolean) {
+    override fun sdkLens(front: Boolean) {
         lensFace = if (front) CameraLensFace.Front else CameraLensFace.Back
         applyCameraSettings()
     }

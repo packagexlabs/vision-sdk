@@ -9,8 +9,9 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.PersistableBundle
-import androidx.activity.result.PickVisualMediaRequest
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -52,6 +53,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.math.roundToInt
 
 /**
  * Wires [ScannerViewModel] to [ScannerScreen]: camera permission (sent on start even when already
@@ -75,7 +77,10 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
     val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) {
             scope.launch {
-                val bitmap = withContext(Dispatchers.IO) { runCatching { decodeBitmap(context, uri) }.getOrNull() }
+                // iOS returns silently when the image can't be loaded (CameraScreen :76); log it here.
+                val bitmap = withContext(Dispatchers.IO) {
+                    runCatching { decodeBitmap(context, uri) }.onFailure { Log.w("ScannerRoute", "Photo decode failed: $uri", it) }.getOrNull()
+                }
                 if (bitmap != null) viewModel.onAction(ScannerAction.ImportPhoto(bitmap))
             }
         }
@@ -166,11 +171,20 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
     }
 }
 
-/** A picked photo as a software bitmap (the extraction reads its pixels), upright per its EXIF. */
+/** A picked photo as a software bitmap (the extraction reads its pixels), upright per its EXIF,
+ *  with the long edge capped at [MAX_PHOTO_EDGE] px (aspect kept) so a large photo can't exhaust memory. */
 private fun decodeBitmap(context: Context, uri: Uri): Bitmap =
-    ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)) { decoder, _, _ ->
+    ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)) { decoder, info, _ ->
         decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+        val (w, h) = info.size.width to info.size.height
+        val long = maxOf(w, h)
+        if (long > MAX_PHOTO_EDGE) {
+            val scale = MAX_PHOTO_EDGE.toFloat() / long
+            decoder.setTargetSize((w * scale).roundToInt().coerceAtLeast(1), (h * scale).roundToInt().coerceAtLeast(1))
+        }
     }
+
+private const val MAX_PHOTO_EDGE = 4000
 
 /** [ScannerEffect.Copy]: scanned values can be personal data, so the clip is marked sensitive. */
 private fun copyToClipboard(context: Context, text: String) {

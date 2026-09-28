@@ -590,4 +590,39 @@ class ScannerViewModelTest {
         cam.emit(ScanEvent.Boxes(listOf(bar), listOf(qr), null)); runCurrent()
         assertEquals(listOf("QR"), v.state.value.boxes.map { it.value })
     }
+
+    // --- integration fix round 1: the SDK clears its pause on rescan / facing switch ---
+
+    @Test fun detectionOffSurvivesMultiToggle() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.PermissionResult(true)); v.onAction(ScannerAction.SetDetectionEnabled(false))
+        val rescans = cam.rescans
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(multi = true) })
+        assertTrue(cam.rescans > rescans); assertTrue(cam.detectionPaused)
+    }
+
+    @Test fun detectionOffSurvivesReopenAndClose() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle()
+        v.onAction(ScannerAction.CloseResult)
+        v.onAction(ScannerAction.SetDetectionEnabled(false))
+        v.onAction(ScannerAction.ReopenLast); v.onAction(ScannerAction.CloseResult)
+        assertTrue(cam.detectionPaused)
+    }
+
+    @Test fun pauseUnderResultSurvivesRescan() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle()
+        assertNotNull(v.state.value.result); assertTrue(cam.detectionPaused)
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(multi = true) })   // setPrefs → rescan
+        cam.emit(ScanEvent.Failure(VisionSDKException.BlurImageDetected)); runCurrent()
+        v.onAction(ScannerAction.DismissAlert)                           // DismissAlert → rescan
+        assertTrue(cam.rescans >= 2); assertTrue(cam.detectionPaused)
+    }
+
+    @Test fun detectionOffSurvivesFlipCamera() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetDetectionEnabled(false)); v.onAction(ScannerAction.FlipCamera)
+        assertTrue(cam.front); assertTrue(cam.detectionPaused)
+    }
 }

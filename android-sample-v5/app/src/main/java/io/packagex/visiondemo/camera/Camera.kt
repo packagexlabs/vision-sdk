@@ -35,3 +35,27 @@ interface Camera {
     /** [PausePolicy.userActive]: resets the idle timer. */
     fun userActive()
 }
+
+/**
+ * Keeps a requested detection pause across SDK pipeline rebuilds. `VisionCameraView` clears its pause
+ * whenever it rebuilds (rescan, start after a stop, facing switch: v2.7.0 VisionCameraView :1148,
+ * :1039, :1474), so the pause is re-applied after each of them. Subclasses implement the raw `sdk*` calls.
+ */
+abstract class DetectionGatedCamera : Camera {
+    private var pauseWanted = false
+
+    protected abstract fun sdkPauseDetection()
+    protected abstract fun sdkResumeDetection()
+    protected abstract fun sdkRescan()
+    protected abstract fun sdkLens(front: Boolean)
+    protected abstract fun sdkApply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode)
+
+    final override fun pauseDetection() { pauseWanted = true; sdkPauseDetection() }
+    final override fun resumeDetection() { pauseWanted = false; sdkResumeDetection() }
+    final override fun rescan() { sdkRescan(); reapplyPause() }
+    final override fun lens(front: Boolean) { sdkLens(front); reapplyPause() }
+    final override fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { sdkApply(config, frame, scanning); reapplyPause() }
+
+    /** Call after anything else that (re)starts the SDK camera. */
+    protected fun reapplyPause() { if (pauseWanted) sdkPauseDetection() }
+}
