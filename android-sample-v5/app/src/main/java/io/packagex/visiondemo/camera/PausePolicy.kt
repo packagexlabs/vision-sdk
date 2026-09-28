@@ -4,6 +4,7 @@ import android.os.PowerManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +24,8 @@ class PausePolicy(
 
     private var idleJob: Job? = null
 
-    /** True once a thermal reading at or above [PowerManager.THERMAL_STATUS_CRITICAL] is seen. */
+    /** Whether the latest [thermal] reading was at or above [PowerManager.THERMAL_STATUS_CRITICAL]. Tracks
+     *  the current status, not a one-way latch: it clears again as soon as a cooler reading arrives. */
     private var critical = false
 
     /** Resets the idle timer. Skipped while paused -- nothing to keep alive. */
@@ -32,6 +34,7 @@ class PausePolicy(
         if (_paused.value) return
         idleJob = scope.launch {
             delay(idleTimeoutMs)
+            ensureActive()   // don't act on a stale delay that raced a cancel() (e.g. from a resume() in between)
             _paused.value = true
         }
     }

@@ -35,7 +35,16 @@ internal class DocumentFlow(private val document: DocumentCamera, private val sc
 
     fun start() {
         scope.launch { document.stills.collect(::onStill) }
-        scope.launch { document.quad.collect { q -> if (host.s.mode == ScanMode.DocAcq) host.update { it.copy(codeInFrame = q != null) } } }
+        scope.launch {
+            document.quad.collect { q ->
+                if (host.s.mode == ScanMode.DocAcq) {
+                    // codeInFrame drives the live-outline/brackets swap (Chrome.kt docSeen); seesDocument
+                    // drives the hint text, same source, kept separate so the SDK's own Indications-driven
+                    // seesDocument (Vision Scanner) isn't confused with this camera's boundary detector.
+                    host.update { it.copy(codeInFrame = q != null, seesDocument = q != null) }
+                }
+            }
+        }
     }
 
     /** Detection and auto capture follow the live camera: off under the drawer, sheets, alerts and processing. */

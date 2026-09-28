@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.packagex.visiondemo.model.DocType
+import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visionsdk.ApiManager
 import io.packagex.visionsdk.core.ReportResult
@@ -15,9 +16,10 @@ import io.packagex.visionsdk.service.dto.ModelToReport
 import io.packagex.visionsdk.service.dto.SLModelToReport
 import javax.inject.Inject
 import javax.inject.Singleton
+import io.packagex.visionsdk.ocr.ml.core.enums.ModelSize as SdkModelSize
 
 interface ReportRepository {
-    suspend fun report(r: OcrResult, fields: Set<String>, message: String, image: Bitmap?): Result<Unit>
+    suspend fun report(r: OcrResult, fields: Set<String>, message: String, image: Bitmap?, modelSize: ModelSize): Result<Unit>
 }
 
 @Singleton
@@ -26,8 +28,8 @@ class SdkReportRepository @Inject constructor(
     private val secrets: Secrets,
 ) : ReportRepository {
 
-    override suspend fun report(r: OcrResult, fields: Set<String>, message: String, image: Bitmap?): Result<Unit> {
-        val model = modelToReport(r.docType, fields)
+    override suspend fun report(r: OcrResult, fields: Set<String>, message: String, image: Bitmap?, modelSize: ModelSize): Result<Unit> {
+        val model = modelToReport(r.docType, fields, modelSize)
             ?: return Result.failure(IllegalArgumentException("Reporting is not supported for ${r.docType}"))
         val combined = if (fields.isEmpty()) message else "$message · ${fields.joinToString(", ")}"
         val result = ApiManager().reportIssueSuspend(
@@ -46,10 +48,12 @@ class SdkReportRepository @Inject constructor(
         }
     }
 
-    /** Report-field flags per doc type, matching the SDK report models' keys. Ported from iOS `ReportBuilder`. */
-    private fun modelToReport(docType: DocType, keys: Set<String>): ModelToReport? = when (docType) {
+    /** Report-field flags per doc type, matching the SDK report models' keys. Ported from iOS `ReportBuilder`.
+     *  [modelSize] is the on-device model active when the report is sent (iOS passes it as a separate
+     *  `reportErrorWith` argument; the Android SDK's report models carry it as a field instead). */
+    private fun modelToReport(docType: DocType, keys: Set<String>, modelSize: ModelSize): ModelToReport? = when (docType) {
         DocType.SL -> SLModelToReport(
-            modelSize = null,
+            modelSize = modelSize.toSdk(),
             trackingNo = "tracking_no" in keys,
             courierName = "courier_name" in keys,
             weight = "weight" in keys,
@@ -60,7 +64,7 @@ class SdkReportRepository @Inject constructor(
             senderAddress = "sender_address" in keys,
         )
         DocType.BOL -> BOLModelToReport(
-            modelSize = null,
+            modelSize = modelSize.toSdk(),
             referenceNo = "referenceNo" in keys,
             loadNumber = "loadNumber" in keys,
             purchaseOrderNumber = "purchaseOrderNumber" in keys,
@@ -76,7 +80,7 @@ class SdkReportRepository @Inject constructor(
             date = "date" in keys,
         )
         DocType.IL -> ILModelToReport(
-            modelSize = null,
+            modelSize = modelSize.toSdk(),
             supplierName = "supplier_name" in keys,
             itemName = "item_name" in keys,
             itemSKU = "item_sku" in keys,
@@ -86,9 +90,14 @@ class SdkReportRepository @Inject constructor(
             productionDate = "production_date" in keys,
             supplierAddress = "supplier_address" in keys,
         )
-        DocType.DC -> DCModelToReport(modelSize = null, documentClass = "document_class" in keys)
+        DocType.DC -> DCModelToReport(modelSize = modelSize.toSdk(), documentClass = "document_class" in keys)
         else -> null
     }
+}
+
+private fun ModelSize.toSdk(): SdkModelSize = when (this) {
+    ModelSize.Micro -> SdkModelSize.Micro
+    ModelSize.Large -> SdkModelSize.Large
 }
 
 /** Downscales before the report multipart upload (the SDK's own reportIssueSuspend resizes too; this

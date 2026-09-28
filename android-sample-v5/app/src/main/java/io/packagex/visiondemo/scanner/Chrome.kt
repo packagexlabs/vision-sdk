@@ -445,9 +445,10 @@ private fun shutterLabel(state: ScannerUiState): String = when {
     else -> "Capture"
 }
 
-/** iOS `codeSeen`/`live`/`cornerColor`/`fillColor`. [ScannerUiState] has no per-indication flags
- *  (SDK `Indications` events aren't stored), so `codeInFrame` stands in for `codeSeen` everywhere,
- *  as its own doc comment intends ("...or anywhere in view (other modes)"). */
+/** iOS `codeSeen`/`live`/`cornerColor`/`fillColor`. Corner/fill color and the viewfinder-brackets swap
+ *  ([Viewfinder]'s `docSeen`) still read [ScannerUiState.codeInFrame] (barcode/QR box presence, or
+ *  Document Acquisition's boundary); the hint text reads [ScannerUiState.seesDocument] instead, since
+ *  that's the correct SDK-Indications-driven signal for Vision Scanner (see `hintFor`). */
 private fun ScannerUiState.isLive(): Boolean =
     !permissionDenied && result == null && phase == Phase.Idle && sheet == null && alert == null && detectionEnabled && !gated && !paused
 
@@ -506,7 +507,7 @@ private fun hintFor(state: ScannerUiState): String {
     val auto = state.prefs.autoCapture
     val codeSeen = state.codeInFrame
     var h = when (state.mode) {
-        ScanMode.Ocr -> if (codeSeen) {
+        ScanMode.Ocr -> if (state.seesDocument) {
             if (auto) "Hold Still" else "Hold Still · tap to capture"
         } else {
             "Point camera to document"
@@ -514,7 +515,7 @@ private fun hintFor(state: ScannerUiState): String {
         ScanMode.Ar -> state.arCounts.sumOf { it.count }.let { n ->
             if (n > 0) "$n markers pinned · tap the shutter to finish" else "One marker per barcode value, pinned where it was last seen"
         }
-        ScanMode.DocAcq -> if (codeSeen) {
+        ScanMode.DocAcq -> if (state.seesDocument) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"
         } else {
             "Fit the page inside the frame"

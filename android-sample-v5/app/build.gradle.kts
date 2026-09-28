@@ -5,6 +5,9 @@ plugins {
 }
 val secrets = Properties().apply { rootProject.file("secrets.properties").takeIf { it.exists() }?.inputStream()?.use(::load) }
 fun secret(name: String) = System.getenv(name) ?: secrets.getProperty(name) ?: ""
+// buildConfigField takes a Java source literal verbatim; a secret containing a quote or backslash
+// would otherwise break (or inject into) the generated BuildConfig source.
+fun String.toJavaStringLiteral() = "\"" + replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 val visionSdkAndroidDir = rootProject.file(providers.gradleProperty("visionSdkAndroidDir").getOrElse("../../vision-sdk-android"))
 
 android {
@@ -14,10 +17,10 @@ android {
         applicationId = "io.packagex.visiondemo"
         minSdk = 29; targetSdk = 36; versionCode = 1; versionName = "5.0"
         ndk { abiFilters += "arm64-v8a" }
-        buildConfigField("String", "VISION_ENV", "\"${secret("VISION_ENV").ifEmpty { "staging" }}\"")
-        buildConfigField("String", "STAGING_API_KEY", "\"${secret("STAGING_API_KEY")}\"")
-        buildConfigField("String", "PRODUCTION_API_KEY", "\"${secret("PRODUCTION_API_KEY")}\"")
-        buildConfigField("String", "IL_FEEDBACK_URL", "\"${secret("IL_FEEDBACK_URL").ifEmpty { "https://lvlm-api-567462092481.us-east1.run.app" }}\"")
+        buildConfigField("String", "VISION_ENV", secret("VISION_ENV").ifEmpty { "staging" }.toJavaStringLiteral())
+        buildConfigField("String", "STAGING_API_KEY", secret("STAGING_API_KEY").toJavaStringLiteral())
+        buildConfigField("String", "PRODUCTION_API_KEY", secret("PRODUCTION_API_KEY").toJavaStringLiteral())
+        buildConfigField("String", "IL_FEEDBACK_URL", secret("IL_FEEDBACK_URL").ifEmpty { "https://lvlm-api-567462092481.us-east1.run.app" }.toJavaStringLiteral())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }

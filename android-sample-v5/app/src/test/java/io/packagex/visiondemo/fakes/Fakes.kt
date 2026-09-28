@@ -122,10 +122,12 @@ class FakeExtraction(
 class FakeReport(var shouldFail: Boolean = false) : ReportRepository {
     var lastMessage: String? = null
     var lastFields: Set<String>? = null
+    var lastModelSize: ModelSize? = null
 
-    override suspend fun report(r: OcrResult, fields: Set<String>, message: String, image: Bitmap?): Result<Unit> {
+    override suspend fun report(r: OcrResult, fields: Set<String>, message: String, image: Bitmap?, modelSize: ModelSize): Result<Unit> {
         lastMessage = message
         lastFields = fields
+        lastModelSize = modelSize
         return if (shouldFail) Result.failure(IllegalStateException("report failed")) else Result.success(Unit)
     }
 }

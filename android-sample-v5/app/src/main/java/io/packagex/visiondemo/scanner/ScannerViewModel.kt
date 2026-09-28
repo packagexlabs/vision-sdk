@@ -27,6 +27,7 @@ import io.packagex.visiondemo.document.DocumentCamera
 import io.packagex.visiondemo.document.NoDocumentCamera
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.Feedback
+import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ModelState
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.Phase
@@ -236,7 +237,8 @@ class ScannerViewModel @Inject constructor(
         _state.update {
             it.copy(
                 mode = m, result = null, sheet = null, pendingSheet = null, phase = Phase.Idle, boxes = emptyList(),
-                codeInFrame = false, torch = false, gated = m.gated, entitlementChecking = false, feedback = null,
+                codeInFrame = false, seesDocument = false, seesText = false, torch = false, gated = m.gated,
+                entitlementChecking = false, feedback = null,
             )
         }
         if (!s.permissionDenied) configureCamera()
@@ -282,7 +284,8 @@ class ScannerViewModel @Inject constructor(
         if (!ownCamera) return
         val front = !s.frontCamera
         setTorch(false)
-        _state.update { it.copy(frontCamera = front, zoom = 1f) }
+        setZoom(1f)   // resets the camera's own zoom ratio too, not just the state (setZoom routes to camera/document)
+        _state.update { it.copy(frontCamera = front) }
         if (s.mode == ScanMode.DocAcq) document.lens(front) else camera.lens(front)
         toast(if (front) "Front camera" else "Back camera")
     }
@@ -408,7 +411,10 @@ class ScannerViewModel @Inject constructor(
             }
             is ScanEvent.Retrieved -> if (s.mode == ScanMode.Retrieval) sawInView(e.code.scannedCode)
             is ScanEvent.Failure -> onFailure(e.e)
-            is ScanEvent.Indications, ScanEvent.Started -> {}
+            // Vision Scanner's hint text (iOS seesText/seesDocument); DocAcq gets the same fields from its
+            // own boundary detector (DocumentFlow), not from this SDK callback.
+            is ScanEvent.Indications -> _state.update { it.copy(seesText = e.text, seesDocument = e.document) }
+            ScanEvent.Started -> {}
         }
     }
 
@@ -482,8 +488,9 @@ class ScannerViewModel @Inject constructor(
 
     private fun sendReport(fields: Set<String>, message: String) {
         val r = s.result as? ScanResult.Ocr ?: return
+        val modelSize = activeModel(s.prefs)?.second ?: ModelSize.Micro   // iOS `activeModel?.1 ?? .micro`
         viewModelScope.launch {
-            report.report(r.result, fields, message, r.image).fold(
+            report.report(r.result, fields, message, r.image, modelSize).fold(
                 onSuccess = { toast("Report sent · ${fields.size} field${if (fields.size == 1) "" else "s"}") },
                 onFailure = { toast("Report failed (${it.message})") },
             )

@@ -21,13 +21,19 @@ enum class ScanMode(val label: String) {
 }
 
 val ScanMode.isCode: Boolean
-    get() = this in setOf(ScanMode.Barcode, ScanMode.QR, ScanMode.Price, ScanMode.Retrieval)
+    get() = when (this) {
+        ScanMode.Barcode, ScanMode.QR, ScanMode.Price, ScanMode.Retrieval -> true
+        else -> false
+    }
 
 val ScanMode.isDocument: Boolean
     get() = this == ScanMode.Ocr || this == ScanMode.DocAcq
 
 val ScanMode.gated: Boolean
-    get() = this in setOf(ScanMode.Price, ScanMode.Retrieval)
+    get() = when (this) {
+        ScanMode.Price, ScanMode.Retrieval -> true
+        else -> false
+    }
 
 val ScanMode.zooms: List<Float>
     get() = when (this) {

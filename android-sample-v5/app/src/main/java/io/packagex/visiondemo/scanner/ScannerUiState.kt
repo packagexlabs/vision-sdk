@@ -26,6 +26,12 @@ data class ScannerUiState(
     /** Next sheet to present once the current one has finished hiding ([ScannerAction.SheetDismissed]). */
     val pendingSheet: SheetKind? = null,
     val codeInFrame: Boolean = false,
+    /** SDK `ScanEvent.Indications` (Vision Scanner) / Document Acquisition's live boundary: a document
+     *  is detected in frame, used by the hint text (iOS `seesDocument`). Independent of [codeInFrame],
+     *  which tracks barcode/QR box presence and is the wrong signal for the document hint. */
+    val seesDocument: Boolean = false,
+    /** SDK `ScanEvent.Indications`: text detected in frame (iOS `seesText`). */
+    val seesText: Boolean = false,
     val boxes: List<DetectedCode> = emptyList(),
     val paused: Boolean = false,
     /** Default-deny: a gated mode stays behind the gate card until the entitlement check passes. */

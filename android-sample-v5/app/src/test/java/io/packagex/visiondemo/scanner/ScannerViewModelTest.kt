@@ -547,7 +547,31 @@ class ScannerViewModelTest {
         }
         assertTrue(cam.front); assertTrue(v.state.value.frontCamera)
         assertFalse(v.state.value.torch); assertFalse(cam.torchOn); assertEquals(1f, v.state.value.zoom)
+        assertEquals(1f, cam.zoomRatio)   // the camera's own zoom is reset too, not just the state
         v.onAction(ScannerAction.FlipCamera); assertFalse(cam.front)
+    }
+
+    @Test fun indicationsUpdateSeesTextAndDocumentAndResetOnModeSwitch() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+        cam.emit(ScanEvent.Indications(barcode = false, qr = false, text = true, document = true)); advanceUntilIdle()
+        assertTrue(v.state.value.seesText); assertTrue(v.state.value.seesDocument)
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
+        assertFalse(v.state.value.seesText); assertFalse(v.state.value.seesDocument)
+    }
+
+    @Test fun reportSendsTheActiveModelSize() = runTest {
+        val report = FakeReport()
+        val v = ScannerViewModel(
+            FakeCamera(), FakePreferences(), FakeModels(),
+            FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", 0),
+            report, FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"),
+        )
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(modelSize = ModelSize.Large) })
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+        (v.camera as FakeCamera).emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        v.onAction(ScannerAction.Report(setOf("tracking_no"), "wrong")); advanceUntilIdle()
+        assertEquals(ModelSize.Large, report.lastModelSize)
     }
 
     @Test fun focusOnlyOnTheLiveCamera() = runTest {
