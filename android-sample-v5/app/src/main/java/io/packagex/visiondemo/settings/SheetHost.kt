@@ -67,8 +67,7 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
                     SheetKind.DocType -> DocTypeSheet(state, onAction)
                     SheetKind.Items -> ItemsSheet(state, onAction)
                     SheetKind.Models -> ModelsSheet(state, onAction)
-                    // Task 11: AR items sheet body (barcode-catalog naming). Nothing to render yet.
-                    SheetKind.ArItems -> {}
+                    SheetKind.ArItems -> ArItemsSheet(state, onAction)
                 }
             }
         }
