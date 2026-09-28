@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import io.packagex.visiondemo.designsystem.PX
@@ -19,8 +20,9 @@ import io.packagex.visiondemo.designsystem.PX
 @Composable
 fun ArSurface(controller: ArCamera, paused: Boolean, modifier: Modifier = Modifier) {
     Box(modifier.fillMaxSize()) {
-        AndroidView(factory = { GLSurfaceView(it).also(controller::attach) }, modifier = Modifier.fillMaxSize())
-        DisposableEffect(controller) { onDispose { controller.detach() } }
+        val attached = remember { arrayOfNulls<GLSurfaceView>(1) }
+        AndroidView(factory = { GLSurfaceView(it).also { v -> attached[0] = v; controller.attach(v) } }, modifier = Modifier.fillMaxSize())
+        DisposableEffect(controller) { onDispose { attached[0]?.let(controller::detach) } }
         if (paused) Box(Modifier.fillMaxSize().background(PX.Ink.copy(alpha = 0.7f)))
     }
 }

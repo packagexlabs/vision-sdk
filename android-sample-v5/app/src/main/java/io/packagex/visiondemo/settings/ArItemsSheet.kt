@@ -65,8 +65,7 @@ fun ArItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
         drafts.remove(sku)
     }
 
-    // Android markers are drawn without text, so names show in the results (iOS also labels new markers).
-    Text("Name the barcodes AR Barcode finds. Names show in the scan results.", style = inter(13.sp), color = PX.Muted)
+    Text("Name the barcodes AR Barcode finds. Names show on new markers and in the scan results.", style = inter(13.sp), color = PX.Muted)
 
     val unnamed = state.arCounts.filter { it.payload !in state.itemNames }
     if (unnamed.isNotEmpty()) {

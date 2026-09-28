@@ -198,8 +198,8 @@ class ArBarcodeRenderer(
     // Placement is gated until ARCore has actually mapped the area (steady
     // tracking + at least one substantial plane). Before that, world
     // positions wobble 10-30cm and no matching logic can hold identity.
-    // Latches true once reached, until the next session.resume()
-    // ([WarmUpGate.onSessionStart], iOS fix d9fb1d1).
+    // Latches true for the session once reached; a new session gets a new
+    // renderer, so a fresh gate (iOS fix d9fb1d1).
     val warmUp = WarmUpGate(minFrames = 60)
     private val mapReady: Boolean get() = warmUp.ready
 
@@ -288,6 +288,9 @@ class ArBarcodeRenderer(
     private val tmp4b = FloatArray(4)
     private val rayOrigin = FloatArray(3)
     private val rayDirection = FloatArray(3)
+
+    /** GL thread: frees the label textures before the view (and its context) goes. */
+    fun releaseGl() = markerRenderer.release()
 
     override fun onSurfaceCreated(
         gl: GL10?,
@@ -415,7 +418,7 @@ class ArBarcodeRenderer(
         // is already a real measurement. Gating placement on a plane just delayed
         // the first marker for no accuracy gain.
         if (!mapReady) return
-        android.util.Log.d("MarkerDiag", "MAP-READY")
+        android.util.Log.d("MarkerDiag", "MAP-READY after ${warmUp.frames} tracked frames")
     }
 
     private fun updateMotionEstimate(

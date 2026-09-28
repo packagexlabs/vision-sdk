@@ -16,6 +16,21 @@ class ArSessionRulesTest {
         val c = CatalogSnapshot(); c.set(mapOf("A" to "Apple")); val seen = c.get(); c.set(emptyMap()); assertEquals("Apple", seen["A"])
     }
 
+    // A pause/resume of the same session calls nothing on the gate (ArController.start), so it stays warm;
+    // only a new session (attach: new renderer, new gate) starts cold.
+    @Test fun warmUpSurvivesPauseResumeAndANewGateIsCold() {
+        val g = WarmUpGate(minFrames = 60); repeat(60) { g.onTrackedFrame() }
+        repeat(10) { g.onTrackedFrame() }   // frames after the resume
+        assertTrue(g.ready); assertEquals(60, g.frames)
+        assertFalse(WarmUpGate(minFrames = 60).ready)
+    }
+
+    @Test fun markerTextTruncatesLikeIos() {
+        assertEquals("Oat milk", markerText("Oat milk"))
+        assertEquals("x".repeat(24), markerText("x".repeat(24)))
+        assertEquals("x".repeat(21) + "…", markerText("x".repeat(25)))
+    }
+
     @Test fun warmUpNeedsMinFrames() {
         val g = WarmUpGate(minFrames = 3); repeat(2) { g.onTrackedFrame() }; assertFalse(g.ready)
         g.onTrackedFrame(); assertTrue(g.ready)

@@ -52,7 +52,7 @@ class ArController @Inject constructor(@param:ApplicationContext private val ctx
         runCatching { ArCoreApk.getInstance().checkAvailability(ctx) == ArCoreApk.Availability.SUPPORTED_INSTALLED }.getOrDefault(false)
 
     override fun attach(view: GLSurfaceView) {
-        detach()
+        detach(null)
         // The renderer must be set before the surface exists (GLSurfaceView has no GL thread until then).
         val r = ArBarcodeRenderer(processor, ctx.resources.displayMetrics.density, onStatus = { status ->
             if (status.counts != _counts.value) _counts.value = status.counts   // GL thread; StateFlow is thread-safe
@@ -69,13 +69,15 @@ class ArController @Inject constructor(@param:ApplicationContext private val ctx
         if (session != null && !pauseWanted) start(retriesLeft = 3) else view.onPause()
     }
 
-    override fun detach() {
+    override fun detach(view: GLSurfaceView?) {
+        if (view != null && view !== this.view) return   // a stale view's dispose after a newer attach
+        renderer?.let { r -> if (running) this.view?.queueEvent(r::releaseGl) }   // runs before onPause lets the GL thread stop
         stop()
         renderer?.session = null
         session?.close()
         session = null
         renderer = null
-        view = null
+        this.view = null
     }
 
     override fun pause() {
@@ -109,8 +111,7 @@ class ArController @Inject constructor(@param:ApplicationContext private val ctx
             return
         }
         running = true
-        r.session = s
-        v.queueEvent { r.warmUp.onSessionStart() }   // every resume re-earns the warm-up (iOS fix d9fb1d1)
+        r.session = s   // the same session keeps its warm-up; a new session comes with a new renderer (attach)
         v.onResume()
     }
 
@@ -131,10 +132,11 @@ class ArController @Inject constructor(@param:ApplicationContext private val ctx
         }
         // The default CPU image is 640x480, too small to decode. The original took the largest; for heat this
         // takes the smallest image at least 1280 px wide at 30 fps (iOS v5: at most 1920 px, 30 fps).
-        val filter = CameraConfigFilter(session).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30))
-        val configs = session.getSupportedCameraConfigs(filter)
+        // No 30 fps config: the same rule over every frame rate, never ARCore's 640x480 default.
+        val configs = session.getSupportedCameraConfigs(CameraConfigFilter(session).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30)))
+            .ifEmpty { session.getSupportedCameraConfigs(CameraConfigFilter(session).setTargetFps(EnumSet.allOf(CameraConfig.TargetFps::class.java))) }
         pickCameraConfig(configs.map { it.imageSize.width to it.imageSize.height })?.let { session.cameraConfig = configs[it] }
-        Log.i(TAG, "camera config ${session.cameraConfig.imageSize} @30fps")
+        Log.i(TAG, "camera config ${session.cameraConfig.imageSize} fps=${session.cameraConfig.fpsRange}")
         // Devices vary; use the real sensor orientation of the camera ARCore picked.
         processor.configureRotation(session.cameraConfig.cameraId)
 

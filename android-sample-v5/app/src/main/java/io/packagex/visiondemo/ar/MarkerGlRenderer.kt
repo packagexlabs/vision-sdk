@@ -1,6 +1,13 @@
 package io.packagex.visiondemo.ar
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.Typeface
 import android.opengl.GLES20
+import android.opengl.GLUtils
 import android.os.SystemClock
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -57,6 +64,30 @@ class MarkerGlRenderer(
     private val accent = floatArrayOf(33f / 255f, 217f / 255f, 115f / 255f)
     private val white = floatArrayOf(1f, 1f, 1f)
 
+    // Label pill above the dot (iOS MarkerNodeFactory.makeLabel): 11pt semibold white text on a 75% black
+    // pill, 8pt side / 4pt top-bottom padding, centred 20pt above the dot.
+    private val labelOffset = dp(20f)
+    private val labelPadX = dp(8f)
+    private val labelPadY = dp(4f)
+    private val labelPaint =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textSize = dp(11f)
+            typeface = Typeface.create(Typeface.DEFAULT, 600, false)
+        }
+    private val pillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(191, 0, 0, 0) }
+
+    private class LabelTexture(val id: Int, val width: Int, val height: Int)
+
+    /** One texture per distinct label; labels not drawn this frame are deleted (GL thread only). */
+    private val labels = HashMap<String, LabelTexture>()
+    private val labelsDrawn = HashSet<String>()
+    private var labelProgram = 0
+    private var labelPosAttrib = 0
+    private var labelCenterUniform = 0
+    private var labelHalfSizeUniform = 0
+    private var labelTextureUniform = 0
+
     private val quad =
         ByteBuffer
             .allocateDirect(4 * 2 * 4)
@@ -66,6 +97,8 @@ class MarkerGlRenderer(
             .apply { position(0) }
 
     fun createOnGlThread() {
+        labels.clear()   // a new EGL context: the old texture names are gone with the old one
+        createLabelProgram()
         val vertex =
             """
             attribute vec2 a_LocalPos;
@@ -178,7 +211,102 @@ class MarkerGlRenderer(
         }
 
         GLES20.glDisableVertexAttribArray(localPosAttrib)
+        drawLabels(markers, viewportWidth, viewportHeight)
         GLES20.glDisable(GLES20.GL_BLEND)
+    }
+
+    /** Deletes every label texture; call on the GL thread before the context goes (detach). */
+    fun release() {
+        if (labels.isEmpty()) return
+        GLES20.glDeleteTextures(labels.size, labels.values.map { it.id }.toIntArray(), 0)
+        labels.clear()
+    }
+
+    private fun createLabelProgram() {
+        val vertex =
+            """
+            attribute vec2 a_LocalPos;
+            uniform vec2 u_Center;
+            uniform vec2 u_HalfSizeNdc;
+            varying vec2 v_Tex;
+            void main() {
+                v_Tex = vec2(a_LocalPos.x * 0.5 + 0.5, 0.5 - a_LocalPos.y * 0.5);
+                gl_Position = vec4(u_Center + a_LocalPos * u_HalfSizeNdc, 0.0, 1.0);
+            }
+            """.trimIndent()
+        val fragment =
+            """
+            precision mediump float;
+            varying vec2 v_Tex;
+            uniform sampler2D u_Texture;
+            void main() {
+                gl_FragColor = texture2D(u_Texture, v_Tex);
+            }
+            """.trimIndent()
+        labelProgram = GLES20.glCreateProgram()
+        GLES20.glAttachShader(labelProgram, compileShader(GLES20.GL_VERTEX_SHADER, vertex))
+        GLES20.glAttachShader(labelProgram, compileShader(GLES20.GL_FRAGMENT_SHADER, fragment))
+        GLES20.glLinkProgram(labelProgram)
+        labelPosAttrib = GLES20.glGetAttribLocation(labelProgram, "a_LocalPos")
+        labelCenterUniform = GLES20.glGetUniformLocation(labelProgram, "u_Center")
+        labelHalfSizeUniform = GLES20.glGetUniformLocation(labelProgram, "u_HalfSizeNdc")
+        labelTextureUniform = GLES20.glGetUniformLocation(labelProgram, "u_Texture")
+    }
+
+    private fun drawLabels(
+        markers: List<ScreenMarker>,
+        viewportWidth: Int,
+        viewportHeight: Int,
+    ) {
+        GLES20.glUseProgram(labelProgram)
+        // The bitmap is premultiplied.
+        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+        quad.position(0)
+        GLES20.glVertexAttribPointer(labelPosAttrib, 2, GLES20.GL_FLOAT, false, 0, quad)
+        GLES20.glEnableVertexAttribArray(labelPosAttrib)
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+        GLES20.glUniform1i(labelTextureUniform, 0)
+
+        labelsDrawn.clear()
+        for (m in markers) {
+            val text = markerText(m.label)
+            val tex = labels.getOrPut(text) { makeLabel(text) }
+            labelsDrawn.add(text)
+            val cx = m.x / viewportWidth * 2f - 1f
+            val cy = 1f - (m.y - labelOffset) / viewportHeight * 2f
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, tex.id)
+            GLES20.glUniform2f(labelCenterUniform, cx, cy)
+            GLES20.glUniform2f(labelHalfSizeUniform, tex.width / viewportWidth.toFloat(), tex.height / viewportHeight.toFloat())
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
+        }
+        GLES20.glDisableVertexAttribArray(labelPosAttrib)
+
+        val unused = labels.keys.filter { it !in labelsDrawn }
+        if (unused.isNotEmpty()) {
+            GLES20.glDeleteTextures(unused.size, unused.map { labels.remove(it)!!.id }.toIntArray(), 0)
+        }
+    }
+
+    /** Rasterises one pill label into a new texture. */
+    private fun makeLabel(text: String): LabelTexture {
+        val fm = labelPaint.fontMetrics
+        val w = (labelPaint.measureText(text) + labelPadX * 2).toInt().coerceAtLeast(1)
+        val h = (fm.descent - fm.ascent + labelPadY * 2).toInt().coerceAtLeast(1)
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).apply {
+            drawRoundRect(RectF(0f, 0f, w.toFloat(), h.toFloat()), h / 2f, h / 2f, pillPaint)
+            drawText(text, labelPadX, labelPadY - fm.ascent, labelPaint)
+        }
+        val ids = IntArray(1)
+        GLES20.glGenTextures(1, ids, 0)
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, ids[0])
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
+        bitmap.recycle()
+        return LabelTexture(ids[0], w, h)
     }
 
     private fun compileShader(

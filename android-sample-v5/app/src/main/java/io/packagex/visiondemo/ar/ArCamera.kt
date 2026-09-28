@@ -22,11 +22,12 @@ interface ArCamera {
     fun installed(): Boolean
     /** Starts a new ARCore session on [view] (a fresh warm-up, no markers). Call from the view's factory. */
     fun attach(view: GLSurfaceView)
-    /** Stops and closes the session, releasing the camera. Safe to call twice. */
-    fun detach()
+    /** Stops and closes the session, releasing the camera. Safe to call twice. With [view], only when that
+     *  view is still the attached one (a stale dispose must not close a newer session). */
+    fun detach(view: GLSurfaceView? = null)
     /** Pauses the session and GL surface (releases the camera); markers and counts are kept. */
     fun pause()
-    /** Resumes after [pause], keeping markers and counts; placement waits for a new warm-up. */
+    /** Resumes after [pause], keeping markers, counts and the warm-up (iOS resumes without reset). */
     fun resume()
     /** Removes every marker ("New Scan", entering AR). */
     fun clear()
@@ -39,7 +40,7 @@ object NoArCamera : ArCamera {
     override var catalog: Map<String, String> = emptyMap()
     override fun installed() = true   // nothing to install: entering AR just shows no camera
     override fun attach(view: GLSurfaceView) {}
-    override fun detach() {}
+    override fun detach(view: GLSurfaceView?) {}
     override fun pause() {}
     override fun resume() {}
     override fun clear() {}

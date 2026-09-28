@@ -22,7 +22,7 @@ class FakeAr(var installed: Boolean = true, private val onDetach: () -> Unit = {
 
     override fun installed() = installed
     override fun attach(view: GLSurfaceView) {}
-    override fun detach() { detaches++; onDetach() }
+    override fun detach(view: GLSurfaceView?) { detaches++; onDetach() }
     override fun pause() { paused = true }
     override fun resume() { paused = false }
     override fun clear() { clears++; counts.value = emptyList() }
