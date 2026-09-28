@@ -65,4 +65,15 @@ class ModelRepositoryTest {
             refreshedState(ModelState.Loaded, isLoaded = { false }, isDownloaded = { false }),
         )
     }
+
+    // mergeRefreshed: refresh() folds its probe into the rows' current states atomically.
+
+    @Test fun refreshKeepsADownloadThatStartedDuringTheProbe() =
+        assertEquals(ModelState.Downloading(0.1f), mergeRefreshed(ModelState.Downloading(0.1f), ModelState.NotDownloaded))
+
+    @Test fun refreshKeepsADownloadThatFinishedDuringTheProbe() =
+        assertEquals(ModelState.Downloaded, mergeRefreshed(ModelState.Downloaded, ModelState.Downloading(0.9f)))
+
+    @Test fun refreshOtherwiseTakesTheProbe() =
+        assertEquals(ModelState.Loaded, mergeRefreshed(ModelState.NotDownloaded, ModelState.Loaded))
 }

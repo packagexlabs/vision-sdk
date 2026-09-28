@@ -12,6 +12,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -69,6 +70,13 @@ internal suspend fun refreshedState(current: ModelState, isLoaded: suspend () ->
     }
 }
 
+/**
+ * Folds [refresh]'s probe of one row into the row's state *now*: a download that started or finished
+ * while the probe ran wins (the probe only saw [ModelState.Downloading] rows as skipped).
+ */
+internal fun mergeRefreshed(now: ModelState?, probed: ModelState): ModelState =
+    if (now is ModelState.Downloading || probed is ModelState.Downloading) now ?: probed else probed
+
 interface ModelRepository {
     val states: StateFlow<Map<Pair<DocType, ModelSize>, ModelState>>
     /** Version of each model on disk (`ModelInfo.version`); iOS `modelVersion` (DemoModel.swift:727). */
@@ -109,14 +117,16 @@ class SdkModelRepository @Inject constructor(
                 )
             }
         }
-        _states.value = updated
+        // Atomic merge: the SDK's progress callback updates rows on its own thread meanwhile.
+        _states.update { now -> now + updated.mapValues { (k, probed) -> mergeRefreshed(now[k], probed) } }
         // Rebuilt from scratch, so a row that is no longer on disk loses its version.
-        _versions.value = withContext(Dispatchers.IO) {
+        val versions = withContext(Dispatchers.IO) {
             updated.filterValues { it == ModelState.Loaded || it == ModelState.Downloaded }.keys.mapNotNull { key ->
                 val module = ocrModuleFor(key.first, key.second) ?: return@mapNotNull null
                 manager.findDownloadedModel(module)?.let { key to it.version }
             }.toMap()
         }
+        _versions.update { versions }
     }
 
     override suspend fun download(t: DocType, s: ModelSize, thenLoad: Boolean) {
@@ -166,7 +176,7 @@ class SdkModelRepository @Inject constructor(
         val module = ocrModuleFor(t, s) ?: return
         manager.deleteModel(module)
         setState(t, s, ModelState.NotDownloaded)
-        _versions.value = _versions.value - (t to s)
+        _versions.update { it - (t to s) }
     }
 
     override suspend fun checkUpdates(): String {
@@ -189,14 +199,15 @@ class SdkModelRepository @Inject constructor(
 
     private suspend fun refreshVersion(t: DocType, s: ModelSize, module: OCRModule) {
         val v = withContext(Dispatchers.IO) { manager.findDownloadedModel(module)?.version }
-        _versions.value = if (v == null) _versions.value - (t to s) else _versions.value + ((t to s) to v)
+        _versions.update { if (v == null) it - (t to s) else it + ((t to s) to v) }
     }
 
     private fun setState(t: DocType, s: ModelSize, state: ModelState) {
-        _states.value = _states.value + ((t to s) to state)
+        _states.update { it + ((t to s) to state) }
     }
 
+    /** Atomic: the check and the write can't interleave with a cancel() on the main thread. */
     private fun setIfStillDownloading(t: DocType, s: ModelSize, state: ModelState) {
-        setState(t, s, ifStillDownloading(_states.value.getValue(t to s), state))
+        _states.update { it + ((t to s) to ifStillDownloading(it.getValue(t to s), state)) }
     }
 }
