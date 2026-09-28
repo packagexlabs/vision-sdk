@@ -60,16 +60,17 @@ internal fun focusSettingsFor(config: ScannerConfig, frame: Box?): FocusSpec {
 class CameraController @Inject constructor(
     @param:ApplicationContext private val ctx: Context,
     private val scope: CoroutineScope,
-) {
-    val view: VisionCameraView = VisionCameraView(ctx)
+) : Camera {
+    override val view: VisionCameraView = VisionCameraView(ctx)
 
     private val _events = MutableSharedFlow<ScanEvent>(extraBufferCapacity = 16)
-    val events: SharedFlow<ScanEvent> = _events
+    override val events: SharedFlow<ScanEvent> = _events
 
     private val _owner = MutableStateFlow(CameraOwner.None)
     val owner: StateFlow<CameraOwner> = _owner.asStateFlow()
 
     val policy = PausePolicy(scope)
+    override val paused: StateFlow<Boolean> get() = policy.paused
 
     /** Last focus spec `apply()`ed; re-applied on `onCameraStarted` since `getFocusRegionManager()`
      *  throws [VisionSDKException.FocusRegionManagerNotAvailable] before the camera has started. */
@@ -145,12 +146,12 @@ class CameraController @Inject constructor(
     }
 
     /** Stops the scanner camera unless [owner] is [CameraOwner.Scanner]. */
-    fun claim(owner: CameraOwner) {
+    override fun claim(owner: CameraOwner) {
         _owner.value = owner
         if (scannerMustStop(owner)) view.stopCamera() else if (!policy.paused.value) view.startCamera()
     }
 
-    fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) {
+    override fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) {
         config.detection?.let { view.configure(it, scanning, config.multiple) }
         view.setCameraSettings(CameraSettings(nthFrameToProcess = config.nthFrame, orientationMode = CameraOrientationMode.PORTRAIT))
         view.enableTapToFocus()
@@ -173,10 +174,12 @@ class CameraController @Inject constructor(
         )
     }
 
-    fun pauseDetection() = view.pauseDetection()
-    fun resumeDetection() = view.resumeDetection()
-    fun capture() = view.capture()
-    fun rescan() = view.rescan()
-    fun torch(on: Boolean) = view.setFlashTurnedOn(on)
-    fun zoom(ratio: Float) = view.setZoomRatio(ratio)
+    override fun pauseDetection() = view.pauseDetection()
+    override fun resumeDetection() = view.resumeDetection()
+    override fun capture() = view.capture()
+    override fun rescan() = view.rescan()
+    override fun torch(on: Boolean) = view.setFlashTurnedOn(on)
+    override fun zoom(ratio: Float) = view.setZoomRatio(ratio)
+    override fun resume(): Boolean = policy.resume()
+    override fun userActive() = policy.userActive()
 }

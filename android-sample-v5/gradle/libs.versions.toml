@@ -18,6 +18,7 @@ tflite = "16.5.0"
 mlkitText = "16.0.1"
 junit = "4.13.2"
 turbine = "1.2.1"
+robolectric = "4.14.1"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -51,6 +52,7 @@ tflite-gpu = { module = "com.google.android.gms:play-services-tflite-gpu", versi
 mlkit-text = { module = "com.google.mlkit:text-recognition", version.ref = "mlkitText" }
 junit = { module = "junit:junit", version.ref = "junit" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

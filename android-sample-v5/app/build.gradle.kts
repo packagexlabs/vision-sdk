@@ -24,6 +24,7 @@ android {
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/uvdoc"))
     packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+    testOptions { unitTests.isIncludeAndroidResources = true }
 }
 kotlin { jvmToolchain(17) }
 
@@ -47,7 +48,7 @@ dependencies {
     implementation(libs.camerax.core); implementation(libs.camerax.camera2); implementation(libs.camerax.lifecycle); implementation(libs.camerax.view)
     implementation(libs.tflite.java); implementation(libs.tflite.gpu); implementation(libs.mlkit.text)
     implementation(files(visionSdkAndroidDir.resolve("app/libs/docscanner-release.aar")))
-    testImplementation(libs.junit); testImplementation(libs.coroutines.test); testImplementation(libs.turbine)
+    testImplementation(libs.junit); testImplementation(libs.coroutines.test); testImplementation(libs.turbine); testImplementation(libs.robolectric)
     androidTestImplementation(platform(libs.compose.bom)); androidTestImplementation(libs.compose.ui.test.junit4)
     debugImplementation(libs.compose.ui.test.manifest)
 }

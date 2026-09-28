@@ -1,8 +1,14 @@
 package io.packagex.visiondemo.fakes
 
 import android.graphics.Bitmap
+import android.graphics.Rect
+import android.graphics.RectF
+import io.packagex.visiondemo.camera.Camera
+import io.packagex.visiondemo.camera.CameraOwner
+import io.packagex.visiondemo.camera.ScanEvent
 import io.packagex.visiondemo.data.EntitlementRepository
 import io.packagex.visiondemo.data.ExtractionRepository
+import io.packagex.visiondemo.data.ItemCatalogRepository
 import io.packagex.visiondemo.data.ModelRepository
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PreferencesRepository
@@ -13,12 +19,25 @@ import io.packagex.visiondemo.model.ModelState
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanMode
+import io.packagex.visiondemo.model.ScannerConfig
+import io.packagex.visionsdk.core.ScanningMode
+import io.packagex.visionsdk.dto.BarcodeSymbology
 import io.packagex.visionsdk.dto.ScannedCodeResult
 import io.packagex.visionsdk.ui.views.VisionCameraView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 
 /** In-memory [PreferencesRepository]: no DataStore, no Context -- for ViewModel tests. */
 class FakePreferences(initial: Prefs = Prefs()) : PreferencesRepository {
@@ -92,6 +111,64 @@ class FakeReport(var shouldFail: Boolean = false) : ReportRepository {
 
 /** Always allows or always denies, without a real [VisionCameraView]. */
 class FakeEntitlement(private val allowed: Boolean = true) : EntitlementRepository {
-    override suspend fun check(view: VisionCameraView, mode: ScanMode): Result<Unit> =
+    override suspend fun check(view: VisionCameraView?, mode: ScanMode): Result<Unit> =
         if (allowed) Result.success(Unit) else Result.failure(IllegalStateException("not entitled"))
 }
+
+/** Records what the ViewModel asked of the camera; [emit] feeds SDK events (buffered until collected). */
+class FakeCamera : Camera {
+    private val channel = Channel<ScanEvent>(Channel.UNLIMITED)
+    override val events: Flow<ScanEvent> = channel.receiveAsFlow()
+    val pausedFlow = MutableStateFlow(false)
+    override val paused: StateFlow<Boolean> = pausedFlow
+    override val view: VisionCameraView? = null
+
+    var detectionPaused = false
+    var owner = CameraOwner.None
+    var lastConfig: ScannerConfig? = null
+    var lastScanning: ScanningMode? = null
+    var torchOn = false
+    var captures = 0
+    var rescans = 0
+    var userActiveCalls = 0
+    /** Critically hot: [resume] refuses, like [io.packagex.visiondemo.camera.PausePolicy.resume]. */
+    var hot = false
+
+    fun emit(event: ScanEvent) { channel.trySend(event) }
+
+    override fun claim(owner: CameraOwner) { this.owner = owner }
+    override fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { lastConfig = config; lastScanning = scanning }
+    override fun pauseDetection() { detectionPaused = true }
+    override fun resumeDetection() { detectionPaused = false }
+    override fun capture() { captures++ }
+    override fun rescan() { rescans++ }
+    override fun torch(on: Boolean) { torchOn = on }
+    override fun zoom(ratio: Float) {}
+    override fun resume(): Boolean {
+        if (hot) return false
+        pausedFlow.value = false
+        return true
+    }
+    override fun userActive() { userActiveCalls++ }
+}
+
+/** In-memory [ItemCatalogRepository]. */
+class FakeCatalog(initial: Map<String, String> = emptyMap()) : ItemCatalogRepository {
+    override val names = MutableStateFlow(initial)
+    override suspend fun name(sku: String, name: String) { names.value = names.value + (sku to name) }
+    override suspend fun remove(sku: String) { names.value = names.value - sku }
+}
+
+/** Swaps Dispatchers.Main for a [StandardTestDispatcher] so viewModelScope runs on runTest's virtual clock. */
+@OptIn(ExperimentalCoroutinesApi::class)
+class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher()) : TestWatcher() {
+    override fun starting(description: Description) = Dispatchers.setMain(dispatcher)
+    override fun finished(description: Description) = Dispatchers.resetMain()
+}
+
+/** Needs Robolectric (real android.graphics). */
+fun fakeBitmap(): Bitmap = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)
+
+/** A code128 [ScannedCodeResult] at [box]; needs Robolectric. */
+fun code(value: String, box: Rect = Rect(0, 0, 10, 10)) =
+    ScannedCodeResult(value, box, BarcodeSymbology.code128, null, RectF(), 0f, null)

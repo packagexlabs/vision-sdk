@@ -11,14 +11,16 @@ import javax.inject.Singleton
  * (cached license first, network refresh on miss).
  */
 interface EntitlementRepository {
-    suspend fun check(view: VisionCameraView, mode: ScanMode): Result<Unit>
+    /** [view] is nullable only so fakes can run without a real camera view; null fails the check. */
+    suspend fun check(view: VisionCameraView?, mode: ScanMode): Result<Unit>
 }
 
 @Singleton
 class SdkEntitlementRepository @Inject constructor(
     private val secrets: Secrets,
 ) : EntitlementRepository {
-    override suspend fun check(view: VisionCameraView, mode: ScanMode): Result<Unit> = runCatching {
+    override suspend fun check(view: VisionCameraView?, mode: ScanMode): Result<Unit> = runCatching {
+        checkNotNull(view) { "Camera not ready" }
         if (mode == ScanMode.Price) view.enablePriceTagMode(secrets.apiKey) else view.enableItemRetrievalMode(secrets.apiKey)
     }
 }
