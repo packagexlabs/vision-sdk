@@ -40,14 +40,14 @@ class CatalogSnapshot {
     fun set(names: Map<String, String>) { map = names.toMap() }
 }
 
+/** iOS `displayText`: labels longer than 24 characters show the first 21 and an ellipsis. */
+internal fun markerText(label: String): String = if (label.length > 24) label.take(21) + "…" else label
+
 /**
  * Index of the camera config to use, from each config's CPU image size (the image the decoder reads),
  * already filtered to 30 fps. For heat: the smallest image at least [MIN_WIDTH] px wide, as close to
  * iOS v5's "at most 1920 px, 30 fps" as ARCore's list allows; if none is that wide, the largest one.
  */
-/** iOS `displayText`: labels longer than 24 characters show the first 21 and an ellipsis. */
-internal fun markerText(label: String): String = if (label.length > 24) label.take(21) + "…" else label
-
 internal fun pickCameraConfig(sizes: List<Pair<Int, Int>>): Int? {
     if (sizes.isEmpty()) return null
     val area = { i: Int -> sizes[i].first.toLong() * sizes[i].second }
