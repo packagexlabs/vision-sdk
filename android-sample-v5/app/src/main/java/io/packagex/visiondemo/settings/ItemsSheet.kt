@@ -108,7 +108,7 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
         AlertDialog(
             onDismissRequest = { confirmDeleteAll = false },
             title = { Text("Delete all codes?") },
-            text = { Text("This action cannot be undone.") },
+            text = { Text("This action cannot be undone") },
             confirmButton = {
                 TextButton(onClick = { onAction(ScannerAction.ClearItems); confirmDeleteAll = false }) { Text("Delete") }
             },

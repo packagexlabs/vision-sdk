@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.packagex.visiondemo.designsystem.LinkLabel
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.SectionLabel
 import io.packagex.visiondemo.designsystem.Segmented
@@ -31,11 +32,15 @@ import io.packagex.visiondemo.scanner.ScannerUiState
 import io.packagex.visiondemo.scanner.onDevice
 
 /**
- * Ported from iOS `UI/Sheets.swift` `SettingsSheet`. Rows not carried over, because Android's [ScannerUiState]
- * / `Prefs` have no matching field: "Show detection hints" (no `showHints`), the static symbologies grid,
- * "Reset to defaults", and the "Advanced" section's detection-enabled / AR-debug toggles and environment row
- * (no `detectionEnabled` or AR debug state on [ScannerUiState] -- Task 11). "On-device models" content moves
- * to its own sheet here (the "Models" row below), including "Check for updates".
+ * Ported from iOS `UI/Sheets.swift` `SettingsSheet`. Grouping follows iOS: `wildCard`/`parseRecipient`/
+ * `parseSender` sit under "Vision Scanner" with auto capture (Sheets.swift:94-99); Processing is its own
+ * group (the brief's explicit Settings row list; iOS itself only has this control in `DocTypeSheet`).
+ * "Reset to defaults" resets the `Prefs` fields iOS resets that exist on Android (Sheets.swift:161-166).
+ * Rows not carried over, because Android's [ScannerUiState] / `Prefs` have no matching field: "Show
+ * detection hints" (no `showHints`), the static symbologies grid, and the "Advanced" section's
+ * detection-enabled / AR-debug toggles and environment row (no `detectionEnabled` or AR debug state on
+ * [ScannerUiState] -- Task 11). "On-device models" content moves to its own sheet here (the "Models" row
+ * below), including "Check for updates".
  */
 @Composable
 fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
@@ -62,24 +67,6 @@ fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             selection = p.processing,
             onSelect = { onAction(ScannerAction.UpdatePrefs { prefs -> prefs.copy(processing = it) }) },
             disabled = if (p.docType.onDevice) emptySet() else setOf(Processing.Device),
-        )
-        ToggleRow(
-            title = "Wild card scan",
-            desc = "Classifies on-device, then extracts shipping and item labels on-device and bills of lading in the cloud.",
-            checked = p.wildCard,
-            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = checked) }) },
-        )
-        ToggleRow(
-            title = "Clean up recipient address",
-            desc = "Runs an extra cloud check on shipping-label recipient addresses.",
-            checked = p.parseRecipient,
-            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(parseRecipient = checked) }) },
-        )
-        ToggleRow(
-            title = "Clean up sender address",
-            desc = "Runs the same check on sender addresses.",
-            checked = p.parseSender,
-            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(parseSender = checked) }) },
         )
     }
 
@@ -114,9 +101,46 @@ fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             checked = p.autoCapture,
             onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(autoCapture = checked) }) },
         )
+        ToggleRow(
+            title = "Wild card scan",
+            desc = "Classifies on-device, then extracts shipping and item labels on-device and bills of lading in the cloud.",
+            checked = p.wildCard,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = checked) }) },
+        )
+        ToggleRow(
+            title = "Clean up recipient address",
+            desc = "Runs an extra cloud check on shipping-label recipient addresses.",
+            checked = p.parseRecipient,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(parseRecipient = checked) }) },
+        )
+        ToggleRow(
+            title = "Clean up sender address",
+            desc = "Runs the same check on sender addresses.",
+            checked = p.parseSender,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(parseSender = checked) }) },
+        )
     }
 
     // AR debug toggles (iOS ARDebugRows): skipped -- ScannerUiState carries no AR debug state (Task 11).
+
+    // iOS `reset()` (Sheets.swift:161-166) also resets showHints/detectionEnabled; those fields don't
+    // exist on Prefs/ScannerUiState yet and will be added when AR debug integration lands (Task 11).
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        LinkLabel("Reset to defaults") {
+            onAction(
+                ScannerAction.UpdatePrefs {
+                    it.copy(
+                        multi = false,
+                        showBoxes = true,
+                        wildCard = false,
+                        parseRecipient = true,
+                        parseSender = true,
+                        modelSize = ModelSize.Micro,
+                    )
+                },
+            )
+        }
+    }
 
     ModelsRow(onAction)
 }
