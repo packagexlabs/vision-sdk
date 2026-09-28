@@ -83,6 +83,16 @@ interface DocumentCamera {
     suspend fun exportPdf(pages: List<DocumentPage>, enhanced: Boolean): File?
 }
 
+/** Output long edge cap after the perspective crop: each page keeps its Original and Enhanced bitmaps
+ *  (2400 x 1800 ARGB is ~17 MB apiece), and dewarp time grows with it. */
+internal const val MAX_OUTPUT_LONG_EDGE = 2400
+
+/** The perspective crop's output size for a quad measuring [w] x [h] px: capped at [MAX_OUTPUT_LONG_EDGE], never upscaled. */
+internal fun pageOutputSize(w: Int, h: Int): Pair<Int, Int> {
+    val scale = min(1f, MAX_OUTPUT_LONG_EDGE.toFloat() / max(w, h))
+    return max(8, (w * scale).roundToInt()) to max(8, (h * scale).roundToInt())
+}
+
 /** What a shutter press started. */
 enum class CaptureStart { Started, Busy, NoPage }
 
@@ -419,11 +429,7 @@ class DocumentController @Inject constructor(
 
         // 3. Warp to an upright rectangle sized by the quad's edge lengths.
         fun len(a: Int, b: Int) = hypot(src[b * 2] - src[a * 2], src[b * 2 + 1] - src[a * 2 + 1])
-        var outW = ((len(0, 1) + len(3, 2)) / 2).roundToInt()
-        var outH = ((len(0, 3) + len(1, 2)) / 2).roundToInt()
-        val scale = min(1f, MAX_OUTPUT_LONG_EDGE.toFloat() / max(outW, outH))
-        outW = max(8, (outW * scale).roundToInt())
-        outH = max(8, (outH * scale).roundToInt())
+        val (outW, outH) = pageOutputSize(((len(0, 1) + len(3, 2)) / 2).roundToInt(), ((len(0, 3) + len(1, 2)) / 2).roundToInt())
         val dst = floatArrayOf(0f, 0f, outW.toFloat(), 0f, outW.toFloat(), outH.toFloat(), 0f, outH.toFloat())
         val m = Matrix()
         if (!m.setPolyToPoly(src, 0, dst, 0, 4)) return region
@@ -550,9 +556,6 @@ class DocumentController @Inject constructor(
 
         /** Corners closer than this (fraction of frame size) to an edge block auto-capture: the page is clipped. */
         const val EDGE_MARGIN = 0.02f
-
-        /** Output long edge cap after the perspective crop (memory + dewarp time). */
-        const val MAX_OUTPUT_LONG_EDGE = 3000
 
         /** Edge snap: samples per edge, outward search reach (fraction of the short side), minimum luminance step. */
         const val EDGE_SAMPLES = 24

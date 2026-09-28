@@ -210,12 +210,14 @@ object DocumentDewarp {
         val t1 = System.nanoTime()
         val w = page.width
         val h = page.height
-        val src = IntArray(w * h)
-        page.getPixels(src, 0, w, 0, 0, w, h)
-        val out = DocumentResampler.resample(src, w, h, map)
+        val out = DocumentResampler.resample(pixels(page), w, h, map)   // the source pixels are garbage once it returns
         val straightened = Bitmap.createBitmap(out, w, h, Bitmap.Config.ARGB_8888)
         val resampleMs = (System.nanoTime() - t1) / 1_000_000
         Log.i("DocumentDewarp", "page=${w}x$h deviation=%.3f model=%dms resample=%dms (${DocumentResampler.lastPath})".format(deviation, modelMs, resampleMs))
         return DewarpResult(straightened, true, deviation, modelMs, resampleMs)
     }
 }
+
+/** [bitmap]'s ARGB pixels, row-major. */
+internal fun pixels(bitmap: Bitmap): IntArray =
+    IntArray(bitmap.width * bitmap.height).also { bitmap.getPixels(it, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height) }

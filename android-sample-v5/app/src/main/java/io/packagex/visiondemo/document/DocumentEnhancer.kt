@@ -36,14 +36,16 @@ object DocumentEnhancer {
     private const val SHARPEN_K = 0.6f
 
     /** NEON path (vision-native) when available; the Kotlin loop below is the reference and fallback. */
+    /** [consume]: the caller hands [src] over, so the native path enhances it in place instead of copying it. */
     fun enhance(
         src: IntArray,
         width: Int,
         height: Int,
+        consume: Boolean = false,
     ): IntArray {
         if (width < 2 || height < 2 || src.size < width * height) return src
         if (useNative) {
-            val copy = src.copyOf()
+            val copy = if (consume) src else src.copyOf()
             val t = System.nanoTime()
             if (io.packagex.visionsdk.native.DocumentEnhanceNative
                     .enhanceInPlace(copy, width, height)

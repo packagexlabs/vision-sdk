@@ -19,26 +19,30 @@ class DocumentSession(private val context: Context) {
     /** Blocking; call off the main thread. A failure leaves [DocumentPage.failed] set. */
     fun process(page: DocumentPage) {
         try {
-            val r = DocumentDewarp.dewarp(model(), page.original)
-            page.page = r.bitmap
-            page.wasDewarped = r.corrected
-            page.deviation = r.deviation
-            page.modelMs = r.modelMs
-            page.resampleMs = r.resampleMs
-            // Quality on the straightened page, before tone (glare is meaningless after).
-            page.quality = DocumentQualityChecker.analyze(r.bitmap)
-            val t = System.nanoTime()
-            val w = r.bitmap.width
-            val h = r.bitmap.height
-            val px = IntArray(w * h)
-            r.bitmap.getPixels(px, 0, w, 0, 0, w, h)
-            page.enhanced = Bitmap.createBitmap(DocumentEnhancer.enhance(px, w, h), w, h, Bitmap.Config.ARGB_8888)
-            page.enhanceMs = (System.nanoTime() - t) / 1_000_000
-            Log.i(TAG, "page ${page.index}: ${w}x$h dewarped=${r.corrected} model=${r.modelMs}ms resample=${r.resampleMs}ms enhance=${page.enhanceMs}ms (${DocumentEnhancer.lastPath})")
+            finish(page, DocumentDewarp.dewarp(model(), page.original))
         } catch (e: Exception) {
             Log.e(TAG, "page ${page.index} failed", e)
             page.failed = true
         }
+    }
+
+    /** Quality and enhance on the dewarp result. Keeps two bitmaps per page (Original = [DocumentPage.page],
+     *  Enhanced); pixel buffers are only referenced while in use, so each is collectable as soon as it is done. */
+    internal fun finish(page: DocumentPage, r: DewarpResult) {
+        page.page = r.bitmap
+        if (r.corrected) page.original = r.bitmap   // the raw crop isn't shown again: let it go
+        page.wasDewarped = r.corrected
+        page.deviation = r.deviation
+        page.modelMs = r.modelMs
+        page.resampleMs = r.resampleMs
+        // Quality on the straightened page, before tone (glare is meaningless after).
+        page.quality = DocumentQualityChecker.analyze(r.bitmap)
+        val t = System.nanoTime()
+        val w = r.bitmap.width
+        val h = r.bitmap.height
+        page.enhanced = Bitmap.createBitmap(DocumentEnhancer.enhance(pixels(r.bitmap), w, h, consume = true), w, h, Bitmap.Config.ARGB_8888)
+        page.enhanceMs = (System.nanoTime() - t) / 1_000_000
+        Log.i(TAG, "page ${page.index}: ${w}x$h dewarped=${r.corrected} model=${r.modelMs}ms resample=${r.resampleMs}ms enhance=${page.enhanceMs}ms (${DocumentEnhancer.lastPath})")
     }
 
     /** Blocking text recognition for the PDF's text layer; a no-op once done. */
