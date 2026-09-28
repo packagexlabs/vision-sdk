@@ -147,4 +147,12 @@ class ScannerViewModelArTest {
             assertEquals(ScannerEffect.Toast("Camera not available"), awaitItem())
         }
     }
+
+    @Test fun newViewModelResetsSingletonCameraState() = runTest {
+        val doc = io.packagex.visiondemo.fakes.FakeDocument()
+        cam.front = true; doc.front = true; ar.paused = true   // left over from the previous ViewModel (Back, relaunch)
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"), ar, doc)
+        advanceUntilIdle()
+        assertFalse(v.state.value.frontCamera); assertFalse(cam.front); assertFalse(doc.front); assertFalse(ar.paused)
+    }
 }

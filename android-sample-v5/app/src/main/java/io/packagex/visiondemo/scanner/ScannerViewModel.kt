@@ -126,6 +126,10 @@ class ScannerViewModel @Inject constructor(
     private val ownCamera get() = usesScanner || s.mode == ScanMode.DocAcq
 
     init {
+        // The cameras are singletons that outlive a ViewModel (Back, then relaunch): match them to the fresh state.
+        camera.lens(false)
+        document.lens(false)
+        ar.resume()   // no result, not paused; entering AR re-syncs with the camera pause (syncAr)
         // While a local write is in flight the repo can still emit the value from before it; skip those.
         viewModelScope.launch { prefs.prefs.collect { if (prefWrites == 0) setPrefs(it) } }
         viewModelScope.launch { models.states.collect { m -> _state.update { it.copy(models = m) } } }
