@@ -28,15 +28,25 @@ class PausePolicy(
      *  the current status, not a one-way latch: it clears again as soon as a cooler reading arrives. */
     private var critical = false
 
-    /** Resets the idle timer. Skipped while paused -- nothing to keep alive. */
+    /** A capture or extraction is in flight: the idle timeout waits for it (iOS `phase == .idle` guard). */
+    private var busy = false
+
+    /** Resets the idle timer. Skipped while paused -- nothing to keep alive -- or [busy]. */
     fun userActive() {
         idleJob?.cancel()
-        if (_paused.value) return
+        if (_paused.value || busy) return
         idleJob = scope.launch {
             delay(idleTimeoutMs)
             ensureActive()   // don't act on a stale delay that raced a cancel() (e.g. from a resume() in between)
             _paused.value = true
         }
+    }
+
+    /** Busy stops the idle timer; going idle again restarts it (heat and background still pause). */
+    fun setBusy(busy: Boolean) {
+        if (busy == this.busy) return
+        this.busy = busy
+        userActive()
     }
 
     /** [status] is a `PowerManager.THERMAL_STATUS_*` value. */

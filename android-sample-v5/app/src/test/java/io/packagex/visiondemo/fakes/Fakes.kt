@@ -202,6 +202,9 @@ class FakeCamera : DetectionGatedCamera() {
         return true
     }
     override fun userActive() { userActiveCalls++ }
+    /** Every [setBusy] value, in order. */
+    val busy = mutableListOf<Boolean>()
+    override fun setBusy(busy: Boolean) { this.busy += busy }
 }
 
 /** Records what the ViewModel asked of Document Acquisition; [still] feeds a capture (null = failed), [seePage] the live quad. */

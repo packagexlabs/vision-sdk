@@ -204,4 +204,5 @@ class CameraController @Inject constructor(
     }
     override fun resume(): Boolean = policy.resume()
     override fun userActive() = policy.userActive()
+    override fun setBusy(busy: Boolean) = policy.setBusy(busy)
 }

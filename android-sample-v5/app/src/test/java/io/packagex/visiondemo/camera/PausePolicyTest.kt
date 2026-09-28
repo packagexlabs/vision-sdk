@@ -76,4 +76,19 @@ class PausePolicyTest {
         advanceTimeBy(50_000)   // the original idle job (t=90s) must not still be alive and re-pause here
         assertFalse(p.paused.value)
     }
+
+    @Test fun noIdlePauseWhileBusy() = runTest {
+        val p = PausePolicy(backgroundScope, 90_000)
+        p.userActive(); advanceTimeBy(60_000)
+        p.setBusy(true); advanceTimeBy(120_000); assertFalse(p.paused.value)
+        p.userActive(); advanceTimeBy(120_000); assertFalse(p.paused.value)   // taps while busy don't arm it either
+        p.setBusy(false); advanceTimeBy(89_000); assertFalse(p.paused.value)  // going idle restarts the full timeout
+        advanceTimeBy(2_000); assertTrue(p.paused.value)
+    }
+
+    @Test fun heatStillPausesWhileBusy() = runTest {
+        val p = PausePolicy(backgroundScope)
+        p.setBusy(true); p.thermal(PowerManager.THERMAL_STATUS_SEVERE)
+        assertTrue(p.paused.value)
+    }
 }

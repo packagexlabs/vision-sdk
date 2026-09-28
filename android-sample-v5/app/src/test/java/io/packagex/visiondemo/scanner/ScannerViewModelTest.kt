@@ -709,4 +709,12 @@ class ScannerViewModelTest {
         assertEquals(scannerConfig(ScanMode.Barcode, p.multi, p.showBoxes), cam.lastConfig)
         assertEquals(ScanMode.Barcode, v.state.value.mode); assertFalse(v.state.value.entitlementChecking)
     }
+
+    @Test fun processingMarksCameraBusy() = runTest {
+        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
+        assertEquals(listOf(false, true), cam.busy)
+        advanceUntilIdle(); assertEquals(listOf(false, true, false), cam.busy)
+    }
 }

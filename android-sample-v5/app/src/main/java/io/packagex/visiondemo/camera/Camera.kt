@@ -34,6 +34,8 @@ interface Camera {
     fun resume(): Boolean
     /** [PausePolicy.userActive]: resets the idle timer. */
     fun userActive()
+    /** [PausePolicy.setBusy]: no idle pause while a capture or extraction runs. */
+    fun setBusy(busy: Boolean)
 }
 
 /**
