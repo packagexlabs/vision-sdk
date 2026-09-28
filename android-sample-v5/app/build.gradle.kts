@@ -36,7 +36,21 @@ val copyUvDoc by tasks.registering(Copy::class) {
     from(visionSdkAndroidDir.resolve("app/src/main/assets")) { include("uvdoc_fp16.tflite", "UVDoc-LICENSE.txt") }
     into(layout.buildDirectory.dir("generated/uvdoc"))
 }
-tasks.named("preBuild") { dependsOn(copyUvDoc) }
+// Both come from a vision-sdk-android checkout; without them the build would fail later and obscurely
+// (a NO-SOURCE copy, then a missing class or model at runtime).
+val visionSdkInputs = listOf("app/src/main/assets/uvdoc_fp16.tflite", "app/libs/docscanner-release.aar").map { visionSdkAndroidDir.resolve(it) }
+tasks.named("preBuild") {
+    dependsOn(copyUvDoc)
+    doFirst {
+        val missing = visionSdkInputs.filterNot { it.isFile }
+        if (missing.isNotEmpty()) {
+            throw GradleException(
+                "Missing from vision-sdk-android (visionSdkAndroidDir = $visionSdkAndroidDir): " +
+                    missing.joinToString { it.path } + ". Check out vision-sdk-android next to vision-sdk, or pass -PvisionSdkAndroidDir=<path>.",
+            )
+        }
+    }
+}
 
 dependencies {
     implementation(platform(libs.compose.bom))
