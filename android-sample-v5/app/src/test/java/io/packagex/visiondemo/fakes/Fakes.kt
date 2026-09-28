@@ -30,6 +30,7 @@ import io.packagex.visionsdk.dto.BarcodeSymbology
 import io.packagex.visionsdk.dto.ScannedCodeResult
 import io.packagex.visionsdk.ui.views.VisionCameraView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -41,6 +42,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import java.io.File
@@ -132,14 +134,23 @@ class FakeReport(var shouldFail: Boolean = false) : ReportRepository {
     }
 }
 
-/** Always allows or always denies, without a real [VisionCameraView]. */
-class FakeEntitlement(private val allowed: Boolean = true) : EntitlementRepository {
-    override suspend fun check(view: VisionCameraView?, mode: ScanMode): Result<Unit> =
-        if (allowed) Result.success(Unit) else Result.failure(IllegalStateException("not entitled"))
+/** Always allows or always denies, without a real [VisionCameraView], after [delayMs].
+ *  [onDone] models the SDK's `enable*Mode` switching the view into the checked mode when it finishes;
+ *  like the SDK's blocking license work, the wait and [onDone] run even if the caller was cancelled. */
+class FakeEntitlement(
+    private val allowed: Boolean = true,
+    private val delayMs: Long = 0,
+    var onDone: (ScanMode) -> Unit = {},
+) : EntitlementRepository {
+    override suspend fun check(view: VisionCameraView?, mode: ScanMode): Result<Unit> {
+        withContext(NonCancellable) { if (delayMs > 0) delay(delayMs); onDone(mode) }
+        return if (allowed) Result.success(Unit) else Result.failure(IllegalStateException("not entitled"))
+    }
 }
 
 /** Records what the ViewModel asked of the camera; [emit] feeds SDK events (buffered until collected).
- *  Like the SDK, a rescan or facing switch clears the detection pause; [DetectionGatedCamera] re-applies it. */
+ *  Like the SDK, a rescan or facing switch clears the detection pause; [DetectionGatedCamera] re-applies it.
+ *  Like the SDK too, a rescan starts a stopped camera ([running]); [pause] stops it as [CameraController] does. */
 class FakeCamera : DetectionGatedCamera() {
     private val channel = Channel<ScanEvent>(Channel.UNLIMITED)
     override val events: Flow<ScanEvent> = channel.receiveAsFlow()
@@ -148,7 +159,10 @@ class FakeCamera : DetectionGatedCamera() {
     override val view: VisionCameraView? = null
 
     var detectionPaused = false
-    var owner = CameraOwner.None
+    /** Starts as the scanner's, as after the permission grant, so tests needn't claim first. */
+    var owner = CameraOwner.Scanner
+    /** Whether the sensor is streaming. */
+    var running = true
     var lastConfig: ScannerConfig? = null
     var lastScanning: ScanningMode? = null
     var torchOn = false
@@ -163,12 +177,20 @@ class FakeCamera : DetectionGatedCamera() {
 
     fun emit(event: ScanEvent) { channel.trySend(event) }
 
-    override fun claim(owner: CameraOwner) { this.owner = owner }
+    /** [io.packagex.visiondemo.camera.PausePolicy] pauses (idle, heat, background): the camera stops. */
+    fun pause() { pausedFlow.value = true; running = false }
+
+    override val mayRun get() = owner == CameraOwner.Scanner && !pausedFlow.value
+    override fun sdkStart() { running = true }
+    override fun claim(owner: CameraOwner) {
+        this.owner = owner
+        if (owner != CameraOwner.Scanner) running = false else if (!pausedFlow.value) start()
+    }
     override fun sdkApply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { lastConfig = config; lastScanning = scanning }
     override fun sdkPauseDetection() { detectionPaused = true }
     override fun sdkResumeDetection() { detectionPaused = false }
     override fun capture() { captures++ }
-    override fun sdkRescan() { rescans++; detectionPaused = false }
+    override fun sdkRescan() { rescans++; running = true; detectionPaused = false }
     override fun torch(on: Boolean) { torchOn = on }
     override fun zoom(ratio: Float) { zoomRatio = ratio }
     override fun sdkLens(front: Boolean) { this.front = front; detectionPaused = false }
@@ -176,6 +198,7 @@ class FakeCamera : DetectionGatedCamera() {
     override fun resume(): Boolean {
         if (hot) return false
         pausedFlow.value = false
+        if (owner == CameraOwner.Scanner) start()
         return true
     }
     override fun userActive() { userActiveCalls++ }

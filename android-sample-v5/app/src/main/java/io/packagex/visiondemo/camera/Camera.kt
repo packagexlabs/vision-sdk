@@ -43,6 +43,12 @@ interface Camera {
  */
 abstract class DetectionGatedCamera : Camera {
     private var pauseWanted = false
+    /** A [rescan] asked for while the camera was stopped; applied by the next [start]. */
+    private var rescanPending = false
+
+    /** The SDK camera may run now: the scanner owns it and [PausePolicy] isn't pausing it. */
+    protected abstract val mayRun: Boolean
+    protected abstract fun sdkStart()
 
     protected abstract fun sdkPauseDetection()
     protected abstract fun sdkResumeDetection()
@@ -52,9 +58,20 @@ abstract class DetectionGatedCamera : Camera {
 
     final override fun pauseDetection() { pauseWanted = true; sdkPauseDetection() }
     final override fun resumeDetection() { pauseWanted = false; sdkResumeDetection() }
-    final override fun rescan() { sdkRescan(); reapplyPause() }
+    /** The SDK's `rescan()` rebinds, i.e. starts a stopped camera, so while it may not run the rescan waits for [start]. */
+    final override fun rescan() {
+        if (!mayRun) { rescanPending = true; return }
+        rescanPending = false
+        sdkRescan(); reapplyPause()
+    }
     final override fun lens(front: Boolean) { sdkLens(front); reapplyPause() }
     final override fun apply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { sdkApply(config, frame, scanning); reapplyPause() }
+
+    /** (Re)starts the SDK camera (resume, claim), as a rescan if one was asked for while it was stopped. */
+    protected fun start() {
+        if (rescanPending) { rescanPending = false; sdkRescan() } else sdkStart()
+        reapplyPause()
+    }
 
     /** Call after anything else that (re)starts the SDK camera. */
     protected fun reapplyPause() { if (pauseWanted) sdkPauseDetection() }

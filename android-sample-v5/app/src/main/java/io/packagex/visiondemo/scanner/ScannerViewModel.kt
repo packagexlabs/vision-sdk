@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
@@ -83,6 +84,9 @@ class ScannerViewModel @Inject constructor(
 
     /** The result waiting out the success flash; cancelled by a mode switch or close so it can't land later. */
     private var pendingShow: Job? = null
+
+    /** The running entitlement check; a mode switch cancels it. */
+    private var entitlementJob: Job? = null
 
     /** What the current alert's "Try again" re-runs. */
     private var retry: (() -> Unit)? = null
@@ -226,6 +230,7 @@ class ScannerViewModel @Inject constructor(
         if (s.mode == ScanMode.Ar) ar.detach()   // release ARCore's camera before the scanner claims it (iOS :250)
         if (m == ScanMode.Ar) ar.clear()         // every AR entry starts a new scan (iOS reset)
         pendingShow?.cancel(); pendingShow = null
+        entitlementJob?.cancel(); entitlementJob = null
         modeGeneration++
         retry = null
         clearInView()
@@ -333,9 +338,12 @@ class ScannerViewModel @Inject constructor(
     private fun checkEntitlement(mode: ScanMode, announce: Boolean = false, rescan: Boolean = announce) {
         if (!mode.gated) return
         _state.update { it.copy(gated = true, entitlementChecking = true) }
-        viewModelScope.launch {
-            val r = entitlement.check(camera.view, mode)
-            if (s.mode != mode) return@launch
+        entitlementJob?.cancel()
+        entitlementJob = viewModelScope.launch {
+            // The check switches the view into [mode]; one that outlived its mode (cancelled, or finishing
+            // past the cancel) re-applies the current mode's config.
+            val r = try { entitlement.check(camera.view, mode) } finally { if (s.mode != mode) applyConfig() }
+            if (s.mode != mode || !isActive) return@launch   // a newer check replaced this one
             _state.update { it.copy(gated = r.isFailure, entitlementChecking = false) }
             if (r.isSuccess) {
                 if (announce) toast("Authenticated")

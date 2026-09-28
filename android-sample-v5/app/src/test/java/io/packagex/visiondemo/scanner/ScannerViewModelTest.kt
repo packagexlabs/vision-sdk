@@ -25,6 +25,7 @@ import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
 import io.packagex.visiondemo.model.SheetKind
+import io.packagex.visiondemo.model.scannerConfig
 import android.graphics.Rect
 import io.packagex.visionsdk.core.pricetag.PriceTagData
 import io.packagex.visionsdk.exceptions.VisionSDKException
@@ -648,5 +649,64 @@ class ScannerViewModelTest {
         val v = vm(); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetDetectionEnabled(false)); v.onAction(ScannerAction.FlipCamera)
         assertTrue(cam.front); assertTrue(cam.detectionPaused)
+    }
+
+    // --- final review: the SDK's rescan() starts a stopped camera; while paused it must wait for resume ---
+
+    @Test fun closeResultWhilePausedKeepsCameraStopped() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle()
+        cam.pause(); advanceUntilIdle()
+        val rescans = cam.rescans
+        v.onAction(ScannerAction.CloseResult)
+        assertFalse(cam.running); assertEquals(rescans, cam.rescans)
+        v.onAction(ScannerAction.Resume)   // the rescan asked for while paused runs on resume
+        assertTrue(cam.running); assertEquals(rescans + 1, cam.rescans)
+    }
+
+    @Test fun dismissAlertWhilePausedKeepsCameraStopped() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Failure(VisionSDKException.BlurImageDetected)); runCurrent()
+        cam.pause(); advanceUntilIdle()
+        v.onAction(ScannerAction.DismissAlert)
+        assertFalse(cam.running)
+    }
+
+    @Test fun multiToggleWhilePausedKeepsCameraStopped() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.pause(); advanceUntilIdle()
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(multi = !it.multi) }); advanceUntilIdle()
+        assertFalse(cam.running)
+    }
+
+    @Test fun cancelProcessingWhilePausedKeepsCameraStopped() = runTest {
+        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
+        cam.pause(); runCurrent()
+        v.onAction(ScannerAction.CancelProcessing); advanceUntilIdle()
+        assertFalse(cam.running)
+    }
+
+    @Test fun entitlementPassWhilePausedKeepsCameraStopped() = runTest {
+        val cam = FakeCamera()
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true, delayMs = 2_000), FakeCatalog(), Secrets("k", "staging"))
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        cam.emit(ScanEvent.Failure(VisionSDKException.PriceTagNotEligible())); advanceTimeBy(1_000)   // re-check with rescan
+        cam.pause(); advanceUntilIdle()
+        assertFalse(v.state.value.gated); assertFalse(cam.running)
+    }
+
+    @Test fun staleEntitlementCheckDoesNotOverwriteNextMode() = runTest {
+        val cam = FakeCamera()
+        val ent = FakeEntitlement(true, delayMs = 5_000)
+        ent.onDone = { m -> cam.lastConfig = scannerConfig(m, false, true) }   // SDK enable*Mode switches the view
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), ent, FakeCatalog(), Secrets("k", "staging"))
+        v.onAction(ScannerAction.PermissionResult(true))
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceTimeBy(1_000)
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
+        val p = v.state.value.prefs
+        assertEquals(scannerConfig(ScanMode.Barcode, p.multi, p.showBoxes), cam.lastConfig)
+        assertEquals(ScanMode.Barcode, v.state.value.mode); assertFalse(v.state.value.entitlementChecking)
     }
 }

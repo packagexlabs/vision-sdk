@@ -145,8 +145,7 @@ class CameraController @Inject constructor(
                 if (paused) {
                     view.stopCamera()
                 } else if (_owner.value == CameraOwner.Scanner) {
-                    view.startCamera()
-                    reapplyPause()
+                    start()
                 }
             }
         }
@@ -158,8 +157,7 @@ class CameraController @Inject constructor(
         if (scannerMustStop(owner)) {
             view.stopCamera()
         } else if (!policy.paused.value) {
-            view.startCamera()
-            reapplyPause()
+            start()
         }
     }
 
@@ -187,6 +185,8 @@ class CameraController @Inject constructor(
         )
     }
 
+    override val mayRun get() = _owner.value == CameraOwner.Scanner && !policy.paused.value
+    override fun sdkStart() = view.startCamera()
     override fun sdkPauseDetection() = view.pauseDetection()
     override fun sdkResumeDetection() = view.resumeDetection()
     override fun capture() = view.capture()
