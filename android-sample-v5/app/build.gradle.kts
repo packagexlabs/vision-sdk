@@ -17,6 +17,7 @@ android {
         buildConfigField("String", "VISION_ENV", "\"${secret("VISION_ENV").ifEmpty { "staging" }}\"")
         buildConfigField("String", "STAGING_API_KEY", "\"${secret("STAGING_API_KEY")}\"")
         buildConfigField("String", "PRODUCTION_API_KEY", "\"${secret("PRODUCTION_API_KEY")}\"")
+        buildConfigField("String", "IL_FEEDBACK_URL", "\"${secret("IL_FEEDBACK_URL").ifEmpty { "https://lvlm-api-567462092481.us-east1.run.app" }}\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true; buildConfig = true }
