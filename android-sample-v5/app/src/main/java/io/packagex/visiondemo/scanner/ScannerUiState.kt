@@ -1,9 +1,11 @@
 package io.packagex.visiondemo.scanner
 
 import io.packagex.visiondemo.data.Prefs
+import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.model.DetectedCode
 import io.packagex.visiondemo.model.DocType
+import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ModelState
 import io.packagex.visiondemo.model.Phase
@@ -12,7 +14,7 @@ import io.packagex.visiondemo.model.ScanResult
 import io.packagex.visiondemo.model.SheetKind
 
 data class ScannerUiState(
-    /** The active mode. Not persisted: the app always opens on Barcode, as iOS (`Prefs.mode` is unused). */
+    /** The active mode. Not persisted: the app always opens on Barcode, as iOS. */
     val mode: ScanMode = ScanMode.Barcode,
     val prefs: Prefs = Prefs(),
     val phase: Phase = Phase.Idle,
@@ -33,6 +35,14 @@ data class ScannerUiState(
     val torch: Boolean = false,
     val permissionDenied: Boolean = false,
     val missingKey: String? = null,
+    /** Frame flash: Success during the 380 ms before a result shows, Error for 1.2 s after a failure. */
+    val feedback: Feedback? = null,
+    /** Price tag: unique tags read since entering the mode or the last close (hint "N tags found"). */
+    val tags: List<PriceTag> = emptyList(),
+    /** Item retrieval: codes reported in view within the last second. */
+    val codesInView: List<String> = emptyList(),
+    /** Item retrieval list: the codes to find (iOS `items`). */
+    val items: List<String> = emptyList(),
 )
 
 data class Alert(val title: String, val message: String, val actions: List<AlertAction>)

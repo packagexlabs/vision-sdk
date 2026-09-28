@@ -17,6 +17,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Extraction output: the JSON and the document type it was read as (the routed type for wild card). */
+data class Extraction(val type: DocType, val json: String)
+
 interface ExtractionRepository {
     /**
      * [wildCard]: classify on-device first (document classification · micro, always -- regardless
@@ -31,7 +34,7 @@ interface ExtractionRepository {
         processing: Processing,
         size: ModelSize,
         wildCard: Boolean = false,
-    ): String
+    ): Extraction
 }
 
 /**
@@ -71,8 +74,8 @@ class SdkExtractionRepository @Inject constructor(
         processing: Processing,
         size: ModelSize,
         wildCard: Boolean,
-    ): String = withContext(Dispatchers.Default) {
-        if (!wildCard) return@withContext extractOne(bitmap, codes, type, processing, size)
+    ): Extraction = withContext(Dispatchers.Default) {
+        if (!wildCard) return@withContext Extraction(type, extractOne(bitmap, codes, type, processing, size))
 
         // Wild card, as the original demo: classify on-device (DC · micro, always), then dispatch
         // to the reported module -- BOL to the cloud, SL/IL on-device large (after ensuring that
@@ -82,7 +85,7 @@ class SdkExtractionRepository @Inject constructor(
         val documentClass = OcrParser.documentClass(classification)
         val route = wildCardRoute(documentClass) ?: throw UnsupportedDocumentException(documentClass)
         if (route.processing == Processing.Device) ensureLoaded(route.type, route.size)
-        extractOne(bitmap, codes, route.type, route.processing, route.size)
+        Extraction(route.type, extractOne(bitmap, codes, route.type, route.processing, route.size))
     }
 
     /** Download+load, like iOS's `prepareModel`, unless the row is already loaded. */

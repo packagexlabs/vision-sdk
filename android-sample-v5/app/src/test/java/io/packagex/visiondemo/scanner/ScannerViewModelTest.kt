@@ -15,6 +15,7 @@ import io.packagex.visiondemo.fakes.MainDispatcherRule
 import io.packagex.visiondemo.fakes.code
 import io.packagex.visiondemo.fakes.fakeBitmap
 import io.packagex.visiondemo.model.DocType
+import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ModelState
 import io.packagex.visiondemo.model.Phase
@@ -22,10 +23,13 @@ import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
 import io.packagex.visiondemo.model.SheetKind
+import android.graphics.Rect
+import io.packagex.visionsdk.core.pricetag.PriceTagData
 import io.packagex.visionsdk.exceptions.VisionSDKException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -184,13 +188,124 @@ class ScannerViewModelTest {
         assertNull(v.state.value.alert); assertEquals(SheetKind.Items, v.state.value.sheet)
     }
 
-    @Test fun retrievalSplitsFoundAndMissing() = runTest {
-        val catalog = FakeCatalog(mapOf("A" to "Apple", "B" to "Banana"))
+    @Test fun retrievalReportsCodesInViewFlaggedByList() = runTest {
+        val catalog = FakeCatalog(items = listOf("A", "B"))
         val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"))
-        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
-        (v.camera as FakeCamera).emit(ScanEvent.Retrieved(code("A"))); advanceUntilIdle()
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
+        val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Retrieved(code("A"))); cam.emit(ScanEvent.Retrieved(code("Z"))); runCurrent()
+        assertEquals(listOf("A", "Z"), v.state.value.codesInView)
+        v.onAction(ScannerAction.Shutter); advanceTimeBy(400)
+        assertEquals(ScanResult.Retrieval(listOf("A" to true, "Z" to false)), v.state.value.result)
+    }
+
+    @Test fun codesLeaveViewAfterASecondWithoutReports() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
+        (v.camera as FakeCamera).emit(ScanEvent.Retrieved(code("A"))); runCurrent()
+        advanceTimeBy(900); assertEquals(listOf("A"), v.state.value.codesInView)
+        (v.camera as FakeCamera).emit(ScanEvent.Retrieved(code("A"))); runCurrent()
+        advanceTimeBy(900); assertEquals(listOf("A"), v.state.value.codesInView)   // refreshed
+        advanceTimeBy(200); assertEquals(emptyList<String>(), v.state.value.codesInView)
+    }
+
+    // --- fix round 1 ---
+
+    @Test fun wildCardSkipsModelPrompt() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true, processing = Processing.Device) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
-        assertEquals(ScanResult.Retrieval(found = listOf("A"), missing = listOf("B")), v.state.value.result)
+        assertNull(v.state.value.alert); assertEquals(1, cam.captures)
+    }
+
+    @Test fun wildCardResultUsesRoutedType() = runTest {
+        val v = vm(FakeExtraction("""{"data":{"inference":{"item_name":"Bolt"}}}""", routedType = DocType.IL)); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        val r = v.state.value.result as ScanResult.Ocr
+        assertEquals(DocType.IL, r.result.docType); assertEquals("Item label (wild card)", r.title)
+        assertTrue(r.subtitle, r.subtitle.startsWith("On-device · large · "))
+    }
+
+    @Test fun cloudResultTitleAndSubtitle() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        val r = v.state.value.result as ScanResult.Ocr
+        assertEquals("Shipping label", r.title); assertTrue(r.subtitle, r.subtitle.startsWith("Cloud · "))
+    }
+
+    @Test fun cloudFailureOffersOnDevice() = runTest {
+        val x = FakeExtraction("{}", error = IllegalStateException("boom")); val v = vm(x); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        val alert = v.state.value.alert!!
+        assertEquals("Cloud request failed", alert.title); assertEquals("boom", alert.message)
+        assertEquals(listOf("Try again", "Use On-device", "Cancel"), alert.actions.map { it.label })
+        v.onAction(ScannerAction.Retry); advanceUntilIdle()
+        assertEquals(2, x.calls)
+    }
+
+    @Test fun priceTagsCollectUniqueAndShowOnShutter() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438-01", "$28.99", Rect())))
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect())))
+        cam.emit(ScanEvent.PriceTag(PriceTagData("999", "$1.00", Rect()))); advanceUntilIdle()
+        assertNull(v.state.value.result)   // no drawer on the event
+        assertEquals(2, v.state.value.tags.size)
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle()
+        val tags = (v.state.value.result as ScanResult.Price).tags
+        assertEquals(listOf("14438" to true, "999" to false), tags.map { it.sku to it.valid })
+        assertEquals(listOf("$28.99", "Not Found"), tags.map { it.expected })
+        v.onAction(ScannerAction.CloseResult); assertTrue(v.state.value.tags.isEmpty())
+    }
+
+    @Test fun priceShutterWithNoTagsShowsEmptyDrawer() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle()
+        assertEquals(ScanResult.Price(emptyList()), v.state.value.result)
+    }
+
+    @Test fun shutterCaptureWithNoCodeExplains() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.Shutter)
+        cam.emit(ScanEvent.Failure(VisionSDKException.NoBarcodeDetected)); runCurrent()
+        val alert = v.state.value.alert!!
+        assertEquals("No Barcode Found", alert.title)
+        assertEquals("Move closer so the code fills the frame, then try again.", alert.message)
+        assertEquals(listOf("Try again", "Turn on torch and retry", "Cancel"), alert.actions.map { it.label })
+        v.onAction(alert.actions[1].action)
+        assertTrue(v.state.value.torch); assertTrue(cam.torchOn); assertNull(v.state.value.alert)
+    }
+
+    @Test fun shutterRetryCapturesAgain() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.QR)); v.onAction(ScannerAction.Shutter)
+        cam.emit(ScanEvent.Failure(VisionSDKException.NoQRCodeDetected)); runCurrent()
+        assertEquals("No QR Code Found", v.state.value.alert?.title)
+        v.onAction(ScannerAction.Retry)
+        assertEquals(2, cam.captures); assertEquals(Phase.Scanning, v.state.value.phase)
+    }
+
+    @Test fun feedbackSuccessUntilPresented() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); runCurrent()
+        assertEquals(Feedback.Success, v.state.value.feedback); assertNull(v.state.value.result)
+        advanceTimeBy(400); assertNull(v.state.value.feedback); assertNotNull(v.state.value.result)
+    }
+
+    @Test fun feedbackErrorClearsAfter1200ms() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Failure(VisionSDKException.BlurImageDetected)); runCurrent()
+        assertEquals(Feedback.Error, v.state.value.feedback)
+        advanceTimeBy(1_100); assertEquals(Feedback.Error, v.state.value.feedback)
+        advanceTimeBy(200); assertNull(v.state.value.feedback)
+    }
+
+    @Test fun passedRecheckRescans() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        val before = cam.rescans
+        cam.emit(ScanEvent.Failure(VisionSDKException.PriceTagNotEligible())); advanceUntilIdle()
+        assertFalse(v.state.value.gated); assertEquals(before + 1, cam.rescans)
     }
 
     @Test fun pauseForcesTorchOff() = runTest {

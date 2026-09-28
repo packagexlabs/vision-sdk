@@ -32,6 +32,8 @@ sealed interface ScannerAction {
     data class FrameChanged(val rect: RectF) : ScannerAction
     /** Re-runs the failed step behind the current alert's "Try again". */
     data object Retry : ScannerAction
+    /** "Turn on torch and retry" on a no-code alert. */
+    data object TorchRetry : ScannerAction
     /** Gate card: re-run the entitlement check. */
     data object Authenticate : ScannerAction
 

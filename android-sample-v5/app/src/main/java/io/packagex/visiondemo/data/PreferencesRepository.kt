@@ -10,14 +10,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.Processing
-import io.packagex.visiondemo.model.ScanMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 data class Prefs(
-    val mode: ScanMode = ScanMode.Barcode,
     val multi: Boolean = false,
     val showBoxes: Boolean = true,
     val docType: DocType = DocType.SL,
@@ -41,7 +39,6 @@ interface PreferencesRepository {
 internal val Context.dataStore by preferencesDataStore(name = "v5")
 
 private object PrefKeys {
-    val mode = stringPreferencesKey("v5.pref.mode")
     val multi = booleanPreferencesKey("v5.pref.multi")
     val showBoxes = booleanPreferencesKey("v5.pref.showBoxes")
     val docType = stringPreferencesKey("v5.pref.docType")
@@ -55,7 +52,6 @@ private object PrefKeys {
 }
 
 private fun decodePrefs(p: Preferences): Prefs = Prefs(
-    mode = p[PrefKeys.mode]?.let { runCatching { ScanMode.valueOf(it) }.getOrNull() } ?: ScanMode.Barcode,
     multi = p[PrefKeys.multi] ?: false,
     showBoxes = p[PrefKeys.showBoxes] ?: true,
     docType = p[PrefKeys.docType]?.let { runCatching { DocType.valueOf(it) }.getOrNull() } ?: DocType.SL,
@@ -78,7 +74,6 @@ class DataStorePreferencesRepository @Inject constructor(
     override suspend fun update(transform: (Prefs) -> Prefs) {
         context.dataStore.edit { p ->
             val next = transform(decodePrefs(p))
-            p[PrefKeys.mode] = next.mode.name
             p[PrefKeys.multi] = next.multi
             p[PrefKeys.showBoxes] = next.showBoxes
             p[PrefKeys.docType] = next.docType.name

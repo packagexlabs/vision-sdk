@@ -12,18 +12,17 @@ import io.packagex.visiondemo.data.EntitlementRepository
 import io.packagex.visiondemo.data.ExtractionRepository
 import io.packagex.visiondemo.data.ItemCatalogRepository
 import io.packagex.visiondemo.data.ModelRepository
-import io.packagex.visiondemo.data.OcrParser
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PreferencesRepository
+import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.data.ReportRepository
 import io.packagex.visiondemo.data.ScanError
 import io.packagex.visiondemo.data.Secrets
-import io.packagex.visiondemo.data.UnsupportedDocumentException
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.model.Box
+import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.ModelState
 import io.packagex.visiondemo.model.Phase
-import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
 import io.packagex.visiondemo.model.SheetKind
@@ -46,8 +45,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.IOException
-import java.net.ConnectException
-import java.net.UnknownHostException
 import javax.inject.Inject
 
 /**
@@ -86,19 +83,26 @@ class ScannerViewModel @Inject constructor(
     /** Viewfinder rect in camera-view px, from [ScannerAction.FrameChanged]. */
     private var frame: RectF? = null
 
-    /** Item retrieval: codes seen since the mode was entered or the last result closed. */
-    private val seen = linkedSetOf<String>()
+    /** Item retrieval: per code, the timer that drops it from [ScannerUiState.codesInView]. */
+    private val inViewExpiry = mutableMapOf<String, Job>()
+
+    /** [ScannerAction.UpdatePrefs] writes not yet persisted. */
+    private var prefWrites = 0
 
     private val s get() = _state.value
     private val usesScanner get() = ownerFor(s.mode) == CameraOwner.Scanner
 
     init {
-        viewModelScope.launch { prefs.prefs.collect(::setPrefs) }
+        // While a local write is in flight the repo can still emit the value from before it; skip those.
+        viewModelScope.launch { prefs.prefs.collect { if (prefWrites == 0) setPrefs(it) } }
         viewModelScope.launch { models.states.collect { m -> _state.update { it.copy(models = m) } } }
+        viewModelScope.launch { catalog.items.collect { i -> _state.update { it.copy(items = i) } } }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
         // Repo states are in-memory; read what the SDK already has on disk / in memory.
-        viewModelScope.launch { runCatching { models.refresh() } }
+        viewModelScope.launch {
+            try { models.refresh() } catch (e: CancellationException) { throw e } catch (e: Exception) { /* rows stay NotDownloaded */ }
+        }
         camera.userActive()
     }
 
@@ -118,7 +122,8 @@ class ScannerViewModel @Inject constructor(
             ScannerAction.UserActive -> {}
             is ScannerAction.UpdatePrefs -> {
                 setPrefs(a.t(s.prefs))   // at once, so the next action sees it; the repo echoes the same value
-                viewModelScope.launch { prefs.update(a.t) }
+                prefWrites++
+                viewModelScope.launch { try { prefs.update(a.t) } finally { prefWrites-- } }
             }
             ScannerAction.ToggleTorch -> setTorch(!s.torch)
             ScannerAction.ToggleAuto -> toggleAuto()
@@ -135,6 +140,7 @@ class ScannerViewModel @Inject constructor(
             }
             is ScannerAction.FrameChanged -> if (a.rect != frame) { frame = a.rect; applyConfig() }
             ScannerAction.Retry -> retry.also { retry = null }?.invoke()
+            ScannerAction.TorchRetry -> { setTorch(true); camera.rescan() }
             ScannerAction.Authenticate -> checkEntitlement(s.mode, announce = true)
             is ScannerAction.DownloadModel -> downloadModel(a)
             is ScannerAction.LoadModel -> viewModelScope.launch {
@@ -154,13 +160,13 @@ class ScannerViewModel @Inject constructor(
         pendingShow?.cancel(); pendingShow = null
         modeGeneration++
         retry = null
-        seen.clear()
+        clearInView()
         dismissing = false
         if (s.torch) camera.torch(false)
         _state.update {
             it.copy(
                 mode = m, result = null, sheet = null, pendingSheet = null, phase = Phase.Idle, boxes = emptyList(),
-                codeInFrame = false, torch = false, gated = m.gated, entitlementChecking = false,
+                codeInFrame = false, torch = false, gated = m.gated, entitlementChecking = false, feedback = null, tags = emptyList(),
             )
         }
         if (!s.permissionDenied) configureCamera()
@@ -172,7 +178,7 @@ class ScannerViewModel @Inject constructor(
         if (!usesScanner) return
         applyConfig()
         if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) camera.resumeDetection()
-        if (s.mode.gated) checkEntitlement(s.mode, announce = false)
+        if (s.mode.gated) checkEntitlement(s.mode)
     }
 
     private fun applyConfig() {
@@ -203,8 +209,11 @@ class ScannerViewModel @Inject constructor(
         camera.torch(on)
     }
 
-    /** The SDK's check is `enable*Mode` on the live view, which also switches the view into that mode, so it runs on every entry. */
-    private fun checkEntitlement(mode: ScanMode, announce: Boolean) {
+    /**
+     * The SDK's check is `enable*Mode` on the live view, which also switches the view into that mode, so it runs
+     * on every entry. [rescan] after a pass when detection was refused mid-scan (iOS :927); [announce] for the gate card.
+     */
+    private fun checkEntitlement(mode: ScanMode, announce: Boolean = false, rescan: Boolean = announce) {
         if (!mode.gated) return
         _state.update { it.copy(gated = true, entitlementChecking = true) }
         viewModelScope.launch {
@@ -212,7 +221,8 @@ class ScannerViewModel @Inject constructor(
             if (s.mode != mode) return@launch
             _state.update { it.copy(gated = r.isFailure, entitlementChecking = false) }
             if (r.isSuccess) {
-                if (announce) { toast("Authenticated"); camera.rescan() }
+                if (announce) toast("Authenticated")
+                if (rescan) camera.rescan()
             } else if (announce) {
                 val e = r.exceptionOrNull()
                 toast(if (e is IOException) "You're offline. Try again once connected." else e?.message ?: "Not entitled for ${mode.label}")
@@ -227,11 +237,10 @@ class ScannerViewModel @Inject constructor(
         when (s.mode) {
             // ponytail: rows come from the AR controller (Task 11); until then there are never any markers.
             ScanMode.Ar -> toast("No markers yet. Point at barcodes first.")
-            ScanMode.Price -> {}      // price tags arrive on their own (ScanEvent.PriceTag); capture() is a no-op here
+            ScanMode.Price -> show(ScanResult.Price(s.tags))   // iOS shows the drawer even with no tags yet
             ScanMode.DocAcq -> {}     // the document pipeline's capture (Task 12)
             ScanMode.Retrieval -> {
-                val items = catalog.names.value.keys.toList()
-                if (items.isEmpty()) {
+                if (s.items.isEmpty()) {
                     _state.update {
                         it.copy(alert = Alert(
                             "No items to find",
@@ -244,10 +253,11 @@ class ScannerViewModel @Inject constructor(
                     }
                     return
                 }
-                show(ScanResult.Retrieval(found = items.filter { it in seen }, missing = items.filter { it !in seen }))
+                show(ScanResult.Retrieval(s.codesInView.map { it to (it in s.items) }))
             }
             ScanMode.Barcode, ScanMode.QR, ScanMode.Ocr -> {
-                if (s.mode == ScanMode.Ocr && !cloudSelected(s.prefs) && !ensureModelReady()) return
+                // Wild card prepares its own models (iOS :427).
+                if (s.mode == ScanMode.Ocr && !s.prefs.wildCard && !cloudSelected(s.prefs) && !ensureModelReady()) return
                 _state.update { it.copy(phase = Phase.Scanning) }
                 camera.capture()
             }
@@ -282,14 +292,35 @@ class ScannerViewModel @Inject constructor(
             }
             is ScanEvent.Boxes -> onBoxes(e.codes)
             is ScanEvent.Captured -> if (s.mode == ScanMode.Ocr) runOcr(e.bitmap, e.codes) else _state.update { it.copy(phase = Phase.Idle) }
-            is ScanEvent.PriceTag -> {
-                if (s.mode != ScanMode.Price || s.result != null || pendingShow != null) return
-                show(ScanResult.Price(sku = e.data.productSKU, price = e.data.productPrice))
+            is ScanEvent.PriceTag -> {   // iOS codeScannerViewDidCapturePrice: collect unique tags; the shutter shows them
+                if (s.mode != ScanMode.Price) return
+                val tag = PriceTag.from(e.data.productSKU, e.data.productPrice)
+                if (s.tags.none { it.sku == tag.sku }) _state.update { it.copy(tags = it.tags + tag) }
             }
-            is ScanEvent.Retrieved -> if (s.mode == ScanMode.Retrieval) seen += e.code.scannedCode
+            is ScanEvent.Retrieved -> if (s.mode == ScanMode.Retrieval) sawInView(e.code.scannedCode)
             is ScanEvent.Failure -> onFailure(e.e)
             is ScanEvent.Indications, ScanEvent.Started -> {}
         }
+    }
+
+    /**
+     * The Android SDK reports item-retrieval codes one callback at a time (no per-frame batch like iOS
+     * `codeScannerViewDidCaptureItemCodesWith`), so a code counts as in view until [IN_VIEW_MS] without a report.
+     */
+    private fun sawInView(code: String) {
+        inViewExpiry.remove(code)?.cancel()
+        if (code !in s.codesInView) _state.update { it.copy(codesInView = it.codesInView + code) }
+        inViewExpiry[code] = viewModelScope.launch {
+            delay(IN_VIEW_MS)
+            inViewExpiry.remove(code)
+            _state.update { it.copy(codesInView = it.codesInView - code) }
+        }
+    }
+
+    private fun clearInView() {
+        inViewExpiry.values.forEach { it.cancel() }
+        inViewExpiry.clear()
+        _state.update { it.copy(codesInView = emptyList()) }
     }
 
     private fun onBoxes(codes: List<ScannedCodeResult>) {
@@ -308,66 +339,42 @@ class ScannerViewModel @Inject constructor(
     private fun onFailure(e: VisionSDKException) {
         when {
             e is VisionSDKException.CameraUsageNotAuthorized -> _state.update { it.copy(permissionDenied = true) }
-            e.errorCode in 1..5 -> {   // No*Detected: try the next frame
-                if (s.phase == Phase.Scanning) _state.update { it.copy(phase = Phase.Idle) }
-                camera.rescan()
-            }
+            e.errorCode in 1..5 ->   // No*Detected: after a shutter capture tell the user; per-frame / auto, try the next frame
+                if (s.phase == Phase.Scanning) noCodeFound() else camera.rescan()
             // As iOS: re-check once (the SDK repeats this per frame); the gate only stays up if the license lacks it.
             e is VisionSDKException.PriceTagNotEligible || e is VisionSDKException.ItemRetrievalNotEligible ->
-                if (!s.gated && !s.entitlementChecking) checkEntitlement(s.mode, announce = false)
+                if (!s.gated && !s.entitlementChecking) checkEntitlement(s.mode, rescan = true)
             s.alert == null -> ScanError.from(e).let { fail(it.title, it.message) }
         }
+    }
+
+    /** iOS `noCodeFound`. */
+    private fun noCodeFound() {
+        val text = s.mode == ScanMode.Ocr
+        val extra = if (s.torch) emptyList() else listOf(AlertAction("Turn on torch and retry", PXButtonKind.Secondary, ScannerAction.TorchRetry))
+        fail(
+            if (text) "No Text Found" else if (s.mode == ScanMode.QR) "No QR Code Found" else "No Barcode Found",
+            if (text) "Fill the frame with the label and hold still, then capture again." else "Move closer so the code fills the frame, then try again.",
+            retry = { camera.rescan(); shutter() },
+            extra = extra,
+        )
     }
 
     // MARK: Vision Scanner (OCR)
 
     private fun runOcr(bitmap: Bitmap, codes: List<ScannedCodeResult>) {
-        val p = s.prefs
         val gen = modeGeneration
-        val cloud = cloudSelected(p)
+        val p = s.prefs
         val retryThis = { runOcr(bitmap, codes) }
         _state.update { it.copy(phase = Phase.Processing) }
         viewModelScope.launch {
-            val json = try {
-                extraction.extract(
-                    bitmap, codes, p.docType,
-                    if (cloud) Processing.Cloud else Processing.Device,
-                    activeModel(p)?.second ?: p.modelSize,
-                    p.wildCard,
-                )
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                if (gen == modeGeneration) ocrFailed(e, cloud, p, retryThis)
-                return@launch
-            }
+            val outcome = runOcrExtraction(extraction, bitmap, codes, p)
             if (gen != modeGeneration) return@launch   // user switched mode or cancelled while this was in flight
-            // ponytail: wild card parses with the selected doc type; the repo doesn't report which module it routed to.
-            val r = OcrParser.parse(json, p.docType)
-            if (r.fields.isEmpty() && r.tables.isEmpty()) {
-                fail("No Text Found", OcrParser.message(json) ?: "Fill the frame with the label and hold still, then capture again.", retryThis)
-            } else {
-                show(ScanResult.Ocr(r, bitmap))
+            when (outcome) {
+                is OcrOutcome.Done -> show(outcome.result)
+                is OcrOutcome.Failed -> fail(outcome.title, outcome.message, retryThis, outcome.extra)
             }
         }
-    }
-
-    /** iOS `finishOCR`'s error branch. */
-    private fun ocrFailed(e: Exception, cloud: Boolean, p: Prefs, retryThis: () -> Unit) {
-        if (e is UnsupportedDocumentException) return ScanError.from(e).let { fail(it.title, it.message, retryThis) }
-        val offline = e is UnknownHostException || e is ConnectException
-        val extra = if (cloud && p.docType.onDevice && !p.wildCard) {
-            listOf(AlertAction("Use On-device", PXButtonKind.Secondary, ScannerAction.UpdatePrefs(useDevice)))
-        } else {
-            emptyList()
-        }
-        fail(
-            title = if (offline) "You're offline" else if (cloud) "Cloud request failed" else "Extraction failed",
-            message = if (offline) "Cloud extraction needs a connection. Switch to on-device extraction, or retry once you are back online."
-            else (e as? VisionSDKException)?.errorMessage ?: e.message ?: "Unknown error",
-            retry = retryThis,
-            extra = extra,
-        )
     }
 
     private fun sendReport(fields: Set<String>, message: String) {
@@ -384,8 +391,8 @@ class ScannerViewModel @Inject constructor(
 
     /** 380 ms success flash, then the drawer (iOS `show`). */
     private fun show(r: ScanResult) {
-        _state.update { it.copy(phase = Phase.Idle) }
-        feedback()
+        _state.update { it.copy(phase = Phase.Idle, feedback = Feedback.Success) }
+        haptic()
         pendingShow?.cancel()
         val forMode = s.mode
         pendingShow = viewModelScope.launch {
@@ -397,7 +404,7 @@ class ScannerViewModel @Inject constructor(
     }
 
     private fun present(r: ScanResult) {
-        _state.update { it.copy(result = r, lastResult = it.mode to r) }
+        _state.update { it.copy(result = r, lastResult = it.mode to r, feedback = null) }
         if (usesScanner) camera.pauseDetection()   // nothing to detect under the drawer
     }
 
@@ -408,9 +415,11 @@ class ScannerViewModel @Inject constructor(
     }
 
     private fun closeResult() {
-        pendingShow?.cancel(); pendingShow = null
-        seen.clear()
-        _state.update { it.copy(result = null) }
+        if (pendingShow != null) {
+            pendingShow?.cancel(); pendingShow = null
+            _state.update { it.copy(feedback = null) }
+        }
+        _state.update { it.copy(result = null, tags = emptyList()) }
         if (usesScanner) {
             if (s.sheet == null || s.sheet == SheetKind.Items) camera.resumeDetection()
             camera.rescan()
@@ -426,10 +435,14 @@ class ScannerViewModel @Inject constructor(
         toast("Cancelled")
     }
 
-    /** iOS `fail`: "Try again" (if [retry]), [extra], then Ok / Cancel (which rescans). */
+    /** iOS `fail`: "Try again" (if [retry]), [extra], then Ok / Cancel (which rescans). Error flash for 1.2 s. */
     private fun fail(title: String, message: String, retry: (() -> Unit)? = null, extra: List<AlertAction> = emptyList()) {
-        _state.update { it.copy(phase = Phase.Idle) }
-        feedback()
+        _state.update { it.copy(phase = Phase.Idle, feedback = Feedback.Error) }
+        haptic()
+        viewModelScope.launch {
+            delay(1200)
+            if (s.feedback == Feedback.Error) _state.update { it.copy(feedback = null) }
+        }
         this.retry = retry
         val acts = buildList {
             if (retry != null) add(AlertAction("Try again", action = ScannerAction.Retry))
@@ -500,5 +513,9 @@ class ScannerViewModel @Inject constructor(
 
     private fun toast(text: String) { _effects.trySend(ScannerEffect.Toast(text)) }
 
-    private fun feedback() { if (s.prefs.sound) _effects.trySend(ScannerEffect.Haptic) }
+    private fun haptic() { if (s.prefs.sound) _effects.trySend(ScannerEffect.Haptic) }
+
+    private companion object {
+        const val IN_VIEW_MS = 1_000L
+    }
 }

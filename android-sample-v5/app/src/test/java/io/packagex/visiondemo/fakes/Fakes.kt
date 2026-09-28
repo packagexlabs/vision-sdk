@@ -7,6 +7,7 @@ import io.packagex.visiondemo.camera.Camera
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.camera.ScanEvent
 import io.packagex.visiondemo.data.EntitlementRepository
+import io.packagex.visiondemo.data.Extraction
 import io.packagex.visiondemo.data.ExtractionRepository
 import io.packagex.visiondemo.data.ItemCatalogRepository
 import io.packagex.visiondemo.data.ModelRepository
@@ -79,9 +80,17 @@ class FakeModels(initial: Map<Pair<DocType, ModelSize>, ModelState> = emptyMap()
     override suspend fun checkUpdates(): String = updatesMessage
 }
 
-/** Returns [result] (optionally after [delayMs], for phase/loading tests) instead of calling the SDK. */
-class FakeExtraction(private val result: String, private val delayMs: Long = 0) : ExtractionRepository {
+/** Returns [result] (optionally after [delayMs], for phase/loading tests) instead of calling the SDK.
+ *  [routedType]: the type wild card "routed" to (defaults to the requested type). [error]: thrown instead. */
+class FakeExtraction(
+    private val result: String,
+    private val delayMs: Long = 0,
+    private val routedType: DocType? = null,
+    private val error: Exception? = null,
+) : ExtractionRepository {
     var lastRequestedType: DocType? = null
+    var lastProcessing: Processing? = null
+    var calls = 0
 
     override suspend fun extract(
         bitmap: Bitmap,
@@ -90,10 +99,13 @@ class FakeExtraction(private val result: String, private val delayMs: Long = 0) 
         processing: Processing,
         size: ModelSize,
         wildCard: Boolean,
-    ): String {
+    ): Extraction {
         lastRequestedType = type
+        lastProcessing = processing
+        calls++
         if (delayMs > 0) delay(delayMs)
-        return result
+        error?.let { throw it }
+        return Extraction(if (wildCard) routedType ?: type else type, result)
     }
 }
 
@@ -153,10 +165,12 @@ class FakeCamera : Camera {
 }
 
 /** In-memory [ItemCatalogRepository]. */
-class FakeCatalog(initial: Map<String, String> = emptyMap()) : ItemCatalogRepository {
+class FakeCatalog(initial: Map<String, String> = emptyMap(), items: List<String> = emptyList()) : ItemCatalogRepository {
     override val names = MutableStateFlow(initial)
     override suspend fun name(sku: String, name: String) { names.value = names.value + (sku to name) }
     override suspend fun remove(sku: String) { names.value = names.value - sku }
+    override val items = MutableStateFlow(items)
+    override suspend fun setItems(items: List<String>) { this.items.value = items }
 }
 
 /** Swaps Dispatchers.Main for a [StandardTestDispatcher] so viewModelScope runs on runTest's virtual clock. */
