@@ -112,20 +112,21 @@ Templates are not in this sample's mode dial (see *Known gaps*).
 - **`designsystem/`** — tokens, type, and shared composables (`SheetScaffold`, `Shutter`, …).
 - **`di/`** — Hilt modules (`AppModule`, `DataModule`) binding the repository interfaces to their
   SDK-backed implementations; tests substitute fakes (`fakes/Fakes.kt`) instead.
-- **`io.packagex.visionsdk.native/`** — `DocumentNative.kt`: the SDK v2.7.0 AAR strips
-  `io.packagex.visionsdk.native`'s `DocumentResampleNative`/`DocumentEnhanceNative` Kotlin wrappers
-  around `libvision_native.so`'s NEON document kernels (added upstream after that release cut).
-  This sample carries its own copies with the same JNI signatures so dewarp/enhance still work.
-  **Delete this file** once a released SDK version ships those wrappers again — the build then
-  fails with a duplicate-class error, which is the signal to remove it.
+- **`io.packagex.visionsdk.native/`** — a stop-gap copy of two SDK wrappers; see *Known gaps*.
 
 ## Known gaps
 
 - **Dimensioning** and **Text Templates** are not implemented — hidden from the mode dial and not
   wired to any camera owner.
-- **Local Models** management (a standalone on-device model browser/downloader screen, as some iOS
-  demo builds have) is not implemented; on-device OCR models still download/load through
-  `ModelRepository`, just without a dedicated management screen.
+- **Local Models builds** (iOS builds that bundle every on-device model and load the active one up
+  front) have no Android counterpart. Model management itself is there: Settings › Models lists
+  each on-device model with download / load / unload / delete and an update check.
+- **SDK native wrappers carried by the sample** (`io.packagex.visionsdk.native/DocumentNative.kt`):
+  the SDK v2.7.0 AAR strips `DocumentResampleNative`/`DocumentEnhanceNative`, the Kotlin wrappers
+  around `libvision_native.so`'s NEON document kernels (release minify, no keep rule). The sample
+  carries copies with the same JNI signatures so dewarp/enhance still use NEON. **Delete this
+  file** once a released SDK version ships those wrappers again — the build then fails with a
+  duplicate-class error, which is the signal to remove it.
 
 ## Testing
 

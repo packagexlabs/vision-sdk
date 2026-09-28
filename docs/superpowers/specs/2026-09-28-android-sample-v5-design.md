@@ -74,6 +74,8 @@ sealed `Action` interface (`onAction(action)`); one-off effects (toast, haptic, 
 navigating. Sheets are Material3 `ModalBottomSheet` driven by a `sheet: SheetKind?` field in UI state (swap =
 dismiss, then present on `onDismissRequest` completion — the iOS swap bug avoided by construction). Only true
 full-screen destinations (document page zoom viewer) use Navigation Compose with type-safe routes.
+*As built:* no Navigation Compose — the page zoom viewer is an in-screen overlay too, so the app has a single
+destination.
 
 **Data layer.** Repositories wrap the SDK behind interfaces (`ModelRepository`, `EntitlementRepository`,
 `ReportRepository`) with suspend/Flow APIs; SDK callbacks are adapted with `callbackFlow` /
@@ -86,6 +88,9 @@ Repositories are interfaces so ViewModel tests use small fakes.
 applies per-mode config (`setDetectionMode`, `setScanningMode`, `setMultipleScanEnabled`, focus region,
 nthFrame), and a single `CameraOwner` (Scanner | AR | Document | None) so two pipelines never hold the sensor.
 The composable embeds the view with `AndroidView` and never configures it.
+*As built:* `CameraController` exposes `events: Flow<ScanEvent>` plus `owner: StateFlow<CameraOwner>` and
+`paused: StateFlow<Boolean>` (from `PausePolicy`), not a `StateFlow<CameraStatus>`; the ViewModel keeps the
+rest of the camera status in `ScannerUiState`.
 
 **Concurrency.** ViewModels use `viewModelScope`; results from slow work carry the mode generation and are
 dropped if the mode changed (iOS `modeGeneration`). SDK threads never touch state directly.
@@ -128,7 +133,7 @@ entitlement untouched. No silent guards: every blocked action gives feedback.
 
 ```
 # 1. SDK into mavenLocal (from vision-sdk-android, JDK 17)
-./gradlew :vision-native:publishToMavenLocal :zbarscanner:publishToMavenLocal :VisionScanner:publishToMavenLocal
+./gradlew :vision-native:publishToMavenLocal :VisionScanner:publishToMavenLocal
 # 2. Sample (from vision-sdk/android-sample-v5)
 cp secrets.properties.example secrets.properties   # fill STAGING_API_KEY
 ./gradlew :app:installDebug
