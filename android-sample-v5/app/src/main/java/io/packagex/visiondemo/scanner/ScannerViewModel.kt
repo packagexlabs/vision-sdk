@@ -20,6 +20,8 @@ import io.packagex.visiondemo.data.ReportRepository
 import io.packagex.visiondemo.data.ScanError
 import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.designsystem.PXButtonKind
+import io.packagex.visiondemo.document.DocumentCamera
+import io.packagex.visiondemo.document.DocumentPages
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.ModelState
@@ -63,6 +65,7 @@ class ScannerViewModel @Inject constructor(
     private val entitlement: EntitlementRepository,
     private val catalog: ItemCatalogRepository,
     secrets: Secrets,
+    internal val document: DocumentCamera,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ScannerUiState(missingKey = if (secrets.isMissing) secrets.missingMessage else null))
     val state: StateFlow<ScannerUiState> = _state.asStateFlow()
@@ -94,6 +97,9 @@ class ScannerViewModel @Inject constructor(
     /** Item-label feedback upload; replaced in tests (it is network I/O). */
     internal var submitFeedback: suspend (Bitmap, OcrResult, Map<String, ItemLabelFeedback.Entry>, String) -> String = ItemLabelFeedback::submit
 
+    /** Document Acquisition's pages (iOS `docPages` / `docExported`). */
+    private val docPages = DocumentPages()
+
     private val s get() = _state.value
     private val usesScanner get() = ownerFor(s.mode) == CameraOwner.Scanner
 
@@ -105,6 +111,9 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { catalog.items.collect { i -> _state.update { it.copy(items = i) } } }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
+        viewModelScope.launch { document.stills.collect(::onDocumentStill) }
+        viewModelScope.launch { document.quad.collect { q -> if (s.mode == ScanMode.DocAcq) _state.update { it.copy(codeInFrame = q != null) } } }
+        viewModelScope.launch { state.collect(::syncDocument) }
         // Repo states are in-memory; read what the SDK already has on disk / in memory.
         viewModelScope.launch {
             try { models.refresh() } catch (e: CancellationException) { throw e } catch (e: Exception) { /* rows stay NotDownloaded */ }
@@ -172,6 +181,8 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.SetDetectionEnabled -> setDetection(a.on)
             ScannerAction.ResetSettings -> resetSettings()
             ScannerAction.FlipCamera -> flipCamera()
+            is ScannerAction.RescanDocument -> { docPages.retake(a.dropLast); closeResult() }
+            is ScannerAction.ExportPdf -> exportPdf(a.enhanced)
             is ScannerAction.Focus -> focus(a.x, a.y)
             ScannerAction.PickPhoto -> if (s.mode == ScanMode.Ocr) _effects.trySend(ScannerEffect.PickPhoto)
             is ScannerAction.ImportPhoto -> if (s.mode == ScanMode.Ocr) {   // the mode may have changed while the picker was up
@@ -191,6 +202,7 @@ class ScannerViewModel @Inject constructor(
         clearInView()
         dismissing = false
         if (s.torch) camera.torch(false)
+        if (s.mode == ScanMode.DocAcq) docPages.reset()   // iOS setMode: the pages are dropped on leaving
         setZoom(1f)
         _state.update {
             it.copy(
@@ -303,7 +315,12 @@ class ScannerViewModel @Inject constructor(
             // ponytail: rows come from the AR controller (Task 11); until then there are never any markers.
             ScanMode.Ar -> toast("No markers yet. Point at barcodes first.")
             ScanMode.Price -> show(ScanResult.Price)   // iOS shows the drawer even with no tags yet
-            ScanMode.DocAcq -> {}     // the document pipeline's capture (Task 12)
+            ScanMode.DocAcq -> if (document.capture()) {
+                flashOnce()
+                _state.update { it.copy(phase = Phase.Scanning) }
+            } else {
+                toast("Fit the page inside the frame")
+            }
             ScanMode.Retrieval -> {
                 if (s.items.isEmpty()) return _state.update { it.copy(alert = noItemsAlert) }
                 show(ScanResult.Retrieval(s.codesInView.map { it to (it in s.items) }))
@@ -579,7 +596,7 @@ class ScannerViewModel @Inject constructor(
     private fun setZoom(ratio: Float) {
         if (ratio == s.zoom) return
         _state.update { it.copy(zoom = ratio) }
-        camera.zoom(ratio)
+        if (s.mode == ScanMode.DocAcq) document.zoom(ratio) else camera.zoom(ratio)
     }
 
     // MARK: Effects
@@ -587,6 +604,43 @@ class ScannerViewModel @Inject constructor(
     private fun toast(text: String) { _effects.trySend(ScannerEffect.Toast(text)) }
 
     private fun haptic() { if (s.prefs.sound) _effects.trySend(ScannerEffect.Haptic) }
+
+    // MARK: Document Acquisition
+
+    /** Detection and auto capture follow the live camera: off under the drawer, sheets, alerts and processing. */
+    private fun syncDocument(st: ScannerUiState) {
+        document.auto = st.prefs.autoCapture
+        document.detecting = st.mode == ScanMode.DocAcq && st.result == null && st.phase == Phase.Idle && st.sheet == null &&
+            st.alert == null && st.feedback == null && !st.paused && !st.permissionDenied
+    }
+
+    /** iOS `addDocPage`: the captured page runs through dewarp, enhance and quality, then the drawer shows every page. */
+    private fun onDocumentStill(original: Bitmap?) {
+        if (s.mode != ScanMode.DocAcq) return
+        if (original == null) {
+            _state.update { it.copy(phase = Phase.Idle) }
+            return toast("Capture failed")
+        }
+        val gen = modeGeneration
+        _state.update { it.copy(phase = Phase.Processing) }
+        viewModelScope.launch {
+            val page = document.process(original, docPages.nextIndex())
+            if (gen != modeGeneration) return@launch
+            docPages.add(page)
+            show(ScanResult.Document(docPages.pages))
+        }
+    }
+
+    /** iOS ResultDrawer `exportPDF`: the next capture after an export starts a new document. */
+    private fun exportPdf(enhanced: Boolean) {
+        val pages = docPages.pages.takeIf { it.isNotEmpty() } ?: return
+        if (pages.any { it.lines == null }) toast("Preparing searchable PDF…")
+        viewModelScope.launch {
+            val file = document.exportPdf(pages, enhanced) ?: return@launch toast("PDF export failed")
+            docPages.exported = true
+            _effects.trySend(ScannerEffect.SharePdf(file))
+        }
+    }
 
     private companion object {
         const val IN_VIEW_MS = 1_000L

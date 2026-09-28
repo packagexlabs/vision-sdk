@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
@@ -42,17 +43,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.inter
+import io.packagex.visiondemo.document.DocumentController
+import io.packagex.visiondemo.document.DocumentFileProvider
+import io.packagex.visiondemo.document.DocumentSurface
+import io.packagex.visiondemo.model.Phase
+import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.settings.SheetHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import java.io.File
 import kotlin.math.roundToInt
 
 /**
@@ -116,6 +124,7 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 ScannerEffect.Haptic -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 is ScannerEffect.Copy -> copyToClipboard(context, effect.text)
                 ScannerEffect.PickPhoto -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                is ScannerEffect.SharePdf -> sharePdf(context, effect.file)
             }
         }
     }
@@ -148,6 +157,11 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                         CameraSurface(view = cameraViewRaw, paused = state.paused)
                     } else {
                         Box(Modifier.fillMaxSize())
+                    }
+                    // Document Acquisition owns the sensor with its own CameraX pipeline (the SDK camera is stopped).
+                    val doc = viewModel.document as? DocumentController
+                    if (state.mode == ScanMode.DocAcq && doc != null && !state.permissionDenied) {
+                        DocumentSurface(doc, paused = state.paused, showQuad = state.result == null && state.phase == Phase.Idle)
                     }
                 }
             },
@@ -185,6 +199,13 @@ private fun decodeBitmap(context: Context, uri: Uri): Bitmap =
     }
 
 private const val MAX_PHOTO_EDGE = 4000
+
+/** [ScannerEffect.SharePdf]: the system share sheet, reading the PDF through the app's [DocumentFileProvider]. */
+private fun sharePdf(context: Context, file: File) {
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.docs", file)
+    val send = Intent(Intent.ACTION_SEND).setType("application/pdf").putExtra(Intent.EXTRA_STREAM, uri).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    context.startActivity(Intent.createChooser(send, "Share PDF"))
+}
 
 /** [ScannerEffect.Copy]: scanned values can be personal data, so the clip is marked sensitive. */
 private fun copyToClipboard(context: Context, text: String) {

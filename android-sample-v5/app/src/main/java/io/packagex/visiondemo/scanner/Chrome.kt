@@ -87,6 +87,7 @@ import io.packagex.visiondemo.designsystem.Shutter
 import io.packagex.visiondemo.designsystem.glass
 import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
+import io.packagex.visiondemo.document.shown
 import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.Phase
 import io.packagex.visiondemo.model.ScanMode
@@ -176,7 +177,9 @@ fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifie
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val f = state.mode.viewfinder
         val multiLive = state.prefs.multi && (state.mode == ScanMode.Barcode || state.mode == ScanMode.QR)
-        val visible = f != null && !multiLive && state.result == null && !state.gated && !state.permissionDenied
+        // Document Acquisition: the live page outline replaces the brackets once a page is found (iOS :98).
+        val docSeen = state.mode == ScanMode.DocAcq && state.codeInFrame && state.phase == Phase.Idle
+        val visible = f != null && !multiLive && !docSeen && state.result == null && !state.gated && !state.permissionDenied
         if (f != null && visible) {
             val insets = WindowInsets.safeDrawing.asPaddingValues()
             val insetTop = insets.calculateTopPadding()
@@ -426,7 +429,7 @@ private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit,
 
 @Composable
 private fun LastThumb(result: ScanResult, modifier: Modifier = Modifier) {
-    val image = (result as? ScanResult.Ocr)?.image
+    val image = (result as? ScanResult.Ocr)?.image ?: (result as? ScanResult.Document)?.pages?.lastOrNull()?.shown(enhanced = true)
     if (image != null) {
         Image(bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop, modifier = modifier)
     } else {

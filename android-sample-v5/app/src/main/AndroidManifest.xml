@@ -14,6 +14,15 @@
 
         <meta-data android:name="com.google.ar.core" android:value="optional" />
 
+        <!-- Document Acquisition's PDF export; its own class and authority, so it can't merge with a library's provider. -->
+        <provider
+            android:name=".document.DocumentFileProvider"
+            android:authorities="${applicationId}.docs"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+        </provider>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

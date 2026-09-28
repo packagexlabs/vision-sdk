@@ -8,6 +8,7 @@ import io.packagex.visiondemo.data.RoutedExtractionException
 import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.fakes.FakeCamera
 import io.packagex.visiondemo.fakes.FakeCatalog
+import io.packagex.visiondemo.fakes.FakeDocument
 import io.packagex.visiondemo.fakes.FakeEntitlement
 import io.packagex.visiondemo.fakes.FakeExtraction
 import io.packagex.visiondemo.fakes.FakeModels
@@ -50,7 +51,7 @@ import org.robolectric.annotation.Config
 class ScannerViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private fun vm(extraction: FakeExtraction = FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", 0)) =
-        ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), extraction, FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"))
+        ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), extraction, FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeDocument())
 
     // --- brief tests ---
 
@@ -76,12 +77,12 @@ class ScannerViewModelTest {
     }
 
     @Test fun gatedModeDeniedShowsGate() = runTest {
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(false), FakeCatalog(), Secrets("k", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(false), FakeCatalog(), Secrets("k", "staging"), FakeDocument())
         v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle(); assertTrue(v.state.value.gated)
     }
 
     @Test fun missingKeyIsShown() = runTest {
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("", "staging"), FakeDocument())
         advanceUntilIdle(); assertEquals("Add STAGING_API_KEY to secrets.properties", v.state.value.missingKey)
     }
 
@@ -95,7 +96,7 @@ class ScannerViewModelTest {
 
     @Test fun modelPromptTextAndActionsMatchIos() = runTest {
         val models = FakeModels(mapOf((DocType.SL to ModelSize.Micro) to ModelState.Downloaded))
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), models, FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), models, FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeDocument())
         advanceUntilIdle()
         v.onAction(ScannerAction.UpdatePrefs { it.copy(processing = Processing.Device) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         v.onAction(ScannerAction.Shutter)
@@ -192,7 +193,7 @@ class ScannerViewModelTest {
 
     @Test fun retrievalReportsCodesInViewFlaggedByList() = runTest {
         val catalog = FakeCatalog(items = listOf("A", "B"))
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"), FakeDocument())
         v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
         val cam = v.camera as FakeCamera
         cam.emit(ScanEvent.Retrieved(code("A"))); cam.emit(ScanEvent.Retrieved(code("Z"))); runCurrent()
@@ -340,7 +341,7 @@ class ScannerViewModelTest {
 
     @Test fun itemListAddRemoveClearPersists() = runTest {
         val catalog = FakeCatalog()
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"), FakeDocument())
         v.onAction(ScannerAction.AddItem("A")); v.onAction(ScannerAction.AddItem("B")); advanceUntilIdle()
         assertEquals(listOf("A", "B"), v.state.value.items); assertEquals(listOf("A", "B"), catalog.items.value)
         v.effects.test {
@@ -352,7 +353,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun addItemsInViewAddsNewCodesWithIosToasts() = runTest {
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"), FakeDocument())
         v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
         v.effects.test {
             v.onAction(ScannerAction.AddItemsInView)
@@ -501,7 +502,7 @@ class ScannerViewModelTest {
 
     @Test fun modelVersionsReachTheState() = runTest {
         val models = FakeModels(mapOf((DocType.SL to ModelSize.Micro) to ModelState.Loaded), mapOf((DocType.SL to ModelSize.Micro) to "2025-05-05"))
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), models, FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), models, FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeDocument())
         advanceUntilIdle()
         assertEquals("2025-05-05", v.state.value.modelVersions[DocType.SL to ModelSize.Micro])
     }
@@ -515,7 +516,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun openItemListClosesWithoutRescanAndOpensItems() = runTest {
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"))
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"), FakeDocument())
         val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceTimeBy(400)
