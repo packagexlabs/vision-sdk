@@ -256,7 +256,8 @@ class ScannerViewModelTest {
         val tags = (v.state.value.result as ScanResult.Price).tags
         assertEquals(listOf("14438" to true, "999" to false), tags.map { it.sku to it.valid })
         assertEquals(listOf("$28.99", "Not Found"), tags.map { it.expected })
-        v.onAction(ScannerAction.CloseResult); assertTrue(v.state.value.tags.isEmpty())
+        v.onAction(ScannerAction.CloseResult); assertEquals(2, v.state.value.tags.size)   // kept, as iOS
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); assertTrue(v.state.value.tags.isEmpty())
     }
 
     @Test fun priceShutterWithNoTagsShowsEmptyDrawer() = runTest {

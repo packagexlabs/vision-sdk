@@ -423,7 +423,7 @@ class ScannerViewModel @Inject constructor(
             pendingShow?.cancel(); pendingShow = null
             _state.update { it.copy(feedback = null) }
         }
-        _state.update { it.copy(result = null, tags = emptyList(), resultExpanded = false) }
+        _state.update { it.copy(result = null, resultExpanded = false) }   // price tags stay until ClearTags / mode switch (iOS)
         if (usesScanner) {
             if (s.sheet == null || s.sheet == SheetKind.Items) camera.resumeDetection()
             camera.rescan()

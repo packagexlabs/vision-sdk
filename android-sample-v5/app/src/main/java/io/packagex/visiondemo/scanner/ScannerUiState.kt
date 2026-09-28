@@ -37,7 +37,7 @@ data class ScannerUiState(
     val missingKey: String? = null,
     /** Frame flash: Success during the 380 ms before a result shows, Error for 1.2 s after a failure. */
     val feedback: Feedback? = null,
-    /** Price tag: unique tags read since entering the mode or the last close (hint "N tags found"). */
+    /** Price tag: unique tags read since entering the mode or the last ClearTags (hint "N tags found"). */
     val tags: List<PriceTag> = emptyList(),
     /** Item retrieval: codes reported in view within the last second. */
     val codesInView: List<String> = emptyList(),
