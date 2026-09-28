@@ -328,7 +328,7 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
             true,
         )
     }
-    is ScanResult.Ar -> Triple("Scan Results", "${result.rows.sumOf { it.third }} barcodes · ${result.rows.size} unique", true)
+    is ScanResult.Ar -> Triple("Scan Results", "${result.rows.sumOf { it.count }} barcodes · ${result.rows.size} unique", true)
     is ScanResult.Document -> Triple("Document captured", "${result.pageCount} ${if (result.pageCount == 1) "page" else "pages"}", true)
 }
 
@@ -349,7 +349,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when 
     }
     ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
     is ScanResult.Retrieval -> result.codes.joinToString("\n") { "${it.first}\t${if (it.second) "In list" else "Not in list"}" }
-    is ScanResult.Ar -> result.rows.joinToString("\n") { "${it.first} × ${it.third}" }
+    is ScanResult.Ar -> result.rows.joinToString("\n") { "${it.name?.let { n -> "$n · " }.orEmpty()}${it.value} × ${it.count}" }
     is ScanResult.Document -> "Scanned document · ${result.pageCount} ${if (result.pageCount == 1) "page" else "pages"}"
 }
 
@@ -419,14 +419,10 @@ private fun RetrievalContent(codes: List<Pair<String, Boolean>>, onAction: (Scan
 
 @Composable
 private fun ArContent(result: ScanResult.Ar) {
-    if (result.rows.isEmpty()) {
-        EmptyNote(text = "AR results are coming soon.")
-    } else {
-        Column {
-            result.rows.forEach { (value, symbology, count) ->
-                RowLine(label = symbology, value = value) {
-                    Text("× $count", style = mono(14.sp), color = PX.Text2)
-                }
+    Column {
+        result.rows.forEach { row ->
+            RowLine(label = row.name?.let { "${row.symbology} · $it" } ?: row.symbology, value = row.value) {
+                Text("× ${row.count}", style = mono(14.sp), color = PX.Text2)
             }
         }
     }

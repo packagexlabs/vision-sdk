@@ -476,6 +476,7 @@ private fun chipFor(state: ScannerUiState): Triple<String, String, ScannerAction
             "· ${state.items.size} ${if (state.items.size == 1) "code" else "codes"}",
             ScannerAction.OpenSheet(SheetKind.Items),
         )
+        ScanMode.Ar -> Triple("Items", "· ${state.itemNames.size}", ScannerAction.OpenSheet(SheetKind.ArItems))
         else -> null
     }
 }
@@ -507,7 +508,9 @@ private fun hintFor(state: ScannerUiState): String {
         } else {
             "Point camera to document"
         }
-        ScanMode.Ar -> "Point at barcodes to place markers"
+        ScanMode.Ar -> state.arCounts.sumOf { it.count }.let { n ->
+            if (n > 0) "$n markers pinned · tap the shutter to finish" else "One marker per barcode value, pinned where it was last seen"
+        }
         ScanMode.DocAcq -> if (codeSeen) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"
         } else {

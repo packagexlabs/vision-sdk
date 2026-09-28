@@ -47,7 +47,7 @@ class DataStoreItemCatalogRepository @Inject constructor(
         .stateIn(appScope, SharingStarted.Eagerly, emptyMap())
 
     override suspend fun name(sku: String, name: String) {
-        context.dataStore.edit { p -> p[itemNamesKey] = Json.encodeToString(decodeItemNames(p[itemNamesKey]) + (sku to name)) }
+        context.dataStore.edit { p -> p[itemNamesKey] = Json.encodeToString(mapOf(sku to name) + (decodeItemNames(p[itemNamesKey]) - sku)) }   // newest first (iOS)
     }
 
     override suspend fun remove(sku: String) {

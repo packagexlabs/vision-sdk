@@ -1,5 +1,6 @@
 package io.packagex.visiondemo.scanner
 
+import io.packagex.visiondemo.ar.PayloadCount
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.designsystem.PXButtonKind
@@ -57,6 +58,10 @@ data class ScannerUiState(
     val frontCamera: Boolean = false,
     /** Last tap-to-focus point, for the focus ring; a new [FocusTap.id] restarts the ring. */
     val focus: FocusTap? = null,
+    /** AR Barcode: marked instances per payload, most first (the chip, hint, shutter and Items sheet). */
+    val arCounts: List<PayloadCount> = emptyList(),
+    /** AR item catalog, SKU -> name, newest first (iOS `ItemCatalog`). */
+    val itemNames: Map<String, String> = emptyMap(),
 )
 
 /** Tap-to-focus point in view-normalized (0..1) coordinates. */

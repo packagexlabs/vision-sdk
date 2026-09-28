@@ -86,7 +86,16 @@ sealed interface ScannerAction {
     data object PickPhoto : ScannerAction
     /** An image picked from Photos: extracted like a capture (Vision Scanner only). */
     data class ImportPhoto(val bitmap: Bitmap) : ScannerAction
+
+    // AR Barcode
+    /** AR Items sheet: names [sku] (both trimmed; blank input is ignored). AR keeps running. */
+    data class NameArItem(val sku: String, val name: String) : ScannerAction
+    data class RemoveArItem(val sku: String) : ScannerAction
+    /** Outcome of [ScannerEffect.InstallArCore]. */
+    data class ArInstallResult(val result: ArInstall) : ScannerAction
 }
+
+enum class ArInstall { Installed, Declined, Unsupported }
 
 sealed interface ScannerEffect {
     data class Toast(val text: String) : ScannerEffect
@@ -95,4 +104,6 @@ sealed interface ScannerEffect {
     data class Copy(val text: String) : ScannerEffect
     /** Open the system photo picker; send [ScannerAction.ImportPhoto] with the picked image. */
     data object PickPhoto : ScannerEffect
+    /** AR isn't installed yet: `ArCoreApk.requestInstall` from the Activity, then send [ScannerAction.ArInstallResult]. */
+    data object InstallArCore : ScannerEffect
 }

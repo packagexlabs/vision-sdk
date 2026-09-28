@@ -1,6 +1,7 @@
 package io.packagex.visiondemo.scanner
 
 import android.Manifest
+import android.app.Activity
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
@@ -10,6 +11,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.PersistableBundle
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,8 +29,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -45,8 +49,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.ar.core.ArCoreApk
+import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import io.packagex.visiondemo.ar.ArSurface
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.inter
+import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.settings.SheetHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -95,9 +103,16 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
     }
 
     // iOS recheckPermission(): the user may have granted it from system Settings and come back.
+    val activity = LocalActivity.current
+    var arInstallPending by remember { mutableStateOf(false) }
     LifecycleResumeEffect(Unit) {
         if (state.permissionDenied && hasCameraPermission(context)) {
             viewModel.onAction(ScannerAction.PermissionResult(true))
+        }
+        // Back from the Play Store's ARCore install: ask again without prompting (INSTALLED, or declined).
+        if (arInstallPending && activity != null) {
+            arInstallPending = false
+            requestArInstall(activity, userRequested = false, onPending = { arInstallPending = true }, onResult = viewModel::onAction)
         }
         onPauseOrDispose { }
     }
@@ -116,6 +131,9 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 ScannerEffect.Haptic -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 is ScannerEffect.Copy -> copyToClipboard(context, effect.text)
                 ScannerEffect.PickPhoto -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                ScannerEffect.InstallArCore -> activity?.let {
+                    requestArInstall(it, userRequested = true, onPending = { arInstallPending = true }, onResult = viewModel::onAction)
+                }
             }
         }
     }
@@ -144,7 +162,9 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                         }
                     },
                 ) {
-                    if (cameraViewRaw != null) {
+                    if (state.mode == ScanMode.Ar) {
+                        if (!state.permissionDenied) ArSurface(controller = viewModel.ar, paused = state.paused)
+                    } else if (cameraViewRaw != null) {
                         CameraSurface(view = cameraViewRaw, paused = state.paused)
                     } else {
                         Box(Modifier.fillMaxSize())
@@ -185,6 +205,23 @@ private fun decodeBitmap(context: Context, uri: Uri): Bitmap =
     }
 
 private const val MAX_PHOTO_EDGE = 4000
+
+/** First AR entry (the original ArScannerActivity's `requestInstall`): [onPending] when the Play Store install
+ *  was started (ask again on resume), otherwise the outcome as [ScannerAction.ArInstallResult]. */
+private fun requestArInstall(activity: Activity, userRequested: Boolean, onPending: () -> Unit, onResult: (ScannerAction) -> Unit) {
+    val result = try {
+        when (ArCoreApk.getInstance().requestInstall(activity, userRequested)) {
+            ArCoreApk.InstallStatus.INSTALLED -> ArInstall.Installed
+            ArCoreApk.InstallStatus.INSTALL_REQUESTED -> return onPending()
+        }
+    } catch (e: UnavailableUserDeclinedInstallationException) {
+        ArInstall.Declined
+    } catch (e: Exception) {   // device not compatible, SDK too old, ...
+        Log.w("ScannerRoute", "ARCore unavailable", e)
+        ArInstall.Unsupported
+    }
+    onResult(ScannerAction.ArInstallResult(result))
+}
 
 /** [ScannerEffect.Copy]: scanned values can be personal data, so the clip is marked sensitive. */
 private fun copyToClipboard(context: Context, text: String) {
