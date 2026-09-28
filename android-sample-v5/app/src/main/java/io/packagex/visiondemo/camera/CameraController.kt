@@ -16,6 +16,7 @@ import io.packagex.visionsdk.config.CameraOrientationMode
 import io.packagex.visionsdk.config.CameraSettings
 import io.packagex.visionsdk.config.FocusSettings
 import io.packagex.visionsdk.core.CameraLensFace
+import io.packagex.visionsdk.core.DetectionMode
 import io.packagex.visionsdk.core.ScanningMode
 import io.packagex.visionsdk.core.pricetag.PriceTagData
 import io.packagex.visionsdk.dto.ScannedCodeResult
@@ -162,7 +163,7 @@ class CameraController @Inject constructor(
     }
 
     override fun sdkApply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) {
-        config.detection?.let { view.configure(it, scanning, config.multiple) }
+        config.detection?.let { view.configure(it, scanning, config.multiple); configured = true }
         nthFrame = config.nthFrame
         applyCameraSettings()
         // No enableTapToFocus: the SDK would draw its own focus square over the app's ring; taps go through focus().
@@ -186,7 +187,12 @@ class CameraController @Inject constructor(
     }
 
     override val mayRun get() = _owner.value == CameraOwner.Scanner && !policy.paused.value
-    override fun sdkStart() = view.startCamera()
+    /** The SDK's startCamera() needs a detection mode (lateinit); Price/Retrieval set theirs only after the entitlement call. */
+    private var configured = false
+    override fun sdkStart() {
+        if (!configured) { view.configure(DetectionMode.Barcode, ScanningMode.Manual, false); configured = true }
+        view.startCamera()
+    }
     override fun sdkPauseDetection() = view.pauseDetection()
     override fun sdkResumeDetection() = view.resumeDetection()
     override fun capture() = view.capture()
