@@ -11,6 +11,7 @@ import io.packagex.visionsdk.ApiManager
 import io.packagex.visionsdk.dto.ScannedCodeResult
 import io.packagex.visionsdk.ocr.ml.core.OnDeviceOCRManager
 import io.packagex.visionsdk.ocr.ml.core.model_options.ShippingLabelOptions
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -36,6 +37,9 @@ interface ExtractionRepository {
         wildCard: Boolean = false,
     ): Extraction
 }
+
+/** A wild-card extraction that failed after routing: [type] and [cloud] say which step (iOS `finish(nil, error, dt, cloud)`). */
+class RoutedExtractionException(val type: DocType, val cloud: Boolean, cause: Exception) : Exception(cause.message, cause)
 
 /**
  * Thrown by wild-card extraction when the on-device classifier's result doesn't map to a
@@ -84,8 +88,14 @@ class SdkExtractionRepository @Inject constructor(
         val classification = extractOne(bitmap, codes, DocType.DC, Processing.Device, ModelSize.Micro)
         val documentClass = OcrParser.documentClass(classification)
         val route = wildCardRoute(documentClass) ?: throw UnsupportedDocumentException(documentClass)
-        if (route.processing == Processing.Device) ensureLoaded(route.type, route.size)
-        Extraction(route.type, extractOne(bitmap, codes, route.type, route.processing, route.size))
+        try {
+            if (route.processing == Processing.Device) ensureLoaded(route.type, route.size)
+            Extraction(route.type, extractOne(bitmap, codes, route.type, route.processing, route.size))
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            throw RoutedExtractionException(route.type, route.processing == Processing.Cloud, e)
+        }
     }
 
     /** Download+load, like iOS's `prepareModel`, unless the row is already loaded. */

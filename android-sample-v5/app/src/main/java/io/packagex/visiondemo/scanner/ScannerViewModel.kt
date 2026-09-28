@@ -145,7 +145,7 @@ class ScannerViewModel @Inject constructor(
             }
             is ScannerAction.FrameChanged -> if (a.rect != frame) { frame = a.rect; applyConfig() }
             ScannerAction.Retry -> retry.also { retry = null }?.invoke()
-            ScannerAction.TorchRetry -> { setTorch(true); camera.rescan() }
+            ScannerAction.TorchRetry -> { retry = null; setTorch(true); camera.rescan() }
             ScannerAction.Authenticate -> checkEntitlement(s.mode, announce = true)
             is ScannerAction.DownloadModel -> downloadModel(a)
             is ScannerAction.LoadModel -> viewModelScope.launch {
@@ -155,7 +155,9 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.DeleteModel -> viewModelScope.launch { runCatchingModel { models.delete(a.t, a.s) }?.let(::toast) }
             is ScannerAction.CancelDownload -> { models.cancel(a.t, a.s); toast("Download cancelled") }
             ScannerAction.CheckUpdates -> viewModelScope.launch { toast(runCatching { models.checkUpdates() }.getOrElse { it.message ?: "Update check failed" }) }
-            is ScannerAction.AddItem -> if (a.sku in s.items) toast("Code already in list") else setItems(s.items + a.sku)
+            is ScannerAction.AddItem -> a.sku.trim().takeIf { it.isNotEmpty() }?.let { sku ->
+                if (sku in s.items) toast("Code already in list") else setItems(s.items + sku)
+            }
             ScannerAction.AddItemsInView -> addItemsInView()
             is ScannerAction.RemoveItem -> setItems(s.items - a.sku)
             ScannerAction.ClearItems -> setItems(emptyList())
@@ -182,7 +184,7 @@ class ScannerViewModel @Inject constructor(
         _state.update {
             it.copy(
                 mode = m, result = null, sheet = null, pendingSheet = null, phase = Phase.Idle, boxes = emptyList(),
-                codeInFrame = false, torch = false, gated = m.gated, entitlementChecking = false, feedback = null, tags = emptyList(),
+                codeInFrame = false, torch = false, gated = m.gated, entitlementChecking = false, feedback = null,
             )
         }
         if (!s.permissionDenied) configureCamera()
@@ -253,7 +255,7 @@ class ScannerViewModel @Inject constructor(
         when (s.mode) {
             // ponytail: rows come from the AR controller (Task 11); until then there are never any markers.
             ScanMode.Ar -> toast("No markers yet. Point at barcodes first.")
-            ScanMode.Price -> show(ScanResult.Price(s.tags))   // iOS shows the drawer even with no tags yet
+            ScanMode.Price -> show(ScanResult.Price)   // iOS shows the drawer even with no tags yet
             ScanMode.DocAcq -> {}     // the document pipeline's capture (Task 12)
             ScanMode.Retrieval -> {
                 if (s.items.isEmpty()) return _state.update { it.copy(alert = noItemsAlert) }

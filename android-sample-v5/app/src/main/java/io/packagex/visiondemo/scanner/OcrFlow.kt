@@ -5,6 +5,7 @@ import io.packagex.visiondemo.data.Extraction
 import io.packagex.visiondemo.data.ExtractionRepository
 import io.packagex.visiondemo.data.OcrParser
 import io.packagex.visiondemo.data.Prefs
+import io.packagex.visiondemo.data.RoutedExtractionException
 import io.packagex.visiondemo.data.ScanError
 import io.packagex.visiondemo.data.UnsupportedDocumentException
 import io.packagex.visiondemo.designsystem.PXButtonKind
@@ -71,7 +72,11 @@ internal fun ocrResult(x: Extraction, bitmap: Bitmap?, p: Prefs, cloudSelected: 
 }
 
 /** iOS `finishOCR`'s error branch. */
-internal fun ocrFailure(e: Exception, cloud: Boolean, p: Prefs): OcrOutcome.Failed {
+internal fun ocrFailure(error: Exception, cloudSelected: Boolean, p: Prefs): OcrOutcome.Failed {
+    // Wild card: the routed step decides the wording (bills of lading go to the cloud).
+    val routed = error as? RoutedExtractionException
+    val e = (routed?.cause as? Exception) ?: error
+    val cloud = routed?.cloud ?: cloudSelected
     if (e is UnsupportedDocumentException) return ScanError.from(e).let { OcrOutcome.Failed(it.title, it.message) }
     val offline = e is UnknownHostException || e is ConnectException
     val extra = if (cloud && p.docType.onDevice && !p.wildCard) {

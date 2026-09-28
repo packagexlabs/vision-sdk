@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.camera.ScanEvent
 import io.packagex.visiondemo.data.ItemLabelFeedback
+import io.packagex.visiondemo.data.RoutedExtractionException
 import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.fakes.FakeCamera
 import io.packagex.visiondemo.fakes.FakeCatalog
@@ -253,17 +254,19 @@ class ScannerViewModelTest {
         assertNull(v.state.value.result)   // no drawer on the event
         assertEquals(2, v.state.value.tags.size)
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
-        val tags = (v.state.value.result as ScanResult.Price).tags
+        assertEquals(ScanResult.Price, v.state.value.result)
+        val tags = v.state.value.tags   // the drawer reads these live
         assertEquals(listOf("14438" to true, "999" to false), tags.map { it.sku to it.valid })
         assertEquals(listOf("$28.99", "Not Found"), tags.map { it.expected })
         v.onAction(ScannerAction.CloseResult); assertEquals(2, v.state.value.tags.size)   // kept, as iOS
-        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); assertTrue(v.state.value.tags.isEmpty())
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); v.onAction(ScannerAction.SetMode(ScanMode.Price))
+        assertEquals(2, v.state.value.tags.size)   // iOS setMode keeps them too; only ClearTags clears
     }
 
     @Test fun priceShutterWithNoTagsShowsEmptyDrawer() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
-        assertEquals(ScanResult.Price(emptyList()), v.state.value.result)
+        assertEquals(ScanResult.Price, v.state.value.result); assertTrue(v.state.value.tags.isEmpty())
     }
 
     @Test fun shutterCaptureWithNoCodeExplains() = runTest {
@@ -410,9 +413,52 @@ class ScannerViewModelTest {
         v.onAction(ScannerAction.SetMode(ScanMode.QR)); assertEquals(1f, v.state.value.zoom)
     }
 
-    @Test fun clearTagsEmptiesPriceList() = runTest {
+    @Test fun clearTagsEmptiesTheOpenDrawer() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
         (v.camera as FakeCamera).emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
-        v.onAction(ScannerAction.ClearTags); assertTrue(v.state.value.tags.isEmpty())
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle(); assertEquals(ScanResult.Price, v.state.value.result)
+        v.onAction(ScannerAction.ClearTags)
+        assertEquals(ScanResult.Price, v.state.value.result); assertTrue(v.state.value.tags.isEmpty())
+    }
+
+    @Test fun reopenedPriceDrawerShowsCurrentTags() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle(); v.onAction(ScannerAction.CloseResult)
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
+        v.onAction(ScannerAction.ReopenLast)
+        assertEquals(ScanResult.Price, v.state.value.result); assertEquals(listOf("14438"), v.state.value.tags.map { it.sku })
+    }
+
+    @Test fun returningToAModeDoesNotRepresentItsResult() = runTest {   // iOS setMode: result = nil, no re-present
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle()
+        v.onAction(ScannerAction.SetMode(ScanMode.QR)); v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
+        assertNull(v.state.value.result); assertFalse(cam.detectionPaused)
+        v.onAction(ScannerAction.ReopenLast); assertNotNull(v.state.value.result)   // the thumbnail still reopens it
+    }
+
+    @Test fun wildCardBolFailureReadsAsCloud() = runTest {
+        val x = FakeExtraction("{}", error = RoutedExtractionException(DocType.BOL, cloud = true, IllegalStateException("boom")))
+        val v = vm(x); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        val alert = v.state.value.alert!!
+        assertEquals("Cloud request failed", alert.title); assertEquals("boom", alert.message)
+        assertEquals(listOf("Try again", "Cancel"), alert.actions.map { it.label })   // no "Use On-device" for wild card
+    }
+
+    @Test fun addItemTrimsAndIgnoresBlank() = runTest {
+        val v = vm()
+        v.onAction(ScannerAction.AddItem("  A1 ")); v.onAction(ScannerAction.AddItem("   ")); v.onAction(ScannerAction.AddItem(""))
+        assertEquals(listOf("A1"), v.state.value.items)
+    }
+
+    @Test fun torchRetryDropsTheStaleRetry() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.Shutter)
+        cam.emit(ScanEvent.Failure(VisionSDKException.NoBarcodeDetected)); runCurrent()
+        v.onAction(ScannerAction.TorchRetry); v.onAction(ScannerAction.Retry)
+        assertEquals(1, cam.captures)   // the old "Try again" closure did not run
     }
 }

@@ -1,7 +1,6 @@
 package io.packagex.visiondemo.model
 
 import android.graphics.Bitmap
-import io.packagex.visiondemo.data.PriceTag
 
 /** What the result drawer shows. Ported from iOS `Model/Types.swift`'s `ScanResult`. */
 sealed interface ScanResult {
@@ -14,8 +13,8 @@ sealed interface ScanResult {
         val title: String = result.docType.label,
         val subtitle: String = "",
     ) : ScanResult
-    /** Every unique tag read since entering the mode or the last ClearTags. */
-    data class Price(val tags: List<PriceTag>) : ScanResult
+    /** Price tag drawer; it reads `ScannerUiState.tags` live (iOS `.price`), so ClearTags empties an open drawer. */
+    data object Price : ScanResult
     /** Codes in view when the shutter was pressed, each flagged when it is in the item list (iOS `.retrieval`). */
     data class Retrieval(val codes: List<Pair<String, Boolean>>) : ScanResult
     /** (value, symbology, count) per AR payload. */
