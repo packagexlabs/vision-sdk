@@ -33,7 +33,7 @@ Success: every mode Android supports behaves as it does in iOS v5 (list below), 
 
 ## Stack
 
-Kotlin 2.2 · AGP 8.12 · Gradle version catalog · compileSdk/targetSdk 36, minSdk 24 (matches `:VisionScanner`) ·
+Kotlin 2.2 · AGP 8.12 · Gradle version catalog · compileSdk/targetSdk 36, minSdk 29 (`VisionSDK.initialize` throws below API 29), arm64 only ·
 Compose BOM 2025.11 + Material3 · Hilt (KSP) · `lifecycle-runtime-compose` (`collectAsStateWithLifecycle`) ·
 coroutines/Flow · DataStore Preferences · ARCore (ported AR) · Tests: JUnit4, Turbine, coroutines-test,
 Compose UI test.
@@ -77,8 +77,8 @@ full-screen destinations (document page zoom viewer) use Navigation Compose with
 
 **Data layer.** Repositories wrap the SDK behind interfaces (`ModelRepository`, `EntitlementRepository`,
 `ReportRepository`) with suspend/Flow APIs; SDK callbacks are adapted with `callbackFlow` /
-`suspendCancellableCoroutine`. The API key and environment come from `BuildConfig`, filled from
-`local.properties` / environment variables (`VISION_API_KEY`, `VISION_ENV`) — never committed.
+`suspendCancellableCoroutine`. The API key and environment come from `BuildConfig`, filled from a git-ignored
+`secrets.properties` or environment variables (`STAGING_API_KEY`, `PRODUCTION_API_KEY`, `VISION_ENV`) — never committed.
 Repositories are interfaces so ViewModel tests use small fakes.
 
 **Camera layer.** `CameraController` (Hilt singleton) owns the one `VisionCameraView` and exposes
@@ -130,6 +130,6 @@ entitlement untouched. No silent guards: every blocked action gives feedback.
 # 1. SDK into mavenLocal (from vision-sdk-android, JDK 17)
 ./gradlew :vision-native:publishToMavenLocal :zbarscanner:publishToMavenLocal :VisionScanner:publishToMavenLocal
 # 2. Sample (from vision-sdk/android-sample-v5)
-echo "VISION_API_KEY=…" >> local.properties
+cp secrets.properties.example secrets.properties   # fill STAGING_API_KEY
 ./gradlew :app:installDebug
 ```
