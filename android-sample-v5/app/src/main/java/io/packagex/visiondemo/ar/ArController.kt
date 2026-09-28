@@ -72,9 +72,9 @@ class ArController @Inject constructor(@param:ApplicationContext private val ctx
     override fun detach(view: GLSurfaceView?) {
         if (view != null && view !== this.view) return   // a stale view's dispose after a newer attach
         renderer?.let { r -> if (running) this.view?.queueEvent(r::releaseGl) }   // runs before onPause lets the GL thread stop
-        stop()
+        stop()   // the GL thread is paused now, so no new decode starts
         renderer?.session = null
-        session?.close()
+        session?.let { processor.awaitIdle(DECODE_DRAIN_MS); it.close() }
         session = null
         renderer = null
         this.view = null
@@ -157,5 +157,7 @@ class ArController @Inject constructor(@param:ApplicationContext private val ctx
 
     private companion object {
         const val TAG = "ArController"
+        /** Longest the main thread waits for an in-flight decode before closing the session (decodes take ~5-40 ms). */
+        const val DECODE_DRAIN_MS = 300L
     }
 }
