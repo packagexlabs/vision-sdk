@@ -3,6 +3,7 @@ package io.packagex.visiondemo.scanner
 import app.cash.turbine.test
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.camera.ScanEvent
+import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.fakes.FakeCamera
 import io.packagex.visiondemo.fakes.FakeCatalog
@@ -330,5 +331,87 @@ class ScannerViewModelTest {
         val before = cam.userActiveCalls
         v.onAction(ScannerAction.ToggleTorch); v.onAction(ScannerAction.CloseResult)
         assertEquals(before + 2, cam.userActiveCalls)
+    }
+    // --- UI action surface ---
+
+    @Test fun itemListAddRemoveClearPersists() = runTest {
+        val catalog = FakeCatalog()
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"))
+        v.onAction(ScannerAction.AddItem("A")); v.onAction(ScannerAction.AddItem("B")); advanceUntilIdle()
+        assertEquals(listOf("A", "B"), v.state.value.items); assertEquals(listOf("A", "B"), catalog.items.value)
+        v.effects.test {
+            v.onAction(ScannerAction.AddItem("A"))
+            assertEquals(ScannerEffect.Toast("Code already in list"), awaitItem())
+        }
+        v.onAction(ScannerAction.RemoveItem("A")); advanceUntilIdle(); assertEquals(listOf("B"), catalog.items.value)
+        v.onAction(ScannerAction.ClearItems); advanceUntilIdle(); assertEquals(emptyList<String>(), catalog.items.value)
+    }
+
+    @Test fun addItemsInViewAddsNewCodesWithIosToasts() = runTest {
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"))
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
+        v.effects.test {
+            v.onAction(ScannerAction.AddItemsInView)
+            assertEquals(ScannerEffect.Toast("Point the camera at a code, then tap Add Item"), awaitItem())
+            val cam = v.camera as FakeCamera
+            cam.emit(ScanEvent.Retrieved(code("A"))); cam.emit(ScanEvent.Retrieved(code("B"))); runCurrent()
+            v.onAction(ScannerAction.AddItemsInView)
+            assertEquals(ScannerEffect.Toast("Scanned and added B"), awaitItem())
+            v.onAction(ScannerAction.AddItemsInView)
+            assertEquals(ScannerEffect.Toast("Code already in list"), awaitItem())
+        }
+        assertEquals(listOf("A", "B"), v.state.value.items)
+    }
+
+    @Test fun toggleExpandedResetsOnPresentAndClose() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle()
+        v.onAction(ScannerAction.ToggleExpanded); assertTrue(v.state.value.resultExpanded)
+        v.onAction(ScannerAction.ToggleExpanded); v.onAction(ScannerAction.ToggleExpanded); assertTrue(v.state.value.resultExpanded)
+        v.onAction(ScannerAction.CloseResult); assertFalse(v.state.value.resultExpanded)
+        v.onAction(ScannerAction.ToggleExpanded); v.onAction(ScannerAction.ReopenLast); assertFalse(v.state.value.resultExpanded)
+    }
+
+    @Test fun scanNextClosesAndRescans() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle()
+        val before = cam.rescans
+        v.onAction(ScannerAction.ScanNext)
+        assertNull(v.state.value.result); assertFalse(cam.detectionPaused); assertEquals(before + 1, cam.rescans)
+    }
+
+    @Test fun copyEmitsClipboardEffectAndToast() = runTest {
+        val v = vm()
+        v.effects.test {
+            v.onAction(ScannerAction.Copy("Tracking No.", "1Z9"))
+            assertEquals(ScannerEffect.Copy("1Z9"), awaitItem())
+            assertEquals(ScannerEffect.Toast("Copied Tracking No."), awaitItem())
+        }
+    }
+
+    @Test fun sendFeedbackSubmitsShownResultAndToasts() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        var sent: Map<String, ItemLabelFeedback.Entry>? = null
+        v.submitFeedback = { _, _, entries, _ -> sent = entries; "Feedback sent · 1 entities" }
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        val entries = mapOf("f" to ItemLabelFeedback.Entry("x", true))
+        v.effects.test {
+            assertEquals(ScannerEffect.Haptic, awaitItem())   // from the result's success flash
+            v.onAction(ScannerAction.SendFeedback(entries))
+            assertEquals(ScannerEffect.Toast("Feedback sent · 1 entities"), awaitItem())
+        }
+        assertEquals(entries, sent)
+    }
+
+    @Test fun zoomAppliesAndResetsOnModeSwitch() = runTest {
+        val v = vm()
+        v.onAction(ScannerAction.Zoom(2f)); assertEquals(2f, v.state.value.zoom)
+        v.onAction(ScannerAction.SetMode(ScanMode.QR)); assertEquals(1f, v.state.value.zoom)
+    }
+
+    @Test fun clearTagsEmptiesPriceList() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        (v.camera as FakeCamera).emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
+        v.onAction(ScannerAction.ClearTags); assertTrue(v.state.value.tags.isEmpty())
     }
 }

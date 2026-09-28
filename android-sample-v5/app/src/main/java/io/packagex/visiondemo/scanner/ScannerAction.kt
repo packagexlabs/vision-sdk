@@ -1,6 +1,7 @@
 package io.packagex.visiondemo.scanner
 
 import android.graphics.RectF
+import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
@@ -44,9 +45,34 @@ sealed interface ScannerAction {
     data class DeleteModel(val t: DocType, val s: ModelSize) : ScannerAction
     data class CancelDownload(val t: DocType, val s: ModelSize) : ScannerAction
     data object CheckUpdates : ScannerAction
+
+    // Item retrieval list (Items sheet)
+    /** Adds one code (typed or picked) to the list. */
+    data class AddItem(val sku: String) : ScannerAction
+    /** The Items sheet's "Add Item": adds every code currently in view (iOS `addItemsInView`). */
+    data object AddItemsInView : ScannerAction
+    data class RemoveItem(val sku: String) : ScannerAction
+    /** The Items sheet's "Delete" (all). */
+    data object ClearItems : ScannerAction
+
+    // Result drawer
+    data object ToggleExpanded : ScannerAction
+    /** "Scan next" / "New Scan": closes the drawer (AR also resets its markers, Task 11). */
+    data object ScanNext : ScannerAction
+    /** Copies [text] (ScannerEffect.Copy) and toasts "Copied <label>". */
+    data class Copy(val label: String, val text: String) : ScannerAction
+    /** Item-label feedback for the shown OCR result, keyed by `OcrField.id`. */
+    data class SendFeedback(val entries: Map<String, ItemLabelFeedback.Entry>, val comment: String = "") : ScannerAction
+    /** Price drawer's "Clear tags". */
+    data object ClearTags : ScannerAction
+
+    // Camera chrome
+    data class Zoom(val ratio: Float) : ScannerAction
 }
 
 sealed interface ScannerEffect {
     data class Toast(val text: String) : ScannerEffect
     data object Haptic : ScannerEffect
+    /** Put [text] on the clipboard with `ClipDescription.EXTRA_IS_SENSITIVE = true` (scanned values can be personal data). */
+    data class Copy(val text: String) : ScannerEffect
 }

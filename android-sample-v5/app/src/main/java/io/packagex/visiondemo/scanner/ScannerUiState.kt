@@ -43,6 +43,10 @@ data class ScannerUiState(
     val codesInView: List<String> = emptyList(),
     /** Item retrieval list: the codes to find (iOS `items`). */
     val items: List<String> = emptyList(),
+    /** Result drawer expanded (reset whenever a result is presented or closed). */
+    val resultExpanded: Boolean = false,
+    /** Zoom preset in use (reset to 1 on mode switch). */
+    val zoom: Float = 1f,
 )
 
 data class Alert(val title: String, val message: String, val actions: List<AlertAction>)

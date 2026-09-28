@@ -11,6 +11,7 @@ import io.packagex.visiondemo.camera.ScanEvent
 import io.packagex.visiondemo.data.EntitlementRepository
 import io.packagex.visiondemo.data.ExtractionRepository
 import io.packagex.visiondemo.data.ItemCatalogRepository
+import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.ModelRepository
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PreferencesRepository
@@ -22,6 +23,7 @@ import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.ModelState
+import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.Phase
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
@@ -89,6 +91,9 @@ class ScannerViewModel @Inject constructor(
     /** [ScannerAction.UpdatePrefs] writes not yet persisted. */
     private var prefWrites = 0
 
+    /** Item-label feedback upload; replaced in tests (it is network I/O). */
+    internal var submitFeedback: suspend (Bitmap, OcrResult, Map<String, ItemLabelFeedback.Entry>, String) -> String = ItemLabelFeedback::submit
+
     private val s get() = _state.value
     private val usesScanner get() = ownerFor(s.mode) == CameraOwner.Scanner
 
@@ -150,6 +155,16 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.DeleteModel -> viewModelScope.launch { runCatchingModel { models.delete(a.t, a.s) }?.let(::toast) }
             is ScannerAction.CancelDownload -> { models.cancel(a.t, a.s); toast("Download cancelled") }
             ScannerAction.CheckUpdates -> viewModelScope.launch { toast(runCatching { models.checkUpdates() }.getOrElse { it.message ?: "Update check failed" }) }
+            is ScannerAction.AddItem -> if (a.sku in s.items) toast("Code already in list") else setItems(s.items + a.sku)
+            ScannerAction.AddItemsInView -> addItemsInView()
+            is ScannerAction.RemoveItem -> setItems(s.items - a.sku)
+            ScannerAction.ClearItems -> setItems(emptyList())
+            ScannerAction.ToggleExpanded -> _state.update { it.copy(resultExpanded = !it.resultExpanded) }
+            ScannerAction.ScanNext -> closeResult()
+            is ScannerAction.Copy -> { _effects.trySend(ScannerEffect.Copy(a.text)); toast("Copied ${a.label}") }
+            is ScannerAction.SendFeedback -> sendFeedback(a.entries, a.comment)
+            ScannerAction.ClearTags -> _state.update { it.copy(tags = emptyList()) }
+            is ScannerAction.Zoom -> setZoom(a.ratio)
         }
     }
 
@@ -163,6 +178,7 @@ class ScannerViewModel @Inject constructor(
         clearInView()
         dismissing = false
         if (s.torch) camera.torch(false)
+        setZoom(1f)
         _state.update {
             it.copy(
                 mode = m, result = null, sheet = null, pendingSheet = null, phase = Phase.Idle, boxes = emptyList(),
@@ -240,19 +256,7 @@ class ScannerViewModel @Inject constructor(
             ScanMode.Price -> show(ScanResult.Price(s.tags))   // iOS shows the drawer even with no tags yet
             ScanMode.DocAcq -> {}     // the document pipeline's capture (Task 12)
             ScanMode.Retrieval -> {
-                if (s.items.isEmpty()) {
-                    _state.update {
-                        it.copy(alert = Alert(
-                            "No items to find",
-                            "Add item codes to the list first. The scanner then reports which of them are in view.",
-                            listOf(
-                                AlertAction("Open item list", action = ScannerAction.OpenSheet(SheetKind.Items)),
-                                AlertAction("Cancel", PXButtonKind.Tertiary, ScannerAction.DismissAlert),
-                            ),
-                        ))
-                    }
-                    return
-                }
+                if (s.items.isEmpty()) return _state.update { it.copy(alert = noItemsAlert) }
                 show(ScanResult.Retrieval(s.codesInView.map { it to (it in s.items) }))
             }
             ScanMode.Barcode, ScanMode.QR, ScanMode.Ocr -> {
@@ -348,16 +352,10 @@ class ScannerViewModel @Inject constructor(
         }
     }
 
-    /** iOS `noCodeFound`. */
+    /** iOS `noCodeFound`: retry rescans and captures again. */
     private fun noCodeFound() {
-        val text = s.mode == ScanMode.Ocr
-        val extra = if (s.torch) emptyList() else listOf(AlertAction("Turn on torch and retry", PXButtonKind.Secondary, ScannerAction.TorchRetry))
-        fail(
-            if (text) "No Text Found" else if (s.mode == ScanMode.QR) "No QR Code Found" else "No Barcode Found",
-            if (text) "Fill the frame with the label and hold still, then capture again." else "Move closer so the code fills the frame, then try again.",
-            retry = { camera.rescan(); shutter() },
-            extra = extra,
-        )
+        val (title, message, extra) = noCodeCopy(s.mode, s.torch)
+        fail(title, message, retry = { camera.rescan(); shutter() }, extra = extra)
     }
 
     // MARK: Vision Scanner (OCR)
@@ -387,6 +385,12 @@ class ScannerViewModel @Inject constructor(
         }
     }
 
+    private fun sendFeedback(entries: Map<String, ItemLabelFeedback.Entry>, comment: String) {
+        val r = s.result as? ScanResult.Ocr ?: return
+        val image = r.image ?: return toast("No image to send")
+        viewModelScope.launch { toast(submitFeedback(image, r.result, entries, comment)) }
+    }
+
     // MARK: Results
 
     /** 380 ms success flash, then the drawer (iOS `show`). */
@@ -404,7 +408,7 @@ class ScannerViewModel @Inject constructor(
     }
 
     private fun present(r: ScanResult) {
-        _state.update { it.copy(result = r, lastResult = it.mode to r, feedback = null) }
+        _state.update { it.copy(result = r, lastResult = it.mode to r, feedback = null, resultExpanded = false) }
         if (usesScanner) camera.pauseDetection()   // nothing to detect under the drawer
     }
 
@@ -419,7 +423,7 @@ class ScannerViewModel @Inject constructor(
             pendingShow?.cancel(); pendingShow = null
             _state.update { it.copy(feedback = null) }
         }
-        _state.update { it.copy(result = null, tags = emptyList()) }
+        _state.update { it.copy(result = null, tags = emptyList(), resultExpanded = false) }
         if (usesScanner) {
             if (s.sheet == null || s.sheet == SheetKind.Items) camera.resumeDetection()
             camera.rescan()
@@ -483,6 +487,22 @@ class ScannerViewModel @Inject constructor(
         if (k == SheetKind.Items) camera.resumeDetection() else camera.pauseDetection()
     }
 
+    // MARK: Item retrieval list
+
+    private fun setItems(items: List<String>) {
+        _state.update { it.copy(items = items) }   // at once; the repo echoes the same list
+        viewModelScope.launch { catalog.setItems(items) }
+    }
+
+    /** iOS `addItemsInView`. */
+    private fun addItemsInView() {
+        val new = s.codesInView.filter { it !in s.items }
+        val first = new.firstOrNull()
+            ?: return toast(if (s.codesInView.isEmpty()) "Point the camera at a code, then tap Add Item" else "Code already in list")
+        setItems(s.items + new)
+        toast(if (new.size == 1) "Scanned and added $first" else "Added ${new.size} codes")
+    }
+
     // MARK: Models
 
     private fun downloadModel(a: ScannerAction.DownloadModel) {
@@ -507,6 +527,12 @@ class ScannerViewModel @Inject constructor(
         "Download failed. Check the connection."
     } catch (e: Exception) {
         (e as? VisionSDKException)?.errorMessage ?: e.message ?: "Something went wrong"
+    }
+
+    private fun setZoom(ratio: Float) {
+        if (ratio == s.zoom) return
+        _state.update { it.copy(zoom = ratio) }
+        camera.zoom(ratio)
     }
 
     // MARK: Effects
