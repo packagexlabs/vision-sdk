@@ -2,6 +2,7 @@ package io.packagex.visiondemo.model
 
 import android.graphics.Bitmap
 import io.packagex.visiondemo.ar.ArRow
+import io.packagex.visiondemo.document.DocumentPage
 
 /** What the result drawer shows. Ported from iOS `Model/Types.swift`'s `ScanResult`. */
 sealed interface ScanResult {
@@ -20,5 +21,6 @@ sealed interface ScanResult {
     data class Retrieval(val codes: List<Pair<String, Boolean>>) : ScanResult
     /** One row per AR payload: value, symbology, marked instances and catalog name (iOS `.ar`). */
     data class Ar(val rows: List<ArRow>) : ScanResult
-    data class Document(val pageCount: Int) : ScanResult
+    /** Every page of the document so far (iOS `.docacq`). */
+    data class Document(val pages: List<DocumentPage>) : ScanResult
 }

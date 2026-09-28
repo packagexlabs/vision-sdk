@@ -46,6 +46,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -82,6 +83,7 @@ import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.designsystem.inter
 import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
+import io.packagex.visiondemo.document.DocumentReview
 import io.packagex.visiondemo.model.DetectedCode
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.OcrField
@@ -119,6 +121,9 @@ fun ResultDrawer(
     var editingField by remember(result) { mutableStateOf<String?>(null) }
     var selectedField by remember(result) { mutableStateOf<String?>(null) }
     var dragTotal by remember { mutableStateOf(0f) }
+    // Document: Enhanced / Original (kept across captures, as iOS @State) and the page shown (the newest, iOS onAppear).
+    var docEnhanced by remember { mutableStateOf(true) }
+    var docPage by remember(result) { mutableIntStateOf((result as? ScanResult.Document)?.pages?.lastIndex ?: 0) }
 
     val heightFraction by animateFloatAsState(
         targetValue = if (expanded) 0.89f else 0.46f,
@@ -209,11 +214,19 @@ fun ResultDrawer(
                     ScanResult.Price -> PriceContent(tags, onAction)
                     is ScanResult.Retrieval -> RetrievalContent(result.codes, onAction)
                     is ScanResult.Ar -> ArContent(result)
-                    is ScanResult.Document -> DocumentContent(result)
+                    is ScanResult.Document -> DocumentReview(
+                        pages = result.pages,
+                        index = docPage,
+                        onIndexChange = { docPage = it },
+                        enhanced = docEnhanced,
+                        onEnhancedChange = { docEnhanced = it },
+                        onZoom = { zoomedImage = it },
+                        onAddPage = { onAction(ScannerAction.RescanDocument(dropLast = false)) },
+                    )
                 }
             }
 
-            DrawerFooter(result = result, tags = tags, onAction = onAction)
+            DrawerFooter(result = result, tags = tags, docEnhanced = docEnhanced, onAction = onAction)
         }
 
         if (reportOpen && result is ScanResult.Ocr) {
@@ -261,7 +274,7 @@ private fun DrawerHeader(result: ScanResult, tags: List<PriceTag>, itemCount: In
 }
 
 @Composable
-private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, onAction: (ScannerAction) -> Unit) {
+private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: Boolean, onAction: (ScannerAction) -> Unit) {
     val context = LocalContext.current
     Column {
         HorizontalDivider(color = PX.Hairline)
@@ -288,16 +301,23 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, onAction: (Sc
             ) {
                 Icon(Icons.Filled.Share, contentDescription = null, tint = PX.Purple, modifier = Modifier.size(20.dp))
             }
-            Box(Modifier.weight(1f)) {
-                // Label "to clipboard" so the VM's "Copied <label>" toast reads "Copied to clipboard",
-                // matching iOS's fixed string (:83).
-                PXButton(title = "Copy", kind = PXButtonKind.Secondary) {
-                    onAction(ScannerAction.Copy("to clipboard", summaryFor(result, tags)))
+            if (result is ScanResult.Document) {   // iOS :79-81
+                Box(Modifier.weight(1f)) {
+                    PXButton(title = "Retake", kind = PXButtonKind.Secondary) { onAction(ScannerAction.RescanDocument(dropLast = true)) }
                 }
-            }
-            Box(Modifier.weight(1f)) {
-                val label = if (result is ScanResult.Ar) "New Scan" else "Scan next"
-                PXButton(title = label) { onAction(ScannerAction.ScanNext) }
+                Box(Modifier.weight(1f)) { PXButton(title = "Export PDF") { onAction(ScannerAction.ExportPdf(docEnhanced)) } }
+            } else {
+                Box(Modifier.weight(1f)) {
+                    // Label "to clipboard" so the VM's "Copied <label>" toast reads "Copied to clipboard",
+                    // matching iOS's fixed string (:83).
+                    PXButton(title = "Copy", kind = PXButtonKind.Secondary) {
+                        onAction(ScannerAction.Copy("to clipboard", summaryFor(result, tags)))
+                    }
+                }
+                Box(Modifier.weight(1f)) {
+                    val label = if (result is ScanResult.Ar) "New Scan" else "Scan next"
+                    PXButton(title = label) { onAction(ScannerAction.ScanNext) }
+                }
             }
         }
     }
@@ -329,7 +349,7 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
         )
     }
     is ScanResult.Ar -> Triple("Scan Results", "${result.rows.sumOf { it.count }} barcodes · ${result.rows.size} unique", true)
-    is ScanResult.Document -> Triple("Document captured", "${result.pageCount} ${if (result.pageCount == 1) "page" else "pages"}", true)
+    is ScanResult.Document -> Triple("Document captured", "${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"} · on-device", true)
 }
 
 private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when (result) {
@@ -350,7 +370,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when 
     ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
     is ScanResult.Retrieval -> result.codes.joinToString("\n") { "${it.first}\t${if (it.second) "In list" else "Not in list"}" }
     is ScanResult.Ar -> result.rows.joinToString("\n") { "${it.name?.let { n -> "$n · " }.orEmpty()}${it.value} × ${it.count}" }
-    is ScanResult.Document -> "Scanned document · ${result.pageCount} ${if (result.pageCount == 1) "page" else "pages"}"
+    is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
 }
 
 // endregion
@@ -426,11 +446,6 @@ private fun ArContent(result: ScanResult.Ar) {
             }
         }
     }
-}
-
-@Composable
-private fun DocumentContent(result: ScanResult.Document) {
-    EmptyNote(text = "${result.pageCount} ${if (result.pageCount == 1) "page" else "pages"} captured. Document review is coming soon.")
 }
 
 @Composable

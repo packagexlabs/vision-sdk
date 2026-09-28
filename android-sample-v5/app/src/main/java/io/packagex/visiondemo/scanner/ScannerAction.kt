@@ -8,6 +8,7 @@ import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.SheetKind
+import java.io.File
 
 sealed interface ScannerAction {
     data class SetMode(val m: ScanMode) : ScannerAction
@@ -64,6 +65,10 @@ sealed interface ScannerAction {
     data class Copy(val label: String, val text: String) : ScannerAction
     /** Item-label feedback for the shown OCR result, keyed by `OcrField.id`. */
     data class SendFeedback(val entries: Map<String, ItemLabelFeedback.Entry>, val comment: String = "") : ScannerAction
+    /** Document drawer's Retake (drops the last page) and "Add page" (keeps them); both return to the camera (iOS `rescanDocument`). */
+    data class RescanDocument(val dropLast: Boolean) : ScannerAction
+    /** Document drawer's "Export PDF", from the enhanced or the original pages. */
+    data class ExportPdf(val enhanced: Boolean) : ScannerAction
     /** Price drawer's "Clear tags". */
     data object ClearTags : ScannerAction
 
@@ -106,4 +111,6 @@ sealed interface ScannerEffect {
     data object PickPhoto : ScannerEffect
     /** AR isn't installed yet: `ArCoreApk.requestInstall` from the Activity, then send [ScannerAction.ArInstallResult]. */
     data object InstallArCore : ScannerEffect
+    /** Share the exported document PDF (through the app's FileProvider). */
+    data class SharePdf(val file: File) : ScannerEffect
 }

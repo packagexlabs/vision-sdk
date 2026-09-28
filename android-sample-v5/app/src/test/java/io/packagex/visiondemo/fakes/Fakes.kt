@@ -3,6 +3,7 @@ package io.packagex.visiondemo.fakes
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
+import com.packagex.docscanner.DocumentQuad
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.camera.DetectionGatedCamera
 import io.packagex.visiondemo.camera.ScanEvent
@@ -14,6 +15,9 @@ import io.packagex.visiondemo.data.ModelRepository
 import io.packagex.visiondemo.data.PreferencesRepository
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.ReportRepository
+import io.packagex.visiondemo.document.CaptureStart
+import io.packagex.visiondemo.document.DocumentCamera
+import io.packagex.visiondemo.document.DocumentPage
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ModelState
@@ -39,6 +43,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import java.io.File
 
 /** In-memory [PreferencesRepository]: no DataStore, no Context -- for ViewModel tests. */
 class FakePreferences(initial: Prefs = Prefs()) : PreferencesRepository {
@@ -172,6 +177,48 @@ class FakeCamera : DetectionGatedCamera() {
         return true
     }
     override fun userActive() { userActiveCalls++ }
+}
+
+/** Records what the ViewModel asked of Document Acquisition; [still] feeds a capture (null = failed), [seePage] the live quad. */
+class FakeDocument : DocumentCamera {
+    private val channel = Channel<Bitmap?>(Channel.UNLIMITED)
+    override val quad = MutableStateFlow<DocumentQuad?>(null)
+    override val stills: Flow<Bitmap?> = channel.receiveAsFlow()
+    override var auto = false
+    override var detecting = false
+    var captures = 0
+    var exports = 0
+    /** What the next shutter press starts. */
+    var captureStart = CaptureStart.Started
+    var torchOn = false
+    var front = false
+    var focusPoint: Pair<Float, Float>? = null
+    var exportFails = false
+
+    fun still(bitmap: Bitmap? = fakeBitmap()) { channel.trySend(bitmap) }
+    fun seePage(seen: Boolean) {
+        quad.value = if (seen) DocumentQuad(emptyList(), true, 1f, 100, 100, 0, true, 0f, 0f, 0f, 0f, 0f, false, false) else null
+    }
+
+    override fun capture(): CaptureStart { if (captureStart == CaptureStart.Started) captures++; return captureStart }
+    override fun torch(on: Boolean) { torchOn = on }
+    override fun lens(front: Boolean) { this.front = front }
+    override fun focus(x: Float, y: Float) { focusPoint = x to y }
+    /** The camera owner seen by each release, in order ([ownerProbe] reads it). */
+    val releasedUnder = mutableListOf<CameraOwner?>()
+    var ownerProbe: () -> CameraOwner? = { null }
+    override fun release() { releasedUnder += ownerProbe() }
+    var zoomRatio = 1f
+    override fun zoom(ratio: Float) { zoomRatio = ratio }
+    override suspend fun process(original: Bitmap, index: Int) = DocumentPage(original, index)
+    var exportedPages: List<DocumentPage> = emptyList()
+    var exportDelayMs = 0L
+    override suspend fun exportPdf(pages: List<DocumentPage>, enhanced: Boolean): File? {
+        exports++
+        exportedPages = pages
+        if (exportDelayMs > 0) delay(exportDelayMs)
+        return if (exportFails) null else File("Document.pdf")
+    }
 }
 
 /** In-memory [ItemCatalogRepository]. */

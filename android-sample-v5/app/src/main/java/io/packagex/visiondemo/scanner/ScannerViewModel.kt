@@ -23,6 +23,8 @@ import io.packagex.visiondemo.data.ReportRepository
 import io.packagex.visiondemo.data.ScanError
 import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.designsystem.PXButtonKind
+import io.packagex.visiondemo.document.DocumentCamera
+import io.packagex.visiondemo.document.NoDocumentCamera
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.ModelState
@@ -67,6 +69,7 @@ class ScannerViewModel @Inject constructor(
     private val catalog: ItemCatalogRepository,
     secrets: Secrets,
     internal val ar: ArCamera = NoArCamera,
+    internal val document: DocumentCamera = NoDocumentCamera,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ScannerUiState(missingKey = if (secrets.isMissing) secrets.missingMessage else null))
     val state: StateFlow<ScannerUiState> = _state.asStateFlow()
@@ -100,9 +103,20 @@ class ScannerViewModel @Inject constructor(
 
     /** ARCore reported installed (requestInstall), so AR entries skip the availability check. */
     private var arInstalled = false
+    private val doc = DocumentFlow(document, viewModelScope, object : DocumentFlow.Host {
+        override val s get() = _state.value
+        override val generation get() = modeGeneration
+        override fun update(t: (ScannerUiState) -> ScannerUiState) = _state.update(t)
+        override fun show(r: ScanResult) = this@ScannerViewModel.show(r)
+        override fun flash() = flashOnce()
+        override fun toast(text: String) = this@ScannerViewModel.toast(text)
+        override fun effect(e: ScannerEffect) { _effects.trySend(e) }
+    })
 
     private val s get() = _state.value
     private val usesScanner get() = ownerFor(s.mode) == CameraOwner.Scanner
+    /** A camera the user drives (torch, flip, focus): the SDK scanner, or Document Acquisition's (iOS usesScanner). */
+    private val ownCamera get() = usesScanner || s.mode == ScanMode.DocAcq
 
     init {
         // While a local write is in flight the repo can still emit the value from before it; skip those.
@@ -115,6 +129,8 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { ar.errors.collect(::toast) }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
+        doc.start()
+        viewModelScope.launch { state.collect(doc::sync) }
         // Repo states are in-memory; read what the SDK already has on disk / in memory.
         viewModelScope.launch {
             try { models.refresh() } catch (e: CancellationException) { throw e } catch (e: Exception) { /* rows stay NotDownloaded */ }
@@ -182,6 +198,8 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.SetDetectionEnabled -> setDetection(a.on)
             ScannerAction.ResetSettings -> resetSettings()
             ScannerAction.FlipCamera -> flipCamera()
+            is ScannerAction.RescanDocument -> { doc.rescan(a.dropLast); closeResult() }
+            is ScannerAction.ExportPdf -> doc.exportPdf(a.enhanced)
             is ScannerAction.Focus -> focus(a.x, a.y)
             ScannerAction.PickPhoto -> if (s.mode == ScanMode.Ocr) _effects.trySend(ScannerEffect.PickPhoto)
             is ScannerAction.ImportPhoto -> if (s.mode == ScanMode.Ocr) {   // the mode may have changed while the picker was up
@@ -211,7 +229,9 @@ class ScannerViewModel @Inject constructor(
         retry = null
         clearInView()
         dismissing = false
-        if (s.torch) camera.torch(false)
+        setTorch(false)
+        if (s.mode == ScanMode.DocAcq) doc.leave()   // drops the pages, releases CameraX before the next owner claims
+        if (m == ScanMode.DocAcq) doc.enter()
         setZoom(1f)
         _state.update {
             it.copy(
@@ -259,18 +279,18 @@ class ScannerViewModel @Inject constructor(
 
     /** iOS `flipCamera`: a facing switch turns the torch off and resets the zoom. */
     private fun flipCamera() {
-        if (!usesScanner) return
+        if (!ownCamera) return
         val front = !s.frontCamera
         setTorch(false)
         _state.update { it.copy(frontCamera = front, zoom = 1f) }
-        camera.lens(front)
+        if (s.mode == ScanMode.DocAcq) document.lens(front) else camera.lens(front)
         toast(if (front) "Front camera" else "Back camera")
     }
 
     /** Tap-to-focus and its ring, only on the live camera (iOS CameraScreen :17-21). */
     private fun focus(x: Float, y: Float) {
-        if (!usesScanner || s.result != null || s.sheet != null || s.alert != null) return
-        camera.focus(x, y)
+        if (!ownCamera || s.result != null || s.sheet != null || s.alert != null) return
+        if (s.mode == ScanMode.DocAcq) document.focus(x, y) else camera.focus(x, y)
         _state.update { it.copy(focus = FocusTap(x, y, (it.focus?.id ?: 0) + 1)) }
     }
 
@@ -300,7 +320,7 @@ class ScannerViewModel @Inject constructor(
     private fun setTorch(on: Boolean) {
         if (on == s.torch) return
         _state.update { it.copy(torch = on) }
-        camera.torch(on)
+        if (s.mode == ScanMode.DocAcq) document.torch(on) else camera.torch(on)
     }
 
     /**
@@ -333,7 +353,7 @@ class ScannerViewModel @Inject constructor(
             ScanMode.Ar -> arRows(s.arCounts, s.itemNames).takeIf { it.isNotEmpty() }?.let { show(ScanResult.Ar(it)) }
                 ?: toast("No markers yet. Point at barcodes first.")
             ScanMode.Price -> show(ScanResult.Price)   // iOS shows the drawer even with no tags yet
-            ScanMode.DocAcq -> {}     // the document pipeline's capture (Task 12)
+            ScanMode.DocAcq -> doc.shutter()
             ScanMode.Retrieval -> {
                 if (s.items.isEmpty()) return _state.update { it.copy(alert = noItemsAlert) }
                 show(ScanResult.Retrieval(s.codesInView.map { it to (it in s.items) }))
@@ -625,7 +645,7 @@ class ScannerViewModel @Inject constructor(
     private fun setZoom(ratio: Float) {
         if (ratio == s.zoom) return
         _state.update { it.copy(zoom = ratio) }
-        camera.zoom(ratio)
+        if (s.mode == ScanMode.DocAcq) document.zoom(ratio) else camera.zoom(ratio)
     }
 
     // MARK: Effects
