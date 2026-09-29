@@ -121,8 +121,9 @@ Vision Scanner → Price tag → Item retrieval → Document Acquisition → bac
 granted with `pm grant` first. **AR Barcode is skipped**: ARCore start-up depends on Google Play
 Services for AR being installed and current on the device and is not reliable under automation.
 
-The generated profile is committed at `app/src/release/generated/baselineProfiles/`
-(`baseline-prof.txt`, plus `startup-prof.txt` for dex layout) and packaged into release builds;
+The generated profile is committed at `app/src/release/generated/baselineProfiles/baseline-prof.txt`
+and packaged into release builds (no `startup-prof.txt`: the journey goes well past startup, so it
+isn't collected as a startup/dex-layout profile);
 `androidx.profileinstaller` installs it on devices where Play doesn't. Generation is manual
 (`automaticGenerationDuringBuild = false`), so regenerate after significant UI or startup changes,
 with one arm64 device connected (the app has no emulator ABI) and unlocked:

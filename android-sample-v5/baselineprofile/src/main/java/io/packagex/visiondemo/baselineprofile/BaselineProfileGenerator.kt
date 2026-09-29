@@ -7,7 +7,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Generates app/src/release/generated/baselineProfiles/baseline-prof.txt (and startup-prof.txt):
+ * Generates app/src/release/generated/baselineProfiles/baseline-prof.txt:
  * `./gradlew :app:generateBaselineProfile` with a device connected (see README).
  *
  * AR Barcode is left out: ARCore session start-up under automation depends on Google Play Services for AR
@@ -18,7 +18,9 @@ class BaselineProfileGenerator {
     @get:Rule val rule = BaselineProfileRule()
 
     @Test
-    fun generate() = rule.collect(packageName = PACKAGE_NAME, includeInStartupProfile = true) {
+    fun generate() = rule.collect(packageName = PACKAGE_NAME) {
+        // Not a startup profile (includeInStartupProfile): the journey goes well past startup, and a
+        // startup profile covering all of it would only dilute the dex layout it drives.
         grantCamera()
         startToCamera()
         openAndCloseSettings()
