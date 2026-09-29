@@ -4,14 +4,17 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.RectF
+import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.PowerManager
+import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.packagex.visiondemo.BuildConfig
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.ScannerConfig
 import io.packagex.visionsdk.camera.core.CameraStatus
@@ -80,7 +83,14 @@ class CameraController @Inject constructor(
 
     /** Another client took the camera ([isCameraLoss]); reconnects by rescanning (the SDK's startCamera() is a
      *  no-op while its interrupted session is still bound). Main thread, like every other SDK call. */
-    private val reclaim = CameraReclaim(CoroutineScope(scope.coroutineContext + Dispatchers.Main)) { if (mayRun) rescan() }
+    private val reclaim = CameraReclaim(
+        scope = CoroutineScope(scope.coroutineContext + Dispatchers.Main),
+        now = SystemClock::elapsedRealtime,
+        stillLost = { view.currentCameraState().let { isCameraLoss(it.status, it.error) } },
+        onPersistentFailure = {
+            _events.tryEmit(ScanEvent.Failure(VisionSDKException.UnknownException(IllegalStateException("The camera is in use by another app"))))
+        },
+    ) { if (mayRun) rescan() }
 
     /** [PausePolicy.paused], or the camera is lost to another client: either way the UI shows it paused. */
     override val paused: StateFlow<Boolean> =
@@ -89,6 +99,7 @@ class CameraController @Inject constructor(
     /** Last focus spec `apply()`ed; re-applied on `onCameraStarted` since `getFocusRegionManager()`
      *  throws [VisionSDKException.FocusRegionManagerNotAvailable] before the camera has started. */
     private var lastSpec: FocusSpec? = null
+    private val cameraManager = ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager
     private var nthFrame = 10
     private var lensFace: CameraLensFace = CameraLensFace.Back
 
@@ -145,15 +156,16 @@ class CameraController @Inject constructor(
                 state.status == CameraStatus.RUNNING -> reclaim.onRunning()
                 // Only while the scanner wants the camera in the foreground: backgrounding interrupts the SDK session too.
                 isCameraLoss(state.status, state.error) && mayRun && foreground() -> {
-                    Log.i(TAG, "Camera lost (${state.status}, ${state.error}); reconnecting when it is free")
-                    reclaim.onLost()
+                    if (BuildConfig.DEBUG) Log.i(TAG, "Camera lost (${state.status}, ${state.error}); reconnecting when it is free")
+                    reclaim.onLost(failed = state.status == CameraStatus.ERROR)
                 }
             }
         }
-        (ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager).registerAvailabilityCallback(
+        cameraManager.registerAvailabilityCallback(
             ContextCompat.getMainExecutor(ctx),
             object : CameraManager.AvailabilityCallback() {
-                override fun onCameraAvailable(cameraId: String) = reclaim.onAvailable()
+                // Only the sensor the scanner uses (another app freeing a different camera changes nothing for us).
+                override fun onCameraAvailable(cameraId: String) { if (cameraId == scannerCameraId()) reclaim.onAvailable() }
             },
         )
 
@@ -208,15 +220,18 @@ class CameraController @Inject constructor(
     private fun applyFocusSpec() {
         val spec = lastSpec ?: return
         if (!view.isCameraStarted()) return
-        view.getFocusRegionManager().setFocusSettings(
-            FocusSettings(
-                context = ctx,
-                focusImageRect = RectF(spec.rect.left.toFloat(), spec.rect.top.toFloat(), spec.rect.right.toFloat(), spec.rect.bottom.toFloat()),
-                shouldScanInFocusImageRect = spec.restrict,
-                showCodeBoundariesInMultipleScan = false,   // the app draws the boxes (BoxesOverlay)
-                showDocumentBoundaries = false,
-            ),
-        )
+        // Still throws if the session stops between the check and the call (e.g. evicted); re-applied on the next start.
+        runCatching {
+            view.getFocusRegionManager().setFocusSettings(
+                FocusSettings(
+                    context = ctx,
+                    focusImageRect = RectF(spec.rect.left.toFloat(), spec.rect.top.toFloat(), spec.rect.right.toFloat(), spec.rect.bottom.toFloat()),
+                    shouldScanInFocusImageRect = spec.restrict,
+                    showCodeBoundariesInMultipleScan = false,   // the app draws the boxes (BoxesOverlay)
+                    showDocumentBoundaries = false,
+                ),
+            )
+        }.onFailure { if (BuildConfig.DEBUG) Log.d(TAG, "Focus settings not applied", it) }
     }
 
     override val mayRun get() = _owner.value == CameraOwner.Scanner && !policy.paused.value
@@ -237,6 +252,12 @@ class CameraController @Inject constructor(
         applyCameraSettings()
     }
     override fun focus(x: Float, y: Float) = view.setFocusPoint(x, y)
+
+    /** The system camera id of the lens the scanner uses (first one facing that way), or null if unknown. */
+    private fun scannerCameraId(): String? = runCatching {
+        val facing = if (lensFace == CameraLensFace.Front) CameraCharacteristics.LENS_FACING_FRONT else CameraCharacteristics.LENS_FACING_BACK
+        cameraManager.cameraIdList.firstOrNull { cameraManager.getCameraCharacteristics(it).get(CameraCharacteristics.LENS_FACING) == facing }
+    }.getOrNull()
 
     private fun foreground() = ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
 
