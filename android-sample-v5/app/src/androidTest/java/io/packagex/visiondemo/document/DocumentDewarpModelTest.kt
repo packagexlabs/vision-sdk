@@ -5,12 +5,16 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
+import io.packagex.visiondemo.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
+import kotlin.concurrent.thread
 import kotlin.math.abs
 
 /** UVDoc on each path, the GPU guard, and the per-page model time for each (logged, tag DewarpBench). */
@@ -71,5 +75,27 @@ class DocumentDewarpModelTest {
             assertNotNull(m.backwardMap(page()))
             Log.i("DewarpBench", "self-check ran=$checked, path=CPU after a failed GPU self-check")
         }
+    }
+
+    /** Debug builds reject a call from any thread but the one that built the model (and its GPU delegate). */
+    @Test fun modelCallsFromAnotherThreadFail() {
+        assumeTrue(BuildConfig.DEBUG)
+        DocumentDewarpModel(context).use { m ->
+            var error: Throwable? = null
+            thread { error = runCatching { m.backwardMap(page()) }.exceptionOrNull() }.join()
+            assertTrue("got $error", error is IllegalStateException)
+            assertNotNull(m.backwardMap(page()))   // the owning thread still works
+        }
+    }
+
+    /** The session keeps every model call on its own thread while pages arrive from the coroutine pool. */
+    @Test fun sessionRunsThePageOnItsModelThread() {
+        val session = DocumentSession(context)
+        session.warm()
+        val pages = runBlocking(Dispatchers.Default) {
+            (0 until 2).map { i -> DocumentPage(page(), i).also { session.process(it) } }
+        }
+        session.close()
+        pages.forEach { assertFalse("page ${it.index} failed", it.failed); assertNotNull(it.enhanced) }
     }
 }

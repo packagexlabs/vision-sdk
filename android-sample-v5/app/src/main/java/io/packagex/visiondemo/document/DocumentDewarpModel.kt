@@ -42,6 +42,14 @@ class DocumentDewarpModel internal constructor(
         private const val TAG = "DocumentDewarp"
     }
 
+    /** The thread that built the interpreter (and its GPU delegate); every later call must come from it. */
+    private val owner: Thread = Thread.currentThread()
+
+    /** Debug builds fail fast on a call from another thread: a GPU delegate is bound to the thread that made it. */
+    private fun checkOwner() {
+        if (BuildConfig.DEBUG) check(Thread.currentThread() === owner) { "UVDoc used on ${Thread.currentThread().name}, owned by ${owner.name}" }
+    }
+
     /** True when the interpreter runs on the GPU delegate (fp16), false for CPU/XNNPACK. */
     var usingGpu = false
         private set
@@ -120,6 +128,7 @@ class DocumentDewarpModel internal constructor(
      */
     @Synchronized
     fun backwardMap(page: Bitmap): BackwardMap? {
+        checkOwner()
         val interpreter = interpreter ?: return null
         val scaled = Bitmap.createScaledBitmap(page, INPUT_WIDTH, INPUT_HEIGHT, true)
         val pixels = IntArray(INPUT_WIDTH * INPUT_HEIGHT)
@@ -136,6 +145,7 @@ class DocumentDewarpModel internal constructor(
     }
 
     override fun close() {
+        checkOwner()
         interpreter?.close()
         gpuDelegate?.close()
     }

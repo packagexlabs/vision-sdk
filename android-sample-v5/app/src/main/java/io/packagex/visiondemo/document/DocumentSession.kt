@@ -3,27 +3,41 @@ package io.packagex.visiondemo.document
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.withContext
+import java.util.concurrent.Executors
 
 /**
  * Per-page processing, ported from the original demo's DocumentSession: dewarp →
  * quality → enhance, run once per captured page (never per live frame). The
  * page list lives in [DocumentPages]; text recognition runs at PDF export, as iOS
  * DocumentPipeline defers it. The UVDoc model stays warm for the next page.
+ *
+ * Every use of the model (load and GPU self-check, each page's inference, close) runs on one thread of its own,
+ * [modelThread]: a GPU delegate may only be used on the thread that created it. Quality and enhance run on the
+ * caller's thread.
  */
 class DocumentSession(private val context: Context) {
+    private val modelThread = Executors.newSingleThreadExecutor { Thread(it, MODEL_THREAD) }
+    private val onModelThread = modelThread.asCoroutineDispatcher()
+
+    /** Only touched on [modelThread]. */
     private var model: DocumentDewarpModel? = null
 
-    @Synchronized
     private fun model(): DocumentDewarpModel = model ?: DocumentDewarpModel(context).also { model = it }
 
-    /** Blocking; loads UVDoc (a GPU kernel compile on a first run, then one self-check inference that drops a GPU
-     *  giving bad output back to the CPU) so the first page doesn't wait for it. */
-    fun warm() { model() }
+    /** Loads UVDoc in the background (a GPU kernel compile on a first run, then one self-check inference that drops
+     *  a GPU giving bad output back to the CPU), so the first page doesn't wait for it. */
+    fun warm() { modelThread.execute { model() } }
 
-    /** Blocking; call off the main thread. A failure leaves [DocumentPage.failed] set. */
-    fun process(page: DocumentPage) {
+    /** Suspends until the page is done. A failure leaves [DocumentPage.failed] set. */
+    suspend fun process(page: DocumentPage) {
         try {
-            finish(page, DocumentDewarp.dewarp(model(), page.original))
+            val dewarped = withContext(onModelThread) { DocumentDewarp.dewarp(model(), page.original) }
+            finish(page, dewarped)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "page ${page.index} failed", e)
             page.failed = true
@@ -57,7 +71,14 @@ class DocumentSession(private val context: Context) {
         page.recognizeMs = (System.nanoTime() - t) / 1_000_000
     }
 
+    /** Releases the model (and its GPU delegate) on its own thread, then the thread. */
+    fun close() {
+        modelThread.execute { model?.close(); model = null }
+        modelThread.shutdown()
+    }
+
     private companion object {
         const val TAG = "DocumentSession"
+        const val MODEL_THREAD = "uvdoc"
     }
 }

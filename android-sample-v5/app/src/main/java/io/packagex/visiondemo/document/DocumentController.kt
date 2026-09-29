@@ -186,8 +186,8 @@ class DocumentController @Inject constructor(
 
     /** Main thread. Claim [io.packagex.visiondemo.camera.CameraOwner.Document] first so the SDK camera is stopped. */
     fun bind(owner: LifecycleOwner, preview: PreviewView) {
-        // Entering Document Acquisition: load the dewarp model now, off the analysis thread, not at app start.
-        cropExecutor.execute(session::warm)
+        // Entering Document Acquisition: load the dewarp model now (on its own thread), not at app start.
+        session.warm()
         wanted = true
         bound = owner to preview
         val future = ProcessCameraProvider.getInstance(ctx)
@@ -326,7 +326,7 @@ class DocumentController @Inject constructor(
     }
 
     override suspend fun process(original: Bitmap, index: Int): DocumentPage = withContext(Dispatchers.Default) {
-        DocumentPage(original, index).also(session::process)
+        DocumentPage(original, index).also { session.process(it) }   // the model part hops to the session's model thread
     }
 
     override suspend fun exportPdf(pages: List<DocumentPage>, enhanced: Boolean): File? = withContext(Dispatchers.IO) {
