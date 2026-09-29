@@ -1,8 +1,7 @@
 package io.packagex.visiondemo.settings
 
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -15,13 +14,16 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.SheetScaffold
 import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visiondemo.scanner.ScannerAction
 import io.packagex.visiondemo.scanner.ScannerUiState
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /**
  * Presents [ScannerUiState.sheet] as a bottom sheet. Ported 1:1 from iOS `UI/Sheets.swift` `SheetHost`.
@@ -42,7 +44,7 @@ import io.packagex.visiondemo.scanner.ScannerUiState
  * taps a node's real, possibly off-screen position and does not auto-scroll) never reached it and
  * `OpenSheet` was never sent at all.
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     RecomposeLog("SheetHost")
@@ -55,10 +57,14 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     val sheetState = key(kind) { rememberModalBottomSheetState(skipPartiallyExpanded = kind !in PartialDetentKinds) }
 
     // A half-height sheet keeps its lower half (where the Items / AR items text fields are) off screen, so the
-    // keyboard would cover a focused field: typing always happens in the fully expanded sheet.
-    val imeVisible = WindowInsets.isImeVisible
-    LaunchedEffect(imeVisible, sheetState) {
-        if (imeVisible && sheetState.currentValue == SheetValue.PartiallyExpanded) sheetState.expand()
+    // keyboard would cover a focused field: while the keyboard is up, the sheet never settles at half height
+    // (opening the keyboard expands it, and so does dragging it back down to half with the keyboard still up).
+    val ime = WindowInsets.ime
+    val density = LocalDensity.current
+    LaunchedEffect(sheetState) {
+        snapshotFlow { ime.getBottom(density) > 0 && sheetState.targetValue == SheetValue.PartiallyExpanded }
+            .distinctUntilChanged()
+            .collect { if (it) sheetState.expand() }
     }
 
     LaunchedEffect(state.sheet) {
