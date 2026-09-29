@@ -49,7 +49,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -70,8 +69,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.layout.positionInParent
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -329,21 +331,26 @@ private fun ZoomPresets(zooms: List<Float>, current: Float, onZoom: (Float) -> U
 private fun ModeDial(selected: ScanMode, onSelect: (ScanMode) -> Unit) {
     RecomposeLog("ModeDial")
     val scrollState = rememberScrollState()
-    var viewportWidth by remember { mutableIntStateOf(0) }
-    val itemOffsets = remember { mutableStateMapOf<ScanMode, Pair<Int, Int>>() }
+    // Centres in window coordinates, so the Row's padding and the current scroll don't skew the target.
+    var viewportCenter by remember { mutableFloatStateOf(Float.NaN) }
+    val itemCenters = remember { mutableStateMapOf<ScanMode, Float>() }
 
-    LaunchedEffect(selected, viewportWidth) {
-        val (start, width) = itemOffsets[selected] ?: return@LaunchedEffect
-        if (viewportWidth == 0) return@LaunchedEffect
-        val target = (start + width / 2) - viewportWidth / 2
-        scrollState.animateScrollTo(target.coerceIn(0, scrollState.maxValue))
+    // The dial can be re-created when the chrome above it changes with the mode (e.g. the doc-type chip),
+    // so wait for its first layout instead of giving up, and jump there without animating on a fresh dial.
+    var placed by remember { mutableStateOf(false) }
+    LaunchedEffect(selected) {
+        val (center, viewport) = snapshotFlow { itemCenters[selected] to viewportCenter }
+            .first { (c, v) -> c != null && !v.isNaN() }
+        val target = (scrollState.value + (center!! - viewport).roundToInt()).coerceIn(0, scrollState.maxValue)
+        if (placed) scrollState.animateScrollTo(target) else scrollState.scrollTo(target)
+        placed = true
     }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
-            .onSizeChanged { viewportWidth = it.width }
+            .onGloballyPositioned { viewportCenter = it.positionInWindow().x + it.size.width / 2f }
             .edgeFadeMask(),
     ) {
         Row(
@@ -359,7 +366,7 @@ private fun ModeDial(selected: ScanMode, onSelect: (ScanMode) -> Unit) {
                     color = if (isSelected) Color.White else Color.White.copy(alpha = 0.62f),
                     modifier = Modifier
                         .onGloballyPositioned { coords ->
-                            itemOffsets[m] = coords.positionInParent().x.roundToInt() to coords.size.width
+                            itemCenters[m] = coords.positionInWindow().x + coords.size.width / 2f
                         }
                         .height(44.dp)
                         .wrapContentHeight(Alignment.CenterVertically)
