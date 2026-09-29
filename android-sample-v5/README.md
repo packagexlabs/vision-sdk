@@ -79,7 +79,76 @@ export JAVA_HOME=<path to a JDK 17>
 ./gradlew :app:testDebugUnitTest :app:assembleDebug   # unit tests + debug build
 ./gradlew :app:installDebug                           # install on a connected arm64 device
 ./gradlew :app:connectedDebugAndroidTest               # instrumented tests, needs a connected device
+./gradlew :app:assembleRelease :baselineprofile:assemble # release build + profile/benchmark test APKs
+# :baselineprofile:assemble also builds the app's plugin-added nonMinifiedRelease and benchmarkRelease variants
 ```
+
+## Release build
+
+```bash
+./gradlew :app:assembleRelease          # app/build/outputs/apk/release/app-release.apk
+./gradlew :app:installRelease
+```
+
+The `release` build type is minified and resource-shrunk with R8 (full mode), not debuggable, and
+uses `proguard-android-optimize.txt` plus `app/proguard-rules.pro`. Most keep rules come from the
+libraries' own consumer rules (VisionScanner, vision-barcode-scanner, ARCore, GMS TFLite, ML Kit,
+Hilt, DataStore, kotlinx.serialization); `proguard-rules.pro` adds only what nothing else keeps —
+the JNI-bound `io.packagex.visionsdk.native.*` wrappers and the rule-less local docscanner AAR.
+`app/build/outputs/mapping/release/mapping.txt` deobfuscates release stack traces
+(`retrace mapping.txt stacktrace.txt`).
+
+**Signing.** Release signing reads four values, from environment variables or `secrets.properties`
+(environment wins, same as the API keys):
+
+| Name | Value |
+|---|---|
+| `RELEASE_STORE_FILE` | keystore path, relative to `android-sample-v5/` or absolute |
+| `RELEASE_STORE_PASSWORD` | keystore password |
+| `RELEASE_KEY_ALIAS` | key alias |
+| `RELEASE_KEY_PASSWORD` | key password |
+
+If all four are empty, release (and the baseline-profile/benchmark variants derived from it)
+is signed with the **debug keystore** (the build logs a warning), so `assembleRelease` works on any
+machine. Setting only some of the four fails the build. Such an APK installs
+over a debug build from the same machine but isn't fit for distribution. Never commit a keystore or
+its passwords; `secrets.properties` is git-ignored and `secrets.properties.example` lists the names
+with empty values.
+
+## Baseline profiles and startup benchmarks
+
+`:baselineprofile` (a `com.android.test` module using the `androidx.baselineprofile` plugin) drives
+the release app with UiAutomator: cold start → camera screen → open and close Settings → QR code →
+Vision Scanner → Price tag → Item retrieval → Document Acquisition → back to Barcode. CAMERA is
+granted with `pm grant` first. **AR Barcode is skipped**: ARCore start-up depends on Google Play
+Services for AR being installed and current on the device and is not reliable under automation.
+
+The generated profile is committed at `app/src/release/generated/baselineProfiles/baseline-prof.txt`
+and packaged into release builds (no `startup-prof.txt`: the journey goes well past startup, so it
+isn't collected as a startup/dex-layout profile);
+`androidx.profileinstaller` installs it on devices where Play doesn't. Generation is manual
+(`automaticGenerationDuringBuild = false`), so regenerate after significant UI or startup changes,
+with one arm64 device connected (the app has no emulator ABI) and unlocked:
+
+```bash
+./gradlew :app:generateReleaseBaselineProfile     # runs BaselineProfileGenerator on the device
+```
+
+It builds the `nonMinifiedRelease` variant the plugin adds, collects the profile and writes it into
+`app/src/release/generated/baselineProfiles/`. Commit the result.
+
+Startup benchmark (`StartupBenchmarks`: cold start to the camera screen, `CompilationMode.None()`
+vs `Partial(BaselineProfileMode.Require)`, 10 iterations each) runs against the `benchmarkRelease`
+variant:
+
+```bash
+./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=Macrobenchmark
+```
+
+Results (`timeToInitialDisplayMs` min/median/max) print in the test output and land as JSON under
+`baselineprofile/build/outputs/connected_android_test_additional_output/`. Both tasks reinstall the
+app, replacing whatever build of `io.packagex.visiondemo` was on the device.
 
 ## Modes
 

@@ -4,4 +4,4 @@ dependencyResolutionManagement {
     repositories { mavenLocal(); google(); mavenCentral(); maven("https://jitpack.io") }
 }
 rootProject.name = "VisionSDKv5"
-include(":app")
+include(":app", ":baselineprofile")
