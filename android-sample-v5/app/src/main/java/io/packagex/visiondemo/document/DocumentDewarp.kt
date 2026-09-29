@@ -25,6 +25,9 @@ class BackwardMap(
         require(x.size == width * height && y.size == width * height) { "grid size mismatch" }
     }
 
+    /** Every coordinate is a real number (a GPU driver can return NaN or Inf). */
+    val isFinite: Boolean get() = x.all { it.isFinite() } && y.all { it.isFinite() }
+
     /**
      * How far the map departs from reading straight through, as a fraction of the
      * image. A flat page predicts close to the identity and is best left alone

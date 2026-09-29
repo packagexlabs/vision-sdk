@@ -14,6 +14,8 @@ visionSdk = "v2.7.0"
 visionBarcodeScanner = "3.0.0-1730"
 arcore = "1.56.0"
 camerax = "1.5.1"
+# docscanner-release.aar (vision-sdk-android) bundles the same LiteRT runtime .so files: keep this version aligned
+# with the one it was built against; app/build.gradle.kts packages one copy of each (jniLibs.pickFirsts).
 litert = "1.4.2"
 mlkitText = "16.0.1"
 junit = "4.13.2"

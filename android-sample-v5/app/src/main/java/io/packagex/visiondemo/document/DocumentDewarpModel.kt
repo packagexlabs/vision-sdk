@@ -25,11 +25,15 @@ import java.nio.ByteOrder
  * iOS demo ships as UVDoc.mlmodelc. Loading is slow (GPU kernel compile on a first run): construct it off
  * the main thread, ahead of the first page ([DocumentSession.warm]).
  */
-class DocumentDewarpModel(
+class DocumentDewarpModel internal constructor(
     context: Context,
     /** False forces the CPU path (benchmarks). */
-    preferGpu: Boolean = true,
+    preferGpu: Boolean,
+    /** Whether a freshly built GPU interpreter may be kept; tests replace it to force the fallback. */
+    gpuCheck: (Interpreter) -> Boolean,
 ) : AutoCloseable {
+    constructor(context: Context, preferGpu: Boolean = true) : this(context, preferGpu, { it.passesSelfCheck() })
+
     companion object {
         /** The input size UVDoc was trained at; not negotiable. */
         const val INPUT_WIDTH = 488
@@ -61,11 +65,20 @@ class DocumentDewarpModel(
             if (gpu == null) {
                 cpu()
             } else {
-                try {
-                    Interpreter(model, Interpreter.Options().addDelegate(gpu)).also { gpuDelegate = gpu; usingGpu = true }
+                val onGpu = try {
+                    Interpreter(model, Interpreter.Options().addDelegate(gpu))
                 } catch (e: Exception) {
                     // Driver rejected the graph: drop to CPU rather than fail the page.
                     Log.w(TAG, "GPU delegate rejected UVDoc; using CPU", e)
+                    null
+                }
+                // The GPU may be off LiteRT's compatibility list (see gpuDelegate), so a graph it accepted still has to
+                // produce a usable grid before any page relies on it.
+                if (onGpu != null && gpuCheck(onGpu)) {
+                    onGpu.also { gpuDelegate = gpu; usingGpu = true }
+                } else {
+                    if (onGpu != null) Log.w(TAG, "UVDoc on the GPU failed its self-check; using CPU")
+                    onGpu?.close()
                     gpu.close()
                     cpu()
                 }
@@ -100,7 +113,8 @@ class DocumentDewarpModel(
     val isAvailable: Boolean get() = interpreter != null
 
     /**
-     * Predicts the backward map for a page, or null when the model is missing.
+     * Predicts the backward map for a page, or null when the model is missing, fails, or predicts a non-finite grid
+     * ([DocumentDewarp.dewarp] then leaves the page as it is).
      * Synchronized: one interpreter, and TFLite's run() is not thread-safe —
      * two concurrent pages segfaulted inside the runtime.
      */
@@ -108,52 +122,13 @@ class DocumentDewarpModel(
     fun backwardMap(page: Bitmap): BackwardMap? {
         val interpreter = interpreter ?: return null
         val scaled = Bitmap.createScaledBitmap(page, INPUT_WIDTH, INPUT_HEIGHT, true)
-        val n = INPUT_WIDTH * INPUT_HEIGHT
-        val pixels = IntArray(n)
+        val pixels = IntArray(INPUT_WIDTH * INPUT_HEIGHT)
         scaled.getPixels(pixels, 0, INPUT_WIDTH, 0, 0, INPUT_WIDTH, INPUT_HEIGHT)
         if (scaled !== page) scaled.recycle()
-
-        // RGB 0..1 — the 1/255 lives here rather than in the graph. Layout
-        // follows whatever the converter emitted: [1,3,H,W] or [1,H,W,3].
-        val inShape = interpreter.getInputTensor(0).shape()
-        val nchw = inShape.size == 4 && inShape[1] == 3
-        val input = ByteBuffer.allocateDirect(3 * n * 4).order(ByteOrder.nativeOrder())
-        if (nchw) {
-            for (c in 0 until 3) {
-                val shift = 16 - 8 * c
-                for (i in 0 until n) input.putFloat((pixels[i] ushr shift and 0xff) / 255f)
-            }
-        } else {
-            for (i in 0 until n) {
-                val p = pixels[i]
-                input.putFloat((p ushr 16 and 0xff) / 255f)
-                input.putFloat((p ushr 8 and 0xff) / 255f)
-                input.putFloat((p and 0xff) / 255f)
-            }
-        }
-        input.rewind()
-
-        val outShape = interpreter.getOutputTensor(0).shape() // [1, 2, gh, gw] or [1, gh, gw, 2]
-        if (outShape.size != 4) return null
-        val channelsFirst = outShape[1] == 2
-        val gh = if (channelsFirst) outShape[2] else outShape[1]
-        val gw = if (channelsFirst) outShape[3] else outShape[2]
-        val output = ByteBuffer.allocateDirect(2 * gh * gw * 4).order(ByteOrder.nativeOrder())
         return try {
-            interpreter.run(input, output)
-            output.rewind()
-            val x = FloatArray(gw * gh)
-            val y = FloatArray(gw * gh)
-            if (channelsFirst) {
-                for (i in x.indices) x[i] = output.getFloat()
-                for (i in y.indices) y[i] = output.getFloat()
-            } else {
-                for (i in x.indices) {
-                    x[i] = output.getFloat()
-                    y[i] = output.getFloat()
-                }
-            }
-            BackwardMap(gw, gh, x, y)
+            val map = interpreter.backwardMap(pixels)
+            // A NaN/Inf grid would resample garbage: the page passes through un-dewarped instead.
+            if (map != null && !map.isFinite) null.also { Log.w(TAG, "UVDoc produced a non-finite grid; page left as is") } else map
         } catch (e: Exception) {
             Log.e(TAG, "UVDoc inference failed", e)
             null
@@ -164,6 +139,62 @@ class DocumentDewarpModel(
         interpreter?.close()
         gpuDelegate?.close()
     }
+}
+
+/** One inference on a synthetic page: runs, and predicts a finite grid. */
+private fun Interpreter.passesSelfCheck(): Boolean = gpuPassesSelfCheck {
+    val w = DocumentDewarpModel.INPUT_WIDTH
+    backwardMap(IntArray(w * DocumentDewarpModel.INPUT_HEIGHT) { i -> if ((i % w) / 16 % 2 == 0) -0x1 else -0x1000000 })
+}
+
+/** [check]'s grid exists and is finite; a throw counts as a failure. Pure, for the JVM tests. */
+internal fun gpuPassesSelfCheck(check: () -> BackwardMap?): Boolean =
+    try { check()?.isFinite == true } catch (e: Exception) { false }
+
+/** UVDoc on [pixels] (ARGB, 488 x 712), or null when the output shape is unexpected. Throws on a runtime failure. */
+private fun Interpreter.backwardMap(pixels: IntArray): BackwardMap? {
+    val n = pixels.size
+
+    // RGB 0..1 — the 1/255 lives here rather than in the graph. Layout
+    // follows whatever the converter emitted: [1,3,H,W] or [1,H,W,3].
+    val inShape = getInputTensor(0).shape()
+    val nchw = inShape.size == 4 && inShape[1] == 3
+    val input = ByteBuffer.allocateDirect(3 * n * 4).order(ByteOrder.nativeOrder())
+    if (nchw) {
+        for (c in 0 until 3) {
+            val shift = 16 - 8 * c
+            for (i in 0 until n) input.putFloat((pixels[i] ushr shift and 0xff) / 255f)
+        }
+    } else {
+        for (i in 0 until n) {
+            val p = pixels[i]
+            input.putFloat((p ushr 16 and 0xff) / 255f)
+            input.putFloat((p ushr 8 and 0xff) / 255f)
+            input.putFloat((p and 0xff) / 255f)
+        }
+    }
+    input.rewind()
+
+    val outShape = getOutputTensor(0).shape() // [1, 2, gh, gw] or [1, gh, gw, 2]
+    if (outShape.size != 4) return null
+    val channelsFirst = outShape[1] == 2
+    val gh = if (channelsFirst) outShape[2] else outShape[1]
+    val gw = if (channelsFirst) outShape[3] else outShape[2]
+    val output = ByteBuffer.allocateDirect(2 * gh * gw * 4).order(ByteOrder.nativeOrder())
+    run(input, output)
+    output.rewind()
+    val x = FloatArray(gw * gh)
+    val y = FloatArray(gw * gh)
+    if (channelsFirst) {
+        for (i in x.indices) x[i] = output.getFloat()
+        for (i in y.indices) y[i] = output.getFloat()
+    } else {
+        for (i in x.indices) {
+            x[i] = output.getFloat()
+            y[i] = output.getFloat()
+        }
+    }
+    return BackwardMap(gw, gh, x, y)
 }
 
 class DewarpResult(
