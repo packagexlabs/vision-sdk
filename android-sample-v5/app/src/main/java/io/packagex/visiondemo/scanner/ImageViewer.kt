@@ -7,10 +7,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -75,7 +79,8 @@ fun ImageViewer(image: Bitmap, onClose: () -> Unit) {
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .safeDrawingPadding()   // the image is full-bleed; the close button stays clear of the status bar / cutout
+                // The image is full-bleed; the close button stays clear of the status bar / cutout.
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.End))
                 .padding(top = 4.dp, end = 12.dp)
                 .size(44.dp)
                 .clickable(onClick = onClose)

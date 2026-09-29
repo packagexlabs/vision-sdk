@@ -8,11 +8,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -106,7 +110,7 @@ fun ScannerScreen(
         if (state.flash) Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.6f)))
 
         if (state.gated && !state.permissionDenied && state.result == null) {
-            GateCard(state = state, onAction = onAction, modifier = Modifier.align(Alignment.Center).safeDrawingPadding().padding(horizontal = 20.dp))
+            GateCard(state = state, onAction = onAction, modifier = Modifier.align(Alignment.Center).windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)).padding(horizontal = 20.dp))
         }
 
         if (state.paused && !state.permissionDenied && state.result == null) {

@@ -15,6 +15,8 @@ import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
 import io.packagex.visiondemo.model.SheetKind
 
+/** A snapshot of the camera screen. [Immutable] for Compose: every list and map in it is a fresh read-only
+ *  collection per `copy`, never mutated after it is published on [ScannerViewModel.state]. */
 @Immutable
 data class ScannerUiState(
     /** The active mode. Not persisted: the app always opens on Barcode, as iOS. */

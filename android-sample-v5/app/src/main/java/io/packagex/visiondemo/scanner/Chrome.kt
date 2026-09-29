@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,8 +30,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
@@ -49,9 +51,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,11 +74,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import kotlinx.coroutines.flow.first
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -100,6 +101,7 @@ import io.packagex.visiondemo.model.isDocument
 import io.packagex.visiondemo.model.viewfinder
 import io.packagex.visiondemo.model.zooms
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.first
 
 /**
  * Camera chrome: top icons, hint, context chip, capture-mode pill, zoom presets, mode dial and
@@ -114,7 +116,7 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
+                .windowInsetsPadding(WindowInsets.chromeInsets.only(WindowInsetsSides.Top))
                 .padding(horizontal = 14.dp)
                 .padding(top = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -167,11 +169,16 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
             state = state,
             onAction = onAction,
             modifier = Modifier
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                .windowInsetsPadding(WindowInsets.chromeInsets.only(WindowInsetsSides.Bottom))
                 .padding(top = 12.dp, bottom = 8.dp),
         )
     }
 }
+
+/** System bars and the display cutout, not the IME: a sheet's keyboard must not move the camera chrome, nor the
+ *  viewfinder (whose rect the SDK scans in). */
+private val WindowInsets.Companion.chromeInsets: WindowInsets
+    @Composable get() = systemBars.union(displayCutout)
 
 /** The viewfinder brackets: the design's 390x844 artboard scaled to the screen, reported to the
  *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`. */
@@ -185,7 +192,7 @@ fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifie
         val docSeen = state.mode == ScanMode.DocAcq && state.codeInFrame && state.phase == Phase.Idle
         val visible = f != null && !multiLive && !docSeen && state.result == null && !state.gated && !state.permissionDenied
         if (f != null && visible) {
-            val insets = WindowInsets.safeDrawing.asPaddingValues()
+            val insets = WindowInsets.chromeInsets.asPaddingValues()
             val insetTop = insets.calculateTopPadding()
             val insetBottom = insets.calculateBottomPadding()
             val contentHeight = maxHeight - insetTop - insetBottom

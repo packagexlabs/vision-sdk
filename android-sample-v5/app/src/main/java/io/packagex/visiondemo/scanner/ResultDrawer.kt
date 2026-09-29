@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -151,6 +153,9 @@ fun ResultDrawer(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
+                // The keyboard lifts the whole sheet (its height fraction is of the space above the keyboard), so an
+                // open keyboard never squeezes the content inside a fixed-height sheet.
+                .windowInsetsPadding(WindowInsets.ime)
                 .fractionOfMaxHeight(below = WindowInsets.safeDrawing) { heightFraction.value }
                 .shadow(
                     elevation = 12.dp,
@@ -160,8 +165,8 @@ fun ResultDrawer(
                 )
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                 .background(Color.White)
-                // White behind the navigation bar; the footer (and the focused comment field) above it and the IME.
-                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
+                // White behind the navigation bar, the footer above it (nothing while the keyboard, consumed above, covers it).
+                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
                 .pointerInput(expanded) {
                     detectVerticalDragGestures(
                         onDragStart = { dragTotal = 0f },

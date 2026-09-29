@@ -1,8 +1,12 @@
 package io.packagex.visiondemo.settings
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,6 +15,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.SheetScaffold
@@ -37,7 +42,7 @@ import io.packagex.visiondemo.scanner.ScannerUiState
  * taps a node's real, possibly off-screen position and does not auto-scroll) never reached it and
  * `OpenSheet` was never sent at all.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     RecomposeLog("SheetHost")
@@ -48,6 +53,13 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
 
     // A fresh SheetState per kind: detents differ per kind and can't change after creation.
     val sheetState = key(kind) { rememberModalBottomSheetState(skipPartiallyExpanded = kind !in PartialDetentKinds) }
+
+    // A half-height sheet keeps its lower half (where the Items / AR items text fields are) off screen, so the
+    // keyboard would cover a focused field: typing always happens in the fully expanded sheet.
+    val imeVisible = WindowInsets.isImeVisible
+    LaunchedEffect(imeVisible, sheetState) {
+        if (imeVisible && sheetState.currentValue == SheetValue.PartiallyExpanded) sheetState.expand()
+    }
 
     LaunchedEffect(state.sheet) {
         if (state.sheet == null) {
@@ -62,6 +74,10 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             onDismissRequest = { onAction(ScannerAction.DismissSheet) },
             sheetState = sheetState,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            // White all the way up, drag handle strip included: the default container is the theme's tinted
+            // surfaceContainerLow, which shows as a lilac band behind the status bar when the sheet is fully up.
+            containerColor = Color.White,
+            tonalElevation = 0.dp,
         ) {
             SheetScaffold(title = titleFor(kind), onClose = { onAction(ScannerAction.DismissSheet) }) {
                 when (kind) {
