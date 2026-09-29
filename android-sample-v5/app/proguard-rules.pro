@@ -15,6 +15,13 @@
 # libdocscan.so and the rest is the tiny Kotlin API around it (quads/corners built from its float[]).
 -keep class com.packagex.docscanner.** { *; }
 
+# LiteRT (document dewarp): GpuDelegate/CompatibilityList are created via JNI and reflection from
+# libtensorflowlite_gpu_jni.so; keep the GPU package and every native method name in the runtime.
+-keep class org.tensorflow.lite.gpu.** { *; }
+-keep class org.tensorflow.lite.** { native <methods>; }
+# Optional nested type referenced by litert-gpu-api but absent from litert-gpu 1.4.2.
+-dontwarn org.tensorflow.lite.gpu.GpuDelegateFactory$Options$GpuBackend
+
 # --- Crash reports ------------------------------------------------------------------------------------
 # Readable stack traces from the release build (mapping.txt still maps the obfuscated names).
 -keepattributes SourceFile,LineNumberTable
