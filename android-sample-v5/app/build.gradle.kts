@@ -2,6 +2,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application); alias(libs.plugins.kotlin.android); alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization); alias(libs.plugins.ksp); alias(libs.plugins.hilt)
+    alias(libs.plugins.baselineprofile)
 }
 val secrets = Properties().apply { rootProject.file("secrets.properties").takeIf { it.exists() }?.inputStream()?.use(::load) }
 fun secret(name: String) = System.getenv(name) ?: secrets.getProperty(name) ?: ""
@@ -23,6 +24,29 @@ android {
         buildConfigField("String", "IL_FEEDBACK_URL", secret("IL_FEEDBACK_URL").ifEmpty { "https://lvlm-api-567462092481.us-east1.run.app" }.toJavaStringLiteral())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    // Release signing comes from secrets.properties / env (RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD,
+    // RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD). Without all four, release falls back to the debug keystore
+    // so `assembleRelease` (and the baseline-profile/benchmark variants) still build and install locally.
+    val releaseSigning = listOf("RELEASE_STORE_FILE", "RELEASE_STORE_PASSWORD", "RELEASE_KEY_ALIAS", "RELEASE_KEY_PASSWORD").map(::secret)
+    signingConfigs {
+        if (releaseSigning.all { it.isNotEmpty() }) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigning[0])
+                storePassword = releaseSigning[1]
+                keyAlias = releaseSigning[2]
+                keyPassword = releaseSigning[3]
+            }
+        }
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
+        }
+    }
     buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/uvdoc"))
@@ -30,6 +54,12 @@ android {
     testOptions { unitTests.isIncludeAndroidResources = true }
 }
 kotlin { jvmToolchain(17) }
+
+// Profiles are generated on a device by :baselineprofile (see README), not on every release build.
+baselineProfile {
+    automaticGenerationDuringBuild = false
+    saveInSrc = true
+}
 
 // UVDoc dewarp model lives in vision-sdk-android (15 MB); copy at build time instead of committing it.
 val copyUvDoc by tasks.registering(Copy::class) {
@@ -59,6 +89,7 @@ dependencies {
     implementation(libs.activity.compose); implementation(libs.lifecycle.runtime.compose)
     implementation(libs.lifecycle.viewmodel.compose); implementation(libs.lifecycle.process)
     implementation(libs.hilt.android); ksp(libs.hilt.compiler); implementation(libs.hilt.navigation.compose)
+    implementation(libs.profileinstaller); baselineProfile(project(":baselineprofile"))
     implementation(libs.coroutines.android); implementation(libs.datastore.preferences); implementation(libs.serialization.json)
     implementation(libs.vision.sdk); implementation(libs.vision.barcode.scanner)
     implementation(libs.arcore)
