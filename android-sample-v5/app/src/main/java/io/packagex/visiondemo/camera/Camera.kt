@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 interface Camera {
     val events: Flow<ScanEvent>
-    /** [PausePolicy.paused]: idle timeout, heat, background. */
+    /** [PausePolicy.paused] (idle timeout, heat, background), or the camera lost to another client ([CameraReclaim]). */
     val paused: StateFlow<Boolean>
     /** The live SDK view, for the entitlement check (which *is* `enablePriceTagMode`/`enableItemRetrievalMode`
      *  on the view). Null only in fakes. */
@@ -30,7 +30,7 @@ interface Camera {
     fun lens(front: Boolean)
     /** Focus at a point in view-normalized (0..1) display coordinates. */
     fun focus(x: Float, y: Float)
-    /** [PausePolicy.resume]: false (still paused) while the device is critically hot. */
+    /** [PausePolicy.resume]: false (still paused) while the device is critically hot; also retries a lost camera at once. */
     fun resume(): Boolean
     /** [PausePolicy.userActive]: resets the idle timer. */
     fun userActive()
