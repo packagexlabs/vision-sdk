@@ -26,7 +26,11 @@ android {
     buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/uvdoc"))
-    packaging { resources.excludes += "/META-INF/{AL2.0,LGPL2.1}" }
+    packaging {
+        resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        // docscanner-release.aar bundles LiteRT 1.4.2's own runtime libs (byte-identical once stripped); keep one copy.
+        jniLibs.pickFirsts += listOf("**/libtensorflowlite_jni.so", "**/libtensorflowlite_gpu_jni.so")
+    }
     testOptions { unitTests.isIncludeAndroidResources = true }
 }
 kotlin { jvmToolchain(17) }
@@ -63,7 +67,7 @@ dependencies {
     implementation(libs.vision.sdk); implementation(libs.vision.barcode.scanner)
     implementation(libs.arcore)
     implementation(libs.camerax.core); implementation(libs.camerax.camera2); implementation(libs.camerax.lifecycle); implementation(libs.camerax.view)
-    implementation(libs.tflite.java); implementation(libs.tflite.gpu); implementation(libs.mlkit.text)
+    implementation(libs.litert); implementation(libs.litert.gpu); implementation(libs.litert.gpu.api); implementation(libs.mlkit.text)
     implementation(files(visionSdkAndroidDir.resolve("app/libs/docscanner-release.aar")))
     testImplementation(libs.junit); testImplementation(libs.coroutines.test); testImplementation(libs.turbine); testImplementation(libs.robolectric)
     androidTestImplementation(platform(libs.compose.bom)); androidTestImplementation(libs.compose.ui.test.junit4)

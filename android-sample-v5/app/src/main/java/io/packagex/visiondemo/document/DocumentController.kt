@@ -186,6 +186,8 @@ class DocumentController @Inject constructor(
 
     /** Main thread. Claim [io.packagex.visiondemo.camera.CameraOwner.Document] first so the SDK camera is stopped. */
     fun bind(owner: LifecycleOwner, preview: PreviewView) {
+        // Entering Document Acquisition: load the dewarp model now, off the analysis thread, not at app start.
+        cropExecutor.execute(session::warm)
         wanted = true
         bound = owner to preview
         val future = ProcessCameraProvider.getInstance(ctx)

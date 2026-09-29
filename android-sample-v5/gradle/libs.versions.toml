@@ -14,7 +14,7 @@ visionSdk = "v2.7.0"
 visionBarcodeScanner = "3.0.0-1730"
 arcore = "1.56.0"
 camerax = "1.5.1"
-tflite = "16.5.0"
+litert = "1.4.2"
 mlkitText = "16.0.1"
 junit = "4.13.2"
 turbine = "1.2.1"
@@ -47,8 +47,9 @@ camerax-core = { module = "androidx.camera:camera-core", version.ref = "camerax"
 camerax-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 camerax-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
-tflite-java = { module = "com.google.android.gms:play-services-tflite-java", version.ref = "tflite" }
-tflite-gpu = { module = "com.google.android.gms:play-services-tflite-gpu", version.ref = "tflite" }
+litert = { module = "com.google.ai.edge.litert:litert", version.ref = "litert" }
+litert-gpu = { module = "com.google.ai.edge.litert:litert-gpu", version.ref = "litert" }
+litert-gpu-api = { module = "com.google.ai.edge.litert:litert-gpu-api", version.ref = "litert" }
 mlkit-text = { module = "com.google.mlkit:text-recognition", version.ref = "mlkitText" }
 junit = { module = "junit:junit", version.ref = "junit" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }

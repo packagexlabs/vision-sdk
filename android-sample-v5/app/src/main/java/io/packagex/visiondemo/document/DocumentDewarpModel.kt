@@ -3,17 +3,14 @@ package io.packagex.visiondemo.document
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import com.google.android.gms.tasks.Tasks
-import com.google.android.gms.tflite.client.TfLiteInitializationOptions
-import com.google.android.gms.tflite.gpu.support.TfLiteGpu
-import com.google.android.gms.tflite.java.TfLite
-import org.tensorflow.lite.InterpreterApi
-import org.tensorflow.lite.InterpreterApi.Options.TfLiteRuntime
+import io.packagex.visiondemo.BuildConfig
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.gpu.CompatibilityList
+import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.gpu.GpuDelegateFactory
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.util.concurrent.TimeUnit
 
 /**
  * TFLite wrapper around UVDoc (tanguymagne/UVDoc, MIT), the document unwarping
@@ -21,13 +18,17 @@ import java.util.concurrent.TimeUnit
  * 2023). It takes a fixed 488 × 712 view of the page and predicts a coarse grid
  * of normalised sampling coordinates — see [BackwardMap].
  *
- * Same shipping format as the barcode detector: fp16 weights, float32 I/O, run
- * through the Play Services TFLite runtime. Exported by
- * scripts/export_uvdoc_tflite.py from the checkpoint the iOS demo ships as
- * UVDoc.mlmodelc.
+ * fp16 weights, float32 I/O, run on the LiteRT runtime bundled in the app (not Play Services TFLite: GMS
+ * on some devices, the Datalogic Memor 35 among them, has no `tflite_gpu_dynamite` module, so its GPU
+ * delegate is never available there). GPU delegate first (see [gpuDelegate]), multi-threaded XNNPACK on
+ * the CPU when the GPU can't take the graph. Exported by scripts/export_uvdoc_tflite.py from the checkpoint the
+ * iOS demo ships as UVDoc.mlmodelc. Loading is slow (GPU kernel compile on a first run): construct it off
+ * the main thread, ahead of the first page ([DocumentSession.warm]).
  */
 class DocumentDewarpModel(
     context: Context,
+    /** False forces the CPU path (benchmarks). */
+    preferGpu: Boolean = true,
 ) : AutoCloseable {
     companion object {
         /** The input size UVDoc was trained at; not negotiable. */
@@ -37,32 +38,15 @@ class DocumentDewarpModel(
         private const val TAG = "DocumentDewarp"
     }
 
-    /** True when the interpreter runs on the GMS GPU delegate (fp16), false for CPU/XNNPACK. */
+    /** True when the interpreter runs on the GPU delegate (fp16), false for CPU/XNNPACK. */
     var usingGpu = false
         private set
 
-    private val interpreter: InterpreterApi? =
+    /** Owned here: an interpreter only borrows its delegates. */
+    private var gpuDelegate: GpuDelegate? = null
+
+    private val interpreter: Interpreter? =
         try {
-            // GPU-enabled init first (fails outright on devices whose GMS can't
-            // load the GPU module — the Memor 35 among them); plain init after.
-            // The GMS client aborts the process if any TFLite API runs before
-            // initialize() succeeds; the barcode analyzer does the same dance.
-            val gpuInit =
-                try {
-                    Tasks.await(TfLite.initialize(context, TfLiteInitializationOptions.builder().setEnableGpuDelegateSupport(true).build()), 2, TimeUnit.MINUTES)
-                    true
-                } catch (e: Exception) {
-                    Log.d(TAG, "GPU-enabled TFLite init failed; CPU-only init", e)
-                    Tasks.await(TfLite.initialize(context), 2, TimeUnit.MINUTES)
-                    false
-                }
-            val gpuAvailable =
-                gpuInit &&
-                    try {
-                        Tasks.await(TfLiteGpu.isGpuDelegateAvailable(context), 2, TimeUnit.SECONDS)
-                    } catch (e: Exception) {
-                        false
-                    }
             val model =
                 context.assets.open(ASSET).use { it.readBytes() }.let { bytes ->
                     ByteBuffer
@@ -71,49 +55,54 @@ class DocumentDewarpModel(
                         .put(bytes)
                         .apply { rewind() }
                 }
-            val options =
-                InterpreterApi
-                    .Options()
-                    .setRuntime(TfLiteRuntime.FROM_SYSTEM_ONLY)
-                    .setNumThreads(Runtime.getRuntime().availableProcessors().coerceIn(1, 4))
-            if (gpuAvailable) {
-                // 18 GMACs of plain convs: fp16 GPU is the difference between ~1 s
-                // and ~0.1–0.2 s per page. Serialized kernels make the second
-                // open fast.
-                // Play Services TFLite only accepts delegate *factories*; the
-                // interpreter owns the delegate it creates.
-                options.addDelegateFactory(
-                    GpuDelegateFactory(
-                        GpuDelegateFactory
-                            .Options()
-                            .setPrecisionLossAllowed(true)
-                            .setInferencePreference(GpuDelegateFactory.Options.INFERENCE_PREFERENCE_FAST_SINGLE_ANSWER)
-                            .setSerializationParams(File(context.cacheDir, "uvdoc_gpu").apply { mkdirs() }.absolutePath, "uvdoc-fp16-v1"),
-                    ),
-                )
-            }
-            try {
-                InterpreterApi.create(model, options).also { usingGpu = gpuAvailable }
-            } catch (e: Exception) {
-                if (!gpuAvailable) throw e
-                // Driver rejected the graph: drop to CPU rather than fail the page.
-                Log.w(TAG, "GPU delegate rejected UVDoc; using CPU", e)
-                InterpreterApi.create(
-                    model,
-                    InterpreterApi.Options().setRuntime(TfLiteRuntime.FROM_SYSTEM_ONLY).setNumThreads(Runtime.getRuntime().availableProcessors().coerceIn(1, 4)),
-                )
-            }.also { Log.i(TAG, "UVDoc ready gpu=$usingGpu") }
+            val threads = Runtime.getRuntime().availableProcessors().coerceIn(1, 4)
+            fun cpu() = Interpreter(model, Interpreter.Options().setNumThreads(threads).setUseXNNPACK(true))
+            val gpu = if (preferGpu) gpuDelegate(context) else null
+            if (gpu == null) {
+                cpu()
+            } else {
+                try {
+                    Interpreter(model, Interpreter.Options().addDelegate(gpu)).also { gpuDelegate = gpu; usingGpu = true }
+                } catch (e: Exception) {
+                    // Driver rejected the graph: drop to CPU rather than fail the page.
+                    Log.w(TAG, "GPU delegate rejected UVDoc; using CPU", e)
+                    gpu.close()
+                    cpu()
+                }
+            }.also { if (BuildConfig.DEBUG) Log.d(TAG, "UVDoc ready on ${if (usingGpu) "GPU" else "CPU (XNNPACK, $threads threads)"}") }
         } catch (e: Exception) {
             Log.e(TAG, "UVDoc unavailable", e)
             null
         }
+
+    /**
+     * The GPU delegate: with this device's best options where [CompatibilityList] lists the GPU, and with the
+     * defaults where it doesn't. The list is conservative: it leaves out the Memor 35's Adreno 613, which runs
+     * UVDoc correctly and ~40 % faster than the CPU (and runs docscanner's corner model through the same
+     * delegate). A GPU whose driver rejects the graph fails [Interpreter] creation, which falls back to CPU.
+     */
+    private fun gpuDelegate(context: Context): GpuDelegate? = try {
+        CompatibilityList().use { compat ->
+            val listed = compat.isDelegateSupportedOnThisDevice
+            if (BuildConfig.DEBUG && !listed) Log.d(TAG, "GPU not in LiteRT's compatibility list; trying the delegate anyway")
+            // Serialized kernels make every open after the first fast.
+            val options: GpuDelegateFactory.Options = (if (listed) compat.bestOptionsForThisDevice else GpuDelegateFactory.Options())
+                .setPrecisionLossAllowed(true)
+                .setInferencePreference(GpuDelegateFactory.Options.INFERENCE_PREFERENCE_FAST_SINGLE_ANSWER)
+                .setSerializationParams(File(context.cacheDir, "uvdoc_gpu").apply { mkdirs() }.absolutePath, "uvdoc-fp16-litert-v1")
+            GpuDelegate(options)
+        }
+    } catch (e: Exception) {
+        Log.w(TAG, "GPU delegate unavailable", e)
+        null
+    }
 
     val isAvailable: Boolean get() = interpreter != null
 
     /**
      * Predicts the backward map for a page, or null when the model is missing.
      * Synchronized: one interpreter, and TFLite's run() is not thread-safe —
-     * two concurrent pages segfaulted inside the GMS runtime.
+     * two concurrent pages segfaulted inside the runtime.
      */
     @Synchronized
     fun backwardMap(page: Bitmap): BackwardMap? {
@@ -173,6 +162,7 @@ class DocumentDewarpModel(
 
     override fun close() {
         interpreter?.close()
+        gpuDelegate?.close()
     }
 }
 

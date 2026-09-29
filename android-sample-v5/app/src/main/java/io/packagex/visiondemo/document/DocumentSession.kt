@@ -16,6 +16,9 @@ class DocumentSession(private val context: Context) {
     @Synchronized
     private fun model(): DocumentDewarpModel = model ?: DocumentDewarpModel(context).also { model = it }
 
+    /** Blocking; loads UVDoc (a GPU kernel compile on a first run) so the first page doesn't wait for it. */
+    fun warm() { model() }
+
     /** Blocking; call off the main thread. A failure leaves [DocumentPage.failed] set. */
     fun process(page: DocumentPage) {
         try {
