@@ -38,6 +38,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -559,6 +560,14 @@ class ScannerViewModelTest {
         assertTrue(v.state.value.seesText); assertTrue(v.state.value.seesDocument)
         v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
         assertFalse(v.state.value.seesText); assertFalse(v.state.value.seesDocument)
+    }
+
+    @Test fun indicationsOutsideVisionScannerLeaveTheStateAlone() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        advanceUntilIdle()
+        val before = v.state.value
+        cam.emit(ScanEvent.Indications(barcode = true, qr = false, text = true, document = true)); advanceUntilIdle()
+        assertSame(before, v.state.value)
     }
 
     @Test fun reportSendsTheActiveModelSize() = runTest {

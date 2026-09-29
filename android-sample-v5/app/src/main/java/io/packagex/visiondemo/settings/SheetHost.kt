@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
+import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.SheetScaffold
 import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visiondemo.scanner.ScannerAction
@@ -39,6 +40,7 @@ import io.packagex.visiondemo.scanner.ScannerUiState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
+    RecomposeLog("SheetHost")
     // Remembers the last non-null sheet kind so its content keeps rendering while the sheet hides.
     var shownKind by remember { mutableStateOf(state.sheet) }
     if (state.sheet != null) shownKind = state.sheet

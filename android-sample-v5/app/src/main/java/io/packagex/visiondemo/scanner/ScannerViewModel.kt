@@ -427,8 +427,9 @@ class ScannerViewModel @Inject constructor(
             is ScanEvent.Retrieved -> if (s.mode == ScanMode.Retrieval) sawInView(e.code.scannedCode)
             is ScanEvent.Failure -> onFailure(e.e)
             // Vision Scanner's hint text (iOS seesText/seesDocument); DocAcq gets the same fields from its
-            // own boundary detector (DocumentFlow), not from this SDK callback.
-            is ScanEvent.Indications -> _state.update { it.copy(seesText = e.text, seesDocument = e.document) }
+            // own boundary detector (DocumentFlow), not from this SDK callback. Only Vision Scanner reads them: in other
+            // modes the per-frame flags would change the state (and recompose the screen) for nothing.
+            is ScanEvent.Indications -> if (s.mode == ScanMode.Ocr) _state.update { it.copy(seesText = e.text, seesDocument = e.document) }
             ScanEvent.Started -> {}
         }
     }

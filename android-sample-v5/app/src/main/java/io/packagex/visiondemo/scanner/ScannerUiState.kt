@@ -1,5 +1,6 @@
 package io.packagex.visiondemo.scanner
 
+import androidx.compose.runtime.Immutable
 import io.packagex.visiondemo.ar.PayloadCount
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PriceTag
@@ -14,6 +15,7 @@ import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
 import io.packagex.visiondemo.model.SheetKind
 
+@Immutable
 data class ScannerUiState(
     /** The active mode. Not persisted: the app always opens on Barcode, as iOS. */
     val mode: ScanMode = ScanMode.Barcode,
@@ -70,9 +72,14 @@ data class ScannerUiState(
     val itemNames: Map<String, String> = emptyMap(),
 )
 
+/** This state minus [ScannerUiState.boxes], which change on every analysed frame while codes are in view:
+ *  what everything but the boxes overlay renders from. Unchanged (same instance) when there are no boxes. */
+fun ScannerUiState.withoutBoxes(): ScannerUiState = if (boxes.isEmpty()) this else copy(boxes = emptyList())
+
 /** Tap-to-focus point in view-normalized (0..1) coordinates. */
 data class FocusTap(val x: Float, val y: Float, val id: Int)
 
+@Immutable
 data class Alert(val title: String, val message: String, val actions: List<AlertAction>)
 
 /** Tapping it sends [action]; the ViewModel dismisses the alert first. */

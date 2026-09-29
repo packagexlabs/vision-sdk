@@ -20,16 +20,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
@@ -66,9 +71,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.zIndex
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.OcrParser
@@ -80,6 +85,7 @@ import io.packagex.visiondemo.designsystem.LinkLabel
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.PXButton
 import io.packagex.visiondemo.designsystem.PXButtonKind
+import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.inter
 import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
@@ -90,6 +96,7 @@ import io.packagex.visiondemo.model.OcrField
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.OcrTable
 import io.packagex.visiondemo.model.ScanResult
+import kotlin.math.roundToInt
 
 /**
  * Bottom drawer with the result of the last capture; drag handle (or a drag gesture) toggles
@@ -109,6 +116,7 @@ fun ResultDrawer(
     expanded: Boolean,
     onAction: (ScannerAction) -> Unit,
 ) {
+    RecomposeLog("ResultDrawer")
     // Report/zoom overlays and item-label feedback are keyed on `result` so a new capture (a new
     // ScanResult instance) always starts from a clean drawer, even if the drawer composable itself
     // survives the swap (e.g. a rapid ReopenLast).
@@ -125,7 +133,8 @@ fun ResultDrawer(
     var docEnhanced by remember { mutableStateOf(true) }
     var docPage by remember(result) { mutableIntStateOf((result as? ScanResult.Document)?.pages?.lastIndex ?: 0) }
 
-    val heightFraction by animateFloatAsState(
+    // Read in the layout phase (fractionOfMaxHeight), so the expand/collapse animation relayouts without recomposing.
+    val heightFraction = animateFloatAsState(
         targetValue = if (expanded) 0.89f else 0.46f,
         animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
         label = "resultDrawerHeight",
@@ -142,7 +151,7 @@ fun ResultDrawer(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .fillMaxHeight(heightFraction)
+                .fractionOfMaxHeight(below = WindowInsets.safeDrawing) { heightFraction.value }
                 .shadow(
                     elevation = 12.dp,
                     shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
@@ -151,6 +160,8 @@ fun ResultDrawer(
                 )
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                 .background(Color.White)
+                // White behind the navigation bar; the footer (and the focused comment field) above it and the IME.
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))
                 .pointerInput(expanded) {
                     detectVerticalDragGestures(
                         onDragStart = { dragTotal = 0f },
@@ -234,6 +245,19 @@ fun ResultDrawer(
         }
         zoomedImage?.let { img -> ImageViewer(image = img, onClose = { zoomedImage = null }) }
     }
+}
+
+/** `fillMaxHeight(fraction())`, but never taller than reaching [below]'s top inset (the status bar / cutout), with
+ *  [fraction] read while measuring instead of while composing. */
+private fun Modifier.fractionOfMaxHeight(below: WindowInsets, fraction: () -> Float): Modifier = layout { measurable, constraints ->
+    val height = if (constraints.hasBoundedHeight) {
+        val max = (constraints.maxHeight - below.getTop(this)).coerceAtLeast(constraints.minHeight)
+        (constraints.maxHeight * fraction()).roundToInt().coerceIn(constraints.minHeight, max)
+    } else {
+        constraints.minHeight
+    }
+    val placeable = measurable.measure(constraints.copy(minHeight = height, maxHeight = height))
+    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
 }
 
 // region Header / footer

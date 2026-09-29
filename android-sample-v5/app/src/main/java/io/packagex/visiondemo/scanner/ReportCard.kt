@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -74,7 +75,8 @@ fun ReportCard(result: OcrResult, onAction: (ScannerAction) -> Unit, onClose: ()
         modifier = Modifier
             .fillMaxSize()
             .background(PX.Ink.copy(alpha = 0.55f))
-            .clickable(onClick = onClose),
+            .clickable(onClick = onClose)
+            .safeDrawingPadding(),   // the card clears the status/navigation bars and, while typing, the keyboard
         contentAlignment = Alignment.Center,
     ) {
         Column(

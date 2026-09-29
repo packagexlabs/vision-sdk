@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.packagex.visiondemo.designsystem.PX
+import io.packagex.visiondemo.designsystem.RecomposeLog
 
 /**
  * Hosts the SDK's live camera view. Ported from iOS `CameraLayer`. When [paused] the frozen frame
@@ -22,6 +23,7 @@ import io.packagex.visiondemo.designsystem.PX
  */
 @Composable
 fun CameraSurface(view: View, paused: Boolean, modifier: Modifier = Modifier) {
+    RecomposeLog("CameraSurface")
     Box(modifier = modifier.fillMaxSize()) {
         AndroidView(
             factory = { view.also { (it.parent as? ViewGroup)?.removeView(it) } },

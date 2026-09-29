@@ -20,15 +20,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +61,7 @@ import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 import io.packagex.visiondemo.ar.ArSurface
 import io.packagex.visiondemo.designsystem.PX
+import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.inter
 import io.packagex.visiondemo.document.DocumentController
 import io.packagex.visiondemo.document.DocumentFileProvider
@@ -78,7 +85,12 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val uiState = viewModel.state.collectAsStateWithLifecycle()
+    // The live detection boxes change on every analysed frame while codes are in view; only BoxesOverlay's draw
+    // phase reads them. The rest of the screen sees the state without them, so it recomposes only on real changes.
+    val state by remember { derivedStateOf { uiState.value.withoutBoxes() } }
+    val boxes = remember { derivedStateOf { uiState.value.boxes } }
+    RecomposeLog("ScannerRoute")
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -151,6 +163,7 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
         ScannerScreen(
             state = state,
             cameraView = {
+                RecomposeLog("cameraView")
                 Box(
                     modifier = Modifier.fillMaxSize().pointerInput(Unit) {
                         // Observed on the Initial pass without consuming, so the SDK's pinch-to-zoom
@@ -184,11 +197,16 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                     }
                 }
             },
+            boxes = { boxes.value },
             drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.resultExpanded, viewModel::onAction) } },
             sheets = { SheetHost(state, viewModel::onAction) },
             onAction = viewModel::onAction,
         )
-        SnackbarHost(hostState = snackbarHostState, modifier = Modifier.align(Alignment.TopCenter).padding(top = 96.dp)) { data ->
+        // Below the status bar / cutout: 96 dp from the top edge under a 24 dp status bar, as before.
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.TopCenter).windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top)).padding(top = 72.dp),
+        ) { data ->
             Text(
                 data.visuals.message,
                 style = inter(14.sp, FontWeight.Medium),

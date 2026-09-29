@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.PXButton
+import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.inter
 import io.packagex.visiondemo.designsystem.montserrat
 import io.packagex.visiondemo.model.DetectedCode
@@ -78,7 +80,7 @@ fun GateCard(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier:
 @Composable
 fun NoPermissionView(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    Box(modifier = modifier.fillMaxSize().background(PX.Ink), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.fillMaxSize().background(PX.Ink).safeDrawingPadding(), contentAlignment = Alignment.Center) {
         Column(
             modifier = Modifier.padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,7 +103,7 @@ fun NoPermissionView(modifier: Modifier = Modifier) {
 /** global-constraints.md: "Empty key = app shows 'Add STAGING_API_KEY to secrets.properties'." */
 @Composable
 fun MissingKeyView(message: String, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize().background(PX.Ink), contentAlignment = Alignment.Center) {
+    Box(modifier = modifier.fillMaxSize().background(PX.Ink).safeDrawingPadding(), contentAlignment = Alignment.Center) {
         Text(
             message,
             style = inter(15.sp),
@@ -115,7 +117,7 @@ fun MissingKeyView(message: String, modifier: Modifier = Modifier) {
 @Composable
 fun AlertCard(alert: Alert, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.fillMaxSize().background(PX.Ink.copy(alpha = 0.55f)).padding(horizontal = 28.dp),
+        modifier = modifier.fillMaxSize().background(PX.Ink.copy(alpha = 0.55f)).safeDrawingPadding().padding(horizontal = 28.dp),
         contentAlignment = Alignment.Center,
     ) {
         Column(
@@ -158,14 +160,15 @@ fun ProcessingSpinner(onCancel: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 /** Live-detection boxes, drawn in camera-view px. Captions are the symbology with any "Vision"
- *  prefix stripped. */
+ *  prefix stripped. [boxes] is read only while drawing, so a moving code redraws this layer without
+ *  recomposing anything. */
 @Composable
-fun BoxesOverlay(boxes: List<DetectedCode>, modifier: Modifier = Modifier) {
-    if (boxes.isEmpty()) return
+fun BoxesOverlay(boxes: () -> List<DetectedCode>, modifier: Modifier = Modifier) {
+    RecomposeLog("BoxesOverlay")
     val textMeasurer = rememberTextMeasurer()
     val captionStyle = remember { TextStyle(fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Medium) }
     Canvas(modifier = modifier.fillMaxSize()) {
-        boxes.forEach { code ->
+        boxes().forEach { code ->
             val left = code.box.left.toFloat()
             val top = code.box.top.toFloat()
             val w = (code.box.right - code.box.left).toFloat()

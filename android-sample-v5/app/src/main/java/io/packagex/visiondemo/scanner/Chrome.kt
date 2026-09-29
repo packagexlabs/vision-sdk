@@ -55,7 +55,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -83,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.designsystem.PX
+import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.Shutter
 import io.packagex.visiondemo.designsystem.glass
 import io.packagex.visiondemo.designsystem.mono
@@ -106,6 +106,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
+    RecomposeLog("Chrome")
     val usesScanner = ownerFor(state.mode) == CameraOwner.Scanner
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -174,6 +175,7 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
  *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`. */
 @Composable
 fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
+    RecomposeLog("Viewfinder")
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val f = state.mode.viewfinder
         val multiLive = state.prefs.multi && (state.mode == ScanMode.Barcode || state.mode == ScanMode.QR)
@@ -210,14 +212,19 @@ fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifie
 
 @Composable
 private fun ViewfinderFrame(corner: Color, fill: Color, pulsing: Boolean) {
-    val infiniteTransition = rememberInfiniteTransition(label = "viewfinderPulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0.35f,
-        animationSpec = infiniteRepeatable(animation = tween(550), repeatMode = RepeatMode.Reverse),
-        label = "alpha",
-    )
-    Box(modifier = Modifier.fillMaxSize().alpha(if (pulsing) pulseAlpha else 1f)) {
+    RecomposeLog("ViewfinderFrame")
+    // Runs only while pulsing, and is read in the layer (draw) phase, so the pulse never recomposes.
+    val pulseAlpha = if (pulsing) {
+        rememberInfiniteTransition(label = "viewfinderPulse").animateFloat(
+            initialValue = 1f,
+            targetValue = 0.35f,
+            animationSpec = infiniteRepeatable(animation = tween(550), repeatMode = RepeatMode.Reverse),
+            label = "alpha",
+        )
+    } else {
+        null
+    }
+    Box(modifier = Modifier.fillMaxSize().graphicsLayer { alpha = pulseAlpha?.value ?: 1f }) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawRoundRect(color = fill, cornerRadius = CornerRadius(16.dp.toPx()))
             val l = 28.dp.toPx(); val c = 16.dp.toPx(); val w = size.width; val h = size.height
@@ -248,6 +255,7 @@ private fun RoundIcon(icon: ImageVector, on: Boolean = false, label: String, onC
 
 @Composable
 private fun HintBar(text: String) {
+    RecomposeLog("HintBar")
     Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 12.dp), contentAlignment = Alignment.Center) {
         Text(
             text,
@@ -319,6 +327,7 @@ private fun ZoomPresets(zooms: List<Float>, current: Float, onZoom: (Float) -> U
  *  gradient `.mask`). */
 @Composable
 private fun ModeDial(selected: ScanMode, onSelect: (ScanMode) -> Unit) {
+    RecomposeLog("ModeDial")
     val scrollState = rememberScrollState()
     var viewportWidth by remember { mutableIntStateOf(0) }
     val itemOffsets = remember { mutableStateMapOf<ScanMode, Pair<Int, Int>>() }
@@ -380,6 +389,7 @@ private fun Modifier.edgeFadeMask(): Modifier = this
 
 @Composable
 private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
+    RecomposeLog("ShutterRow")
     Box(modifier = modifier.fillMaxWidth().height(72.dp), contentAlignment = Alignment.Center) {
         Box(modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = shutterLabel(state) }) {
             Shutter(
