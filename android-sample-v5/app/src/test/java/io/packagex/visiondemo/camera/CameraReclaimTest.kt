@@ -17,6 +17,7 @@ import org.junit.Test
 class CameraReclaimTest {
     /** The SDK's loss state: a reconnect (rescan) moves it to STARTING, i.e. not lost. */
     private var sdkLost = true
+    private var sdkStarting = false
     private val attemptsAt = mutableListOf<Long>()
     private var failures = 0
 
@@ -24,7 +25,9 @@ class CameraReclaimTest {
         scope = scope,
         now = { testScheduler.currentTime },
         stableMs = 1_500,
+        startTimeoutMs = 10_000,
         stillLost = { sdkLost },
+        starting = { sdkStarting },
         onPersistentFailure = { failures++ },
     ) { attemptsAt += testScheduler.currentTime; sdkLost = false }
 
@@ -106,5 +109,45 @@ class CameraReclaimTest {
         repeat(5) { sdkLost = true; r.onLost(failed = false); advanceTimeBy(40_000) }
         sdkLost = true; r.onLost(failed = false)
         assertEquals(1, failures)                                 // plain interruptions never alert
+    }
+
+    @Test fun tapReconnectsEvenWhenTheSdkNoLongerReportsTheLossButNotWhileStarting() = runTest {
+        val r = reclaim()
+        r.onLost(); sdkLost = false                   // e.g. the SDK went IDLE: scheduled attempts would skip
+        advanceTimeBy(5_000); assertTrue(attemptsAt.isEmpty())
+        r.retryNow(); runCurrent()
+        assertEquals(1, attemptsAt.size)
+        sdkStarting = true
+        r.retryNow(); runCurrent()
+        assertEquals(1, attemptsAt.size)              // a rebind is starting: the tap doesn't tear it down
+    }
+
+    @Test fun aStartStuckFor10sCountsAsAFailedAttemptAndIsReplaced() = runTest {
+        val r = reclaim()
+        r.onLost(); advanceTimeBy(1_001)
+        assertEquals(1, attemptsAt.size)
+        sdkStarting = true                            // the rescan never gets past STARTING
+        advanceTimeBy(10_000)                         // watchdog: a failed attempt, next one 2 s after the last
+        advanceTimeBy(1_000); runCurrent()
+        assertEquals(2, attemptsAt.size)              // replaces the stuck start although the SDK still says STARTING
+    }
+
+    @Test fun onlyFailedAttemptsCountTowardsTheAlert() = runTest {
+        val r = reclaim()
+        repeat(10) { sdkLost = true; r.onLost(failed = false); advanceTimeBy(40_000) }   // interruptions only
+        assertEquals(0, failures)
+        repeat(4) { sdkLost = true; r.onLost(failed = true); advanceTimeBy(40_000) }
+        assertEquals(0, failures)                     // 4 failed despite 14 attempts
+        sdkLost = true; r.onLost(failed = true)
+        assertEquals(1, failures)
+    }
+
+    @Test fun stuckStartsCountAsFailures() = runTest {
+        val r = reclaim()
+        r.onLost(); advanceTimeBy(1_001)
+        sdkStarting = true                            // every rescan from now on hangs in STARTING
+        advanceTimeBy(300_000)
+        assertTrue(attemptsAt.size >= 6)              // each stuck start was replaced
+        assertEquals(1, failures)                     // and after five of them the alert showed once
     }
 }

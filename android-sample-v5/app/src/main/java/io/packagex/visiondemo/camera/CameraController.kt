@@ -87,6 +87,7 @@ class CameraController @Inject constructor(
         scope = CoroutineScope(scope.coroutineContext + Dispatchers.Main),
         now = SystemClock::elapsedRealtime,
         stillLost = { view.currentCameraState().let { isCameraLoss(it.status, it.error) } },
+        starting = { view.currentCameraState().status == CameraStatus.STARTING },
         onPersistentFailure = {
             _events.tryEmit(ScanEvent.Failure(VisionSDKException.UnknownException(IllegalStateException("The camera is in use by another app"))))
         },
