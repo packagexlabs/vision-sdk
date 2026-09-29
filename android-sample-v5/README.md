@@ -1,5 +1,8 @@
 # VisionSDK v5 Sample (android-sample-v5)
 
+Installs as **Label Scanner** (`io.vision_sdk_android`), the same name and application ID as the internal
+vision-sdk-android demo, so it replaces that app on a device. The Kotlin code package stays `io.packagex.visiondemo`.
+
 A Jetpack Compose sample app demonstrating VisionSDK v2.7.0, ported feature-for-feature from
 `vision-sdk-ios`'s v5 demo. Single Gradle module (`:app`), Hilt DI, unidirectional data flow.
 
@@ -148,7 +151,7 @@ variant:
 
 Results (`timeToInitialDisplayMs` min/median/max) print in the test output and land as JSON under
 `baselineprofile/build/outputs/connected_android_test_additional_output/`. Both tasks reinstall the
-app, replacing whatever build of `io.packagex.visiondemo` was on the device.
+app, replacing whatever build of `io.vision_sdk_android` was on the device.
 
 ## Modes
 

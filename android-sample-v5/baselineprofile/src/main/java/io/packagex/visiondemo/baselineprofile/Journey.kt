@@ -7,7 +7,7 @@ import androidx.test.uiautomator.Until
 import java.util.regex.Pattern
 import kotlin.math.abs
 
-const val PACKAGE_NAME = "io.packagex.visiondemo"
+const val PACKAGE_NAME = "io.vision_sdk_android"
 private const val TIMEOUT_MS = 10_000L
 
 /** Grant CAMERA up front so the runtime permission dialog never blocks the journey. */

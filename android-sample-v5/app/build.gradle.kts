@@ -15,7 +15,7 @@ android {
     namespace = "io.packagex.visiondemo"
     compileSdk = 36
     defaultConfig {
-        applicationId = "io.packagex.visiondemo"
+        applicationId = "io.vision_sdk_android"
         minSdk = 29; targetSdk = 36; versionCode = 1; versionName = "5.0"
         ndk { abiFilters += "arm64-v8a" }
         buildConfigField("String", "VISION_ENV", secret("VISION_ENV").ifEmpty { "staging" }.toJavaStringLiteral())
