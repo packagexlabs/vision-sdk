@@ -27,9 +27,16 @@ android {
     // Release signing comes from secrets.properties / env (RELEASE_STORE_FILE, RELEASE_STORE_PASSWORD,
     // RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD). Without all four, release falls back to the debug keystore
     // so `assembleRelease` (and the baseline-profile/benchmark variants) still build and install locally.
-    val releaseSigning = listOf("RELEASE_STORE_FILE", "RELEASE_STORE_PASSWORD", "RELEASE_KEY_ALIAS", "RELEASE_KEY_PASSWORD").map(::secret)
+    val releaseSigningNames = listOf("RELEASE_STORE_FILE", "RELEASE_STORE_PASSWORD", "RELEASE_KEY_ALIAS", "RELEASE_KEY_PASSWORD")
+    val releaseSigning = releaseSigningNames.map(::secret)
+    val missingSigning = releaseSigningNames.filterIndexed { i, _ -> releaseSigning[i].isEmpty() }
+    // Some but not all set is a misconfiguration, not a request for the debug keystore.
+    if (missingSigning.isNotEmpty() && missingSigning.size < releaseSigningNames.size) {
+        throw GradleException("Release signing partly configured; missing ${missingSigning.joinToString()}. Set all four RELEASE_* values or none.")
+    }
+    if (missingSigning.isNotEmpty()) logger.warn("RELEASE_* signing not configured; release is signed with the debug keystore")
     signingConfigs {
-        if (releaseSigning.all { it.isNotEmpty() }) {
+        if (missingSigning.isEmpty()) {
             create("release") {
                 storeFile = rootProject.file(releaseSigning[0])
                 storePassword = releaseSigning[1]

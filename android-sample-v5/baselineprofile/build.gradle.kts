@@ -31,5 +31,6 @@ dependencies {
 
 // Gradle 8 makes `assemble` build the artifacts of every visible configuration, and the plugin's
 // `<variant>BaselineProfile` configuration's artifact is the on-device collection task. Hide it so
-// `:baselineprofile:assemble` only builds the test APKs and never needs a device.
+// `:baselineprofile:assemble` only builds the test APKs and never needs a device. `isVisible` is
+// deprecated in Gradle 9, where `assemble` no longer builds visible configurations, so drop this then.
 configurations.configureEach { if (name.endsWith("BaselineProfile")) isVisible = false }

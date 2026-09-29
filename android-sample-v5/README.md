@@ -80,6 +80,7 @@ export JAVA_HOME=<path to a JDK 17>
 ./gradlew :app:installDebug                           # install on a connected arm64 device
 ./gradlew :app:connectedDebugAndroidTest               # instrumented tests, needs a connected device
 ./gradlew :app:assembleRelease :baselineprofile:assemble # release build + profile/benchmark test APKs
+# :baselineprofile:assemble also builds the app's plugin-added nonMinifiedRelease and benchmarkRelease variants
 ```
 
 ## Release build
@@ -107,8 +108,9 @@ the JNI-bound `io.packagex.visionsdk.native.*` wrappers and the rule-less local 
 | `RELEASE_KEY_ALIAS` | key alias |
 | `RELEASE_KEY_PASSWORD` | key password |
 
-If any of the four is empty, release (and the baseline-profile/benchmark variants derived from it)
-is signed with the **debug keystore**, so `assembleRelease` works on any machine. Such an APK installs
+If all four are empty, release (and the baseline-profile/benchmark variants derived from it)
+is signed with the **debug keystore** (the build logs a warning), so `assembleRelease` works on any
+machine. Setting only some of the four fails the build. Such an APK installs
 over a debug build from the same machine but isn't fit for distribution. Never commit a keystore or
 its passwords; `secrets.properties` is git-ignored and `secrets.properties.example` lists the names
 with empty values.

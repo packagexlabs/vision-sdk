@@ -8,7 +8,7 @@ import org.junit.runner.RunWith
 
 /**
  * Generates app/src/release/generated/baselineProfiles/baseline-prof.txt:
- * `./gradlew :app:generateBaselineProfile` with a device connected (see README).
+ * `./gradlew :app:generateReleaseBaselineProfile` with a device connected (see README).
  *
  * AR Barcode is left out: ARCore session start-up under automation depends on Google Play Services for AR
  * being installed and up to date on the device, and hangs the journey when it isn't.
