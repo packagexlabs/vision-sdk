@@ -130,11 +130,11 @@ class ArController @Inject constructor(@param:ApplicationContext private val ctx
             _errors.tryEmit("AR isn't supported on this device")
             return null
         }
-        // The default CPU image is 640x480, too small to decode. The original took the largest; for heat this
-        // takes the smallest image at least 1280 px wide at 30 fps (iOS v5: at most 1920 px, 30 fps).
-        // No 30 fps config: the same rule over every frame rate, never ARCore's 640x480 default.
+        // The default CPU image is 640x480, too small to decode: take the largest at 30 fps, so AR reads what
+        // Barcode mode reads. No 30 fps config: the same rule over every frame rate.
         val configs = session.getSupportedCameraConfigs(CameraConfigFilter(session).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30)))
             .ifEmpty { session.getSupportedCameraConfigs(CameraConfigFilter(session).setTargetFps(EnumSet.allOf(CameraConfig.TargetFps::class.java))) }
+        Log.i(TAG, "camera configs offered: ${configs.joinToString { "${it.imageSize}@${it.fpsRange}" }}")
         pickCameraConfig(configs.map { it.imageSize.width to it.imageSize.height })?.let { session.cameraConfig = configs[it] }
         Log.i(TAG, "camera config ${session.cameraConfig.imageSize} fps=${session.cameraConfig.fpsRange}")
         // Devices vary; use the real sensor orientation of the camera ARCore picked.

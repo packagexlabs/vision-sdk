@@ -45,17 +45,11 @@ internal fun markerText(label: String): String = if (label.length > 24) label.ta
 
 /**
  * Index of the camera config to use, from each config's CPU image size (the image the decoder reads),
- * already filtered to 30 fps. For heat: the smallest image at least [MIN_WIDTH] px wide, as close to
- * iOS v5's "at most 1920 px, 30 fps" as ARCore's list allows; if none is that wide, the largest one.
+ * already filtered to 30 fps: the largest one, so AR reads the codes normal Barcode mode (4K) reads.
+ * ARCore's CPU images top out well below 4K, so every pixel counts.
  */
-internal fun pickCameraConfig(sizes: List<Pair<Int, Int>>): Int? {
-    if (sizes.isEmpty()) return null
-    val area = { i: Int -> sizes[i].first.toLong() * sizes[i].second }
-    val wide = sizes.indices.filter { sizes[it].first >= MIN_WIDTH }
-    return wide.minByOrNull(area) ?: sizes.indices.maxBy(area)
-}
-
-private const val MIN_WIDTH = 1280
+internal fun pickCameraConfig(sizes: List<Pair<Int, Int>>): Int? =
+    sizes.indices.maxByOrNull { sizes[it].first.toLong() * sizes[it].second }
 
 // --- AR marker presentation: no animation or smoothing --------------------
 //
