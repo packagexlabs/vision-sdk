@@ -50,8 +50,9 @@ enum class CameraOwner { None, Scanner, Ar, Document }
 /** Pure ownership rule, factored out so it's testable without a real [VisionCameraView]. */
 internal fun scannerMustStop(owner: CameraOwner) = owner != CameraOwner.Scanner
 
-/** Plain-Kotlin stand-in for [FocusSettings]'s `RectF` fields -- JVM-testable without android.graphics. */
-internal data class FocusSpec(val rect: Box, val restrict: Boolean)
+/** Plain-Kotlin stand-in for [FocusSettings]'s `RectF` fields -- JVM-testable without android.graphics.
+ *  [sdkBoxes] is `showCodeBoundariesInMultipleScan`: the SDK draws the code boxes ([ScannerConfig.sdkDrawsBoxes]). */
+internal data class FocusSpec(val rect: Box, val restrict: Boolean, val sdkBoxes: Boolean)
 
 /** Pure focus-region rule, factored out so it's testable without a real [VisionCameraView]. */
 internal fun focusSettingsFor(config: ScannerConfig, frame: Box?): FocusSpec {
@@ -59,6 +60,7 @@ internal fun focusSettingsFor(config: ScannerConfig, frame: Box?): FocusSpec {
     return FocusSpec(
         rect = if (useFrame) frame!! else Box(0, 0, 0, 0),
         restrict = useFrame,
+        sdkBoxes = config.sdkDrawsBoxes,
     )
 }
 
@@ -228,7 +230,8 @@ class CameraController @Inject constructor(
                     context = ctx,
                     focusImageRect = RectF(spec.rect.left.toFloat(), spec.rect.top.toFloat(), spec.rect.right.toFloat(), spec.rect.bottom.toFloat()),
                     shouldScanInFocusImageRect = spec.restrict,
-                    showCodeBoundariesInMultipleScan = false,   // the app draws the boxes (BoxesOverlay)
+                    // Barcode/QR multiple scan: the SDK's engine overlay; Vision Scanner: the app's BoxesOverlay.
+                    showCodeBoundariesInMultipleScan = spec.sdkBoxes,
                     showDocumentBoundaries = false,
                 ),
             )

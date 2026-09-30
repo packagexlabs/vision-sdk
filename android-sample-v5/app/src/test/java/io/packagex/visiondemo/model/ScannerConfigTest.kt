@@ -16,6 +16,14 @@ class ScannerConfigTest {
     }
     @Test fun visionScannerShowsBoxes() = assertTrue(scannerConfig(ScanMode.Ocr, false, true).showBoxes)
     @Test fun boxesOffWhenPrefOff() = assertFalse(scannerConfig(ScanMode.Barcode, true, false).showBoxes)
+    @Test fun codeMultipleScanBoxesAreDrawnByTheSdk() {
+        assertTrue(scannerConfig(ScanMode.Barcode, multi = true, showBoxesPref = true).sdkDrawsBoxes)
+        assertTrue(scannerConfig(ScanMode.QR, multi = true, showBoxesPref = true).sdkDrawsBoxes)
+        assertFalse(scannerConfig(ScanMode.Barcode, multi = false, showBoxesPref = true).sdkDrawsBoxes)
+        assertFalse(scannerConfig(ScanMode.Barcode, multi = true, showBoxesPref = false).sdkDrawsBoxes)
+        assertFalse(scannerConfig(ScanMode.Ocr, multi = false, showBoxesPref = true).sdkDrawsBoxes)
+        assertFalse(scannerConfig(ScanMode.Retrieval, multi = true, showBoxesPref = true).sdkDrawsBoxes)
+    }
     @Test fun retrievalEveryOtherFrameAndGated() {
         val c = scannerConfig(ScanMode.Retrieval, false, true)
         assertEquals(2, c.nthFrame); assertTrue(c.needsEntitlement); assertNull(c.detection)

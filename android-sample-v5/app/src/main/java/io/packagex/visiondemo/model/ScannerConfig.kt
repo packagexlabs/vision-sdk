@@ -12,7 +12,12 @@ data class ScannerConfig(
     val restrictToFrame: Boolean,
     val showBoxes: Boolean,
     val needsEntitlement: Boolean
-)
+) {
+    /** Barcode/QR multiple scan with boxes on: the SDK draws them with its barcode engine's overlay (decoded codes
+     *  only, with their text), where the app drew them before; the app then draws none, so no code is outlined
+     *  twice. Vision Scanner's boxes stay the app's own. */
+    val sdkDrawsBoxes: Boolean get() = showBoxes && (detection == DetectionMode.Barcode || detection == DetectionMode.QRCode)
+}
 
 fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): ScannerConfig = when (mode) {
     ScanMode.Barcode, ScanMode.QR -> ScannerConfig(

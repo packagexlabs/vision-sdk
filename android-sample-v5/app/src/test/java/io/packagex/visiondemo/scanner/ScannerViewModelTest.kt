@@ -614,15 +614,22 @@ class ScannerViewModelTest {
         assertEquals(1, x.calls); assertEquals("1Z", (v.state.value.result as ScanResult.Ocr).result.primary?.value)
     }
 
-    @Test fun qrModeDrawsOnlyQrBoxes() = runTest {
+    /** Barcode/QR multiple scan: the SDK's engine overlay draws the boxes, so the app draws none (no code outlined
+     *  twice); Vision Scanner keeps the app's own boxes. */
+    @Test fun codeMultipleScanLeavesBoxesToTheSdkAndVisionScannerDrawsItsOwn() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
-        v.onAction(ScannerAction.UpdatePrefs { it.copy(multi = true) })
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(multi = true) }); runCurrent()
+        assertTrue(cam.lastConfig!!.sdkDrawsBoxes)
         val bar = code("BAR"); val qr = code("QR")
         cam.emit(ScanEvent.Boxes(listOf(bar), listOf(qr), null)); runCurrent()
-        assertEquals(listOf("BAR", "QR"), v.state.value.boxes.map { it.value })
-        v.onAction(ScannerAction.SetMode(ScanMode.QR))
+        assertEquals(emptyList<String>(), v.state.value.boxes.map { it.value })
+        v.onAction(ScannerAction.SetMode(ScanMode.QR)); runCurrent()
         cam.emit(ScanEvent.Boxes(listOf(bar), listOf(qr), null)); runCurrent()
-        assertEquals(listOf("QR"), v.state.value.boxes.map { it.value })
+        assertEquals(emptyList<String>(), v.state.value.boxes.map { it.value })
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); runCurrent()
+        assertFalse(cam.lastConfig!!.sdkDrawsBoxes)
+        cam.emit(ScanEvent.Boxes(listOf(bar), listOf(qr), null)); runCurrent()
+        assertEquals(listOf("BAR", "QR"), v.state.value.boxes.map { it.value })
     }
 
     // --- integration fix round 1: the SDK clears its pause on rescan / facing switch ---
