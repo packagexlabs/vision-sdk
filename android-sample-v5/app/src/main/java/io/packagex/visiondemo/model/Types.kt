@@ -44,15 +44,31 @@ val ScanMode.zooms: List<Float>
 
 /**
  * Design viewfinder frames, in the 390×844 artboard (from iOS Types.swift).
+ * Brackets are single-code Barcode/QR only (Chrome.kt `Viewfinder` also
+ * requires non-multi) — Vision Scanner, Price tag, Item retrieval, Document
+ * Acquisition and AR Barcode never show them.
  */
 val ScanMode.viewfinder: DesignRect?
     get() = when (this) {
-        ScanMode.Barcode, ScanMode.Price -> DesignRect(x = 20f, y = 318f, width = 350f, height = 122f)
+        ScanMode.Barcode -> DesignRect(x = 20f, y = 318f, width = 350f, height = 122f)
         ScanMode.QR -> DesignRect(x = 45f, y = 262f, width = 300f, height = 300f)
-        ScanMode.Ocr -> DesignRect(x = 48f, y = 190f, width = 294f, height = 400f)
-        ScanMode.DocAcq -> DesignRect(x = 20f, y = 190f, width = 350f, height = 400f)
         else -> null
     }
+
+/**
+ * Whether the viewfinder brackets should be drawn (Chrome.kt `Viewfinder`):
+ * single-code Barcode/QR scanning only. Vision Scanner, Price tag, Item
+ * retrieval, Document Acquisition, AR Barcode, and multi-code Barcode/QR
+ * never show them.
+ */
+fun viewfinderBracketsVisible(
+    mode: ScanMode,
+    multi: Boolean,
+    hasResult: Boolean,
+    gated: Boolean,
+    permissionDenied: Boolean,
+): Boolean =
+    (mode == ScanMode.Barcode || mode == ScanMode.QR) && !multi && !hasResult && !gated && !permissionDenied
 
 enum class DocType(val label: String) {
     SL("Shipping label"),
