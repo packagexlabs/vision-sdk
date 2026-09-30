@@ -1,13 +1,13 @@
 package io.packagex.visiondemo.ar
 
 import android.content.Context
+import android.graphics.Rect
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.Image
 import android.util.Log
-import com.packagexlabs.visionbarcodescanner.ScannerCallback
-import com.packagexlabs.visionbarcodescanner.VisionBarcodeScanner
-import com.packagexlabs.visionbarcodescanner.model.BarcodeState
+import com.example.barcodescanner.BarcodeScanner
+import com.example.barcodescanner.ScanFrame
 import io.packagex.visiondemo.BuildConfig
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -40,38 +40,23 @@ data class Detection(
 )
 
 /**
- * Feeds ARCore CPU images to the SDK's own [VisionBarcodeScanner] via its
- * raw-plane `processFrame`, on one worker thread, single-flight.
- *
- * CV-only (ML detection off): ZBar/ZXing decode in ~5-40 ms from frame one,
- * whereas ML detection needs the GMS TfLite client initialised first — the
- * SDK's `BarcodeScanAnalyzer` defers that for exactly this reason. The AR
- * placement pipeline wants low latency and does its own multi-sighting
- * confirmation, so it also asks the tracker to surface every decode at once.
+ * Feeds ARCore CPU images to the barcode engine VisionSDK reads with (`com.packagexlabs:barcode-scanner`,
+ * BarcodeScannerApp's [BarcodeScanner.scanAll] of the planes, the whole frame), on one worker thread,
+ * single-flight. Only barcodes whose text shows are reported: the engine shows a text once two frames
+ * agree and reports only what it sees in the frame, so no predicted position reaches the AR placement.
  */
 class BarcodeProcessor(
     private val context: Context,
 ) {
-    private val scanner =
-        VisionBarcodeScanner.create(
-            assetManager = context.assets,
-            callback = object : ScannerCallback {},
-        ) {
-            mlDetection { enabled = false }
-            tracking {
-                minHitStreak = 1
-                stabilityFramesRequired = 1
-                maxMissedFrames = 0
-                skipFrameInterval = 1
-                roiEnabled = false
-            }
-        }
-
     private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "ArBarcodeDecode") }
     private val busy = AtomicBoolean(false)
 
     @Volatile
     private var closed = false
+
+    // Of the worker: loading the detector takes a moment, which the main thread does not have.
+    // Null until it is made, and for good if it cannot be (then AR reads no barcode).
+    private var scanner: BarcodeScanner? = null
 
     val isBusy: Boolean get() = busy.get()
 
@@ -83,9 +68,19 @@ class BarcodeProcessor(
     @Volatile
     private var rotationDegrees = 90
 
+    init {
+        worker.execute {
+            try {
+                scanner = BarcodeScanner.create(context.applicationContext)
+            } catch (t: Throwable) {
+                Log.e(TAG, "the barcode scanner could not be made; AR reads no barcodes", t)
+            }
+        }
+    }
+
     /**
      * Reads SENSOR_ORIENTATION for [cameraId] (ARCore's chosen camera) and
-     * uses it for both the scanner's decode rotation and [uprightToRaw].
+     * uses it for both the scanner's rotation and [uprightCentreToRaw].
      * Call once the session's camera config is known, after `Session.configure`.
      */
     fun configureRotation(cameraId: String) {
@@ -110,41 +105,26 @@ class BarcodeProcessor(
         }
         worker.execute {
             try {
+                val scanner = scanner ?: return@execute
                 val rawW = image.width
                 val rawH = image.height
+                val rotation = rotationDegrees
                 val p = image.planes
-                val tracked =
-                    scanner.processFrame(
+                val frame =
+                    scanner.scanAll(
                         p[0].buffer,
+                        p[1].buffer,
+                        p[2].buffer,
                         rawW,
                         rawH,
                         p[0].rowStride,
-                        rotationDegrees,
-                        p[1].buffer,
                         p[1].rowStride,
                         p[1].pixelStride,
-                        p[2].buffer,
-                        p[2].rowStride,
-                        p[2].pixelStride,
+                        Rect(0, 0, rawW, rawH),
+                        rotation,
+                        image.timestamp,
                     )
-                val detections =
-                    tracked.mapNotNull { tb ->
-                        if (tb.state == BarcodeState.LOST) return@mapNotNull null
-                        // Coasting tracks (missed this frame, Kalman-predicted
-                        // position) still report non-LOST states, so filtering
-                        // on state alone lets a stale, predicted box through.
-                        if (!tb.measuredThisFrame) return@mapNotNull null
-                        val payload = tb.content
-                        if (payload.isNullOrEmpty()) return@mapNotNull null
-                        // Boxes come back in the rotated (upright) image, like the
-                        // SDK's own consumer assumes (it swaps w/h for 90/270).
-                        // Use the raw (unsmoothed) box: the Kalman + One-Euro
-                        // smoothed boundingBoxF lags a moving barcode in the pan
-                        // direction, which is what placed AR markers off-target.
-                        val box = tb.rawBoundingBoxF
-                        val (rx, ry) = uprightToRaw(box.centerX(), box.centerY(), rotationDegrees, rawW, rawH)
-                        Detection(payload, tb.formatName ?: "Barcode", rx, ry)
-                    }
+                val detections = detectionsOf(frame, rotation, rawW, rawH)
                 if (detections.isNotEmpty()) {
                     if (BuildConfig.DEBUG) Log.d("MarkerDiag", "BATCH dets=${detections.size}")
                     onResult(detections)
@@ -158,21 +138,6 @@ class BarcodeProcessor(
         }
     }
 
-    /** Map a point in the upright (rotated) image back to raw sensor pixels. */
-    private fun uprightToRaw(
-        u: Float,
-        v: Float,
-        rotationDegrees: Int,
-        rawW: Int,
-        rawH: Int,
-    ): Pair<Float, Float> =
-        when (rotationDegrees) {
-            90 -> Pair(v, rawH - u)
-            180 -> Pair(rawW - u, rawH - v)
-            270 -> Pair(rawW - v, u)
-            else -> Pair(u, v)
-        }
-
     /**
      * Blocks until the decode in flight (if any) has finished, at most [timeoutMs]: its [Image] belongs to
      * the ARCore session, so the session must not close under it. The single worker runs FIFO, so a no-op
@@ -183,12 +148,59 @@ class BarcodeProcessor(
     }
 
     fun close() {
+        if (closed) return
         closed = true
+        // After any frame still queued: BarcodeScanner is closed only when no scan is running.
+        worker.execute {
+            scanner?.close()
+            scanner = null
+        }
         worker.shutdown()
-        scanner.close()
     }
 
     private companion object {
         const val TAG = "ArBarcodeProcessor"
+    }
+}
+
+/**
+ * The barcodes of [frame] whose text shows, with their centres in pixels of the raw
+ * [rawWidth] x [rawHeight] frame that [rotationDegrees] clockwise turned upright. A box the
+ * engine has not read (or read as nothing) is left out; a read barcode whose symbology the
+ * SDK has no name for is kept as "Barcode".
+ */
+internal fun detectionsOf(
+    frame: ScanFrame,
+    rotationDegrees: Int,
+    rawWidth: Int,
+    rawHeight: Int,
+): List<Detection> =
+    frame.barcodes.mapNotNull { barcode ->
+        val payload = barcode.text
+        if (payload.isNullOrEmpty()) return@mapNotNull null
+        val (x, y) = uprightCentreToRaw(barcode.corners, frame.cropWidth, frame.cropHeight, rotationDegrees, rawWidth, rawHeight)
+        Detection(payload, barcode.symbology?.id ?: "Barcode", x, y)
+    }
+
+/**
+ * The centre of a barcode whose [corners] are 0..1 of a [uprightWidth] x [uprightHeight] frame
+ * turned upright by [rotationDegrees] clockwise, in pixels of the raw [rawWidth] x [rawHeight]
+ * frame.
+ */
+internal fun uprightCentreToRaw(
+    corners: FloatArray,
+    uprightWidth: Int,
+    uprightHeight: Int,
+    rotationDegrees: Int,
+    rawWidth: Int,
+    rawHeight: Int,
+): Pair<Float, Float> {
+    val u = (corners[0] + corners[2] + corners[4] + corners[6]) / 4f * uprightWidth
+    val v = (corners[1] + corners[3] + corners[5] + corners[7]) / 4f * uprightHeight
+    return when (rotationDegrees) {
+        90 -> Pair(v, rawHeight - u)
+        180 -> Pair(rawWidth - u, rawHeight - v)
+        270 -> Pair(rawWidth - v, u)
+        else -> Pair(u, v)
     }
 }
