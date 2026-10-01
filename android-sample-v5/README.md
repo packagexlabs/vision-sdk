@@ -3,7 +3,8 @@
 Installs as **Label Scanner** (`io.vision_sdk_android`), the same name and application ID as the internal
 vision-sdk-android demo, so it replaces that app on a device. The Kotlin code package stays `io.packagex.visiondemo`.
 
-A Jetpack Compose sample app demonstrating VisionSDK v2.7.0, ported feature-for-feature from
+A Jetpack Compose sample app demonstrating VisionSDK v2.8.0-local (the build that reads barcodes with
+BarcodeScannerApp's engine), ported feature-for-feature from
 `vision-sdk-ios`'s v5 demo. Single Gradle module (`:app`), Hilt DI, unidirectional data flow.
 
 ## Requirements
@@ -23,20 +24,21 @@ checkout:
 ```bash
 export JAVA_HOME=<path to a JDK 17>
 cd vision-sdk-android
-./gradlew :vision-native:publishToMavenLocal :VisionScanner:publishLocal
+git checkout feature/barcode-engine-swap   # the engine swap, until it is merged to main
+./gradlew -Psdk.version=v2.8.0-local :vision-native:publishToMavenLocal :VisionScanner:publishLocal
 ```
 
 `:VisionScanner:publishLocal` does a clean + `assembleRelease` + publish, so it's the reliable way
-to get a fresh `com.packagexlabs:VisionScanner:v2.7.0` artifact. `vision-native` publishes
-alongside it. Both land under `~/.m2/repository/com/packagexlabs/`.
+to get a fresh `com.packagexlabs:VisionScanner:v2.8.0-local` artifact (`-Psdk.version` overrides
+`gradle.properties` without editing it). `vision-native` publishes alongside it at the same version.
+Both land under `~/.m2/repository/com/packagexlabs/`.
 
-**`vision-barcode-scanner` (`com.packagexlabs:vision-barcode-scanner:3.0.0-1730`)** is a private
-artifact and isn't produced by the `vision-sdk-android` build above — it needs to already be in
-your `mavenLocal()` (published from its own repo) or resolvable from PackageX's private JitPack
-with a `JITPACK_TOKEN` environment variable. This sample's `settings.gradle.kts` adds
-`https://jitpack.io` unauthenticated, so without a mavenLocal copy you'll need to wire the same
-Basic-auth credential block `vision-sdk-android/settings.gradle.kts` uses for its own JitPack
-resolution.
+**The barcode engine (`com.packagexlabs:barcode-scanner:0.2.1`, with `barcode-pipeline(-android)`)**
+is BarcodeScannerApp's scanner: VisionScanner v2.8.0-local reads every barcode with it, and this
+sample's AR Barcode feeds it ARCore frames directly. It isn't produced by the build above either;
+publish it from a BarcodeScannerApp checkout first
+(`./gradlew :shared:publishToMavenLocal :scanner:publishToMavenLocal`, see its README). It ships
+arm64-v8a only, like this sample.
 
 ## 2. Secrets
 
@@ -95,9 +97,10 @@ export JAVA_HOME=<path to a JDK 17>
 
 The `release` build type is minified and resource-shrunk with R8 (full mode), not debuggable, and
 uses `proguard-android-optimize.txt` plus `app/proguard-rules.pro`. Most keep rules come from the
-libraries' own consumer rules (VisionScanner, vision-barcode-scanner, ARCore, GMS TFLite, ML Kit,
-Hilt, DataStore, kotlinx.serialization); `proguard-rules.pro` adds only what nothing else keeps —
-the JNI-bound `io.packagex.visionsdk.native.*` wrappers and the rule-less local docscanner AAR.
+libraries' own consumer rules (VisionScanner, the barcode engine — its JNI class and LiteRT —, ARCore,
+ML Kit, Hilt, DataStore, kotlinx.serialization); `proguard-rules.pro` adds only what nothing else
+keeps — the JNI-bound `io.packagex.visionsdk.native.*` wrappers, the rule-less local docscanner AAR
+and LiteRT for document dewarp.
 `app/build/outputs/mapping/release/mapping.txt` deobfuscates release stack traces
 (`retrace mapping.txt stacktrace.txt`).
 
@@ -159,6 +162,12 @@ Barcode (single/multi), QR, Vision Scanner (on-device / cloud / hybrid OCR — S
 card), Price tag, Item retrieval, Document Acquisition, AR Barcode. Dimensioning and Text
 Templates are not in this sample's mode dial (see *Known gaps*).
 
+Barcode and QR code read ~3840x2160 frames with BarcodeScannerApp's engine (VisionSDK v2.8.0-local).
+With Multiple scan and Show boxes on, the SDK draws the boxes itself with the engine's overlay
+(yellow while a code is being read, green with its text once read, gliding with the label and
+fading out); the app draws none there. Vision Scanner's boxes are still the app's own. AR Barcode's
+items list shows the engine's symbology ids (`code128`, `qrcode`, …).
+
 ## Architecture
 
 - **`camera/`** — `CameraController` is the single owner of the SDK's `VisionCameraView`; modes
@@ -194,7 +203,7 @@ Templates are not in this sample's mode dial (see *Known gaps*).
   front) have no Android counterpart. Model management itself is there: Settings › Models lists
   each on-device model with download / load / unload / delete and an update check.
 - **SDK native wrappers carried by the sample** (`io.packagex.visionsdk.native/DocumentNative.kt`):
-  the SDK v2.7.0 AAR strips `DocumentResampleNative`/`DocumentEnhanceNative`, the Kotlin wrappers
+  the SDK AAR (v2.7.0 and v2.8.0-local) strips `DocumentResampleNative`/`DocumentEnhanceNative`, the Kotlin wrappers
   around `libvision_native.so`'s NEON document kernels (release minify, no keep rule). The sample
   carries copies with the same JNI signatures so dewarp/enhance still use NEON. **Delete this
   file** once a released SDK version ships those wrappers again — the build then fails with a
