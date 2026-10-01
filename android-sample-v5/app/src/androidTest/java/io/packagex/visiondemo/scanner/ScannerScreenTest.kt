@@ -25,11 +25,22 @@ class ScannerScreenTest {
     }
 
     @Test
-    fun dialHasSevenModes() {
-        rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(), cameraView = {}) {} } }
-        listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "Item retrieval", "AR Barcode", "Document Acquisition")
+    fun homeHasSevenModuleCards() {
+        var got: ScannerAction? = null
+        rule.setContent { VisionTheme { HomeScreen(ScannerUiState(), onAction = { got = it }) } }
+        listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "AR Item Count", "AR Barcode", "Document Acquisition")
             .forEach { rule.onNodeWithText(it).assertExists() }
         rule.onNodeWithText("Dimensioning").assertDoesNotExist()
+        rule.onNodeWithText("Price tag").performClick()
+        assertEquals(ScannerAction.SetMode(ScanMode.Price), got)
+    }
+
+    @Test
+    fun cameraBackArrowGoesHome() {
+        var got: ScannerAction? = null
+        rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(home = false), cameraView = {}) { got = it } } }
+        rule.onNodeWithContentDescription("Back to modules").performClick()
+        assertEquals(ScannerAction.GoHome, got)
     }
 
     @Test

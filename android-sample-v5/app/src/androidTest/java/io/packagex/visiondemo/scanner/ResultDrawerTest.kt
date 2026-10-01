@@ -19,7 +19,7 @@ class ResultDrawerTest {
 
     @Test fun ocrPrimaryAndFieldsShown() {
         val r = OcrParser.parse("""{"data":{"inference":{"tracking_number":"1Z9","provider_name":"UPS"}}}""", DocType.SL)
-        rule.setContent { VisionTheme { ResultDrawer(ScanResult.Ocr(r, null), expanded = true) {} } }
+        rule.setContent { VisionTheme { ResultDrawer(ScanResult.Ocr(r, null)) {} } }
         // iOS :183-238 shows the primary field both in its own large card and again in the field
         // list below, so "1Z9" (the primary tracking number) is expected twice.
         rule.onAllNodesWithText("1Z9").assertCountEquals(2)
@@ -37,7 +37,7 @@ class ResultDrawerTest {
 
     @Test fun priceDrawerShowsTagsFromState() {
         val tag = io.packagex.visiondemo.data.PriceTag.from("14438-1", "$28.99")
-        rule.setContent { VisionTheme { ResultDrawer(ScanResult.Price, tags = listOf(tag), expanded = true) {} } }
+        rule.setContent { VisionTheme { ResultDrawer(ScanResult.Price, tags = listOf(tag)) {} } }
         rule.onNodeWithText("Found 1 Items").assertExists()
         rule.onNodeWithText("14438").assertExists()
     }
@@ -48,7 +48,7 @@ class ResultDrawerTest {
             symbology = "UPC-A",
             box = io.packagex.visiondemo.model.Box(0, 0, 10, 10),
         )
-        rule.setContent { VisionTheme { ResultDrawer(ScanResult.Codes(listOf(code)), expanded = true) {} } }
+        rule.setContent { VisionTheme { ResultDrawer(ScanResult.Codes(listOf(code))) {} } }
         rule.onNodeWithText("1234567890").assertExists()
         // The header subtitle and the dark card's label both show the symbology (iOS :99's
         // `c.symbology` appears in the subtitle; the card mirrors it as its label).

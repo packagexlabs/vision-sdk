@@ -11,7 +11,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -35,10 +34,10 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.FlashOff
@@ -50,19 +49,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -70,17 +61,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import kotlinx.coroutines.flow.first
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -102,12 +89,12 @@ import io.packagex.visiondemo.model.isDocument
 import io.packagex.visiondemo.model.viewfinder
 import io.packagex.visiondemo.model.viewfinderBracketsVisible
 import io.packagex.visiondemo.model.zooms
-import kotlin.math.roundToInt
 
 /**
- * Camera chrome: top icons, hint, context chip, capture-mode pill, zoom presets, mode dial and
- * shutter row. Ported from iOS `CameraScreen.chrome`. Hidden (opacity 0 in iOS) while a result is
- * shown -- [ScannerScreen] only composes this when `state.result == null`.
+ * Camera chrome: top bar (back to the modules, the mode's title, torch/flip, settings), hint, context chip,
+ * capture-mode pill, zoom presets and shutter row. Ported from iOS `CameraScreen.chrome`; v6 drops the mode
+ * dial (each module card opens its own camera) and keeps its space, so the controls stay where they were.
+ * [ScannerScreen] composes this with no result, or with a code card ([codeHud]) over the camera.
  */
 @Composable
 fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
@@ -123,6 +110,16 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            RoundIcon(icon = Icons.AutoMirrored.Filled.ArrowBackIos, label = "Back to modules", onClick = { onAction(ScannerAction.GoHome) }, iconSize = 18.dp)
+            Text(
+                state.mode.label,
+                style = montserrat(14.sp).copy(lineHeight = 16.sp),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
             if (usesScanner || state.mode == ScanMode.DocAcq) {   // Document Acquisition has its own camera (iOS usesScanner)
                 RoundIcon(
                     icon = if (state.torch) Icons.Filled.FlashOn else Icons.Filled.FlashOff,
@@ -136,7 +133,6 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
                     onClick = { onAction(ScannerAction.FlipCamera) },
                 )
             }
-            Spacer(Modifier.weight(1f))
             RoundIcon(icon = Icons.Filled.Tune, label = "Settings", onClick = { onAction(ScannerAction.OpenSheet(SheetKind.Settings)) })
         }
 
@@ -165,7 +161,7 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
             }
         }
 
-        ModeDial(selected = state.mode, onSelect = { onAction(ScannerAction.SetMode(it)) })
+        Spacer(Modifier.height(44.dp))   // where v5's mode dial was
         ShutterRow(
             state = state,
             onAction = onAction,
@@ -251,7 +247,7 @@ private fun ViewfinderFrame(corner: Color, fill: Color, pulsing: Boolean) {
 }
 
 @Composable
-private fun RoundIcon(icon: ImageVector, on: Boolean = false, label: String, onClick: () -> Unit) {
+private fun RoundIcon(icon: ImageVector, on: Boolean = false, label: String, onClick: () -> Unit, iconSize: Dp = 19.dp) {
     Box(
         modifier = Modifier
             .size(44.dp)
@@ -260,7 +256,7 @@ private fun RoundIcon(icon: ImageVector, on: Boolean = false, label: String, onC
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription = null, tint = if (on) PX.Ink else Color.White, modifier = Modifier.size(19.dp))
+        Icon(icon, contentDescription = null, tint = if (on) PX.Ink else Color.White, modifier = Modifier.size(iconSize))
     }
 }
 
@@ -331,77 +327,6 @@ private fun ZoomPresets(zooms: List<Float>, current: Float, onZoom: (Float) -> U
         }
     }
 }
-
-/** Horizontally scrolling mode names, all always composed (not lazy) so every label is present
- *  in the tree at once, as iOS's plain `HStack` inside a `ScrollView`. The selection is kept
- *  centred (iOS `proxy.scrollTo(selected, anchor: .center)`) and the edges fade out (iOS's
- *  gradient `.mask`). */
-@Composable
-private fun ModeDial(selected: ScanMode, onSelect: (ScanMode) -> Unit) {
-    RecomposeLog("ModeDial")
-    val scrollState = rememberScrollState()
-    // Centres in window coordinates, so the Row's padding and the current scroll don't skew the target.
-    var viewportCenter by remember { mutableFloatStateOf(Float.NaN) }
-    val itemCenters = remember { mutableStateMapOf<ScanMode, Float>() }
-
-    // The dial can be re-created when the chrome above it changes with the mode (e.g. the doc-type chip),
-    // so wait for its first layout instead of giving up, and jump there without animating on a fresh dial.
-    var placed by remember { mutableStateOf(false) }
-    LaunchedEffect(selected) {
-        val (center, viewport) = snapshotFlow { itemCenters[selected] to viewportCenter }
-            .first { (c, v) -> c != null && !v.isNaN() }
-        val target = (scrollState.value + (center!! - viewport).roundToInt()).coerceIn(0, scrollState.maxValue)
-        if (placed) scrollState.animateScrollTo(target) else scrollState.scrollTo(target)
-        placed = true
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp)
-            .onGloballyPositioned { viewportCenter = it.positionInWindow().x + it.size.width / 2f }
-            .edgeFadeMask(),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize().horizontalScroll(scrollState).padding(horizontal = 160.dp),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            ScanMode.entries.forEach { m ->
-                val isSelected = m == selected
-                Text(
-                    m.label,
-                    style = montserrat(14.sp, if (isSelected) FontWeight.Bold else FontWeight.Medium),
-                    color = if (isSelected) Color.White else Color.White.copy(alpha = 0.62f),
-                    modifier = Modifier
-                        .onGloballyPositioned { coords ->
-                            itemCenters[m] = coords.positionInWindow().x + coords.size.width / 2f
-                        }
-                        .height(44.dp)
-                        .wrapContentHeight(Alignment.CenterVertically)
-                        .padding(horizontal = 12.dp)
-                        .clickable { onSelect(m) },
-                )
-            }
-        }
-    }
-}
-
-/** iOS `ModeDial`'s edge fade: transparent at 0%/100%, opaque from 11% to 89%. */
-private fun Modifier.edgeFadeMask(): Modifier = this
-    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-    .drawWithContent {
-        drawContent()
-        drawRect(
-            brush = Brush.horizontalGradient(
-                0f to Color.Transparent,
-                0.11f to Color.Black,
-                0.89f to Color.Black,
-                1f to Color.Transparent,
-            ),
-            blendMode = BlendMode.DstIn,
-        )
-    }
 
 @Composable
 private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {

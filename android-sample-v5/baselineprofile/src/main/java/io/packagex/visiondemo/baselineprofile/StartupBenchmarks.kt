@@ -11,7 +11,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Cold-start time to the camera screen, without and with the baseline profile:
+ * Cold-start time to the module cards (the v6 first screen), without and with the baseline profile:
  * `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.enabledRules=Macrobenchmark`.
  */
 @RunWith(AndroidJUnit4::class)
@@ -30,6 +30,6 @@ class StartupBenchmarks {
         iterations = 10,
         setupBlock = { grantCamera(); pressHome() },
     ) {
-        startToCamera()
+        startToHome()
     }
 }

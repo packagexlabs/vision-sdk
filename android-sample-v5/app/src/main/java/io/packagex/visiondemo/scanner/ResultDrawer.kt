@@ -3,16 +3,11 @@ package io.packagex.visiondemo.scanner
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.RectF
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -55,19 +50,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -98,15 +88,13 @@ import io.packagex.visiondemo.model.OcrField
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.OcrTable
 import io.packagex.visiondemo.model.ScanResult
-import kotlin.math.roundToInt
+import androidx.compose.foundation.layout.union
 
 /**
- * Bottom drawer with the result of the last capture; drag handle (or a drag gesture) toggles
- * half / expanded. Fills whatever slot the caller gives it (a full-screen `Box`) and anchors
- * itself to the bottom, so the controller can drop it straight into `ScannerScreen`.
- * Ported from iOS `UI/ResultDrawer.swift`.
+ * The result of the last capture, full screen (v6: no half-height drawer). Fills whatever slot the caller
+ * gives it, so the controller can drop it straight into `ScannerScreen`. Ported from iOS `UI/ResultDrawer.swift`.
  *
- * [tags] defaults to empty so existing call sites that only pass `result`/`expanded`/`onAction`
+ * [tags] defaults to empty so existing call sites that only pass `result`/`onAction`
  * still compile; real callers should pass `ScannerUiState.tags` (the Price drawer reads it live).
  */
 @Composable
@@ -115,7 +103,6 @@ fun ResultDrawer(
     tags: List<PriceTag> = emptyList(),
     /** `ScannerUiState.items.size`, for the retrieval subtitle (iOS `model.items.count`). */
     itemCount: Int = 0,
-    expanded: Boolean,
     onAction: (ScannerAction) -> Unit,
 ) {
     RecomposeLog("ResultDrawer")
@@ -130,71 +117,25 @@ fun ResultDrawer(
     var ilComment by remember(result) { mutableStateOf("") }
     var editingField by remember(result) { mutableStateOf<String?>(null) }
     var selectedField by remember(result) { mutableStateOf<String?>(null) }
-    var dragTotal by remember { mutableStateOf(0f) }
     // Document: Enhanced / Original (kept across captures, as iOS @State) and the page shown (the newest, iOS onAppear).
     var docEnhanced by remember { mutableStateOf(true) }
     var docPage by remember(result) { mutableIntStateOf((result as? ScanResult.Document)?.pages?.lastIndex ?: 0) }
 
-    // Read in the layout phase (fractionOfMaxHeight), so the expand/collapse animation relayouts without recomposing.
-    val heightFraction = animateFloatAsState(
-        targetValue = if (expanded) 0.89f else 0.46f,
-        animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
-        label = "resultDrawerHeight",
-    )
-    val currentOnAction by rememberUpdatedState(onAction)
-    val density = LocalDensity.current
-    // iOS thresholds are in points (:37-40); drag deltas from detectVerticalDragGestures are px, so
-    // the dp thresholds must go through density, not be compared to raw px directly.
-    val dragUpThresholdPx = with(density) { 40.dp.toPx() }
-    val dragDownThresholdPx = with(density) { 60.dp.toPx() }
-
     Box(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                // The keyboard lifts the whole sheet (its height fraction is of the space above the keyboard), so an
-                // open keyboard never squeezes the content inside a fixed-height sheet.
-                .windowInsetsPadding(WindowInsets.ime)
-                .fractionOfMaxHeight(below = WindowInsets.safeDrawing) { heightFraction.value }
-                .shadow(
-                    elevation = 12.dp,
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                    ambientColor = PX.Ink.copy(alpha = 0.18f),
-                    spotColor = PX.Ink.copy(alpha = 0.18f),
-                )
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .fillMaxSize()
                 .background(Color.White)
-                // White behind the navigation bar, the footer above it (nothing while the keyboard, consumed above, covers it).
-                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-                .pointerInput(expanded) {
-                    detectVerticalDragGestures(
-                        onDragStart = { dragTotal = 0f },
-                        onDragEnd = {
-                            when {
-                                dragTotal < -dragUpThresholdPx && !expanded -> currentOnAction(ScannerAction.ToggleExpanded)
-                                dragTotal > dragDownThresholdPx && expanded -> currentOnAction(ScannerAction.ToggleExpanded)
-                                dragTotal > dragDownThresholdPx && !expanded -> currentOnAction(ScannerAction.CloseResult)
-                            }
-                        },
-                    ) { change, amount -> dragTotal += amount; change.consume() }
-                },
+                // Clear of the status bar / cutout on top, and of the keyboard (or navigation bar) below.
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+                .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars).only(WindowInsetsSides.Bottom)),
         ) {
-            // Drag handle.
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 22.dp)
-                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
-                        onAction(ScannerAction.ToggleExpanded)
-                    }
-                    .semantics { contentDescription = if (expanded) "Collapse" else "Expand" },
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(Modifier.width(40.dp).height(5.dp).clip(RoundedCornerShape(50)).background(PX.SwitchOff))
-            }
-
             DrawerHeader(result = result, tags = tags, itemCount = itemCount, onReport = { reportOpen = true }, onClose = { onAction(ScannerAction.CloseResult) })
+
+            // v6: the captured image sits in its own fixed-height, scrollable frame above the details.
+            (result as? ScanResult.Ocr)?.let { boxedOcr(it) }?.let { (img, fields) ->
+                ResultImage { BoxedOcrImage(image = img, fields = fields, selected = selectedField, onSelect = { selectedField = it }) }
+            }
 
             Column(
                 modifier = Modifier
@@ -250,19 +191,6 @@ fun ResultDrawer(
         }
         zoomedImage?.let { img -> ImageViewer(image = img, onClose = { zoomedImage = null }) }
     }
-}
-
-/** `fillMaxHeight(fraction())`, but never taller than reaching [below]'s top inset (the status bar / cutout), with
- *  [fraction] read while measuring instead of while composing. */
-private fun Modifier.fractionOfMaxHeight(below: WindowInsets, fraction: () -> Float): Modifier = layout { measurable, constraints ->
-    val height = if (constraints.hasBoundedHeight) {
-        val max = (constraints.maxHeight - below.getTop(this)).coerceAtLeast(constraints.minHeight)
-        (constraints.maxHeight * fraction()).roundToInt().coerceIn(constraints.minHeight, max)
-    } else {
-        constraints.minHeight
-    }
-    val placeable = measurable.measure(constraints.copy(minHeight = height, maxHeight = height))
-    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
 }
 
 // region Header / footer
@@ -503,14 +431,8 @@ private fun OcrContent(
     val hasFieldBoxes = o.fields.any { it.vertices != null }
     val boxed = image != null && hasFieldBoxes
 
-    if (hasFieldBoxes) {
-        // iOS only opens `ImageViewer` from document-acquisition page thumbnails (Task 12); the OCR
-        // boxed image itself is not a zoom target, so no click handler is wired here.
-        image?.let { img ->
-            BoxedOcrImage(image = img, fields = o.fields, selected = selectedField, onSelect = onSelectedChange)
-            if (o.fields.any { it.validatedBy.isNotEmpty() }) ValidationLegend()
-        }
-    }
+    // The boxed image itself is drawn above the details ([ResultImage]); its legend stays here.
+    if (hasFieldBoxes && image != null && o.fields.any { it.validatedBy.isNotEmpty() }) ValidationLegend()
 
     o.primary?.let { primary ->
         DarkCard(label = primary.label, value = primary.value, size = 22.sp) {
@@ -638,6 +560,42 @@ private fun OcrFieldRow(
  * Captured image with numbered, tappable field boxes (on-device results only). Not a zoom target —
  * iOS only opens `ImageViewer` from document-acquisition page thumbnails (Task 12).
  */
+/** The OCR result's image and fields when its fields have boxes to draw (not for a document class). */
+private fun boxedOcr(scan: ScanResult.Ocr): Pair<Bitmap, List<OcrField>>? {
+    val image = scan.image ?: return null
+    if (scan.result.fields.none { it.vertices != null } || OcrParser.documentClass(scan.result.rawJson) != null) return null
+    return image to scan.result.fields
+}
+
+/** Design "Result image": a 320 dp frame the image scrolls inside, with a hint while there is more to see. */
+@Composable
+private fun ResultImage(content: @Composable () -> Unit) {
+    val scroll = rememberScrollState()
+    Box(
+        modifier = Modifier
+            .padding(start = 20.dp, end = 20.dp, top = 12.dp)
+            .fillMaxWidth()
+            .height(320.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(PX.Ink)
+            .border(1.dp, PX.Hairline, RoundedCornerShape(12.dp)),
+    ) {
+        Box(Modifier.fillMaxWidth().verticalScroll(scroll)) { content() }
+        if (scroll.maxValue > 0) {
+            Text(
+                "Scroll to see the full image",
+                style = montserrat(11.sp),
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp)
+                    .background(PX.Ink.copy(alpha = 0.72f), RoundedCornerShape(14.dp))
+                    .padding(horizontal = 10.dp, vertical = 6.dp),
+            )
+        }
+    }
+}
+
 @Composable
 private fun BoxedOcrImage(image: Bitmap, fields: List<OcrField>, selected: String?, onSelect: (String?) -> Unit) {
     BoxWithConstraints(

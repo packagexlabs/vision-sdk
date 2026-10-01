@@ -12,6 +12,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.PersistableBundle
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -54,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -158,9 +160,19 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
         }
     }
 
+    // The module cards are white (dark status bar icons); the camera is dark (light icons).
+    LaunchedEffect(state.home) {
+        activity?.window?.let { WindowCompat.getInsetsController(it, it.decorView).isAppearanceLightStatusBars = state.home }
+    }
+    // System Back on a camera returns to the module cards, as its back arrow; on the cards it leaves the app.
+    BackHandler(enabled = !state.home) { viewModel.onAction(ScannerAction.GoHome) }
+
     val cameraViewRaw = viewModel.camera.view
     Box(Modifier.fillMaxSize()) {
-        ScannerScreen(
+        if (state.home) {
+            HomeScreen(state = state, onAction = viewModel::onAction)
+            state.missingKey?.let { MissingKeyView(it) }   // nothing works without a key (global-constraints.md)
+        } else ScannerScreen(
             state = state,
             cameraView = {
                 RecomposeLog("cameraView")
@@ -198,7 +210,7 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 }
             },
             boxes = { boxes.value },
-            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.resultExpanded, viewModel::onAction) } },
+            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, viewModel::onAction) } },
             sheets = { SheetHost(state, viewModel::onAction) },
             onAction = viewModel::onAction,
         )

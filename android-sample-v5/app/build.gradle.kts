@@ -16,7 +16,7 @@ android {
     compileSdk = 36
     defaultConfig {
         applicationId = "io.vision_sdk_android"
-        minSdk = 29; targetSdk = 36; versionCode = 6; versionName = "5.1"
+        minSdk = 29; targetSdk = 36; versionCode = 7; versionName = "6.0"
         ndk { abiFilters += "arm64-v8a" }
         buildConfigField("String", "VISION_ENV", secret("VISION_ENV").ifEmpty { "staging" }.toJavaStringLiteral())
         buildConfigField("String", "STAGING_API_KEY", secret("STAGING_API_KEY").toJavaStringLiteral())

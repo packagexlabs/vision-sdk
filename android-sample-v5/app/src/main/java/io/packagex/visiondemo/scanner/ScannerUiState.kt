@@ -19,7 +19,10 @@ import io.packagex.visiondemo.model.SheetKind
  *  collection per `copy`, never mutated after it is published on [ScannerViewModel.state]. */
 @Immutable
 data class ScannerUiState(
-    /** The active mode. Not persisted: the app always opens on Barcode, as iOS. */
+    /** v6 entry point: the module cards are shown and no camera runs. A card opens its mode ([ScannerAction.SetMode]);
+     *  the camera's back arrow returns here ([ScannerAction.GoHome]). */
+    val home: Boolean = true,
+    /** The active mode (the last one opened while [home]). Not persisted. */
     val mode: ScanMode = ScanMode.Barcode,
     val prefs: Prefs = Prefs(),
     val phase: Phase = Phase.Idle,
@@ -41,6 +44,8 @@ data class ScannerUiState(
     /** Default-deny: a gated mode stays behind the gate card until the entitlement check passes. */
     val gated: Boolean = false,
     val entitlementChecking: Boolean = false,
+    /** Gated modes whose last entitlement check failed: their home cards show "Locked". */
+    val notEntitled: Set<ScanMode> = emptySet(),
     val models: Map<Pair<DocType, ModelSize>, ModelState> = emptyMap(),
     val alert: Alert? = null,
     val torch: Boolean = false,
@@ -54,8 +59,6 @@ data class ScannerUiState(
     val codesInView: List<String> = emptyList(),
     /** Item retrieval list: the codes to find (iOS `items`). */
     val items: List<String> = emptyList(),
-    /** Result drawer expanded (reset whenever a result is presented or closed). */
-    val resultExpanded: Boolean = false,
     /** Zoom preset in use (reset to 1 on mode switch). */
     val zoom: Float = 1f,
     /** Settings › Advanced "Detection enabled"; not persisted (iOS `detectionEnabled`). */
@@ -73,6 +76,10 @@ data class ScannerUiState(
     /** AR item catalog, SKU -> name, newest first (iOS `ItemCatalog`). */
     val itemNames: Map<String, String> = emptyMap(),
 )
+
+/** Single-code Barcode/QR results show over the camera as a code card (v6), not on the result screen. */
+val ScannerUiState.codeHud: DetectedCode?
+    get() = (result as? ScanResult.Codes)?.codes?.singleOrNull()?.takeIf { mode == ScanMode.Barcode || mode == ScanMode.QR }
 
 /** This state minus [ScannerUiState.boxes], which change on every analysed frame while codes are in view:
  *  what everything but the boxes overlay renders from. Unchanged (same instance) when there are no boxes. */

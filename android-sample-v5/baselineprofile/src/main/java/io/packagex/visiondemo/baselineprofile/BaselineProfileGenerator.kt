@@ -24,7 +24,7 @@ class BaselineProfileGenerator {
         grantCamera()
         startToCamera()
         openAndCloseSettings()
-        listOf("QR code", "Vision Scanner", "Price tag", "Item retrieval", "Document Acquisition", "Barcode")
+        listOf("QR code", "Vision Scanner", "Price tag", "AR Item Count", "Document Acquisition", "Barcode")
             .forEach { selectMode(it) }
     }
 }
