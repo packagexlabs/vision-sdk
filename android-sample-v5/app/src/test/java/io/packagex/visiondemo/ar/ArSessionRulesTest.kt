@@ -37,14 +37,14 @@ class ArSessionRulesTest {
     }
 
     // CPU image sizes (w x h) as ARCore reports them, all already filtered to 30 fps.
-    @Test fun cameraConfigIsTheSmallestAtLeast1280Wide() {
-        assertEquals(1, pickCameraConfig(listOf(640 to 480, 1280 to 720, 1920 to 1080, 3840 to 2160)))
-        assertEquals(1, pickCameraConfig(listOf(640 to 480, 1440 to 1080, 1920 to 1080)))
+    @Test fun cameraConfigIsTheLargest() {
+        assertEquals(3, pickCameraConfig(listOf(640 to 480, 1280 to 720, 1920 to 1080, 3840 to 2160)))
+        assertEquals(2, pickCameraConfig(listOf(640 to 480, 1440 to 1080, 1920 to 1080)))
     }
 
-    @Test fun cameraConfigFallsBackToTheLargestWhenNoneIs1280Wide() {
+    @Test fun cameraConfigIsTheLargestOfAnyList() {
         assertEquals(1, pickCameraConfig(listOf(640 to 480, 960 to 720)))
-        assertEquals(0, pickCameraConfig(listOf(2560 to 1440, 3840 to 2160)))
+        assertEquals(1, pickCameraConfig(listOf(2560 to 1440, 3840 to 2160)))
         assertNull(pickCameraConfig(emptyList()))
     }
 

@@ -16,7 +16,7 @@ android {
     compileSdk = 36
     defaultConfig {
         applicationId = "io.vision_sdk_android"
-        minSdk = 29; targetSdk = 36; versionCode = 1; versionName = "5.0"
+        minSdk = 29; targetSdk = 36; versionCode = 6; versionName = "5.1"
         ndk { abiFilters += "arm64-v8a" }
         buildConfigField("String", "VISION_ENV", secret("VISION_ENV").ifEmpty { "staging" }.toJavaStringLiteral())
         buildConfigField("String", "STAGING_API_KEY", secret("STAGING_API_KEY").toJavaStringLiteral())
@@ -102,7 +102,7 @@ dependencies {
     implementation(libs.hilt.android); ksp(libs.hilt.compiler); implementation(libs.hilt.navigation.compose)
     implementation(libs.profileinstaller); baselineProfile(project(":baselineprofile"))
     implementation(libs.coroutines.android); implementation(libs.datastore.preferences); implementation(libs.serialization.json)
-    implementation(libs.vision.sdk); implementation(libs.vision.barcode.scanner)
+    implementation(libs.vision.sdk); implementation(libs.barcode.scanner)
     implementation(libs.arcore)
     implementation(libs.camerax.core); implementation(libs.camerax.camera2); implementation(libs.camerax.lifecycle); implementation(libs.camerax.view)
     implementation(libs.litert); implementation(libs.litert.gpu); implementation(libs.litert.gpu.api); implementation(libs.mlkit.text)

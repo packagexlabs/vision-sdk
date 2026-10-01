@@ -93,7 +93,7 @@ class DocumentAcquisitionViewModelTest {
         enterDocAcq(); doc.captureStart = CaptureStart.NoPage
         v.effects.test {
             v.onAction(ScannerAction.Shutter); advanceUntilIdle()
-            assertEquals(ScannerEffect.Toast("Fit the page inside the frame"), awaitItem())
+            assertEquals(ScannerEffect.Toast("Fit the whole page in view"), awaitItem())
         }
         assertEquals(Phase.Idle, v.state.value.phase)
     }

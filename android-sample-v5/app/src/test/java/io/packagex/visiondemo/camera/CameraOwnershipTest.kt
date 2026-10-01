@@ -17,4 +17,10 @@ class CameraOwnershipTest {
         val fs = focusSettingsFor(scannerConfig(ScanMode.Barcode, multi = false, showBoxesPref = true), Box(0, 100, 300, 200))
         assertTrue(fs.restrict); assertEquals(Box(0, 100, 300, 200), fs.rect)
     }
+
+    @Test fun sdkDrawsTheBoxesOnlyInCodeMultipleScan() {
+        assertTrue(focusSettingsFor(scannerConfig(ScanMode.Barcode, multi = true, showBoxesPref = true), null).sdkBoxes)
+        assertFalse(focusSettingsFor(scannerConfig(ScanMode.Barcode, multi = false, showBoxesPref = true), Box(0, 100, 300, 200)).sdkBoxes)
+        assertFalse(focusSettingsFor(scannerConfig(ScanMode.Ocr, multi = false, showBoxesPref = true), null).sdkBoxes)
+    }
 }

@@ -100,6 +100,7 @@ import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visiondemo.model.isCode
 import io.packagex.visiondemo.model.isDocument
 import io.packagex.visiondemo.model.viewfinder
+import io.packagex.visiondemo.model.viewfinderBracketsVisible
 import io.packagex.visiondemo.model.zooms
 import kotlin.math.roundToInt
 
@@ -181,16 +182,17 @@ private val WindowInsets.Companion.chromeInsets: WindowInsets
     @Composable get() = systemBars.union(displayCutout)
 
 /** The viewfinder brackets: the design's 390x844 artboard scaled to the screen, reported to the
- *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`. */
+ *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`.
+ *  Single-code Barcode/QR only — [ScanMode.viewfinder] is already null for every other mode; the multi
+ *  check here hides them for multi-code Barcode/QR. Vision Scanner, Price tag, Item retrieval, Document
+ *  Acquisition and AR Barcode never show brackets. */
 @Composable
 fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Viewfinder")
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val f = state.mode.viewfinder
-        val multiLive = state.prefs.multi && (state.mode == ScanMode.Barcode || state.mode == ScanMode.QR)
-        // Document Acquisition: the live page outline replaces the brackets once a page is found (iOS :98).
-        val docSeen = state.mode == ScanMode.DocAcq && state.codeInFrame && state.phase == Phase.Idle
-        val visible = f != null && !multiLive && !docSeen && state.result == null && !state.gated && !state.permissionDenied
+        val visible = f != null &&
+            viewfinderBracketsVisible(state.mode, state.prefs.multi, state.result != null, state.gated, state.permissionDenied)
         if (f != null && visible) {
             val insets = WindowInsets.chromeInsets.asPaddingValues()
             val insetTop = insets.calculateTopPadding()
@@ -469,10 +471,10 @@ private fun shutterLabel(state: ScannerUiState): String = when {
     else -> "Capture"
 }
 
-/** iOS `codeSeen`/`live`/`cornerColor`/`fillColor`. Corner/fill color and the viewfinder-brackets swap
- *  ([Viewfinder]'s `docSeen`) still read [ScannerUiState.codeInFrame] (barcode/QR box presence, or
- *  Document Acquisition's boundary); the hint text reads [ScannerUiState.seesDocument] instead, since
- *  that's the correct SDK-Indications-driven signal for Vision Scanner (see `hintFor`). */
+/** iOS `codeSeen`/`live`/`cornerColor`/`fillColor`. Corner/fill color still read [ScannerUiState.codeInFrame]
+ *  (barcode/QR box presence, or Document Acquisition's boundary); the hint text reads
+ *  [ScannerUiState.seesDocument] instead, since that's the correct SDK-Indications-driven signal for
+ *  Vision Scanner (see `hintFor`). */
 private fun ScannerUiState.isLive(): Boolean =
     !permissionDenied && result == null && phase == Phase.Idle && sheet == null && alert == null && detectionEnabled && !gated && !paused
 
@@ -542,7 +544,7 @@ private fun hintFor(state: ScannerUiState): String {
         ScanMode.DocAcq -> if (state.seesDocument) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"
         } else {
-            "Fit the page inside the frame"
+            "Fit the whole page in view"
         }
         ScanMode.Retrieval -> {
             val n = state.codesInView.count { it in state.items }

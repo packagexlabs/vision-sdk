@@ -38,9 +38,10 @@ internal class DocumentFlow(private val document: DocumentCamera, private val sc
         scope.launch {
             document.quad.collect { q ->
                 if (host.s.mode == ScanMode.DocAcq) {
-                    // codeInFrame drives the live-outline/brackets swap (Chrome.kt docSeen); seesDocument
-                    // drives the hint text, same source, kept separate so the SDK's own Indications-driven
-                    // seesDocument (Vision Scanner) isn't confused with this camera's boundary detector.
+                    // codeInFrame drives the live-outline swap and corner/fill color (Chrome.kt cornerColor/
+                    // fillColor); seesDocument drives the hint text, same source, kept separate so the SDK's
+                    // own Indications-driven seesDocument (Vision Scanner) isn't confused with this camera's
+                    // boundary detector.
                     host.update { it.copy(codeInFrame = q != null, seesDocument = q != null) }
                 }
             }
@@ -71,7 +72,7 @@ internal class DocumentFlow(private val document: DocumentCamera, private val sc
     fun shutter() = when (document.capture()) {
         CaptureStart.Started -> { host.flash(); host.update { it.copy(phase = Phase.Scanning) } }
         CaptureStart.Busy -> {}   // an auto capture is already taking the page
-        CaptureStart.NoPage -> host.toast("Fit the page inside the frame")
+        CaptureStart.NoPage -> host.toast("Fit the whole page in view")
     }
 
     /** iOS `rescanDocument`: the caller then closes the result. */

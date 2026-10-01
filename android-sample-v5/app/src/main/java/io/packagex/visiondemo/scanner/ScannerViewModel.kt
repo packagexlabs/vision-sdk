@@ -464,7 +464,8 @@ class ScannerViewModel @Inject constructor(
         } else {
             detected.isNotEmpty()
         }
-        _state.update { it.copy(codeInFrame = inFrame, boxes = if (cfg.showBoxes) detected else emptyList()) }
+        // Where the SDK draws the boxes itself (cfg.sdkDrawsBoxes) the app's BoxesOverlay stays empty.
+        _state.update { it.copy(codeInFrame = inFrame, boxes = if (cfg.showBoxes && !cfg.sdkDrawsBoxes) detected else emptyList()) }
     }
 
     private fun onFailure(e: VisionSDKException) {

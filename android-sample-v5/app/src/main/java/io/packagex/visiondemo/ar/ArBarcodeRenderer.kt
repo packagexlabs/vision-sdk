@@ -487,10 +487,15 @@ class ArBarcodeRenderer(
         }
     }
 
-    // Exclusive one-to-one assignment radius (detection ray → marker). Every
-    // marker is born from measured geometry now, so one tight radius: it must
-    // stay above still-camera noise (~1-2cm) and below copy spacing (~10cm).
-    private val assignRadiusLocalizedM = 0.12f
+    // Exclusive one-to-one assignment radius (detection ray → marker), and
+    // also the "is this a re-read of my marker" radius for mergeSiblingMarkers
+    // below. A re-detection of an already-marked code must never move or
+    // recreate its marker — it only refreshes lastSeenMs — so this has to
+    // cover ordinary hit-test noise from a different angle/geometry (up to
+    // ~15cm), not just still-camera noise (~1-2cm). Only a hit *beyond* this
+    // radius is treated as a different physical copy of the same barcode
+    // text and gets its own marker.
+    private val assignRadiusLocalizedM = 0.15f
 
     // Candidate clustering radius. Tight: still-camera lateral noise is
     // ~1-2cm, and real copies are ≥10cm apart — 8cm separates them cleanly.
@@ -504,10 +509,20 @@ class ArBarcodeRenderer(
             while (j < markers.size) {
                 val a = markers[i]
                 val b = markers[j]
-                // One marker per barcode value (same as the iOS demo): same-payload
-                // markers are deduplicated regardless of distance, keeping the most
-                // recently seen; on a tie keep the newer (b).
-                if (a.payload == b.payload) {
+                // Same-payload markers are only merged when they sit at (near)
+                // the same physical spot — a birth race, e.g. two candidate
+                // clusters maturing on the same frame just outside each
+                // other's assignment radius. Same-payload markers that are
+                // genuinely apart (> assignRadiusLocalizedM, so a fresh
+                // detection there couldn't have paired to either) are
+                // distinct physical copies of the same barcode text and both
+                // keep their own marker — merging them by recency alone is
+                // what used to make an established marker silently jump to a
+                // new position when the code was read again from elsewhere.
+                if (a.payload == b.payload &&
+                    a.hasPos && b.hasPos &&
+                    sameMarkerPosition(a.lastPos, b.lastPos, assignRadiusLocalizedM)
+                ) {
                     if (a.lastSeenMs > b.lastSeenMs) {
                         b.anchor.detach()
                     } else {
@@ -856,12 +871,15 @@ class ArBarcodeRenderer(
 
         candidates.remove(cand)
 
-        // Where the agreeing sightings say the barcode is — not where the
-        // most recent single hit says.
+        // consensus() still runs (into consensusPos) for BirthDiag's spread
+        // metric below. The birth position itself is the raw latest agreeing
+        // hit, not an average of the accumulated sightings — see
+        // AR_MARKER_SMOOTHING.
         val spreadM = consensus(cand.positions, consensusPos)
+        val birthPos = birthPosition(AR_MARKER_SMOOTHING, consensusPos, cand.positions.last())
         val birthPose =
             com.google.ar.core
-                .Pose(consensusPos, h.rotationQuaternion)
+                .Pose(birthPos, h.rotationQuaternion)
         if (BuildConfig.DEBUG) android.util.Log.d(
             "BirthDiag",
             "payload=%d n=%d spread=%.1fcm dist=%.2fm".format(
@@ -885,7 +903,7 @@ class ArBarcodeRenderer(
                 // log — lazy init captured wherever the marker happened to be
                 // when logDrift first ran (up to 2s later), silently hiding
                 // that much drift from the very metric meant to catch it.
-                System.arraycopy(consensusPos, 0, it.birthPos, 0, 3)
+                System.arraycopy(birthPos, 0, it.birthPos, 0, 3)
                 it.hasBirth = true
             },
         )
@@ -952,14 +970,17 @@ class ArBarcodeRenderer(
             if (ndcX < -1.1f || ndcX > 1.1f || ndcY < -1.1f || ndcY > 1.1f) continue
             var sx = (ndcX + 1f) / 2f * viewportWidth
             var sy = (1f - ndcY) / 2f * viewportHeight
-            // Presentation-only dead-band: per-frame VIO orientation noise is
-            // a few px of wobble at the marker. Below the threshold, keep
-            // drawing where we drew last frame. The world anchor is untouched;
-            // real motion (camera pan, correction) clears the band at once.
-            if (cameraNearStill &&
-                record.hasScreen &&
-                kotlin.math.abs(sx - record.screenX) < screenDeadbandPx &&
-                kotlin.math.abs(sy - record.screenY) < screenDeadbandPx
+            // AR_MARKER_SMOOTHING is off: holdScreenPosition() always returns
+            // false, so this always takes the else branch and draws the
+            // fresh projection — no dead-band hold, no snap-back.
+            if (holdScreenPosition(
+                    AR_MARKER_SMOOTHING,
+                    cameraNearStill,
+                    record.hasScreen,
+                    sx - record.screenX,
+                    sy - record.screenY,
+                    screenDeadbandPx,
+                )
             ) {
                 sx = record.screenX
                 sy = record.screenY

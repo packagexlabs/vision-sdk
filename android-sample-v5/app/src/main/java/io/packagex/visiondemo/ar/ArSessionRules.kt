@@ -45,14 +45,81 @@ internal fun markerText(label: String): String = if (label.length > 24) label.ta
 
 /**
  * Index of the camera config to use, from each config's CPU image size (the image the decoder reads),
- * already filtered to 30 fps. For heat: the smallest image at least [MIN_WIDTH] px wide, as close to
- * iOS v5's "at most 1920 px, 30 fps" as ARCore's list allows; if none is that wide, the largest one.
+ * already filtered to 30 fps: the largest one, so AR reads the codes normal Barcode mode (4K) reads.
+ * ARCore's CPU images top out well below 4K, so every pixel counts.
  */
-internal fun pickCameraConfig(sizes: List<Pair<Int, Int>>): Int? {
-    if (sizes.isEmpty()) return null
-    val area = { i: Int -> sizes[i].first.toLong() * sizes[i].second }
-    val wide = sizes.indices.filter { sizes[it].first >= MIN_WIDTH }
-    return wide.minByOrNull(area) ?: sizes.indices.maxBy(area)
+internal fun pickCameraConfig(sizes: List<Pair<Int, Int>>): Int? =
+    sizes.indices.maxByOrNull { sizes[it].first.toLong() * sizes[it].second }
+
+// --- AR marker presentation: no animation or smoothing --------------------
+//
+// Markers are drawn exactly where the latest data places them: no easing,
+// fades, pops, gliding, position/depth smoothing (median/EMA/Kalman
+// averaging of hits), snap-back/hysteresis thresholds, or held screen
+// positions redrawn between reads. Flip to true only to A/B against the old
+// smoothed/animated behaviour (birth-position median of hits, screen
+// dead-band hold, birth pulse ring).
+internal const val AR_MARKER_SMOOTHING = false
+
+/**
+ * A candidate barcode's birth position: the raw [latest] agreeing hit when
+ * smoothing is off, the median of all agreeing hits ([consensus]) when on.
+ */
+internal fun birthPosition(
+    smoothing: Boolean,
+    consensus: FloatArray,
+    latest: FloatArray,
+): FloatArray = if (smoothing) consensus else latest
+
+/**
+ * Whether a freshly projected screen position should be replaced by the
+ * previously drawn one instead (the screen dead-band / snap-back). With
+ * smoothing off this is always false: every frame draws the fresh
+ * projection, never a held one.
+ */
+internal fun holdScreenPosition(
+    smoothing: Boolean,
+    cameraNearStill: Boolean,
+    hasScreen: Boolean,
+    dxPx: Float,
+    dyPx: Float,
+    deadbandPx: Float,
+): Boolean =
+    smoothing && cameraNearStill && hasScreen &&
+        kotlin.math.abs(dxPx) < deadbandPx && kotlin.math.abs(dyPx) < deadbandPx
+
+/**
+ * Birth-pulse ring radius (or -1f when not pulsing) and alpha for a marker
+ * of [ageMs]. With smoothing off, always the non-pulsing (-1f, 0f) pair — no
+ * grow/fade animation on marker birth.
+ */
+internal fun pulseState(
+    smoothing: Boolean,
+    ageMs: Long,
+    pulseMs: Long,
+    ringR: Float,
+    growth: Float,
+): Pair<Float, Float> {
+    val pulsing = smoothing && ageMs in 0 until pulseMs
+    val t = ageMs / pulseMs.toFloat()
+    val pulseR = if (pulsing) ringR + growth * t else -1f
+    val pulseAlpha = if (pulsing) 1f - t else 0f
+    return pulseR to pulseAlpha
 }
 
-private const val MIN_WIDTH = 1280
+/**
+ * Whether two same-payload marker positions are the same physical marker (a
+ * birth-race duplicate, e.g. two candidate clusters maturing the same frame)
+ * rather than a different physical copy of the same barcode text — which
+ * must get, and keep, its own marker rather than replacing this one.
+ */
+internal fun sameMarkerPosition(
+    a: FloatArray,
+    b: FloatArray,
+    radiusM: Float,
+): Boolean {
+    val dx = a[0] - b[0]
+    val dy = a[1] - b[1]
+    val dz = a[2] - b[2]
+    return kotlin.math.sqrt(dx * dx + dy * dy + dz * dz) <= radiusM
+}

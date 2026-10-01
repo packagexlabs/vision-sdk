@@ -192,11 +192,11 @@ class MarkerGlRenderer(
         val halfViewportH = viewportHeight / 2f
         for (m in markers) {
             val age = now - m.bornMs
-            val pulsing = age in 0 until PULSE_MS
-            val t = age / PULSE_MS.toFloat()
-            val pulseR = if (pulsing) ringR + pulseGrowth * t else -1f
-            val pulseAlpha = if (pulsing) 1f - t else 0f
-            val maxRadiusPx = (if (pulsing) pulseR else ringR) + strokeHalf
+            // AR_MARKER_SMOOTHING off: pulseState always returns the
+            // non-pulsing pair, so the ring is drawn at a constant radius
+            // and alpha — no birth pop/grow/fade animation.
+            val (pulseR, pulseAlpha) = pulseState(AR_MARKER_SMOOTHING, age, PULSE_MS, ringR, pulseGrowth)
+            val maxRadiusPx = (if (pulseR >= 0f) pulseR else ringR) + strokeHalf
 
             val ndcX = m.x / viewportWidth * 2f - 1f
             val ndcY = 1f - m.y / viewportHeight * 2f
