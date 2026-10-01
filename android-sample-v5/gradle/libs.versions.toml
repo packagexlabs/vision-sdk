@@ -13,7 +13,7 @@ serialization = "1.9.0"
 # vision-sdk-android published to mavenLocal (README step 1): the build that reads barcodes with BarcodeScannerApp's engine
 visionSdk = "v2.8.0-local"
 # BarcodeScannerApp's engine, the one VisionScanner reads with; the AR demo feeds it ARCore frames itself. mavenLocal only for now.
-barcodeScanner = "0.2.1"
+barcodeScanner = "0.2.2"
 arcore = "1.56.0"
 camerax = "1.5.1"
 # docscanner-release.aar (vision-sdk-android) bundles the same LiteRT runtime .so files: keep this version aligned
