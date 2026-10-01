@@ -72,7 +72,7 @@ internal class DocumentFlow(private val document: DocumentCamera, private val sc
     fun shutter() = when (document.capture()) {
         CaptureStart.Started -> { host.flash(); host.update { it.copy(phase = Phase.Scanning) } }
         CaptureStart.Busy -> {}   // an auto capture is already taking the page
-        CaptureStart.NoPage -> host.toast("Fit the page inside the frame")
+        CaptureStart.NoPage -> host.toast("Fit the whole page in view")
     }
 
     /** iOS `rescanDocument`: the caller then closes the result. */

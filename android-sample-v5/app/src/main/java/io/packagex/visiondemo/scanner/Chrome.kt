@@ -544,7 +544,7 @@ private fun hintFor(state: ScannerUiState): String {
         ScanMode.DocAcq -> if (state.seesDocument) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"
         } else {
-            "Fit the page inside the frame"
+            "Fit the whole page in view"
         }
         ScanMode.Retrieval -> {
             val n = state.codesInView.count { it in state.items }
