@@ -44,8 +44,9 @@ import io.packagex.visiondemo.model.ScanMode
 import kotlinx.coroutines.launch
 
 /**
- * The camera screen -- one live camera, a mode dial, one shutter. Ported from iOS
- * `UI/CameraScreen.swift`. [drawer] and [sheets] are slots for [ResultDrawer] and
+ * The camera screen -- one live camera for the module opened from [HomeScreen], one shutter. Ported from iOS
+ * `UI/CameraScreen.swift`. A single Barcode/QR result is a [CodeHud] over the camera; every other result
+ * fills the [drawer] slot. [drawer] and [sheets] are slots for [ResultDrawer] and
  * [io.packagex.visiondemo.settings.SheetHost], filled by [ScannerRoute]. Layer order follows iOS:
  * drawer above the chrome, alerts above the drawer (the report card is the drawer's own overlay).
  *
@@ -73,7 +74,9 @@ fun ScannerScreen(
 
         state.focus?.let { f -> key(f.id) { FocusRing(f) } }
 
-        BoxesOverlay(boxes = boxes)
+        val hud = state.codeHud
+        // The captured code's box stays drawn under its code card (v6); otherwise the live boxes.
+        BoxesOverlay(boxes = if (hud != null) { { listOf(hud) } } else boxes)
 
         if (state.result != null) {
             Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.15f)))
@@ -98,9 +101,11 @@ fun ScannerScreen(
 
         Viewfinder(state = state, onAction = onAction)
 
-        if (state.result == null) {
+        if (state.result == null || hud != null) {
             Chrome(state = state, onAction = onAction)
         }
+
+        hud?.let { CodeHud(code = it, onAction = onAction) }
 
         if (state.mode == ScanMode.Ocr && state.phase == Phase.Processing) {
             ProcessingSpinner(onCancel = { onAction(ScannerAction.CancelProcessing) })
@@ -129,7 +134,7 @@ fun ScannerScreen(
             NoPermissionView()
         }
 
-        if (state.result != null) drawer()
+        if (state.result != null && hud == null) drawer()
 
         state.alert?.let { AlertCard(alert = it, onAction = onAction) }
 

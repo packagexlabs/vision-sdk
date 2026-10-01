@@ -11,7 +11,10 @@ import io.packagex.visiondemo.model.SheetKind
 import java.io.File
 
 sealed interface ScannerAction {
+    /** Opens [m]'s camera (a home module card), or switches mode. */
     data class SetMode(val m: ScanMode) : ScannerAction
+    /** The camera's back arrow (and system Back): leaves the mode, releases the camera, shows the module cards. */
+    data object GoHome : ScannerAction
     data object Shutter : ScannerAction
     data object CloseResult : ScannerAction
     data object ReopenLast : ScannerAction
@@ -57,8 +60,7 @@ sealed interface ScannerAction {
     /** The Items sheet's "Delete" (all). */
     data object ClearItems : ScannerAction
 
-    // Result drawer
-    data object ToggleExpanded : ScannerAction
+    // Result screen
     /** "Scan next" / "New Scan": closes the drawer (AR also resets its markers, Task 11). */
     data object ScanNext : ScannerAction
     /** Copies [text] (ScannerEffect.Copy) and toasts "Copied <label>". */

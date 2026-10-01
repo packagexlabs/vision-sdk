@@ -156,6 +156,7 @@ class ScannerViewModel @Inject constructor(
         if (a != ScannerAction.DismissAlert && s.alert?.actions?.any { it.action == a } == true) _state.update { it.copy(alert = null) }
         when (a) {
             is ScannerAction.SetMode -> setMode(a.m)
+            ScannerAction.GoHome -> goHome()
             ScannerAction.Shutter -> shutter()
             ScannerAction.CloseResult -> closeResult()
             ScannerAction.ReopenLast -> reopenLast()
@@ -200,7 +201,6 @@ class ScannerViewModel @Inject constructor(
             ScannerAction.AddItemsInView -> addItemsInView()
             is ScannerAction.RemoveItem -> setItems(s.items - a.sku)
             ScannerAction.ClearItems -> setItems(emptyList())
-            ScannerAction.ToggleExpanded -> _state.update { it.copy(resultExpanded = !it.resultExpanded) }
             ScannerAction.ScanNext -> { closeResult(); if (s.mode == ScanMode.Ar) ar.clear() }   // AR "New Scan" (iOS scanNext)
             is ScannerAction.Copy -> { _effects.trySend(ScannerEffect.Copy(a.text)); toast("Copied ${a.label}") }
             is ScannerAction.SendFeedback -> sendFeedback(a.entries, a.comment)
@@ -230,25 +230,17 @@ class ScannerViewModel @Inject constructor(
 
     // MARK: Mode and camera
 
+    /** Opens [m]'s camera from the module cards, or switches the open camera to [m]. */
     private fun setMode(m: ScanMode) {
-        if (m == s.mode) return
-        // First AR entry: install ARCore from the Activity and stay in this mode until it is there.
+        if (m == s.mode && !s.home) return
+        // First AR entry: install ARCore from the Activity and stay where we are until it is there.
         if (m == ScanMode.Ar && !arInstalled && !ar.installed()) { _effects.trySend(ScannerEffect.InstallArCore); return }
-        if (s.mode == ScanMode.Ar) ar.detach()   // release ARCore's camera before the scanner claims it (iOS :250)
+        if (!s.home) leaveMode()   // from home, the mode was already left
         if (m == ScanMode.Ar) ar.clear()         // every AR entry starts a new scan (iOS reset)
-        pendingShow?.cancel(); pendingShow = null
-        entitlementJob?.cancel(); entitlementJob = null
-        modeGeneration++
-        retry = null
-        clearInView()
-        dismissing = false
-        setTorch(false)
-        if (s.mode == ScanMode.DocAcq) doc.leave()   // drops the pages, releases CameraX before the next owner claims
         if (m == ScanMode.DocAcq) doc.enter()
-        setZoom(1f)
         _state.update {
             it.copy(
-                mode = m, result = null, sheet = null, pendingSheet = null, phase = Phase.Idle, boxes = emptyList(),
+                home = false, mode = m, result = null, sheet = null, pendingSheet = null, phase = Phase.Idle, boxes = emptyList(),
                 codeInFrame = false, seesDocument = false, seesText = false, torch = false, gated = m.gated,
                 entitlementChecking = false, feedback = null,
             )
@@ -257,10 +249,38 @@ class ScannerViewModel @Inject constructor(
         syncAr()
     }
 
-    /** Hands the sensor to the mode's owner; for the scanner, applies its config and (gated modes) the entitlement check. */
+    /** Back to the module cards: the mode is left as for a switch and no camera runs until a card is opened. */
+    private fun goHome() {
+        if (s.home) return
+        leaveMode()
+        _state.update {
+            it.copy(
+                home = true, result = null, sheet = null, pendingSheet = null, alert = null, phase = Phase.Idle, boxes = emptyList(),
+                codeInFrame = false, seesDocument = false, seesText = false, entitlementChecking = false, feedback = null,
+            )
+        }
+        camera.claim(CameraOwner.None)
+    }
+
+    /** Ends the current mode's work and releases its camera (iOS setMode, the leaving half). */
+    private fun leaveMode() {
+        if (s.mode == ScanMode.Ar) ar.detach()   // release ARCore's camera before the scanner claims it (iOS :250)
+        pendingShow?.cancel(); pendingShow = null
+        entitlementJob?.cancel(); entitlementJob = null
+        modeGeneration++
+        retry = null
+        clearInView()
+        dismissing = false
+        setTorch(false)
+        if (s.mode == ScanMode.DocAcq) doc.leave()   // drops the pages, releases CameraX before the next owner claims
+        setZoom(1f)
+    }
+
+    /** Hands the sensor to the mode's owner (none on the module cards); for the scanner, applies its config and
+     *  (gated modes) the entitlement check. */
     private fun configureCamera() {
-        camera.claim(ownerFor(s.mode))
-        if (!usesScanner) return
+        camera.claim(if (s.home) CameraOwner.None else ownerFor(s.mode))
+        if (s.home || !usesScanner) return
         applyConfig()
         if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) resumeDetection()
         if (s.mode.gated) checkEntitlement(s.mode)
@@ -328,7 +348,7 @@ class ScannerViewModel @Inject constructor(
     /** ARCore runs unless the camera is paused (heat, idle, background) or a result covers it (iOS :482/:504).
      *  It keeps running under sheets, so the Items sheet can name codes as they are found. */
     private fun syncAr() {
-        if (s.mode != ScanMode.Ar) return
+        if (s.mode != ScanMode.Ar || s.home) return
         if (s.paused || s.result != null) ar.pause() else ar.resume()
     }
 
@@ -351,7 +371,12 @@ class ScannerViewModel @Inject constructor(
             // past the cancel) re-applies the current mode's config.
             val r = try { entitlement.check(camera.view, mode) } finally { if (s.mode != mode) applyConfig() }
             if (s.mode != mode || !isActive) return@launch   // a newer check replaced this one
-            _state.update { it.copy(gated = r.isFailure, entitlementChecking = false) }
+            _state.update {
+                it.copy(
+                    gated = r.isFailure, entitlementChecking = false,
+                    notEntitled = if (r.isFailure) it.notEntitled + mode else it.notEntitled - mode,
+                )
+            }
             if (r.isSuccess) {
                 if (announce) toast("Authenticated")
                 if (rescan) camera.rescan()
@@ -537,14 +562,14 @@ class ScannerViewModel @Inject constructor(
     }
 
     private fun present(r: ScanResult) {
-        _state.update { it.copy(result = r, lastResult = it.mode to r, feedback = null, resultExpanded = false) }
+        _state.update { it.copy(result = r, lastResult = it.mode to r, feedback = null) }
         if (usesScanner) camera.pauseDetection()   // nothing to detect under the drawer
         syncAr()
     }
 
     /** Retrieval drawer's "Open item list": iOS sets `result = nil` (no rescan), then opens the list. */
     private fun openItemList() {
-        _state.update { it.copy(result = null, resultExpanded = false) }
+        _state.update { it.copy(result = null) }
         openSheet(SheetKind.Items)
     }
 
@@ -559,7 +584,7 @@ class ScannerViewModel @Inject constructor(
             pendingShow?.cancel(); pendingShow = null
             _state.update { it.copy(feedback = null) }
         }
-        _state.update { it.copy(result = null, resultExpanded = false) }   // price tags stay until ClearTags / mode switch (iOS)
+        _state.update { it.copy(result = null) }   // price tags stay until ClearTags / mode switch (iOS)
         if (usesScanner) {
             if (s.sheet == null || s.sheet == SheetKind.Items) resumeDetection()
             camera.rescan()

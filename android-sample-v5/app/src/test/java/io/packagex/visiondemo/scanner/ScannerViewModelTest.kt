@@ -369,13 +369,52 @@ class ScannerViewModelTest {
         assertEquals(listOf("A", "B"), v.state.value.items)
     }
 
-    @Test fun toggleExpandedResetsOnPresentAndClose() = runTest {
+    // --- v6 module cards ---
+
+    @Test fun opensOnModuleCardsWithNoCamera() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.PermissionResult(true)); advanceUntilIdle()
+        assertTrue(v.state.value.home); assertEquals(CameraOwner.None, cam.owner); assertFalse(cam.running)
+    }
+
+    @Test fun cardOpensItsCameraEvenForTheCurrentMode() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.PermissionResult(true))
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
+        assertFalse(v.state.value.home); assertEquals(ScanMode.Barcode, v.state.value.mode)
+        assertEquals(CameraOwner.Scanner, cam.owner); assertTrue(cam.running)
+    }
+
+    @Test fun goHomeClosesTheResultAndReleasesTheCamera() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.PermissionResult(true))
+        v.onAction(ScannerAction.SetMode(ScanMode.QR)); advanceUntilIdle()
+        v.onAction(ScannerAction.ToggleTorch)
+        cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle(); assertNotNull(v.state.value.result)
+        v.onAction(ScannerAction.GoHome); advanceUntilIdle()
+        val st = v.state.value
+        assertTrue(st.home); assertNull(st.result); assertFalse(st.torch); assertFalse(cam.torchOn)
+        assertEquals(CameraOwner.None, cam.owner)
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+        assertFalse(v.state.value.home); assertEquals(CameraOwner.Scanner, cam.owner)
+    }
+
+    @Test fun singleCodeIsACodeCardMultipleIsNot() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode))
         cam.emit(ScanEvent.Codes(listOf(code("1")))); advanceUntilIdle()
-        v.onAction(ScannerAction.ToggleExpanded); assertTrue(v.state.value.resultExpanded)
-        v.onAction(ScannerAction.ToggleExpanded); v.onAction(ScannerAction.ToggleExpanded); assertTrue(v.state.value.resultExpanded)
-        v.onAction(ScannerAction.CloseResult); assertFalse(v.state.value.resultExpanded)
-        v.onAction(ScannerAction.ToggleExpanded); v.onAction(ScannerAction.ReopenLast); assertFalse(v.state.value.resultExpanded)
+        assertEquals("1", v.state.value.codeHud?.value)
+        v.onAction(ScannerAction.CloseResult)
+        cam.emit(ScanEvent.Codes(listOf(code("1"), code("2")))); advanceUntilIdle()
+        assertNull(v.state.value.codeHud); assertNotNull(v.state.value.result)
+    }
+
+    @Test fun failedEntitlementLocksTheCard() = runTest {
+        val ent = FakeEntitlement(false)
+        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), ent, FakeCatalog(), Secrets("k", "staging"))
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        v.onAction(ScannerAction.GoHome)
+        assertEquals(setOf(ScanMode.Price), v.state.value.notEntitled)
     }
 
     @Test fun scanNextClosesAndRescans() = runTest {
@@ -410,7 +449,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun zoomAppliesAndResetsOnModeSwitch() = runTest {
-        val v = vm()
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Barcode))   // a camera is open
         v.onAction(ScannerAction.Zoom(2f)); assertEquals(2f, v.state.value.zoom)
         v.onAction(ScannerAction.SetMode(ScanMode.QR)); assertEquals(1f, v.state.value.zoom)
     }
@@ -636,7 +675,8 @@ class ScannerViewModelTest {
 
     @Test fun detectionOffSurvivesMultiToggle() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
-        v.onAction(ScannerAction.PermissionResult(true)); v.onAction(ScannerAction.SetDetectionEnabled(false))
+        v.onAction(ScannerAction.PermissionResult(true)); v.onAction(ScannerAction.SetMode(ScanMode.Barcode))
+        v.onAction(ScannerAction.SetDetectionEnabled(false))
         val rescans = cam.rescans
         v.onAction(ScannerAction.UpdatePrefs { it.copy(multi = true) })
         assertTrue(cam.rescans > rescans); assertTrue(cam.detectionPaused)

@@ -77,7 +77,7 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     }
 
     if (state.items.isEmpty()) {
-        Text("No items. Point at a code in Item retrieval, then tap Add Item.", style = inter(13.sp), color = PX.Muted)
+        Text("No items. Point at a code in AR Item Count, then tap Add Item.", style = inter(13.sp), color = PX.Muted)
     }
 
     Column {

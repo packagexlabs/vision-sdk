@@ -51,7 +51,7 @@ internal class DocumentFlow(private val document: DocumentCamera, private val sc
     /** Detection and auto capture follow the live camera: off under the drawer, sheets, alerts and processing. */
     fun sync(st: ScannerUiState) {
         document.auto = st.prefs.autoCapture
-        document.detecting = st.mode == ScanMode.DocAcq && st.result == null && st.phase == Phase.Idle && st.sheet == null &&
+        document.detecting = !st.home && st.mode == ScanMode.DocAcq && st.result == null && st.phase == Phase.Idle && st.sheet == null &&
             st.alert == null && st.feedback == null && !st.paused && !st.permissionDenied
     }
 

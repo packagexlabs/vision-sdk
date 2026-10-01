@@ -2,10 +2,9 @@ package io.packagex.visiondemo.baselineprofile
 
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.StaleObjectException
+import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until
 import java.util.regex.Pattern
-import kotlin.math.abs
 
 const val PACKAGE_NAME = "io.vision_sdk_android"
 private const val TIMEOUT_MS = 10_000L
@@ -15,11 +14,17 @@ fun MacrobenchmarkScope.grantCamera() {
     device.executeShellCommand("pm grant $packageName android.permission.CAMERA")
 }
 
-/** Cold start to the camera screen; the Settings button is the first chrome drawn over the preview. */
-fun MacrobenchmarkScope.startToCamera() {
+/** Cold start to the module cards (v6 entry point). */
+fun MacrobenchmarkScope.startToHome() {
     pressHome()
     startActivityAndWait()
-    device.wait(Until.hasObject(By.desc("Settings")), TIMEOUT_MS) || error("Camera screen did not appear")
+    device.wait(Until.hasObject(By.text("SCAN CODES")), TIMEOUT_MS) || error("Module cards did not appear")
+}
+
+/** Cold start, then the Barcode camera; the Settings button is the first chrome drawn over the preview. */
+fun MacrobenchmarkScope.startToCamera() {
+    startToHome()
+    selectMode("Barcode")
 }
 
 fun MacrobenchmarkScope.openAndCloseSettings() {
@@ -39,52 +44,18 @@ private fun MacrobenchmarkScope.dismissResult() {
     device.findObject(By.text(SCAN_NEXT))?.run { click(); device.waitForIdle() }
 }
 
-/** Mode dial labels, in dial order (app `ScanMode`). */
-private val DIAL = listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "Item retrieval", "AR Barcode", "Document Acquisition")
-
 /**
- * Selects [label] on the horizontally scrolling mode dial. Compose only exposes the labels that are on
- * screen (clipped ones with clipped bounds), so swipe the dial toward [label] until it sits fully inside.
+ * Opens [label]'s camera from the module cards (v6: one camera per module), going back to the cards first
+ * when a camera is open.
  */
 fun MacrobenchmarkScope.selectMode(label: String) {
-    val target = DIAL.indexOf(label)
-    repeat(10) {
-        dismissResult()
-        // The dial recomposes while it animates, so read every label's bounds once, up front.
-        val visible = try {
-            DIAL.mapNotNull { l -> device.findObject(By.text(l))?.let { l to it.visibleBounds } }
-        } catch (_: StaleObjectException) {
-            device.waitForIdle()
-            return@repeat
-        }
-        check(visible.isNotEmpty()) { "Mode dial not on screen" }
-        val w = device.displayWidth
-        val b = visible.firstOrNull { it.first == label }?.second
-        if (b != null && b.left > 0 && b.right < w - 1) {
-            device.click(b.centerX(), b.centerY()) || error("Could not tap mode '$label'")
-            // The dial scrolls the selected mode to its centre; that's the "selected" signal it exposes.
-            awaitCentred(label)
-            device.waitForIdle()
-            return
-        }
-        val y = visible.first().second.centerY()
-        // Target to the right of what's shown (or clipped at the right edge): drag the dial left, and vice versa.
-        val forward = b?.let { it.centerX() > w / 2 } ?: (target > DIAL.indexOf(visible.last().first))
-        // A slow, short drag (100 steps of ~5 ms) so the dial doesn't fling past the next label.
-        if (forward) device.swipe(w * 2 / 3, y, w / 3, y, 100) else device.swipe(w / 3, y, w * 2 / 3, y, 100)
-        device.waitForIdle()
-    }
-    error("Could not scroll mode '$label' into view")
-}
-
-private fun MacrobenchmarkScope.awaitCentred(label: String) {
-    val deadline = System.currentTimeMillis() + TIMEOUT_MS
-    val mid = device.displayWidth / 2
-    while (System.currentTimeMillis() < deadline) {
-        val x = try { device.findObject(By.text(label))?.visibleBounds?.centerX() } catch (_: StaleObjectException) { null }
-        // The dial's 160 dp side padding lets even the first/last mode reach the centre (within a label's width).
-        if (x != null && abs(x - mid) < device.displayWidth / 8) return
-        Thread.sleep(100)
-    }
-    error("Mode '$label' was not selected")
+    dismissResult()
+    device.findObject(By.desc("Back to modules"))?.click()
+    device.wait(Until.hasObject(By.text("SCAN CODES")), TIMEOUT_MS) || error("Module cards did not appear")
+    val card = device.findObject(By.text(label))
+        ?: run { device.findObject(By.scrollable(true))?.scrollUntil(Direction.DOWN, Until.findObject(By.text(label))) }
+        ?: error("Module card '$label' not found")
+    card.click()
+    device.wait(Until.hasObject(By.desc("Settings")), TIMEOUT_MS) || error("Camera for '$label' did not appear")
+    device.waitForIdle()
 }

@@ -124,8 +124,9 @@ with empty values.
 ## Baseline profiles and startup benchmarks
 
 `:baselineprofile` (a `com.android.test` module using the `androidx.baselineprofile` plugin) drives
-the release app with UiAutomator: cold start → camera screen → open and close Settings → QR code →
-Vision Scanner → Price tag → Item retrieval → Document Acquisition → back to Barcode. CAMERA is
+the release app with UiAutomator: cold start → module cards → Barcode camera → open and close Settings →
+QR code → Vision Scanner → Price tag → AR Item Count → Document Acquisition → back to Barcode (each from its
+module card, via the camera's back arrow). CAMERA is
 granted with `pm grant` first. **AR Barcode is skipped**: ARCore start-up depends on Google Play
 Services for AR being installed and current on the device and is not reliable under automation.
 
@@ -143,7 +144,7 @@ with one arm64 device connected (the app has no emulator ABI) and unlocked:
 It builds the `nonMinifiedRelease` variant the plugin adds, collects the profile and writes it into
 `app/src/release/generated/baselineProfiles/`. Commit the result.
 
-Startup benchmark (`StartupBenchmarks`: cold start to the camera screen, `CompilationMode.None()`
+Startup benchmark (`StartupBenchmarks`: cold start to the module cards, `CompilationMode.None()`
 vs `Partial(BaselineProfileMode.Require)`, 10 iterations each) runs against the `benchmarkRelease`
 variant:
 
@@ -158,9 +159,12 @@ app, replacing whatever build of `io.vision_sdk_android` was on the device.
 
 ## Modes
 
-Barcode (single/multi), QR, Vision Scanner (on-device / cloud / hybrid OCR — SL, BOL, IL, wild
-card), Price tag, Item retrieval, Document Acquisition, AR Barcode. Dimensioning and Text
-Templates are not in this sample's mode dial (see *Known gaps*).
+The app opens on module cards (design v6): SCAN CODES — Barcode (single/multi), QR, Price tag,
+AR Item Count (item retrieval), AR Barcode; CAPTURE DATA — Vision Scanner (on-device / cloud / hybrid
+OCR — SL, BOL, IL, wild card), Document Acquisition. Each card opens its own camera; the back arrow (or
+system Back) returns to the cards and releases the camera. A single Barcode/QR read shows as a code card
+over the camera; every other result is full screen. Dimensioning and Text Templates are not in this
+sample (see *Known gaps*).
 
 Barcode and QR code read ~3840x2160 frames with BarcodeScannerApp's engine (VisionSDK v2.8.0-local).
 With Multiple scan and Show boxes on, the SDK draws the boxes itself with the engine's overlay
