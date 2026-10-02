@@ -8,7 +8,10 @@ import dagger.hilt.components.SingletonComponent
 @Module
 @InstallIn(SingletonComponent::class)
 object ArModule {
-    /** No AR Count session yet: the module shows no camera until the shared-camera session lands. */
     @Provides
-    fun arCount(): ArCount = NoArCount
+    fun arCount(impl: ArSessionController): ArCount = impl
+
+    /** The counter of every AR Count session. Wave 1: [DebugCounter], until the counting core lands. */
+    @Provides
+    fun arCounterFactory(): ArCounterFactory = ArCounterFactory { DebugCounter() }
 }
