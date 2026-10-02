@@ -7,7 +7,10 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.tan
 
-/** Which rule of spec 5.4 accepted a depth: (a) WIDE, ≥ 5 inliers over ≥ 3° with the baseline; (b) DENSE, ≥ 8 over ≥ 2° with σz ≤ 2 cm */
+/**
+ * Which rule of spec 5.4 accepted a depth: (a) WIDE, ≥ 5 inliers over ≥ 3° with the baseline and σz ≤ 2 cm (ruling R3);
+ * (b) DENSE, ≥ 8 over ≥ 2° with σz ≤ 2 cm. Neither accepts rays whose RMS residual exceeds 1.5 σray (ruling R3).
+ */
 enum class DepthGate { WIDE, DENSE }
 
 /**
@@ -19,6 +22,7 @@ enum class DepthGate { WIDE, DENSE }
  * @property spanRad the largest angle between two inlier rays
  * @property baseline the largest distance between two inlier camera centres
  * @property range the mean distance from the camera centres to the point
+ * @property rmsResidual the RMS angular residual of the inlier rays, radians
  * @property gate the rule that accepts this depth; null when none does
  */
 class RayFit(
@@ -29,6 +33,7 @@ class RayFit(
     val spanRad: Double,
     val baseline: Double,
     val range: Double,
+    val rmsResidual: Double,
     val gate: DepthGate?,
 )
 
@@ -91,14 +96,16 @@ object Triangulation {
             }
         }
         val inFront = inliers.all { (it.dir dot (x - it.origin)) > 0 }
+        val rms = sqrt(inliers.sumOf { residual(it, x).pow(2) } / inliers.size)
         val gate = when {
             !inFront || range < config.minDepth || range > config.maxDepth -> null
+            rms > config.maxRmsResidualSigmas * sigmaRad -> null
             inliers.size >= config.wideMinInliers && span >= rad(config.wideSpanDeg) &&
-                baseline >= 2 * range * tan(rad(config.wideBaselineHalfAngleDeg)) -> DepthGate.WIDE
+                baseline >= 2 * range * tan(rad(config.wideBaselineHalfAngleDeg)) && sigmaZ <= config.wideMaxSigmaZ -> DepthGate.WIDE
             inliers.size >= config.denseMinInliers && span >= rad(config.denseSpanDeg) && sigmaZ <= config.denseMaxSigmaZ -> DepthGate.DENSE
             else -> null
         }
-        return RayFit(x, cov, inliers.size, sigmaZ, span, baseline, range, gate)
+        return RayFit(x, cov, inliers.size, sigmaZ, span, baseline, range, rms, gate)
     }
 
     private fun rad(deg: Double) = deg * PI / 180

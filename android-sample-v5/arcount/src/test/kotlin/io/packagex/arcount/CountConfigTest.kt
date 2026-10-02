@@ -21,6 +21,8 @@ class CountConfigTest {
         assertEquals(5, c.wideMinInliers)
         assertEquals(3.0, c.wideSpanDeg, 0.0)
         assertEquals(1.5, c.wideBaselineHalfAngleDeg, 0.0)
+        assertEquals(0.02, c.wideMaxSigmaZ, 0.0)
+        assertEquals(1.5, c.maxRmsResidualSigmas, 0.0)
         assertEquals(8, c.denseMinInliers)
         assertEquals(2.0, c.denseSpanDeg, 0.0)
         assertEquals(0.02, c.denseMaxSigmaZ, 0.0)

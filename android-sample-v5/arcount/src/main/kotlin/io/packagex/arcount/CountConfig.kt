@@ -15,6 +15,10 @@ data class CountConfig(
     val wideMinInliers: Int = 5,
     val wideSpanDeg: Double = 3.0,
     val wideBaselineHalfAngleDeg: Double = 1.5,
+    // Ruling R3: gate (a) also needs sigma z within this, and no gate takes a depth from inlier rays whose RMS
+    // angular residual exceeds maxRmsResidualSigmas * sigma_ray
+    val wideMaxSigmaZ: Double = 0.02,
+    val maxRmsResidualSigmas: Double = 1.5,
     val denseMinInliers: Int = 8,
     val denseSpanDeg: Double = 2.0,
     val denseMaxSigmaZ: Double = 0.02,

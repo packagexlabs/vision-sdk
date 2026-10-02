@@ -53,16 +53,42 @@ class DepthTest {
     }
 
     @Test
-    fun theWideGateFiresOnFiveInliersSpanningThreeDegreesWithTheBaseline() {
-        // 1.83 cm at 30 cm: a 3.5° span, and more than 2 * z * tan(1.5°) = 1.57 cm of baseline
-        val fit = Triangulation.fit(line(5, 0.0183, Vec3(0.0, 0.0, -0.30)), sigma15, config)!!
+    fun theWideGateFiresOnFiveInliersOverThreeDegreesWithTheBaselineAndSigmaZWithin2cm() {
+        // 3.5 cm at 30 cm: a 6.7° span, more than 2 * z * tan(1.5°) = 1.57 cm of baseline, sigma z about 1.7 cm
+        val fit = Triangulation.fit(line(5, 0.035, Vec3(0.0, 0.0, -0.30)), sigma15, config)!!
         assertEquals(DepthGate.WIDE, fit.gate)
         assertTrue(fit.baseline >= 2 * fit.range * tan(1.5 * PI / 180))
+        assertTrue(fit.sigmaZ <= 0.02)
+    }
+
+    @Test
+    fun theWideGateNeedsSigmaZWithin2cm() {
+        // 4.9 cm at 80 cm: span and baseline pass, sigma z is about 8.6 cm
+        val fit = Triangulation.fit(line(5, 0.049, Vec3(0.0, 0.0, -0.80)), sigma15, config)!!
+        assertTrue(fit.spanRad >= 3 * PI / 180 && fit.baseline >= 2 * fit.range * tan(1.5 * PI / 180))
+        assertTrue(fit.sigmaZ > 0.02)
+        assertNull(fit.gate)
+    }
+
+    @Test
+    fun noGateTakesADepthFromRaysThatDisagreeByMoreThanOneAndAHalfSigma() {
+        // twelve rays over 5 cm at 30 cm, each turned 2 sigma up or down in turn: inside the 3 sigma rejection
+        val target = Vec3(0.0, 0.0, -0.30)
+        val rays = (0 until 12).map { i ->
+            val o = Vec3(-0.025 + 0.05 * i / 11, 0.0, 0.0)
+            val d = (target - o).unit()
+            Ray(o, (d + Vec3(0.0, if (i % 2 == 0) 2 * sigma15 else -2 * sigma15, 0.0)).unit())
+        }
+        val fit = Triangulation.fit(rays, sigma15, config)!!
+        assertEquals(12, fit.inliers)
+        assertTrue(fit.sigmaZ <= 0.02)
+        assertTrue(fit.rmsResidual > 1.5 * sigma15)
+        assertNull(fit.gate)
     }
 
     @Test
     fun fourRaysAreNotEnoughForTheWideGate() {
-        assertNull(Triangulation.fit(line(4, 0.0183, Vec3(0.0, 0.0, -0.30)), sigma15, config)!!.gate)
+        assertNull(Triangulation.fit(line(4, 0.035, Vec3(0.0, 0.0, -0.30)), sigma15, config)!!.gate)
     }
 
     @Test
