@@ -17,6 +17,11 @@ data class Counts(val counted: Int, val manual: Int, val tentative: Int, val amb
     val high get() = low + tentative + ambiguous
 }
 
+internal fun List<CountUnit>.counts() =
+    Counts(count { it.state == COUNTED }, count { it.state == MANUAL }, count { it.state == TENTATIVE }, count { it.state == AMBIGUOUS })
+
+internal fun List<CountUnit>.countsByCode(): Map<String, Counts> = groupBy { it.gtin }.mapValues { it.value.counts() }
+
 /** Where a section's units live, in the anchor frame: its plane, its label and its GTIN set (spec 5.1) */
 class SectionFrame(
     var plane: SectionPlane,
@@ -25,6 +30,8 @@ class SectionFrame(
     var labelRay: Ray? = null,
     /** The label point: the prior on its ray, or triangulated from its reads; the plane passes through it until a unit triangulates */
     var labelPoint: Vec3? = null,
+    /** A read's code as the GTIN set holds it: GTINs as 14 digits; in item mode a code's key (spec 5.10) */
+    val keyOf: (Read) -> String = { Gtin.normalize(it.text, it.symbology) },
 ) {
     /** The label's height on the plane, where its ray meets the plane: the centre of the rail band */
     val labelHeight: Double?
@@ -35,7 +42,7 @@ class SectionFrame(
 }
 
 /** One unit of the row (spec 5.4, unit record), in the anchor frame */
-class CountUnit internal constructor(val id: Int, val gtin: String, state: UnitState, val createdNs: Long, maxRays: Int) {
+class CountUnit internal constructor(val id: Int, val gtin: String, state: UnitState, val createdNs: Long, private val maxRays: Int) {
     var state = state
         internal set
 
@@ -71,18 +78,52 @@ class CountUnit internal constructor(val id: Int, val gtin: String, state: UnitS
     internal var mergeFrames = 0
     internal var segment = -1
     internal var segmentFirstNs = Long.MIN_VALUE
-    internal val track = DepthTrack(maxRays)
+    internal var track = DepthTrack(maxRays)
     internal var lastRay: Ray? = null
 
     val rays get() = track.size
     val hasDepth get() = depthGate != null
+
+    /**
+     * Into another anchor frame by [t] = A_new⁻¹ · A_old (spec 5.10, anchor handoff): point, covariance, rays, last
+     * centre, and the last record, whose anchor becomes A_old · t⁻¹ so its T_ac is t · T_ac.
+     */
+    internal fun moveBy(t: Pose) {
+        point = t.apply(point)
+        covariance = covariance.rotated(t.q)
+        val moved = DepthTrack(maxRays)
+        for (r in track.rays) moved.add(r.movedBy(t))
+        track = moved
+        lastRay = lastRay?.movedBy(t)
+        lastCentre = t.apply(lastCentre)
+        lastRecord = lastRecord?.let { it.copy(anchor = (it.anchor ?: Pose.IDENTITY) * t.inverse()) }
+    }
+}
+
+private fun Ray.movedBy(t: Pose) = Ray(t.apply(origin), t.rotate(dir))
+
+/** R · this · Rᵀ for the rotation [q] */
+private fun Mat3.rotated(q: Quat): Mat3 {
+    val cols = listOf(Vec3(1.0, 0.0, 0.0), Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0)).map { q.rotate(it) }
+    fun r(i: Int, j: Int) = cols[j].let { if (i == 0) it.x else if (i == 1) it.y else it.z }
+    return Mat3(DoubleArray(9) { n ->
+        val i = n / 3
+        val j = n % 3
+        var sum = 0.0
+        for (a in 0..2) for (b in 0..2) sum += r(i, a) * this[a, b] * r(j, b)
+        sum
+    })
 }
 
 /** What one frame's reads did: read to unit id for the gated ones, the units they made, the reads dropped and why */
 class FrameOutcome(val matched: Map<Read, Int>, val created: List<CountUnit>, val dropped: List<Pair<Read, Drop>>, val merged: List<Int>, val accepted: Int)
 
-/** A FROZEN section's view of a frame: the COUNTED units re-read inside their gates, and whether a read fell in an ambiguity band */
-class ResumeCheck(val countedReread: Set<Int>, val inBand: Boolean)
+/**
+ * A FROZEN section's view of a frame: the COUNTED units re-read inside their gates, whether a read fell in an
+ * ambiguity band (of any unread unit, or [inCountedBand] of an unread COUNTED one), and whether a code was read
+ * where a COUNTED unit of another code is predicted (ruling R2)
+ */
+class ResumeCheck(val countedReread: Set<Int>, val inBand: Boolean, val codeConflict: Boolean = false, val inCountedBand: Boolean = inBand)
 
 /**
  * The unit table of one section and its per-frame association (spec 5.4): reads are filtered by the hard rules,
@@ -104,7 +145,10 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
     var pitch = config.defaultPitch
         private set
 
-    fun counts() = Counts(all.count { it.state == COUNTED }, all.count { it.state == MANUAL }, all.count { it.state == TENTATIVE }, all.count { it.state == AMBIGUOUS })
+    fun counts() = all.counts()
+
+    /** The count per code of the units, a removed code's included (spec 5.10) */
+    fun countsByCode(): Map<String, Counts> = all.countsByCode()
 
     /** The unit's prediction in [record]'s frame, whose anchor is the section's */
     fun predict(unit: CountUnit, record: PoseRecord): Predicted? =
@@ -167,7 +211,45 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         val matchedIds = matches.values.map { it.id }.toSet()
         val free = all.filter { it.id !in matchedIds }
         val inBand = reads1.indices.any { it !in matches && bandOf(reads1[it], record, free) != null }
-        return ResumeCheck(matches.values.filter { it.state == COUNTED }.map { it.id }.toSet(), inBand)
+        // ruling R7: only a COUNTED unit confident enough to take a read by gate rules out a resume by its band
+        val k = record.intrinsics
+        val counted = free.filter { u -> u.state == COUNTED && predict(u, record)?.let { it.sigmaPx <= config.gateMaxSigmaFraction * pitchPx(k.fx, it.z) } == true }
+        val inCountedBand = reads1.indices.any { it !in matches && bandOf(reads1[it], record, counted) != null }
+        return ResumeCheck(matches.values.filter { it.state == COUNTED }.map { it.id }.toSet(), inBand, codeConflict(record, reads), inCountedBand)
+    }
+
+    /** A read of any code within half a pitch_px of a confident prediction of a COUNTED unit of another code */
+    private fun codeConflict(record: PoseRecord, reads: List<Read>): Boolean {
+        val k = record.intrinsics
+        val counted = all.filter { it.state == COUNTED }.mapNotNull { u -> predict(u, record)?.let { u to it } }.filter { (_, p) ->
+            p.inImage(k) && p.sigmaPx <= config.gateMaxSigmaFraction * pitchPx(k.fx, p.z)
+        }
+        return reads.any { r ->
+            if (r.touchesBorder) return@any false
+            val key = frame.keyOf(r)
+            counted.any { (u, p) -> u.gtin != key && hypot(r.centreU - p.u, r.centreV - p.v) < config.duplicateFraction * pitchPx(k.fx, p.z) }
+        }
+    }
+
+    /**
+     * The anchor handoff (spec 5.10, ruling R1): units within [reach] of the new anchor, with the units their
+     * ambiguity links tie them to, move into its frame by [t] = A_new⁻¹ · A_old and keep their ids, states and rays;
+     * the plane moves with them. Returns the units left behind, taken out of this table.
+     */
+    fun reanchor(t: Pose, reach: Double): List<CountUnit> {
+        val keep = all.filter { t.apply(it.point).norm() <= reach }.mapTo(HashSet()) { it.id }
+        do {
+            val more = all.filter { u -> u.id !in keep && (u.linkedTo in keep || all.any { it.linkedTo == u.id && it.id in keep }) }
+            more.forEach { keep += it.id }
+        } while (more.isNotEmpty())
+        val left = all.filter { it.id !in keep }
+        all.removeAll(left.toSet())
+        for (u in all) u.moveBy(t)
+        val p = frame.plane
+        val n = t.rotate(p.normal)
+        frame.plane = SectionPlane(n, p.offset + (n dot t.t), t.rotate(p.up))
+        note("handed over ${all.size} units to the new anchor, ${left.size} left behind")
+        return left
     }
 
     /** A unit added by hand at [point] on the plane, seen from camera centre [cameraCentre] */
@@ -232,7 +314,7 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         val labelHeight = frame.labelHeight
         val kept = ArrayList<Candidate>()
         for (r in reads) {
-            val gtin = Gtin.normalize(r.text, r.symbology)
+            val gtin = frame.keyOf(r)
             val ray = r.ray(record)
             val p = frame.plane.intersect(ray)
             val drop = when {

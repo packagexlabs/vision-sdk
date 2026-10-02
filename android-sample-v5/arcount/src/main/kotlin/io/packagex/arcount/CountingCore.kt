@@ -37,6 +37,9 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
     internal var lateLumas = 0
         private set
 
+    /** Item mode (spec 5.10): each code's last read, by key, capture time */
+    private val lastSeen = HashMap<String, Long>()
+
     /** The open section's units */
     internal val units: List<CountUnit> get() = machine.section?.table?.units ?: emptyList()
 
@@ -59,12 +62,14 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         latest = frame
         machine.onFrame(frame)
         for (p in pairing.addRecord(frame)) machine.onReads(p)
-        watchMotion(prev, frame)
+        // A section's jump correction (JumpResume) applies to every anchor-frame use of the pose: tracking included
+        val cf = machine.corrected(frame)
+        watchMotion(prev?.let(machine::corrected), cf)
         schedule.onFrame(frame)
-        recent.addLast(frame to schedule.motion.moving)
+        recent.addLast(cf to schedule.motion.moving)
         while (recent.size > config.lumaFrames) recent.removeFirst()
         afterReads(frame.timestampNs)
-        lumas.at(frame.timestampNs)?.let { trackFrame(frame, schedule.motion.moving, it) }
+        lumas.at(frame.timestampNs)?.let { trackFrame(cf, schedule.motion.moving, it) }
         cached = null
     }
 
@@ -73,6 +78,10 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         val finite = reads.filter { r -> r.corners.all { it.isFinite() } }
         nonFiniteReads += reads.size - finite.size
         schedule.onEngineFrame()
+        for (r in finite) {
+            val key = ItemCode.key(r)
+            lastSeen[key] = maxOf(lastSeen[key] ?: Long.MIN_VALUE, timestampNs)
+        }
         machine.noteReads(timestampNs, finite)
         pairing.addReads(timestampNs, finite)?.let { machine.onReads(it) }
         afterReads(latest?.timestampNs ?: timestampNs)
@@ -135,8 +144,13 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
 
     override fun view(): CountView = cached ?: build().also { cached = it }
 
+    override fun setItems(codes: Set<String>) {
+        machine.setItems(codes)
+        cached = null
+    }
+
     private fun build(): CountView {
-        val r = latest ?: return CountView.EMPTY.copy(closed = machine.closed.toList())
+        val r = machine.corrected(latest ?: return CountView.EMPTY.copy(closed = machine.closed.toList(), items = items(null, null, emptyList())))
         val s = machine.section
         val t = s?.table
         val live = s != null && t != null && r.anchor != null
@@ -144,15 +158,36 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         shownGaps = if (counting) gapSpots(t!!) else emptyList()
         val tac = r.cameraInAnchor()
         val k = r.intrinsics
+        val shown = if (counting) itemMarkers(markers(t!!, r), t) else emptyList()
         return CountView(
             state = machine.state,
             prompt = prompt(r),
-            markers = if (counting) markers(t!!, r) else emptyList(),
+            markers = shown,
             gaps = shownGaps.mapNotNull { g -> Prediction.pixel(g.point, tac, k)?.let { (u, v) -> Gap(g.id, u / k.width, v / k.height) } },
             bracket = if (live) bracket(s!!, t!!, r) else null,
             closed = machine.closed.toList(),
             desiredRefreshMs = schedule.desiredMs(lumas.fed && counting && t!!.units.isNotEmpty(), r.timestampNs),
+            items = items(r, if (s?.items == true) t else null, shown),
         )
+    }
+
+    /** In item mode, markers only on units of listed codes (spec 5.10) */
+    private fun itemMarkers(markers: List<Marker>, t: UnitTable): List<Marker> {
+        if (machine.section?.items != true) return markers
+        val keys = machine.itemList.keys
+        val code = t.units.associate { it.id to it.gtin }
+        return markers.filter { code[it.unitId] in keys }
+    }
+
+    /** Each listed code's count over the sections, and whether one of its units has a marker or it was read in the last second */
+    private fun items(r: PoseRecord?, open: UnitTable?, markers: List<Marker>): List<ItemCount> {
+        val list = machine.itemList
+        if (list.isEmpty()) return emptyList()
+        val code = open?.units?.associate { it.id to it.gtin } ?: emptyMap()
+        val marked = markers.mapNotNullTo(HashSet()) { code[it.unitId] }
+        return machine.itemTotals.view(list, open?.countsByCode() ?: emptyMap()) { key ->
+            key in marked || (r != null && lastSeen[key]?.let { r.timestampNs - it <= config.itemSeenNs } ?: false)
+        }
     }
 
     /** One prompt, by spec 5.5's priority; "Too dark" needs a light estimate the API does not carry, "Device hot" is the app's */
@@ -161,14 +196,14 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         val s = machine.section
         if (state != SectionState.COUNTING && machine.guardHolds(r.timestampNs)) return Prompt.HOLD_STILL_A_MOMENT
         when (state) {
-            SectionState.IDLE, SectionState.CLOSED -> return Prompt.SCAN_SHELF_LABEL
-            SectionState.FROZEN -> return Prompt.SCAN_LABEL_TO_CONTINUE
+            SectionState.IDLE, SectionState.CLOSED -> return if (machine.itemMode) fallback(r) else Prompt.SCAN_SHELF_LABEL
+            SectionState.FROZEN -> return if (s?.items == true) Prompt.REREAD_COUNTED_ITEMS else Prompt.SCAN_LABEL_TO_CONTINUE
             SectionState.OPEN -> return if (s != null && s.labelled && !s.seeded) Prompt.SCAN_SHELF_LABEL else fallback(r)
             SectionState.COUNTING -> Unit
         }
         val t = s?.table ?: return null
         val c = t.counts()
-        if (c.tentative + c.ambiguous > 0 && !s.rangeAccepted) return Prompt.RANGE_RESCAN
+        if (c.tentative + c.ambiguous > 0 && !s.rangeAccepted && !s.items) return Prompt.RANGE_RESCAN
         if (slowDown) return Prompt.SLOW_DOWN
         if (r.anchor != null && Blur.slideALittle(inView(t, r), r.timestampNs, config)) return Prompt.SLIDE_A_LITTLE
         val m = modulePx
@@ -218,7 +253,7 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
             if (u.state == UnitState.MANUAL) {
                 val (pu, pv) = Prediction.pixel(u.point, tac, k) ?: return@mapNotNull null
                 val size = t.pitchPx(k.fx, Prediction.cameraDepth(u.point, tac)) / k.width
-                return@mapNotNull Marker(u.id, u.state, pu / k.width, pv / k.height, size, u.point, t.pitch)
+                return@mapNotNull Marker(u.id, u.state, pu / k.width, pv / k.height, size, toAppAnchor(u.point), t.pitch)
             }
             if (r.timestampNs - u.lastReadNs > config.markerMaxAgeNs) return@mapNotNull null
             val p = t.predict(u, r) ?: return@mapNotNull null
@@ -227,9 +262,15 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
             val quad = warp(u, tac, k) ?: return@mapNotNull null
             val width = hypot(quad[1].first - quad[0].first, quad[1].second - quad[0].second)
             val (cu, cv) = tracked?.let { Prediction.pixel(it, tac, k) } ?: (quad.sumOf { it.first } / 4 to quad.sumOf { it.second } / 4)
-            Marker(u.id, u.state, cu / k.width, cv / k.height, width / k.width, tracked ?: u.point, sizeM(u))
+            Marker(u.id, u.state, cu / k.width, cv / k.height, width / k.width, toAppAnchor(tracked ?: u.point), sizeM(u))
         }
     }
+
+    /**
+     * A point of the section's (jump-corrected) anchor frame in the frame of the anchor the app holds: after a resume with
+     * correction C the core sees the anchor as A·C⁻¹, so its point X sits at C⁻¹·X in A's frame (JumpResume)
+     */
+    private fun toAppAnchor(p: Vec3): Vec3 = machine.section?.fix?.inverse()?.apply(p) ?: p
 
     /** The symbol's width in metres: its last quad's tl → tr length at the unit's camera depth then */
     private fun sizeM(u: CountUnit): Double {

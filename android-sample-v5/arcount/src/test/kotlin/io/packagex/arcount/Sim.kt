@@ -97,6 +97,11 @@ class Sim(
     var hidden: (Symbol) -> Boolean = { false }
     var readsEnabled = true
 
+    /** Whether the app creates the anchors the counter asks for, and reports the replaced one in the next record */
+    var anchorsOk = true
+    var reportPreviousAnchor = true
+    private var replaced: Pose? = null
+
     /** The engine's decode budget: at most this many codes per engine frame, taken in turn */
     var readsPerFrame = Int.MAX_VALUE
     private var turn = 0
@@ -131,7 +136,8 @@ class Sim(
         luma?.invoke(ts, camera)
         val reported = Pose(camera.t + cameraShift, camera.q)
         val a = anchor?.let { Pose(it.t + anchorShift, it.q) }
-        val record = PoseRecord(ts, reported, a, tracking, a?.let { anchorTracking }, K4K, EXPOSURE_NS)
+        val record = PoseRecord(ts, reported, a, tracking, a?.let { anchorTracking }, K4K, EXPOSURE_NS, previousAnchor = replaced?.takeIf { reportPreviousAnchor })
+        replaced = null
         val reads = if (readsEnabled && frame % engineEvery == 0) budget(shoot(camera, symbols.filterNot(hidden), ts, noisePx, rnd)) else null
         if (readsFirst && reads != null) counter.reads(ts, reads)
         counter.frame(record)
@@ -139,6 +145,11 @@ class Sim(
         lastRecord = record
         counter.anchorRequest()?.let {
             anchorRequests += it
+            if (!anchorsOk) {
+                counter.anchorCreated(false)
+                return@let
+            }
+            replaced = a
             anchor = it.world
             anchorShift = Vec3.ZERO
             counter.anchorCreated(true)
