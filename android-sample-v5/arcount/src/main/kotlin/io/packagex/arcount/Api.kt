@@ -14,6 +14,8 @@ enum class Tracking { TRACKING, PAUSED, STOPPED }
  * @property anchor the section anchor's pose in the world; null while the core has none
  * @property intrinsics of the image the reads come from: the CPU image's intrinsics scaled to the 4K stream
  * @property exposureNs SENSOR_EXPOSURE_TIME of the capture; -1 when unknown
+ * @property previousAnchor in the first record after an anchor the core asked for replaced the one before, that
+ *   one's pose from the same update() (spec 5.10, anchor handoff); null otherwise. The app may detach it after.
  */
 data class PoseRecord(
     val timestampNs: Long,
@@ -23,6 +25,7 @@ data class PoseRecord(
     val anchorTracking: Tracking?,
     val intrinsics: Intrinsics,
     val exposureNs: Long = -1,
+    val previousAnchor: Pose? = null,
 )
 
 /**

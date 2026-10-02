@@ -44,7 +44,7 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         latest = frame
         machine.onFrame(frame)
         for (p in pairing.addRecord(frame)) machine.onReads(p)
-        watchMotion(prev, frame)
+        watchMotion(prev?.let(machine::corrected), machine.corrected(frame))
         cached = null
     }
 
@@ -85,7 +85,7 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
     }
 
     private fun build(): CountView {
-        val r = latest ?: return CountView.EMPTY.copy(closed = machine.closed.toList(), items = items(null, null, emptyList()))
+        val r = machine.corrected(latest ?: return CountView.EMPTY.copy(closed = machine.closed.toList(), items = items(null, null, emptyList())))
         val s = machine.section
         val t = s?.table
         val live = s != null && t != null && r.anchor != null

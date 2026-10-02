@@ -107,19 +107,92 @@ class ItemsTest {
     }
 
     @Test
-    fun beyondTheReachTheSectionClosesAndTheNextListedReadOpensAnother() {
+    fun beyondTheReachTheSectionHandsOverToANewAnchorAndTheUnitsLeftBehindCloseWithTheOldOne() {
         val (sim, core) = counting()
+        val first = core.machine.section!!.id
+        val ids = core.units.map { it.id }.toSet()
+        sim.run(Paths.move(Vec3.ZERO, Vec3(1.2, 0.0, 0.0), 0.3))
+        assertEquals(SectionState.COUNTING, core.view().state)
+        assertEquals(2, sim.anchorRequests.size)
+        assertNotEquals(first, core.machine.section!!.id)
+        // the units are within the reach of the new anchor: all handed over, none left with the old section
+        val old = core.view().closed.single()
+        assertEquals(first, old.sectionId)
+        assertEquals(SectionStatus.COMPLETE, old.status)
+        assertEquals(0, old.counted)
+        assertEquals(ids, core.units.map { it.id }.toSet())
+        sim.symbols = threeA + threeA.map { it.copy(centre = it.centre + Vec3(1.2, 0.0, 0.0), engineId = it.engineId + 10) }
+        sim.run(Paths.hold(cameraAt(1.2), 1.0))
+        assertEquals(ItemCount(GTIN14, 6, 6, true), item(core, GTIN14))
+        // the next handoff leaves the first three behind, more than the reach from its anchor
+        sim.run(Paths.move(Vec3(1.2, 0.0, 0.0), Vec3(2.4, 0.0, 0.0), 0.3))
+        assertEquals(3, sim.anchorRequests.size)
+        val second = core.view().closed.last()
+        assertEquals(SectionStatus.COMPLETE, second.status)
+        assertEquals(3, second.counted)
+        assertEquals(3, core.units.count { it.state == UnitState.COUNTED })
+        val a = item(core, GTIN14)
+        assertTrue("${a.countLow}..${a.countHigh}", a.countLow == 6 && a.countHigh >= 6)
+        assertTrue(core.machine.section!!.breaks.isEmpty())
+    }
+
+    /** One row of [n] identical A units 6 cm apart from x = -0.06, walked at 5 cm/s past the reach */
+    private fun longRow(n: Int, configure: (Sim) -> Unit = {}): Pair<Sim, CountingCore> {
+        val (sim, core) = session(row(n, 0.06, x0 = -0.06))
+        configure(sim)
+        sim.run(Paths.hold(home, 5.5))
+        val end = -0.06 + (n - 1) * 0.06
+        sim.run(Paths.move(Vec3.ZERO, Vec3(end, 0.0, 0.0), 0.05)) {
+            assertTrue(item(core, GTIN14).countLow <= n)
+        }
+        sim.run(Paths.hold(cameraAt(end), 1.0))
+        return sim to core
+    }
+
+    @Test
+    fun aRowLongerThanTheReachIsCountedOnceAcrossTheHandoff() {
+        var before: Map<Int, UnitState> = emptyMap()
+        var section = ""
+        var handedOver: Map<Int, UnitState>? = null
+        val (sim, core) = session(row(27, 0.06, x0 = -0.06))
+        sim.run(Paths.hold(home, 5.5))
+        sim.run(Paths.move(Vec3.ZERO, Vec3(1.5, 0.0, 0.0), 0.05)) {
+            val s = core.machine.section!!
+            val now = core.units.associate { it.id to it.state }
+            if (section.isNotEmpty() && s.id != section && handedOver == null) {
+                handedOver = before.filterKeys { it in now }
+                assertTrue(handedOver!!.all { (id, st) -> st != UnitState.COUNTED || now[id] == UnitState.COUNTED })
+            }
+            section = s.id
+            before = now
+            assertTrue(item(core, GTIN14).countLow <= 27)
+        }
+        sim.run(Paths.hold(cameraAt(1.5), 1.0))
+        // the units in view kept their ids, and a COUNTED one stayed COUNTED
+        assertTrue(handedOver!!.size >= 3)
+        assertTrue(core.events.any { it.contains("handed over") })
+        assertTrue(core.view().closed.isNotEmpty())
+        assertTrue(core.view().closed.all { it.status == SectionStatus.COMPLETE && it.breaks.isEmpty() })
+        assertTrue(core.machine.section!!.breaks.isEmpty())
+        assertEquals(ItemCount(GTIN14, 27, 27, true), item(core, GTIN14))
+    }
+
+    @Test
+    fun withoutThePreviousAnchorInTheRecordTheHandoffUsesTheOldAnchorsLastPose() {
+        val (_, core) = longRow(27) { it.reportPreviousAnchor = false }
+        assertTrue(core.events.any { it.contains("handed over") })
+        assertEquals(ItemCount(GTIN14, 27, 27, true), item(core, GTIN14))
+    }
+
+    @Test
+    fun aRefusedHandoffAnchorClosesTheSectionAsBefore() {
+        val (sim, core) = counting()
+        sim.anchorsOk = false
         sim.run(Paths.move(Vec3.ZERO, Vec3(1.2, 0.0, 0.0), 0.3))
         assertEquals(SectionState.CLOSED, core.view().state)
         val first = core.view().closed.single()
         assertEquals(SectionStatus.COMPLETE, first.status)
         assertEquals(3, first.counted)
-        assertTrue(core.events.any { it.contains("beyond the section's reach") })
-        sim.symbols = threeA.map { it.copy(centre = it.centre + Vec3(1.2, 0.0, 0.0), engineId = it.engineId + 10) }
-        sim.run(Paths.hold(cameraAt(1.2), 1.0))
-        assertEquals(SectionState.COUNTING, core.view().state)
-        assertEquals(2, sim.anchorRequests.size)
-        assertEquals(ItemCount(GTIN14, 6, 6, true), item(core, GTIN14))
     }
 
     @Test

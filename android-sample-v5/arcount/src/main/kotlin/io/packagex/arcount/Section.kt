@@ -16,13 +16,27 @@ import kotlin.math.max
  */
 internal class ResumeAttempt(val startNs: Long, val label: Read?, val record: PoseRecord) {
     val reread = HashSet<Int>()
+
+    /** Item mode: the pose corrections tried (ruling R2) */
+    var hypotheses: List<Hypothesis> = emptyList()
+    var tieNoted = false
+}
+
+/** Ruling R1: the anchor an item section asked for at its reach, with the view it was asked from, until its first record */
+internal class Handoff(val request: AnchorRequest, val view: Vec3) {
+    var created = false
 }
 
 /**
  * One section (spec 5.1): one SKU location with its label, GTIN set, anchor, units and breaks. An item section (spec
  * 5.10, [items]) has no label: its code set is the item list, and it holds every listed code's units.
  */
-class Section internal constructor(val id: String, val labelPayload: String?, gtins: Set<String>, val openedNs: Long, maxRays: Int, val items: Boolean = false) {
+class Section internal constructor(id: String, val labelPayload: String?, gtins: Set<String>, openedNs: Long, maxRays: Int, val items: Boolean = false) {
+    /** An item section takes the next id at each anchor handoff (spec 5.10, ruling R1) */
+    var id = id
+        internal set
+    var openedNs = openedNs
+        internal set
     val labelled get() = labelPayload != null
     var gtins = gtins
         internal set
@@ -63,6 +77,13 @@ class Section internal constructor(val id: String, val labelPayload: String?, gt
     internal var frozenAtNs = Long.MIN_VALUE
     internal var segmentStartNs = Long.MIN_VALUE
     internal val labelTrack = DepthTrack(maxRays)
+
+    /** Ruling R2: the correction applied to every pose this section sees, from a jump-compensated resume */
+    internal var fix: Pose? = null
+
+    /** Ruling R2: the correction measured from the world jumps since the last resume, relative to the poses the section sees */
+    internal var pending: Pose? = null
+    internal var handoff: Handoff? = null
 }
 
 /**
@@ -113,12 +134,19 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         if (state == COUNTING) freeze(s, timestampNs, BreakReason.FRAME_NOT_TRACKING)
     }
 
-    fun onFrame(r: PoseRecord) {
-        if (resumedAtNs == null) resumedAtNs = r.timestampNs
-        trackingSinceNs = if (r.frameTracking == Tracking.TRACKING) trackingSinceNs ?: r.timestampNs else null
-        val prev = lastRecord
-        lastRecord = r
+    fun onFrame(raw: PoseRecord) {
+        if (resumedAtNs == null) resumedAtNs = raw.timestampNs
+        trackingSinceNs = if (raw.frameTracking == Tracking.TRACKING) trackingSinceNs ?: raw.timestampNs else null
+        var prevRaw = lastRecord
+        lastRecord = raw
+        val h = section?.handoff
+        if (h != null && isSwitch(h, raw, prevRaw)) {
+            switchAnchor(section!!, h, raw, prevRaw)
+            prevRaw = null
+        }
         val s = section ?: return
+        val r = corrected(s, raw)
+        val prev = prevRaw?.let { corrected(s, it) }
         when (state) {
             OPEN -> openFrame(s, r)
             COUNTING -> countingFrame(s, r, prev)
@@ -127,6 +155,11 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         }
     }
 
+    /** [r] as the open section sees it: with the correction of a jump-compensated resume (ruling R2) */
+    fun corrected(r: PoseRecord): PoseRecord = section?.let { corrected(it, r) } ?: r
+
+    private fun corrected(s: Section, r: PoseRecord) = JumpResume.corrected(r, s.fix)
+
     /** The raw reads of a capture as they arrive, for the jump test's picture motion */
     fun noteReads(timestampNs: Long, reads: List<Read>) {
         recent[timestampNs] = reads
@@ -134,8 +167,8 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     }
 
     fun onReads(paired: Paired) {
-        val r = paired.record
         val s = section
+        val r = if (s == null) paired.record else corrected(s, paired.record)
         when {
             s == null -> idleReads(r, paired.reads)
             state == OPEN -> openReads(s, r, paired.reads)
@@ -220,10 +253,21 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         s.table?.frame?.gtins = next.keys
     }
 
-    fun anchorRequest(): AnchorRequest? = section?.request
+    fun anchorRequest(): AnchorRequest? = section?.let { s -> s.handoff?.takeIf { !it.created }?.request ?: s.request }
 
     fun onAnchorCreated(ok: Boolean) {
         val s = section ?: return
+        val h = s.handoff
+        if (h != null && !h.created) {
+            if (ok) {
+                h.created = true
+            } else {
+                s.handoff = null
+                note("${s.id}: the handoff anchor was not created")
+                if (state == COUNTING) close(s, lastRecord?.timestampNs ?: s.openedNs, statusOf(s))
+            }
+            return
+        }
         if (s.request == null) return
         s.request = null
         if (ok) {
@@ -287,16 +331,17 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
                 restart(s, ts)
             }
             r.anchor == null || r.anchorTracking != Tracking.TRACKING -> freeze(s, ts, BreakReason.ANCHOR_NOT_TRACKING)
-            prev?.anchor != null && jumped(prev, r) -> freeze(s, ts, BreakReason.WORLD_JUMP)
+            prev?.anchor != null && jumped(prev, r) -> {
+                if (s.items) s.pending = JumpResume.compose(s.pending, JumpResume.step(prev, r))
+                freeze(s, ts, BreakReason.WORLD_JUMP)
+            }
             else -> {
                 s.anchor = r.anchor
                 val t = s.table ?: return
-                // spec 5.10: leaving the view and silence are not breaks in item mode; going beyond the reach closes
+                // spec 5.10: leaving the view and silence are not breaks in item mode; beyond the reach the section
+                // asks for a new anchor near the camera and hands its units over to it (ruling R1)
                 if (s.items) {
-                    if (beyondReach(r)) {
-                        note("${s.id}: camera beyond the section's reach")
-                        close(s, ts, statusOf(s))
-                    }
+                    if (beyondReach(r) && s.handoff == null) requestHandoff(s, r)
                     return
                 }
                 if (elementInImage(s, t, r)) s.lastInSectionNs = ts
@@ -358,6 +403,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             else -> null
         }
         val at = s.attempt
+        if (reason == BreakReason.WORLD_JUMP && s.items) s.pending = JumpResume.compose(s.pending, JumpResume.step(prev!!, r))
         if (reason != null) {
             if (at != null) {
                 note("${s.id}: $reason inside the resume window, attempt cancelled")
@@ -372,7 +418,10 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             failResume(s, r.timestampNs, null, null, "the camera went beyond the section's reach")
             return
         }
-        if (at != null && r.timestampNs - at.startNs > config.resumeWindowNs) failResume(s, r.timestampNs, at.label, at.record, "two counted units not re-read within the window")
+        if (at != null && r.timestampNs - at.startNs > config.resumeWindowNs) {
+            val tried = if (at.hypotheses.isEmpty()) "" else "; candidates " + at.hypotheses.joinToString { "${it.pitches}: ${it.reread.size}" + if (it.ruledOut) " ruled out" else "" }
+            failResume(s, r.timestampNs, at.label, at.record, "two counted units not re-read within the window$tried")
+        }
     }
 
     /** Item mode (spec 5.10): the camera centre farther than [CountConfig.sectionReach] from the section anchor */
@@ -496,17 +545,89 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         if (open != null && ts < open.startNs) return
         if (open == null) {
             if (reads.none { !it.touchesBorder && t.frame.keyOf(it) in t.frame.gtins }) return
-            s.attempt = ResumeAttempt(ts, null, r)
-            note("${s.id}: listed code read, resume window open")
+            val base = s.pending
+            s.attempt = ResumeAttempt(ts, null, r).also {
+                it.hypotheses = JumpResume.hypotheses(base ?: Pose.IDENTITY, t.pitch, t.frame.plane.shelfAxis, aliases = base != null)
+            }
+            note("${s.id}: listed code read, resume window open" + if (base != null) ", trying the jump's correction and its aliases" else "")
         }
         val at = s.attempt ?: return
-        val check = t.check(r, reads)
-        if (check.inBand) {
-            failResume(s, ts, null, null, "a read fell in an ambiguity band")
+        when (val v = JumpResume.evaluate(at.hypotheses, t, r, reads, config.resumeMinUnits, anyBand = at.hypotheses.size == 1, tied = at.tieNoted)) {
+            JumpResume.Verdict.AllRuledOut -> failResume(s, ts, null, null, "a read fell in an ambiguity band or on a unit of another code")
+            JumpResume.Verdict.Tie -> if (!at.tieNoted) {
+                at.tieNoted = true
+                note("${s.id}: a tie between ${at.hypotheses.filter { !it.ruledOut && it.reread.size >= config.resumeMinUnits }.map { it.pitches }} pitches, no resume")
+            }
+            JumpResume.Verdict.Wait -> Unit
+            is JumpResume.Verdict.Resume -> {
+                if (s.pending != null) {
+                    s.fix = v.with.correction * (s.fix ?: Pose.IDENTITY)
+                    note("${s.id}: resumed with the jump's correction, alias ${v.with.pitches}")
+                }
+                s.pending = null
+                resume(s, ts)
+            }
+        }
+    }
+
+    /** Ruling R1: an anchor 0.40 m along the camera's optical axis, gravity-aligned, facing the camera */
+    private fun requestHandoff(s: Section, r: PoseRecord) {
+        val view = r.camera.rotate(Vec3(0.0, 0.0, -1.0))
+        s.handoff = Handoff(AnchorRequest(anchorPose(r.camera.t + view * config.anchorDepth, view)), view)
+        note("${s.id}: camera beyond the section's reach, new anchor asked for")
+    }
+
+    /** The first record carrying the handoff anchor: it names the anchor it replaced, or lies nearer the asked-for pose than the old one */
+    private fun isSwitch(h: Handoff, raw: PoseRecord, prevRaw: PoseRecord?): Boolean {
+        val a = raw.anchor ?: return false
+        if (raw.previousAnchor != null) return true
+        if (!h.created) return false
+        val old = prevRaw?.anchor ?: return true
+        return (a.t - h.request.world.t).norm() < (a.t - old.t).norm()
+    }
+
+    /**
+     * Ruling R1: the open item section moves to the new anchor. Its units within the reach of that anchor go into its
+     * frame by T_new_old = A_new⁻¹ · A_old · fix⁻¹, both anchors taken from one record (the old one from the record
+     * before when the app did not report it), and keep their ids; the units left behind close as the old section,
+     * COMPLETE or UNRESOLVED. A section that froze meanwhile is abandoned, and a new one starts on the new anchor.
+     */
+    private fun switchAnchor(s: Section, h: Handoff, raw: PoseRecord, prevRaw: PoseRecord?) {
+        s.handoff = null
+        val ts = raw.timestampNs
+        val aNew = raw.anchor!!
+        val aOld = raw.previousAnchor ?: prevRaw?.anchor
+        if (raw.previousAnchor == null) note("${s.id}: the record has no previous anchor, the old anchor's last pose is used")
+        val t = s.table
+        if (state != COUNTING || t == null || aOld == null) {
+            if (t != null && state != OPEN) close(s, ts, SectionStatus.ABANDONED)
+            val n = Section("S${nextSection++}", null, itemList.keys, ts, config.maxRays, items = true)
+            n.seeded = true
+            n.anchorCreated = true
+            n.seedPoint = h.request.world.t
+            n.view = h.view
+            section = n
+            state = OPEN
+            note("${n.id}: OPEN on the handoff anchor after ${s.id}")
             return
         }
-        at.reread += check.countedReread
-        if (at.reread.size >= config.resumeMinUnits) resume(s, ts)
+        val tno = aNew.inverse() * aOld * (s.fix ?: Pose.IDENTITY).inverse()
+        val left = t.reanchor(tno, config.sectionReach)
+        val counts = left.counts()
+        val status = if (counts.tentative + counts.ambiguous > 0) SectionStatus.UNRESOLVED else SectionStatus.COMPLETE
+        results += sectionResult(s.id, null, s.gtins, status, counts, 0, 0, s.breaks.toList(), (ts - s.openedNs) / 1_000_000)
+        itemTotals.add(left.countsByCode())
+        val next = "S${nextSection++}"
+        note("${s.id}: $status, ${counts.low}..${counts.high}, handed over to $next")
+        s.id = next
+        s.openedNs = ts
+        s.anchor = aNew
+        s.fix = null
+        s.pending = null
+        s.attempt = null
+        s.breakList.clear()
+        s.liveSinceNs = ts
+        s.segmentStartNs = ts
     }
 
     private fun resume(s: Section, ts: Long) {
@@ -633,12 +754,17 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         val ray = read.ray(r, anchor = null)
         val view = r.camera.rotate(Vec3(0.0, 0.0, -1.0))
         val point = ray.at(config.anchorDepth)
-        val yaw = if (view.x * view.x + view.z * view.z < 1e-12) 0.0 else atan2(-view.x, -view.z)
         s.seedRay = ray
         s.seedPoint = point
         s.view = view
         s.seeded = true
-        s.request = AnchorRequest(Pose(point, Quat.axisAngle(Vec3(0.0, 1.0, 0.0), yaw)))
+        s.request = AnchorRequest(anchorPose(point, view))
+    }
+
+    /** Gravity-aligned at [point], its +Z facing a camera looking along [view] */
+    private fun anchorPose(point: Vec3, view: Vec3): Pose {
+        val yaw = if (view.x * view.x + view.z * view.z < 1e-12) 0.0 else atan2(-view.x, -view.z)
+        return Pose(point, Quat.axisAngle(Vec3(0.0, 1.0, 0.0), yaw))
     }
 
     private fun restart(s: Section, ts: Long) {
@@ -647,6 +773,10 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     }
 
     private fun freeze(s: Section, ts: Long, reason: BreakReason) {
+        if (s.handoff?.created == false) {
+            s.handoff = null
+            note("${s.id}: handoff cancelled by the break")
+        }
         s.breakList += ts to reason
         s.frozenAtNs = ts
         s.attempt = null
