@@ -149,8 +149,19 @@ fun ResultDrawer(
             DrawerHeader(result = result, tags = tags, itemCount = itemCount, onReport = { reportOpen = true }, onClose = { onAction(ScannerAction.CloseResult) })
 
             // v6: the captured image sits in its own fixed-height, scrollable frame above the details.
-            (result as? ScanResult.Ocr)?.let { boxedOcr(it) }?.let { (img, fields) ->
-                ResultImage { BoxedOcrImage(image = img, fields = fields, selected = selectedField, onSelect = { selectedField = it }) }
+            // The photo stays on top once the fields arrive (it was shown while loading): with its field boxes when the
+            // result has them, else plain (VLM answers, document classes)
+            (result as? ScanResult.Ocr)?.let { ocr ->
+                val boxed = boxedOcr(ocr)
+                if (boxed != null) {
+                    ResultImage { BoxedOcrImage(image = boxed.first, fields = boxed.second, selected = selectedField, onSelect = { selectedField = it }) }
+                } else {
+                    ocr.image?.let { img ->
+                        ResultImage {
+                            Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                        }
+                    }
+                }
             }
             (result as? ScanResult.TextTemplate)?.image?.let { img ->
                 ResultImage {
