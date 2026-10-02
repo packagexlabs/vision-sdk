@@ -44,7 +44,6 @@ import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -345,23 +344,10 @@ private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit,
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (state.mode == ScanMode.Ocr) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(PX.Glass, RoundedCornerShape(12.dp))
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onAction(ScannerAction.PickPhoto) }
-                        .semantics { contentDescription = "Import from Photos" },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(Icons.Outlined.Photo, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                }
-            } else {
-                Spacer(Modifier.size(48.dp))
-            }
+            Spacer(Modifier.size(48.dp))
+            // Vision Scanner has no side picture buttons (no Photos import, no last-result thumbnail)
             val last = state.lastResult
-            if (last != null && last.first == state.mode) {
+            if (last != null && last.first == state.mode && state.mode != ScanMode.Ocr) {
                 LastThumb(
                     result = last.second,
                     modifier = Modifier

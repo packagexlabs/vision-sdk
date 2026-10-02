@@ -66,12 +66,4 @@ class ScannerScreenTest {
         rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(detectionEnabled = false), cameraView = {}) {} } }
         rule.onNodeWithText("Detection paused").assertExists()
     }
-
-    @Test
-    fun visionScannerOffersPhotoImport() {
-        var got: ScannerAction? = null
-        rule.setContent { VisionTheme { ScannerScreen(ScannerUiState(mode = ScanMode.Ocr), cameraView = {}) { got = it } } }
-        rule.onNodeWithContentDescription("Import from Photos").performClick()
-        assertEquals(ScannerAction.PickPhoto, got)
-    }
 }

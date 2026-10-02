@@ -649,20 +649,6 @@ class ScannerViewModelTest {
         advanceTimeBy(151); assertFalse(v.state.value.flash)
     }
 
-    @Test fun photoImportRunsOcrOnlyInVisionScanner() = runTest {
-        val x = FakeExtraction("""{"data":{"tracking_number":"1Z"}}"""); val v = vm(x)
-        v.effects.test {
-            v.onAction(ScannerAction.PickPhoto); v.onAction(ScannerAction.ImportPhoto(fakeBitmap()))
-            expectNoEvents()
-            v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
-            v.onAction(ScannerAction.PickPhoto); assertEquals(ScannerEffect.PickPhoto, awaitItem())
-            v.onAction(ScannerAction.ImportPhoto(fakeBitmap())); assertEquals(ScannerEffect.Toast("Image picked from Photos"), awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-        advanceUntilIdle()
-        assertEquals(1, x.calls); assertEquals("1Z", (v.state.value.result as ScanResult.Ocr).result.primary?.value)
-    }
-
     /** Barcode/QR multiple scan: the SDK's engine overlay draws the boxes, so the app draws none (no code outlined
      *  twice); Vision Scanner keeps the app's own boxes. */
     @Test fun codeMultipleScanLeavesBoxesToTheSdkAndVisionScannerDrawsItsOwn() = runTest {

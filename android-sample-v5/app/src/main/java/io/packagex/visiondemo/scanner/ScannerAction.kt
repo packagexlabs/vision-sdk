@@ -1,6 +1,5 @@
 package io.packagex.visiondemo.scanner
 
-import android.graphics.Bitmap
 import android.graphics.RectF
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.Prefs
@@ -90,10 +89,6 @@ sealed interface ScannerAction {
     data object FlipCamera : ScannerAction
     /** Tap on the camera, in view-normalized (0..1) coordinates. */
     data class Focus(val x: Float, val y: Float) : ScannerAction
-    /** Vision Scanner's Photos button: asks the UI to open the picker ([ScannerEffect.PickPhoto]). */
-    data object PickPhoto : ScannerAction
-    /** An image picked from Photos: extracted like a capture (Vision Scanner only). */
-    data class ImportPhoto(val bitmap: Bitmap) : ScannerAction
 
     // AR Item Count
     /** Outcome of [ScannerEffect.InstallArCore]. */
@@ -123,8 +118,6 @@ sealed interface ScannerEffect {
     data object Haptic : ScannerEffect
     /** Put [text] on the clipboard with `ClipDescription.EXTRA_IS_SENSITIVE = true` (scanned values can be personal data). */
     data class Copy(val text: String) : ScannerEffect
-    /** Open the system photo picker; send [ScannerAction.ImportPhoto] with the picked image. */
-    data object PickPhoto : ScannerEffect
     /** AR isn't installed yet: `ArCoreApk.requestInstall` from the Activity, then send [ScannerAction.ArInstallResult]. */
     data object InstallArCore : ScannerEffect
     /** Share the exported document PDF (through the app's FileProvider). */

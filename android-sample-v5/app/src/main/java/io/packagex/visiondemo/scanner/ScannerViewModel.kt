@@ -238,11 +238,6 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.RescanDocument -> { doc.rescan(a.dropLast); closeResult() }
             is ScannerAction.ExportPdf -> doc.exportPdf(a.enhanced)
             is ScannerAction.Focus -> focus(a.x, a.y)
-            ScannerAction.PickPhoto -> if (s.mode == ScanMode.Ocr) _effects.trySend(ScannerEffect.PickPhoto)
-            is ScannerAction.ImportPhoto -> if (s.mode == ScanMode.Ocr) {   // the mode may have changed while the picker was up
-                toast("Image picked from Photos")
-                runOcr(a.bitmap, emptyList())
-            }
             is ScannerAction.ArInstallResult -> when (a.result) {
                 ArInstall.Installed -> { arInstalled = true; if (usesAr && !s.home && !s.gated) startAr() }
                 ArInstall.Declined -> leaveAr("AR Item Count needs Google Play Services for AR")
