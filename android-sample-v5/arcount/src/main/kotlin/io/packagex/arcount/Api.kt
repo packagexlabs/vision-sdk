@@ -102,6 +102,7 @@ enum class Prompt {
     MOVE_CLOSER,
     HOLD_WITHIN_30CM,
     DEVICE_HOT,
+    REREAD_COUNTED_ITEMS,
 }
 
 /** A unit's marker in normalized coordinates (0..1) of the unrotated image of the latest frame */
