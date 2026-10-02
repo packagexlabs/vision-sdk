@@ -14,6 +14,7 @@ import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.CameraConfig
@@ -100,6 +101,7 @@ class ArSessionController @Inject constructor(
     private var pauseWanted = false
     private var opening = false
     private var running = false
+    private var runningSinceMs = 0L
     private var rebuilds = 0
 
     override fun installed(): Boolean =
@@ -293,6 +295,7 @@ class ArSessionController @Inject constructor(
         // Per-frame metadata while ARCore owns the request: the app's own repeating-request callback stops after resume().
         s.sharedCamera.setCaptureCallback(metaCallback, cameraHandler)
         running = true
+        runningSinceMs = SystemClock.elapsedRealtime()
         opening = false
         r.session = s
         r.resumed()
@@ -320,6 +323,7 @@ class ArSessionController @Inject constructor(
     private fun rebuild(gen: Int, why: String) {
         if (gen != generation) return
         Log.w(TAG, "camera lost ($why), rebuilding")
+        if (SystemClock.elapsedRealtime() - runningSinceMs >= HEALTHY_RUN_MS) rebuilds = 0 // the budget is for a camera that keeps failing
         stopCamera()
         if (++rebuilds > MAX_REBUILDS) {
             _errors.tryEmit("Camera not available")
@@ -404,7 +408,15 @@ class ArSessionController @Inject constructor(
 
         override fun onDisconnected(d: CameraDevice) {
             d.close()
-            main.post { rebuild(gen, "disconnected") }
+            main.post {
+                if (gen != generation) return@post
+                if (running) {
+                    rebuild(gen, "disconnected")
+                } else { // still opening: the scanner may not have let go yet
+                    device = null
+                    retryOrFail(gen, retriesLeft)
+                }
+            }
         }
 
         override fun onError(d: CameraDevice, error: Int) {
@@ -472,6 +484,9 @@ class ArSessionController @Inject constructor(
         const val RETRIES = 3
         const val RETRY_MS = 400L
         const val MAX_REBUILDS = 3
+
+        /** A run this long shows the camera works: a failure after it starts on a full rebuild budget again. */
+        const val HEALTHY_RUN_MS = 10_000L
         const val CLOSE_WAIT_MS = 1_000L
     }
 }
