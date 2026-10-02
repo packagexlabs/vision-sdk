@@ -51,6 +51,11 @@ class Section internal constructor(val id: String, val labelPayload: String?, gt
     internal var quietSinceNs = openedNs
     internal var lastSectionReadNs = openedNs
     internal var attempt: ResumeAttempt? = null
+
+    /** Capture times before which a late batch of reads changes nothing: the anchor's first pose, the last break, this segment's start */
+    internal var liveSinceNs = Long.MAX_VALUE
+    internal var frozenAtNs = Long.MIN_VALUE
+    internal var segmentStartNs = Long.MIN_VALUE
     internal val labelTrack = DepthTrack(maxRays)
 }
 
@@ -70,6 +75,10 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     var lastRecord: PoseRecord? = null
         private set
     val events: List<String> get() = log.toList()
+
+    /** Batches of reads dropped because they were captured before the section's state last changed (a break, the anchor, a resume) */
+    var staleBatches = 0
+        private set
 
     private val results = ArrayList<SectionResult>()
     private val log = ArrayDeque<String>()
@@ -101,7 +110,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         when (state) {
             OPEN -> openFrame(s, r)
             COUNTING -> countingFrame(s, r, prev)
-            FROZEN -> frozenFrame(s, r)
+            FROZEN -> frozenFrame(s, r, prev)
             else -> Unit
         }
     }
@@ -214,6 +223,8 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         }
         s.table = UnitTable(config, frame)
         s.anchor = a
+        s.liveSinceNs = r.timestampNs
+        s.segmentStartNs = r.timestampNs
         note("${s.id}: anchor live")
     }
 
@@ -273,15 +284,33 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         return t.units.any { it.state != UnitState.MANUAL && t.predict(it, r)?.inImage(k) == true }
     }
 
-    private fun frozenFrame(s: Section, r: PoseRecord) {
+    private fun frozenFrame(s: Section, r: PoseRecord, prev: PoseRecord?) {
         if (r.anchor != null) s.anchor = r.anchor
         if (r.anchorTracking == Tracking.STOPPED) {
             note("${s.id}: anchor stopped")
             restart(s, r.timestampNs)
             return
         }
-        val at = s.attempt ?: return
-        if (r.timestampNs - at.startNs > config.resumeWindowNs) failResume(s, r.timestampNs, at.label, at.record, "two counted units not re-read within the window")
+        // review I1: the break conditions keep running while FROZEN. Each one moves the stale cut-off, so nothing
+        // captured before it can open or complete a resume; inside the resume window it also cancels the attempt
+        val reason = when {
+            r.frameTracking != Tracking.TRACKING -> BreakReason.FRAME_NOT_TRACKING
+            r.anchor == null || r.anchorTracking != Tracking.TRACKING -> BreakReason.ANCHOR_NOT_TRACKING
+            prev?.anchor != null && prev.frameTracking == Tracking.TRACKING && jumped(prev, r) -> BreakReason.WORLD_JUMP
+            else -> null
+        }
+        val at = s.attempt
+        if (reason != null) {
+            if (at != null) {
+                note("${s.id}: $reason inside the resume window, attempt cancelled")
+                freeze(s, r.timestampNs, reason)
+            } else {
+                if (reason == BreakReason.WORLD_JUMP) note("${s.id}: WORLD_JUMP while frozen")
+                s.frozenAtNs = r.timestampNs
+            }
+            return
+        }
+        if (at != null && r.timestampNs - at.startNs > config.resumeWindowNs) failResume(s, r.timestampNs, at.label, at.record, "two counted units not re-read within the window")
     }
 
     private fun idleReads(r: PoseRecord, reads: List<Read>) {
@@ -291,6 +320,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
 
     private fun openReads(s: Section, r: PoseRecord, reads: List<Read>) {
         val ts = r.timestampNs
+        if (stale(s, ts, if (s.table == null) s.openedNs else s.liveSinceNs)) return
         if (r.frameTracking != Tracking.TRACKING) return
         val labels = reads.filter { isLabel(it, r, s) }
         val units = reads.filterNot { it in labels }
@@ -323,6 +353,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     }
 
     private fun countingReads(s: Section, r: PoseRecord, reads: List<Read>) {
+        if (stale(s, r.timestampNs, s.segmentStartNs)) return
         if (r.frameTracking != Tracking.TRACKING || r.anchor == null || r.anchorTracking != Tracking.TRACKING) return
         val labels = reads.filter { isLabel(it, r, s) }
         nextLabel(s, labels, r)?.let {
@@ -332,11 +363,23 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         }
         if (s.labelled) labels.firstOrNull { it.text == s.labelPayload && !it.touchesBorder }?.let { refineLabel(s, it, r) }
         val out = s.table?.associate(r, reads.filterNot { it in labels }, s.segment) ?: return
-        if (out.accepted > 0) s.lastSectionReadNs = r.timestampNs
+        if (out.accepted > 0) s.lastSectionReadNs = max(s.lastSectionReadNs, r.timestampNs)
+    }
+
+    /**
+     * A batch captured before [since] (the anchor's first pose, the last break, or the start of this segment) was decoded
+     * from a pose the section no longer stands on: it is dropped and counted, so it can neither resume nor change a unit.
+     */
+    private fun stale(s: Section, captureNs: Long, since: Long): Boolean {
+        if (captureNs >= since) return false
+        staleBatches++
+        note("${s.id}: reads captured before the section's last change of state dropped")
+        return true
     }
 
     private fun frozenReads(s: Section, r: PoseRecord, reads: List<Read>) {
         val ts = r.timestampNs
+        if (stale(s, ts, s.frozenAtNs)) return
         if (guardHolds(ts) || r.frameTracking != Tracking.TRACKING || r.anchor == null || r.anchorTracking != Tracking.TRACKING) return
         val labels = reads.filter { isLabel(it, r, s) }
         nextLabel(s, labels, r)?.let {
@@ -346,12 +389,16 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         }
         if (!s.labelled) return
         val t = s.table ?: return
-        if (s.attempt == null) {
-            val own = labels.firstOrNull { it.text == s.labelPayload && !it.touchesBorder } ?: return
-            if (!labelWhereItWas(t, own, r)) {
-                failResume(s, ts, own, r, "the label was read away from where it was")
-                return
-            }
+        val own = labels.firstOrNull { it.text == s.labelPayload && !it.touchesBorder }
+        val open = s.attempt
+        // only reads captured at or after the window's label read count for it (review I1)
+        if (open != null && ts < open.startNs) return
+        if (own != null && !labelWhereItWas(t, own, r)) {
+            failResume(s, ts, own, r, if (open == null) "the label was read away from where it was" else "the label moved inside the resume window")
+            return
+        }
+        if (open == null) {
+            if (own == null) return
             s.attempt = ResumeAttempt(ts, own, r)
             note("${s.id}: label where it was, resume window open")
         }
@@ -365,6 +412,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         if (at.reread.size < config.resumeMinUnits) return
         s.attempt = null
         s.segment++
+        s.segmentStartNs = ts
         s.lastInSectionNs = ts
         s.quietSinceNs = ts
         s.lastSectionReadNs = ts
@@ -485,6 +533,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
 
     private fun freeze(s: Section, ts: Long, reason: BreakReason) {
         s.breakList += ts to reason
+        s.frozenAtNs = ts
         s.attempt = null
         state = FROZEN
         note("${s.id}: FROZEN, $reason")

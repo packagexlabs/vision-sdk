@@ -30,7 +30,13 @@ class ScenarioTest {
         return Sim(symbols, CoreCounter(core), noisePx = noisePx, seed = seed, readsFirst = readsFirst) to core
     }
 
-    private fun Sim.go(path: List<Pose>) = run(path) { views += (counter as CoreCounter).core.view() }
+    private fun Sim.go(path: List<Pose>) = run(path) { views += coreOf(counter).view() }
+
+    private fun coreOf(c: Counter) = when (c) {
+        is CoreCounter -> c.core
+        is LateCounter -> c.core
+        else -> error("no core behind $c")
+    }
 
     /** No view ever showed more than [n] as a definite count, and no closed section claimed more */
     private fun neverMoreThan(n: Int, core: CountingCore) {
@@ -254,6 +260,105 @@ class ScenarioTest {
         truthKept(stopAndRead(2, 3, stop = "slide", back = true))
         truthKept(stopAndRead(2, 4, stop = "slide", back = true))
         truthKept(stopAndRead(3, 1, stop = "sway", back = true))
+    }
+
+    /** Counting at x = 10 cm with reads a record late, then a one-pitch jump that stays, on a frame after a read frame */
+    private fun jumpWithLateReads(seed: Int, onlyTheLabelInFlight: Boolean): Pair<Sim, CountingCore> {
+        views.clear()
+        val core = CountingCore(hostConfig)
+        val sim = Sim(row(10, 0.06) + label(), LateCounter(core), noisePx = 1.0, seed = seed, readsFirst = false)
+        sim.go(Paths.hold(home, 5.5))
+        sim.go(Paths.move(Vec3.ZERO, Vec3(0.10, 0.0, 0.0), 0.03))
+        sim.go(Paths.hold(cameraAt(0.10), 1.0))
+        assertEquals(SectionState.COUNTING, core.view().state)
+        if (onlyTheLabelInFlight) {
+            // the last read frame before the jump decodes only the label
+            while (sim.frame % 3 != 0) sim.step(cameraAt(0.10))
+            sim.hidden = { it.text == GTIN }
+            sim.step(cameraAt(0.10))
+            sim.hidden = { false }
+        } else {
+            while (sim.frame % 3 != 1) sim.step(cameraAt(0.10))
+        }
+        sim.jumpCamera(Vec3(0.06, 0.0, 0.0))
+        sim.go(Paths.hold(cameraAt(0.10), 0.5))
+        sim.go(Paths.move(Vec3(0.10, 0.0, 0.0), Vec3(0.60, 0.0, 0.0), 0.03))
+        sim.go(Paths.hold(cameraAt(0.60), 1.0))
+        sim.command(Command.Finish)
+        return sim to core
+    }
+
+    @Test
+    fun readsCapturedBeforeAWorldJumpCannotResumeIt() {
+        val (_, core) = jumpWithLateReads(seed = 11, onlyTheLabelInFlight = false)
+        assertTrue(core.events.none { it.contains("resumed") })
+        truthKept(core)
+    }
+
+    @Test
+    fun aLabelReadCapturedBeforeAWorldJumpCannotOpenTheResumeWindow() {
+        val (_, core) = jumpWithLateReads(seed = 12, onlyTheLabelInFlight = true)
+        assertTrue(core.events.none { it.contains("resumed") })
+        truthKept(core)
+    }
+
+    @Test
+    fun aWorldJumpInsideTheResumeWindowFailsTheResume() {
+        views.clear()
+        val (sim, core) = session(row(10, 0.06) + label(), seed = 21)
+        sim.go(Paths.hold(home, 5.5))
+        sim.go(Paths.move(Vec3.ZERO, Vec3(0.10, 0.0, 0.0), 0.03))
+        sim.go(Paths.hold(cameraAt(0.10), 1.0))
+        // a one-frame tracking loss freezes the section
+        sim.tracking = Tracking.PAUSED
+        sim.step(cameraAt(0.10))
+        sim.tracking = Tracking.TRACKING
+        // only the label is read: once the guard has passed, its read opens the resume window
+        sim.hidden = { it.text == GTIN }
+        sim.go(Paths.hold(cameraAt(0.10), 2.3))
+        assertTrue(core.events.any { it.contains("resume window open") })
+        // inside the window ARCore jumps one pitch and the anchor stays; the units can be read again
+        sim.jumpCamera(Vec3(0.06, 0.0, 0.0))
+        sim.hidden = { false }
+        sim.go(Paths.hold(cameraAt(0.10), 0.5))
+        sim.go(Paths.move(Vec3(0.10, 0.0, 0.0), Vec3(0.60, 0.0, 0.0), 0.03))
+        sim.go(Paths.hold(cameraAt(0.60), 1.0))
+        sim.command(Command.Finish)
+        assertTrue(core.events.none { it.contains("resumed") })
+        truthKept(core)
+    }
+
+    @Test
+    fun aLabelReadCapturedBeforeAJumpWhileFrozenCannotOpenTheResumeWindow() {
+        views.clear()
+        val core = CountingCore(hostConfig)
+        val sim = Sim(row(10, 0.06) + label(), LateCounter(core), noisePx = 1.0, seed = 13, readsFirst = false)
+        sim.go(Paths.hold(home, 5.5))
+        sim.go(Paths.move(Vec3.ZERO, Vec3(0.10, 0.0, 0.0), 0.03))
+        sim.go(Paths.hold(cameraAt(0.10), 1.0))
+        // a one-frame tracking loss freezes the section; nothing decodes until the guard has passed
+        sim.tracking = Tracking.PAUSED
+        sim.step(cameraAt(0.10))
+        sim.tracking = Tracking.TRACKING
+        sim.hidden = { true }
+        sim.go(Paths.hold(cameraAt(0.10), 2.2))
+        // the label decodes on the last frame before a one-pitch jump; its read arrives after the jump's record
+        while (sim.frame % 3 != 0) sim.step(cameraAt(0.10))
+        sim.hidden = { it.text == GTIN }
+        sim.step(cameraAt(0.10))
+        sim.hidden = { true }
+        sim.jumpCamera(Vec3(0.06, 0.0, 0.0))
+        sim.step(cameraAt(0.10))
+        // after the jump only the units are read for a second, then everything
+        sim.hidden = { it.text == LABEL }
+        sim.go(Paths.hold(cameraAt(0.10), 1.0))
+        sim.hidden = { false }
+        sim.go(Paths.hold(cameraAt(0.10), 0.5))
+        sim.go(Paths.move(Vec3(0.10, 0.0, 0.0), Vec3(0.60, 0.0, 0.0), 0.03))
+        sim.go(Paths.hold(cameraAt(0.60), 1.0))
+        sim.command(Command.Finish)
+        assertTrue(core.events.none { it.contains("resumed") })
+        truthKept(core)
     }
 
     @Test

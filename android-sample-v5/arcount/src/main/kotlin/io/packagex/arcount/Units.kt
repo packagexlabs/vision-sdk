@@ -181,17 +181,29 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         return u
     }
 
-    /** Takes back the last unit added by hand; an AMBIGUOUS unit linked to it becomes TENTATIVE */
+    /**
+     * Takes back the last unit added by hand. An AMBIGUOUS unit linked to it stays AMBIGUOUS (review I2: as TENTATIVE
+     * its next read would count it, a duplicate when its code belongs to a counted unit): it is linked again to the
+     * nearest unit whose band held its last read, at that read's pose, or to none; it then counts only by ruling R2.
+     */
     fun removeLastManual(): Boolean {
         val m = all.lastOrNull { it.state == MANUAL } ?: return false
         all.remove(m)
         for (u in all) {
             if (u.linkedTo != m.id) continue
-            u.linkedTo = null
-            if (u.state == AMBIGUOUS) u.state = TENTATIVE
+            u.linkedTo = relink(u)
+            note("unit ${u.id}: stays AMBIGUOUS, linked to unit ${u.linkedTo}")
         }
         note("unit ${m.id}: MANUAL removed")
         return true
+    }
+
+    /** The nearest unit whose band holds [u]'s last read, at that read's pose */
+    private fun relink(u: CountUnit): Int? {
+        val read = u.lastRead ?: return null
+        val record = u.lastRecord ?: return null
+        val ray = u.lastRay ?: return null
+        return bandOf(Candidate(read, u.gtin, ray, 0.0), record, all.filter { it !== u })?.id
     }
 
     /**
