@@ -5,6 +5,7 @@ import android.graphics.RectF
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.packagex.arcount.Command
 import io.packagex.visiondemo.ar.ArCount
 import io.packagex.visiondemo.ar.NoArCount
 import io.packagex.visiondemo.camera.Camera
@@ -177,7 +178,8 @@ class ScannerViewModel @Inject constructor(
                 viewModelScope.launch { try { prefs.update(a.t) } finally { prefWrites-- } }
             }
             ScannerAction.ToggleTorch -> { setTorch(!s.torch); toast(if (s.torch) "Torch on" else "Torch off") }
-            ScannerAction.ToggleAuto -> toggleAuto()
+            // AR Count has no auto-capture: a long press is the trigger's long press, an unlabelled section (spec 5.1)
+            ScannerAction.ToggleAuto -> if (s.mode == ScanMode.Ar) onAction(ScannerAction.ArCommand(Command.TriggerLong)) else toggleAuto()
             is ScannerAction.Report -> sendReport(a.fields, a.message)
             ScannerAction.CancelProcessing -> cancelProcessing()
             ScannerAction.DismissAlert -> {

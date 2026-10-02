@@ -96,6 +96,12 @@ class ScannerViewModelArTest {
         assertEquals(listOf(Command.AddUnit, Command.Finish), ar.commands)
     }
 
+    @Test fun aLongPressOfTheShutterOpensAnUnlabelledSection() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
+        v.onAction(ScannerAction.ToggleAuto)   // the shutter's long press
+        assertEquals(listOf(Command.TriggerLong), ar.commands)
+    }
+
     @Test fun cameraPauseAndResumeKeepTheCount() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
         ar.count.value = counting; advanceUntilIdle()
