@@ -1,7 +1,11 @@
 package io.packagex.visiondemo.model
 
 import android.graphics.Bitmap
+import io.packagex.texttemplates.sdk.PXField
+import io.packagex.texttemplates.sdk.PXPredictionResult
+import io.packagex.texttemplates.sdk.PXQuickResult
 import io.packagex.visiondemo.ar.ArRow
+import io.packagex.visiondemo.data.TtPath
 import io.packagex.visiondemo.document.DocumentPage
 
 /** What the result drawer shows. Ported from iOS `Model/Types.swift`'s `ScanResult`. */
@@ -23,4 +27,15 @@ sealed interface ScanResult {
     data class Ar(val rows: List<ArRow>) : ScanResult
     /** Every page of the document so far (iOS `.docacq`). */
     data class Document(val pages: List<DocumentPage>) : ScanResult
+    /** A Text Templates prediction (iOS `.tt`): the captured [image] (One-Shot's still, Stream's grayscale frame),
+     *  the [path] it came from, and [repredicted] once the user re-ran it against another loaded template. */
+    data class TextTemplate(
+        val prediction: PXPredictionResult,
+        val image: Bitmap?,
+        val path: TtPath,
+        val repredicted: PXQuickResult? = null,
+    ) : ScanResult {
+        val templateName: String? get() = repredicted?.templateName ?: prediction.templateName
+        val fields: Map<String, PXField> get() = repredicted?.predictions ?: prediction.predictions
+    }
 }

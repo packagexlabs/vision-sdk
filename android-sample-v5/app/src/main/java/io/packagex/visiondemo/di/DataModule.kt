@@ -20,6 +20,8 @@ import io.packagex.visiondemo.data.SdkEntitlementRepository
 import io.packagex.visiondemo.data.SdkExtractionRepository
 import io.packagex.visiondemo.data.SdkModelRepository
 import io.packagex.visiondemo.data.SdkReportRepository
+import io.packagex.visiondemo.data.TextTemplates
+import io.packagex.visiondemo.data.TextTemplatesService
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -44,6 +46,9 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindArCamera(impl: ArController): ArCamera
+
+    @Binds
+    abstract fun bindTextTemplates(impl: TextTemplatesService): TextTemplates
 
     @Binds
     abstract fun bindItemCatalogRepository(impl: DataStoreItemCatalogRepository): ItemCatalogRepository
