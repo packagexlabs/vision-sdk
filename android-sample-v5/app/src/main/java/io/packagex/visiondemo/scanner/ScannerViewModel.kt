@@ -204,7 +204,7 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.CancelDownload -> { models.cancel(a.t, a.s); toast("Download cancelled") }
             ScannerAction.CheckUpdates -> viewModelScope.launch { toast(runCatching { models.checkUpdates() }.getOrElse { it.message ?: "Update check failed" }) }
             is ScannerAction.AddItem -> a.sku.trim().takeIf { it.isNotEmpty() }?.let { sku ->
-                if (sku in s.items) toast("Code already in list") else setItems(s.items + sku)
+                if (s.items.lists(sku)) toast("Code already in list") else setItems(s.items + sku)
             }
             ScannerAction.AddItemsInView -> addItemsInView()
             is ScannerAction.RemoveItem -> setItems(s.items - a.sku)
@@ -673,7 +673,7 @@ class ScannerViewModel @Inject constructor(
 
     /** iOS `addItemsInView`. */
     private fun addItemsInView() {
-        val new = s.codesInView.filter { it !in s.items }
+        val new = s.codesInView.filter { !s.items.lists(it) }.distinctBy(::codeKey)
         val first = new.firstOrNull()
             ?: return toast(if (s.codesInView.isEmpty()) "Point the camera at a code, then tap Add Item" else "Code already in list")
         setItems(s.items + new)

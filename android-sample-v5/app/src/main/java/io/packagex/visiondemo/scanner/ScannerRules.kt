@@ -1,6 +1,7 @@
 package io.packagex.visiondemo.scanner
 
 import io.packagex.arcount.CountView
+import io.packagex.arcount.Gtin
 import io.packagex.arcount.ItemCount
 import io.packagex.visiondemo.ar.promptText
 import io.packagex.visiondemo.camera.CameraOwner
@@ -129,7 +130,7 @@ internal fun retrievalHint(items: List<String>, codesInView: List<String>, view:
     }
     view.prompt?.let { return promptText(it, view.bracket) }
     if (codesInView.isEmpty()) return "Pan across the shelf"
-    val n = codesInView.count { it in items }
+    val n = codesInView.count { items.lists(it) }
     val counted = view.items.sumOf { it.countLow }
     return "${if (n == 0) "No" else "$n"} listed item${if (n == 1) "" else "s"} in view · $counted counted"
 }
@@ -139,18 +140,25 @@ internal fun retrievalHint(items: List<String>, codesInView: List<String>, view:
  * view; a listed code carries its count ([counts], 0 while the counter has none for it), an unlisted one none.
  */
 internal fun retrievalRows(codesInView: List<String>, items: List<String>, counts: List<ItemCount>): List<RetrievalRow> {
-    val byCode = counts.associateBy { it.code }
+    val byCode = counts.associateBy { codeKey(it.code) }
     fun row(code: String): RetrievalRow {
-        val listed = code in items
-        val c = byCode[code]
+        val listed = items.lists(code)
+        val c = byCode[codeKey(code)]
         return RetrievalRow(code, listed, if (listed) c?.countLow ?: 0 else null, if (listed) c?.countHigh ?: 0 else null)
     }
-    val counted = counts.filter { it.countHigh > 0 && it.code in items && it.code !in codesInView }.map { it.code }
+    val inView = codesInView.map(::codeKey).toSet()
+    val counted = counts.filter { it.countHigh > 0 && items.lists(it.code) && codeKey(it.code) !in inView }.map { it.code }
     return (codesInView + counted).map(::row)
 }
 
 /** The item list's "Seen" rows (spec 5.10): each seen code, and whether it is listed ("In list") or can be added. */
-internal fun seenRows(seen: List<String>, items: List<String>): List<Pair<String, Boolean>> = seen.map { it to (it in items) }
+internal fun seenRows(seen: List<String>, items: List<String>): List<Pair<String, Boolean>> = seen.map { it to items.lists(it) }
+
+/** A code as the counter compares it (spec 5.10): a GTIN as its 14 digits (UPC-A, EAN-13, EAN-8 alike), else its text */
+internal fun codeKey(code: String): String = Gtin.normalize(code)
+
+/** Whether this item list holds [code], compared as the counter compares codes */
+internal fun List<String>.lists(code: String): Boolean = codeKey(code).let { k -> any { codeKey(it) == k } }
 
 /** A listed code's count in the drawer: "× N", or "× N–M" while its range is open. */
 internal fun RetrievalRow.countText(): String? = countLow?.let { low ->

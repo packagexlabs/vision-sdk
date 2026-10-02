@@ -255,7 +255,7 @@ class ArSessionController @Inject constructor(
         streamIndex = 0
         Log.i(TAG, "camera $cameraId offers YUV ${offered.sortedByDescending { it.first * it.second }.take(8)}; app streams to try: $streams")
         if (streams.isEmpty()) {
-            _errors.tryEmit("AR Count can't read this camera: none of 4K, 1440p, 1080p or 720p is offered")
+            _errors.tryEmit("AR Item Count can't read this camera: none of 4K, 1440p, 1080p or 720p is offered")
             return false
         }
         useStream(streams[0])
@@ -319,7 +319,7 @@ class ArSessionController @Inject constructor(
         main.postDelayed({
             if (gen != generation || !opening) return@postDelayed
             Log.w(TAG, "ARCore not running $OPEN_TIMEOUT_MS ms after the camera open began")
-            fail(gen, "AR Count could not start the camera")
+            fail(gen, "AR Item Count could not start the camera")
         }, OPEN_TIMEOUT_MS)
     }
 
@@ -328,7 +328,7 @@ class ArSessionController @Inject constructor(
         val r = reader ?: return
         // Before every open, retries too, as Google's shared-camera sample does: ARCore then feeds the app stream too.
         if (runCatching { s.sharedCamera.setAppSurfaces(cameraId, listOf(r.surface)) }.onFailure { Log.w(TAG, "setAppSurfaces", it) }.isFailure) {
-            fail(gen, "AR Count could not start the camera")
+            fail(gen, "AR Item Count could not start the camera")
             return
         }
         val callback = DeviceCallback(gen, retriesLeft)
@@ -390,7 +390,7 @@ class ArSessionController @Inject constructor(
         stopCamera()
         if (++streamIndex >= streams.size) {
             Log.e(TAG, "no app stream configures; the last tried was $failed")
-            _exits.tryEmit("AR Count could not configure the camera")
+            _exits.tryEmit("AR Item Count could not configure the camera")
             return
         }
         Log.w(TAG, "configure failed with the app stream $failed; trying ${streams[streamIndex]}")
@@ -483,7 +483,7 @@ class ArSessionController @Inject constructor(
             } catch (e: Exception) { // CameraAccessException, IllegalStateException (closed meanwhile)
                 Log.w(TAG, "capture session not made", e)
                 settled.countDown()
-                main.post { fail(gen, "AR Count could not start the camera") }
+                main.post { fail(gen, "AR Item Count could not start the camera") }
             }
         }
 
@@ -537,7 +537,7 @@ class ArSessionController @Inject constructor(
             } catch (e: Exception) { // no onActive will come: this open failed (a stale one's fail is ignored)
                 Log.w(TAG, "capture session gone before it started", e)
                 settled.countDown()
-                main.post { fail(gen, "AR Count could not start the camera") }
+                main.post { fail(gen, "AR Item Count could not start the camera") }
             }
         }
 

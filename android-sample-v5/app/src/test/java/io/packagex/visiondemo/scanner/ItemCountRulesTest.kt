@@ -54,6 +54,15 @@ class ItemCountRulesTest {
         assertEquals(null, RetrievalRow("Z", false, null, null).countText())
     }
 
+    @Test fun aListedUpcAMatchesItsEan13ReadEverywhere() {
+        val list = listOf("012345678905")                      // UPC-A typed into the list
+        val read = "0012345678905"                             // the same product read as EAN-13
+        assertEquals(true, list.lists(read))
+        assertEquals(listOf(read to true), seenRows(listOf(read), list))
+        assertEquals(listOf(RetrievalRow(read, true, 2, 2)), retrievalRows(listOf(read), list, listOf(ItemCount("012345678905", 2, 2, true))))
+        assertEquals(false, listOf("ABC").lists("ABD"))        // other text compares as text
+    }
+
     @Test fun seenRowsCarryTheInListBadge() {
         assertEquals(listOf("C" to false, "A" to true), seenRows(listOf("C", "A"), listOf("A", "B")))
     }
