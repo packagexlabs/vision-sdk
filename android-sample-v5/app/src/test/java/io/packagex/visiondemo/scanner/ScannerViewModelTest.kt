@@ -51,13 +51,13 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34])
 class ScannerViewModelTest {
     @get:Rule val main = MainDispatcherRule()
-    private fun vm(extraction: FakeExtraction = FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", 0)) =
+    private fun vm(extraction: FakeExtraction = FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", 0)) =
         ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), extraction, FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"))
 
     // --- brief tests ---
 
     @Test fun lateResultAfterModeSwitchIsDropped() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000))
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000))
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
         (v.camera as FakeCamera).emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f))
         advanceTimeBy(1_000); v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
@@ -131,7 +131,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun cancelProcessingDropsLateResult() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
         assertEquals(Phase.Processing, v.state.value.phase)
@@ -222,7 +222,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun wildCardResultUsesRoutedType() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"item_name":"Bolt"}}}""", routedType = DocType.IL)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"inference":{"item":{"name":"Bolt"}}}}""", routedType = DocType.IL)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
         val r = v.state.value.result as ScanResult.Ocr
@@ -586,7 +586,7 @@ class ScannerViewModelTest {
         cloud.onAction(ScannerAction.SetMode(ScanMode.Ocr)); cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
         assertTrue((cloud.state.value.result as ScanResult.Ocr).result.cloud)
 
-        val wild = vm(FakeExtraction("""{"data":{"inference":{"item_name":"Bolt"}}}""", routedType = DocType.IL)); val cam2 = wild.camera as FakeCamera
+        val wild = vm(FakeExtraction("""{"data":{"inference":{"item":{"name":"Bolt"}}}}""", routedType = DocType.IL)); val cam2 = wild.camera as FakeCamera
         wild.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true) }); wild.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam2.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
         assertFalse((wild.state.value.result as ScanResult.Ocr).result.cloud)   // wild card read the item label on-device
@@ -627,7 +627,7 @@ class ScannerViewModelTest {
         val report = FakeReport()
         val v = ScannerViewModel(
             FakeCamera(), FakePreferences(), FakeModels(),
-            FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", 0),
+            FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", 0),
             report, FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"),
         )
         v.onAction(ScannerAction.UpdatePrefs { it.copy(modelSize = ModelSize.Large) })
@@ -654,7 +654,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun photoImportRunsOcrOnlyInVisionScanner() = runTest {
-        val x = FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}"""); val v = vm(x)
+        val x = FakeExtraction("""{"data":{"tracking_number":"1Z"}}"""); val v = vm(x)
         v.effects.test {
             v.onAction(ScannerAction.PickPhoto); v.onAction(ScannerAction.ImportPhoto(fakeBitmap()))
             expectNoEvents()
@@ -750,7 +750,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun cancelProcessingWhilePausedKeepsCameraStopped() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
         cam.pause(); runCurrent()
@@ -781,7 +781,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun processingMarksCameraBusy() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
         assertEquals(listOf(false, true), cam.busy)

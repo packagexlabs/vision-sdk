@@ -1,0 +1,20 @@
+{
+ "data": {
+  "dl_version": "bol-large-test", "object": "bill_of_lading_inference", "id": "inf_bol_TEST", "organization_id": null, "location_id": null,
+  "status": "inferred", "image_url": null, "raw_text": "(raw text removed)",
+  "inference": {
+   "logistics_attributes": {
+    "reference_number": "REF-55", "load_number": null, "purchase_order_number": null, "invoice_number": null,
+    "customer_purchase_order_number": "CPO-9", "order_number": null, "billOfLading": "BOL-123456",
+    "master_bill_of_lading": null, "line_bill_of_lading": null, "house_bill_of_lading": null, "shipping_id": null,
+    "shipping_date": null
+   },
+   "barcode_values": [],
+   "date": null,
+   "additional_attributes": {"Trailer No": "TR-88"},
+   "purchaseOrderNumber": "PO-31",
+   "shippingDate": "09/30/2026"
+  },
+  "created_at": 1790925225, "updated_at": 1790925225, "updated_by": null
+ }
+}

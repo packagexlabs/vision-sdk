@@ -18,7 +18,7 @@ class ResultDrawerTest {
     @get:Rule val rule = createComposeRule()
 
     @Test fun ocrPrimaryAndFieldsShown() {
-        val r = OcrParser.parse("""{"data":{"inference":{"tracking_number":"1Z9","provider_name":"UPS"}}}""", DocType.SL)
+        val r = OcrParser.parse("""{"data":{"tracking_number":"1Z9","provider_name":"UPS"}}""", DocType.SL)
         rule.setContent { VisionTheme { ResultDrawer(ScanResult.Ocr(r, null)) {} } }
         // iOS :183-238 shows the primary field both in its own large card and again in the field
         // list below, so "1Z9" (the primary tracking number) is expected twice.
@@ -28,7 +28,7 @@ class ResultDrawerTest {
 
     @Test fun reportNeedsAField() {
         var got: ScannerAction? = null
-        val r = OcrParser.parse("""{"data":{"inference":{"tracking_number":"1Z9"}}}""", DocType.SL)
+        val r = OcrParser.parse("""{"data":{"tracking_number":"1Z9"}}""", DocType.SL)
         rule.setContent { VisionTheme { ReportCard(r, onAction = { got = it }, onClose = {}) } }
         rule.onNodeWithText("Submit").performClick()
         assertNull(got)
