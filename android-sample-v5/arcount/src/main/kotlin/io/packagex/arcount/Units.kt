@@ -160,7 +160,7 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         return FrameOutcome(matched, created, dropped, merged, reads1.size)
     }
 
-    /** For a FROZEN section: which COUNTED units [reads] re-read inside their gates, and whether one fell in a band; changes nothing */
+    /** For a FROZEN section: which COUNTED units [reads] re-read inside their gates, and whether one fell in a band; changes no unit */
     fun check(record: PoseRecord, reads: List<Read>): ResumeCheck {
         val reads1 = prepare(record, reads, ArrayList())
         val matches = match(record, reads1, all.filter { it.state != MANUAL })

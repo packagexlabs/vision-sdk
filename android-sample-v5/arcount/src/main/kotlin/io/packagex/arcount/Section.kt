@@ -16,7 +16,7 @@ internal class ResumeAttempt(val startNs: Long, val label: Read, val record: Pos
 }
 
 /** One section (spec 5.1): one SKU location with its label, GTIN set, anchor, units and breaks */
-class Section internal constructor(val id: String, val labelPayload: String?, gtins: Set<String>, val openedNs: Long) {
+class Section internal constructor(val id: String, val labelPayload: String?, gtins: Set<String>, val openedNs: Long, maxRays: Int) {
     val labelled get() = labelPayload != null
     var gtins = gtins
         internal set
@@ -51,7 +51,7 @@ class Section internal constructor(val id: String, val labelPayload: String?, gt
     internal var quietSinceNs = openedNs
     internal var lastSectionReadNs = openedNs
     internal var attempt: ResumeAttempt? = null
-    internal val labelTrack = DepthTrack(30)
+    internal val labelTrack = DepthTrack(maxRays)
 }
 
 /**
@@ -443,7 +443,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         val payload = l.text
         val gtins = config.gtinsOfLabel?.invoke(payload)?.map { Gtin.normalize(it) }?.toSet()
             ?: if (Gtin.isGtin(payload)) setOf(Gtin.normalize(payload, l.symbology)) else emptySet()
-        val s = Section("S${nextSection++}", payload, gtins, openedNs)
+        val s = Section("S${nextSection++}", payload, gtins, openedNs, config.maxRays)
         section = s
         state = OPEN
         seed(s, l, r)
@@ -451,7 +451,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     }
 
     private fun openUnlabelled(ts: Long) {
-        val s = Section("S${nextSection++}", null, emptySet(), ts)
+        val s = Section("S${nextSection++}", null, emptySet(), ts, config.maxRays)
         section = s
         state = OPEN
         note("${s.id}: OPEN, unlabelled")
@@ -459,7 +459,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
 
     /** OPEN again after an abandonment: same label and GTINs (none for an unlabelled section), waiting for its seed read */
     private fun openAgain(old: Section, ts: Long) {
-        val s = Section("S${nextSection++}", old.labelPayload, if (old.labelled) old.gtins else emptySet(), ts)
+        val s = Section("S${nextSection++}", old.labelPayload, if (old.labelled) old.gtins else emptySet(), ts, config.maxRays)
         section = s
         state = OPEN
         note("${s.id}: OPEN again after ${old.id}")
