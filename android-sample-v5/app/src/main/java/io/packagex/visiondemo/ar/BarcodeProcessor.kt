@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.Image
+import android.media.ImageReader
 import android.util.Log
 import com.example.barcodescanner.BarcodeScanner
 import com.example.barcodescanner.ScannerSettings
@@ -12,8 +13,6 @@ import io.packagex.arcount.Read
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -23,15 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 internal const val AR_REFRESH_AFTER_MS = 0L
 
-/** Waits until every task queued on single-thread [worker] so far has run, at most [timeoutMs]; false on timeout.
- *  A shut-down worker has nothing left to wait for. */
-internal fun awaitDrained(worker: ExecutorService, timeoutMs: Long): Boolean = try {
-    worker.submit {}.get(timeoutMs, TimeUnit.MILLISECONDS)
-    true
-} catch (e: TimeoutException) {
-    false
-} catch (e: RejectedExecutionException) {
-    true
+/** Runs [task] on single-thread [worker] after every task queued so far; on the caller's thread when it is shut down. */
+internal fun runBehind(worker: ExecutorService, task: () -> Unit) {
+    try {
+        worker.execute(task)
+    } catch (e: RejectedExecutionException) {
+        task()
+    }
 }
 
 /**
@@ -123,13 +120,11 @@ class BarcodeProcessor(
     }
 
     /**
-     * Blocks until the decode in flight (if any) has finished, at most [timeoutMs]: its [Image] belongs to the app
-     * stream's ImageReader, which must not close under it. The single worker runs FIFO, so a no-op queued behind the
-     * decode completes once the decode has.
+     * Closes [reader] on the worker, after the decode in flight: that decode reads the planes of one of its images,
+     * and `ImageReader.close()` frees every image it handed out. An image of it decoded later is closed by then and
+     * throws before the engine reads it.
      */
-    fun awaitIdle(timeoutMs: Long) {
-        if (!awaitDrained(worker, timeoutMs)) Log.w(TAG, "decode still running after $timeoutMs ms")
-    }
+    fun closeAfterDecode(reader: ImageReader) = runBehind(worker) { reader.close() }
 
     fun close() {
         if (closed) return

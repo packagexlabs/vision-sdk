@@ -22,7 +22,6 @@ class BarcodeProcessorTest {
     fun `a scanner that cannot be made leaves the processor idle and closable`() {
         // The JVM has no libbarcode_decoder.so: BarcodeScanner.create throws on the worker, which logs it.
         val processor = BarcodeProcessor(RuntimeEnvironment.getApplication())
-        processor.awaitIdle(5_000)
         assertFalse(processor.isBusy)
         processor.close()
         processor.close() // a second close is harmless

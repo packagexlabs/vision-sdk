@@ -130,8 +130,7 @@ class ArSessionController @Inject constructor(
     override fun detach(view: GLSurfaceView?) {
         if (view != null && view !== this.view) return // a stale view's dispose after a newer attach
         stopCamera()
-        engine.awaitIdle(DECODE_DRAIN_MS) // its image belongs to the reader closed below
-        reader?.close()
+        reader?.let { engine.closeAfterDecode(it) }
         reader = null
         renderer?.session = null
         session?.close() // and its anchors
@@ -211,8 +210,7 @@ class ArSessionController @Inject constructor(
     }
 
     private fun useStream(stream: AppStream) {
-        engine.awaitIdle(DECODE_DRAIN_MS)
-        reader?.close()
+        reader?.let { engine.closeAfterDecode(it) }
         reader = ImageReader.newInstance(stream.width, stream.height, ImageFormat.YUV_420_888, 3).apply {
             setOnImageAvailableListener(::onImage, cameraHandler)
         }
@@ -469,8 +467,5 @@ class ArSessionController @Inject constructor(
         const val RETRY_MS = 400L
         const val MAX_REBUILDS = 3
         const val CLOSE_WAIT_MS = 1_000L
-
-        /** Longest the main thread waits for an in-flight decode before closing its reader (decodes take 25-200 ms). */
-        const val DECODE_DRAIN_MS = 300L
     }
 }
