@@ -29,7 +29,7 @@ val modelRows: List<Pair<DocType, ModelSize>> = listOf(
     DocType.DC to ModelSize.Micro, DocType.DC to ModelSize.Large,
 )
 
-/** null for doc types with no offline model (VLM/Tire/IdCard/Plate are cloud-only VLM prompts).
+/** null for doc types with no offline model (VLM/Tire/IdCard/Plate/Meter are cloud-only VLM prompts).
  *  [slOptions] only matters for [DocType.SL] -- see [OnDeviceOCRManager.tryParseAddressesIfEnabled],
  *  which reads it off the `ocrModule` passed to `makePrediction` at prediction time. */
 internal fun ocrModuleFor(type: DocType, size: ModelSize, slOptions: ShippingLabelOptions = ShippingLabelOptions()): OCRModule? {

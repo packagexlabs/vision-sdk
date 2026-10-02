@@ -114,9 +114,8 @@ class SdkExtractionRepository @Inject constructor(
         val api = ApiManager()
         return when (type) {
             DocType.VLM -> api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = null)
-            DocType.Tire -> api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = VlmPrompts.vehicleTire)
-            DocType.IdCard -> api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = VlmPrompts.identityDocument)
-            DocType.Plate -> api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = VlmPrompts.licensePlate)
+            DocType.Tire, DocType.IdCard, DocType.Plate, DocType.Meter ->
+                api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = VlmPrompts.spec(type)?.prompt)
             DocType.SL, DocType.BOL, DocType.IL, DocType.DC ->
                 if (processing == Processing.Device) {
                     // iOS activeModel: document classification is always micro, regardless of the
