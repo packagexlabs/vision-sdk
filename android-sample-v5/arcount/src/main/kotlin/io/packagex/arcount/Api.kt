@@ -171,11 +171,40 @@ data class CountView(
     val desiredRefreshMs: Int = 0,
     /** The open section's breaks so far (capture time, reason), for the app's log; a closed section's are in [closed] */
     val breaks: List<Pair<Long, BreakReason>> = emptyList(),
+    /** AR Item Count's pins: the open section's units of listed codes with a triangulated depth, in the world (COUNTING only) */
+    val unitPoints: List<UnitPoint> = emptyList(),
 ) {
     companion object {
         val EMPTY = CountView(SectionState.IDLE, null, emptyList(), emptyList(), null, emptyList())
     }
 }
+
+/**
+ * A unit of a listed code whose depth passed a gate, for the app's pins: [world] is its point X_a in the world now,
+ * section anchor pose · X_a with the jump correction applied. [key] is unique in the session (section id and unit id);
+ * an item section's id changes at an anchor handoff, so a pin follows a unit by place as well. [code] is the unit's
+ * code key ([ItemCode.key]).
+ */
+data class UnitPoint(val key: String, val unitId: Int, val code: String, val state: UnitState, val world: Vec3)
+
+/**
+ * The patch tracker's work so far (spec 5.9), for the app's log: counters over the session ([trackingFrames] frames it
+ * followed units in, [unitsTracked] positions accepted, [trackedRays] rays added, [oneDimensional] positions measured
+ * along one direction only, tracks dropped by NCC, prediction distance, the neighbour rule and age), and now, the open
+ * section's units with a triangulated depth and those on the plane prior only.
+ */
+data class TrackStats(
+    val trackingFrames: Long,
+    val unitsTracked: Long,
+    val trackedRays: Long,
+    val oneDimensional: Long,
+    val droppedNcc: Long,
+    val droppedPrediction: Long,
+    val droppedNeighbour: Long,
+    val droppedAge: Long,
+    val unitsWithDepth: Int,
+    val unitsPriorOnly: Int,
+)
 
 /** Where the core wants the section anchor: the app creates it with Session.createAnchor([world]) */
 data class AnchorRequest(val world: Pose)
@@ -210,4 +239,7 @@ interface ArCounter {
 
     /** A downscaled luma copy of the app-stream frame with this timestamp, for the patch tracker (spec 5.9) */
     fun onLuma(timestampNs: Long, img: LumaImage, streamPxPerLumaPx: Double) {}
+
+    /** The patch tracker's counters, for the log; null when this counter has none */
+    fun trackStats(): TrackStats? = null
 }

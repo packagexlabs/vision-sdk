@@ -169,6 +169,25 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
             desiredRefreshMs = schedule.desiredMs(lumas.fed && counting && t!!.units.isNotEmpty(), r.timestampNs),
             items = items(r, if (s?.items == true) t else null, shown),
             breaks = s?.breaks?.toList() ?: emptyList(),
+            unitPoints = if (counting && r.anchorTracking == Tracking.TRACKING) unitPoints(s!!, t!!, r) else emptyList(),
+        )
+    }
+
+    /** The units of listed codes with a gated depth, in the world: the corrected record's anchor is A·C⁻¹, so this is A·C⁻¹·X_a */
+    private fun unitPoints(s: Section, t: UnitTable, r: PoseRecord): List<UnitPoint> {
+        val a = r.anchor ?: return emptyList()
+        val keys = machine.itemList.keys
+        return t.units.filter { it.hasDepth && it.state != UnitState.MANUAL && it.gtin in keys }
+            .map { UnitPoint("${s.id}/${it.id}", it.id, it.gtin, it.state, a.apply(it.point)) }
+    }
+
+    override fun trackStats(): TrackStats {
+        val units = machine.section?.table?.units?.filter { it.state != UnitState.MANUAL } ?: emptyList()
+        val withDepth = units.count { it.hasDepth }
+        return TrackStats(
+            tracks.trackingFrames, tracks.unitsTracked, tracks.trackedRays, tracks.oneDimensionalTracks,
+            tracks.droppedNcc, tracks.droppedPrediction, tracks.droppedNeighbour, tracks.droppedAge,
+            withDepth, units.size - withDepth,
         )
     }
 

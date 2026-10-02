@@ -46,6 +46,26 @@ class PatchTracks(private val config: CountConfig) {
     var trackedRays = 0L
         private set
 
+    /** Frames [track] followed units in (moving, anchored), and the positions it accepted over them */
+    var trackingFrames = 0L
+        private set
+    var unitsTracked = 0L
+        private set
+
+    /** Of the accepted positions, those measured along one image direction only (no ray) */
+    var oneDimensionalTracks = 0L
+        private set
+
+    /** Tracks dropped: lost or below the NCC rules; off the prediction (or no seed); on a neighbour of its GTIN; too old */
+    var droppedNcc = 0L
+        private set
+    var droppedPrediction = 0L
+        private set
+    var droppedNeighbour = 0L
+        private set
+    var droppedAge = 0L
+        private set
+
     /** Drops every track: the section changed, or it is not COUNTING */
     fun clear() {
         byUnit.clear()
@@ -106,6 +126,7 @@ class PatchTracks(private val config: CountConfig) {
     fun track(t: UnitTable, r: PoseRecord, luma: LumaFrame, moving: Boolean) {
         tracksOf(t)
         if (!moving || r.anchor == null) return
+        trackingFrames++
         val k = r.intrinsics
         val tac = r.cameraInAnchor()
         val found = ArrayList<Found>()
@@ -117,6 +138,7 @@ class PatchTracks(private val config: CountConfig) {
             if (prev.timestampNs >= r.timestampNs) continue
             if (r.timestampNs - tr.decodeNs > config.trackMaxAgeNs) {
                 drop(tr)
+                droppedAge++
                 continue
             }
             val p = t.predict(u, r) ?: continue
@@ -124,6 +146,7 @@ class PatchTracks(private val config: CountConfig) {
             val seed = carry(u, tr, prev, tac, k)
             if (seed == null) {
                 drop(tr)
+                droppedPrediction++
                 continue
             }
             val sx = luma.toLuma(seed.first)
@@ -135,11 +158,11 @@ class PatchTracks(private val config: CountConfig) {
             val hit = PatchTracker.track(patch, luma.img, sx, sy, config.minNcc)
             val su = hit?.let { luma.toStream(it.x) }
             val sv = hit?.let { luma.toStream(it.y) }
-            val ok = hit != null && su != null && sv != null &&
-                (tr.nccs.isEmpty() || hit.ncc >= config.nccDropFraction * tr.nccs.average()) &&
-                hypot(su - p.u, sv - p.v) / luma.scale <= config.trackGateSigmas * p.sigmaPx / luma.scale + config.trackGateLumaPx
+            val nccOk = hit != null && su != null && sv != null && (tr.nccs.isEmpty() || hit.ncc >= config.nccDropFraction * tr.nccs.average())
+            val ok = nccOk && hypot(su!! - p.u, sv!! - p.v) / luma.scale <= config.trackGateSigmas * p.sigmaPx / luma.scale + config.trackGateLumaPx
             if (!ok) {
                 drop(tr)
+                if (nccOk) droppedPrediction++ else droppedNcc++
                 continue
             }
             found += Found(u, tr, su!!, sv!!, hit!!.ncc, hit.oneDimensional, p.z)
@@ -161,8 +184,11 @@ class PatchTracks(private val config: CountConfig) {
             val tr = fd.track
             if (fd in conflicted) {
                 drop(tr)
+                droppedNeighbour++
                 continue
             }
+            unitsTracked++
+            if (fd.oneDimensional) oneDimensionalTracks++
             tr.x = fd.u
             tr.y = fd.v
             tr.record = r

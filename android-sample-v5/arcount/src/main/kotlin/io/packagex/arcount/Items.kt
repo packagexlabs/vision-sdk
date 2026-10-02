@@ -5,7 +5,7 @@ package io.packagex.arcount
  * (8, 12, 13 or 14 digits ending in their check digit, a UPC-E read expanded first) and are equal as 14 digits;
  * otherwise only when their texts are equal. A code's key is what units, sections and totals carry.
  */
-internal object ItemCode {
+object ItemCode {
     fun key(text: String, symbology: String? = null): String {
         if (!Gtin.isGtin(text)) return text
         val n = Gtin.normalize(text, symbology)
