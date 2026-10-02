@@ -5,7 +5,6 @@ import android.graphics.RectF
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.packagex.arcount.Command
 import io.packagex.visiondemo.ar.ArCount
 import io.packagex.visiondemo.ar.NoArCount
 import io.packagex.visiondemo.camera.Camera
@@ -99,16 +98,13 @@ class ScannerViewModel @Inject constructor(
     /** Viewfinder rect in camera-view px, from [ScannerAction.FrameChanged]. */
     private var frame: RectF? = null
 
-    /** Item retrieval: per code, the timer that drops it from [ScannerUiState.codesInView]. */
-    private val inViewExpiry = mutableMapOf<String, Job>()
-
     /** [ScannerAction.UpdatePrefs] writes not yet persisted. */
     private var prefWrites = 0
 
     /** Item-label feedback upload; replaced in tests (it is network I/O). */
     internal var submitFeedback: suspend (Bitmap, OcrResult, Map<String, ItemLabelFeedback.Entry>, String) -> String = ItemLabelFeedback::submit
 
-    /** ARCore reported installed (requestInstall), so AR entries skip the availability check. */
+    /** ARCore reported installed (requestInstall), so AR Item Count skips the availability check. */
     private var arInstalled = false
     private val doc = DocumentFlow(document, viewModelScope, object : DocumentFlow.Host {
         override val s get() = _state.value
@@ -124,6 +120,8 @@ class ScannerViewModel @Inject constructor(
     private val usesScanner get() = ownerFor(s.mode) == CameraOwner.Scanner
     /** A camera the user drives (torch, flip, focus): the SDK scanner, or Document Acquisition's (iOS usesScanner). */
     private val ownCamera get() = usesScanner || s.mode == ScanMode.DocAcq
+    /** AR Item Count: the mode runs on the AR session (spec 5.10). */
+    private val usesAr get() = ownerFor(s.mode) == CameraOwner.Ar
 
     init {
         // The cameras are singletons that outlive a ViewModel (Back, then relaunch): match them to the fresh state.
@@ -137,15 +135,18 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { models.versions.collect { v -> _state.update { it.copy(modelVersions = v) } } }
         viewModelScope.launch { catalog.items.collect { i -> _state.update { it.copy(items = i) } } }
         viewModelScope.launch { ar.count.collect { v -> _state.update { it.copy(arCount = v) } } }
-        viewModelScope.launch { ar.stream.collect { st -> _state.update { it.copy(arStream = st) } } }
+        viewModelScope.launch { ar.codesInView.collect { c -> _state.update { it.copy(codesInView = c) } } }
+        viewModelScope.launch { ar.seen.collect { c -> _state.update { it.copy(seen = c) } } }
+        // The counter counts the list's codes (spec 5.10); the session keeps the list for its next counters.
+        viewModelScope.launch { state.map { it.items }.distinctUntilChanged().collect { ar.setItems(it.toSet()) } }
         viewModelScope.launch { ar.errors.collect(::toast) }
         viewModelScope.launch { ar.exits.collect(::leaveAr) }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
-        // No idle pause while a capture or extraction runs, nor while AR Count runs: a worker counting with the trigger
+        // No idle pause while a capture or extraction runs, nor while AR Item Count runs: a worker panning the shelf
         // touches nothing, and a pause breaks the open section.
         viewModelScope.launch {
-            state.map { it.phase != Phase.Idle || (it.mode == ScanMode.Ar && !it.home && !it.paused && it.result == null) }
+            state.map { it.phase != Phase.Idle || (it.arOn && !it.home && !it.paused && it.result == null) }
                 .distinctUntilChanged().collect(camera::setBusy)
         }
         doc.start()
@@ -178,8 +179,7 @@ class ScannerViewModel @Inject constructor(
                 viewModelScope.launch { try { prefs.update(a.t) } finally { prefWrites-- } }
             }
             ScannerAction.ToggleTorch -> { setTorch(!s.torch); toast(if (s.torch) "Torch on" else "Torch off") }
-            // AR Count has no auto-capture: a long press is the trigger's long press, an unlabelled section (spec 5.1)
-            ScannerAction.ToggleAuto -> if (s.mode == ScanMode.Ar) onAction(ScannerAction.ArCommand(Command.TriggerLong)) else toggleAuto()
+            ScannerAction.ToggleAuto -> toggleAuto()
             is ScannerAction.Report -> sendReport(a.fields, a.message)
             ScannerAction.CancelProcessing -> cancelProcessing()
             ScannerAction.DismissAlert -> {
@@ -209,7 +209,7 @@ class ScannerViewModel @Inject constructor(
             ScannerAction.AddItemsInView -> addItemsInView()
             is ScannerAction.RemoveItem -> setItems(s.items - a.sku)
             ScannerAction.ClearItems -> setItems(emptyList())
-            ScannerAction.ScanNext -> { closeResult(); if (s.mode == ScanMode.Ar) ar.reset() }   // AR "New Scan": a new counter, its sections gone
+            ScannerAction.ScanNext -> { closeResult(); if (usesAr) newCount() }
             is ScannerAction.Copy -> { _effects.trySend(ScannerEffect.Copy(a.text)); toast("Copied ${a.label}") }
             is ScannerAction.SendFeedback -> sendFeedback(a.entries, a.comment)
             ScannerAction.ClearTags -> _state.update { it.copy(tags = emptyList()) }
@@ -226,12 +226,10 @@ class ScannerViewModel @Inject constructor(
                 toast("Image picked from Photos")
                 runOcr(a.bitmap, emptyList())
             }
-            // The overlay sits on the live camera; nothing reaches the counter under a result.
-            is ScannerAction.ArCommand -> if (s.mode == ScanMode.Ar && !s.home && s.result == null) ar.command(a.command)
             is ScannerAction.ArInstallResult -> when (a.result) {
-                ArInstall.Installed -> { arInstalled = true; setMode(ScanMode.Ar) }
-                ArInstall.Declined -> toast("AR Count needs Google Play Services for AR")
-                ArInstall.Unsupported -> toast("AR isn't supported on this device")
+                ArInstall.Installed -> { arInstalled = true; if (usesAr && !s.home && !s.gated) startAr() }
+                ArInstall.Declined -> leaveAr("AR Item Count needs Google Play Services for AR")
+                ArInstall.Unsupported -> leaveAr("AR isn't supported on this device")
             }
         }
     }
@@ -241,8 +239,6 @@ class ScannerViewModel @Inject constructor(
     /** Opens [m]'s camera from the module cards, or switches the open camera to [m]. */
     private fun setMode(m: ScanMode) {
         if (m == s.mode && !s.home) return
-        // First AR entry: install ARCore from the Activity and stay where we are until it is there.
-        if (m == ScanMode.Ar && !arInstalled && !ar.installed()) { _effects.trySend(ScannerEffect.InstallArCore); return }
         if (!s.home) leaveMode()   // from home, the mode was already left
         if (m == ScanMode.DocAcq) doc.enter()
         _state.update {
@@ -271,25 +267,29 @@ class ScannerViewModel @Inject constructor(
 
     /** Ends the current mode's work and releases its camera (iOS setMode, the leaving half). */
     private fun leaveMode() {
-        if (s.mode == ScanMode.Ar) ar.detach()   // release ARCore's camera before the scanner claims it (iOS :250)
+        if (usesAr) {
+            ar.detach()   // release ARCore's camera before the scanner claims it (iOS :250)
+            _state.update { it.copy(arOn = false) }
+        }
         pendingShow?.cancel(); pendingShow = null
         entitlementJob?.cancel(); entitlementJob = null
         modeGeneration++
         retry = null
-        clearInView()
         dismissing = false
         setTorch(false)
         if (s.mode == ScanMode.DocAcq) doc.leave()   // drops the pages, releases CameraX before the next owner claims
         setZoom(1f)
     }
 
-    /** Hands the sensor to the mode's owner (none on the module cards); for the scanner, applies its config and
-     *  (gated modes) the entitlement check. */
+    /** Hands the sensor to the mode's owner (none on the module cards); for the scanner, applies its config; for gated
+     *  modes, the entitlement check (AR Item Count's AR session starts once it passes). */
     private fun configureCamera() {
         camera.claim(if (s.home) CameraOwner.None else ownerFor(s.mode))
-        if (s.home || !usesScanner) return
-        applyConfig()
-        if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) resumeDetection()
+        if (s.home) return
+        if (usesScanner) {
+            applyConfig()
+            if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) resumeDetection()
+        }
         if (s.mode.gated) checkEntitlement(s.mode)
     }
 
@@ -354,15 +354,32 @@ class ScannerViewModel @Inject constructor(
     }
 
     /** ARCore runs unless the camera is paused (heat, idle, background) or a result covers it (iOS :482/:504).
-     *  It keeps running under the Settings sheet: a pause would break the section's tracking segment. */
+     *  It keeps running under the sheets: a pause would break the section's tracking segment, and Add Item reads the
+     *  codes in view. */
     private fun syncAr() {
-        if (s.mode != ScanMode.Ar || s.home) return
+        if (!s.arOn || s.home) return
         if (s.paused || s.result != null) ar.pause() else ar.resume()
     }
 
-    /** AR Count can't run here (spec 6: no session, or no app stream configures): the message, then the module cards. */
+    /** AR Item Count past its gate (spec 5.10): ARCore's install first if it isn't there, else the AR session, which
+     *  counts the list's codes. */
+    private fun startAr() {
+        if (!arInstalled && !ar.installed()) { _effects.trySend(ScannerEffect.InstallArCore); return }
+        _state.update { it.copy(arOn = true) }
+        ar.setItems(s.items.toSet())
+        syncAr()
+    }
+
+    /** "New Scan" (spec 5.10): a new counter, the count and the seen codes gone; the list is kept. */
+    private fun newCount() {
+        ar.reset()
+        ar.setItems(s.items.toSet())
+    }
+
+    /** AR Item Count can't run here (no ARCore, spec 6: no session, or no app stream configures): the message, then
+     *  the module cards. */
     private fun leaveAr(message: String) {
-        if (s.mode != ScanMode.Ar || s.home) return
+        if (!usesAr || s.home) return
         toast(message)
         goHome()
     }
@@ -390,11 +407,12 @@ class ScannerViewModel @Inject constructor(
                 it.copy(
                     gated = r.isFailure, entitlementChecking = false,
                     notEntitled = if (r.isFailure) it.notEntitled + mode else it.notEntitled - mode,
+                    arOn = it.arOn && r.isSuccess,
                 )
             }
             if (r.isSuccess) {
                 if (announce) toast("Authenticated")
-                if (rescan) camera.rescan()
+                if (usesAr) startAr() else if (rescan) camera.rescan()
             } else if (announce) {
                 val e = r.exceptionOrNull()
                 toast(if (e is IOException) "You're offline. Try again once connected." else e?.message ?: "Not entitled for ${mode.label}")
@@ -408,14 +426,12 @@ class ScannerViewModel @Inject constructor(
         if (s.phase != Phase.Idle || s.result != null || pendingShow != null || s.gated || s.permissionDenied) return
         if (!s.detectionEnabled && usesScanner) return toast("Detection is paused. Resume it in Settings › Advanced.")
         when (s.mode) {
-            // The sections closed so far, one result each (spec 5.7); the drawer's New Scan starts a fresh count.
-            ScanMode.Ar -> s.arCount.closed.takeIf { it.isNotEmpty() }?.let { show(ScanResult.Ar(it)) }
-                ?: toast("No section closed yet. Count a shelf section, then tap Finish.")
             ScanMode.Price -> show(ScanResult.Price)   // iOS shows the drawer even with no tags yet
             ScanMode.DocAcq -> doc.shutter()
             ScanMode.Retrieval -> {
                 if (s.items.isEmpty()) return _state.update { it.copy(alert = noItemsAlert) }
-                show(ScanResult.Retrieval(s.codesInView.map { it to (it in s.items) }))
+                // The codes in view and the listed codes counted so far; the drawer's New Scan starts a fresh count.
+                show(ScanResult.Retrieval(retrievalRows(s.codesInView, s.items, s.arCount.items)))
             }
             ScanMode.Barcode, ScanMode.QR, ScanMode.Ocr -> {
                 // Wild card prepares its own models (iOS :427).
@@ -469,7 +485,6 @@ class ScannerViewModel @Inject constructor(
                 if (s.prefs.autoCapture && s.result == null && pendingShow == null && s.sheet == null && s.alert == null &&
                     s.phase == Phase.Idle && !s.gated) show(ScanResult.Price)
             }
-            is ScanEvent.Retrieved -> if (s.mode == ScanMode.Retrieval) sawInView(e.code.scannedCode)
             is ScanEvent.Failure -> onFailure(e.e)
             // Vision Scanner's hint text (iOS seesText/seesDocument); DocAcq gets the same fields from its
             // own boundary detector (DocumentFlow), not from this SDK callback. Only Vision Scanner reads them: in other
@@ -477,26 +492,6 @@ class ScannerViewModel @Inject constructor(
             is ScanEvent.Indications -> if (s.mode == ScanMode.Ocr) _state.update { it.copy(seesText = e.text, seesDocument = e.document) }
             ScanEvent.Started -> {}
         }
-    }
-
-    /**
-     * The Android SDK reports item-retrieval codes one callback at a time (no per-frame batch like iOS
-     * `codeScannerViewDidCaptureItemCodesWith`), so a code counts as in view until [IN_VIEW_MS] without a report.
-     */
-    private fun sawInView(code: String) {
-        inViewExpiry.remove(code)?.cancel()
-        if (code !in s.codesInView) _state.update { it.copy(codesInView = it.codesInView + code) }
-        inViewExpiry[code] = viewModelScope.launch {
-            delay(IN_VIEW_MS)
-            inViewExpiry.remove(code)
-            _state.update { it.copy(codesInView = it.codesInView - code) }
-        }
-    }
-
-    private fun clearInView() {
-        inViewExpiry.values.forEach { it.cancel() }
-        inViewExpiry.clear()
-        _state.update { it.copy(codesInView = emptyList()) }
     }
 
     private fun onBoxes(codes: List<ScannedCodeResult>) {
@@ -708,8 +703,4 @@ class ScannerViewModel @Inject constructor(
     private fun toast(text: String) { _effects.trySend(ScannerEffect.Toast(text)) }
 
     private fun haptic() { if (s.prefs.sound) _effects.trySend(ScannerEffect.Haptic) }
-
-    private companion object {
-        const val IN_VIEW_MS = 1_000L
-    }
 }

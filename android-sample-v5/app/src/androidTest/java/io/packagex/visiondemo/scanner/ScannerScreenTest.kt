@@ -28,7 +28,7 @@ class ScannerScreenTest {
     fun homeHasSevenModuleCards() {
         var got: ScannerAction? = null
         rule.setContent { VisionTheme { HomeScreen(ScannerUiState(), onAction = { got = it }) } }
-        listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "AR Item Count", "AR Count", "Document Acquisition")
+        listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "AR Item Count", "Document Acquisition")
             .forEach { rule.onNodeWithText(it).assertExists() }
         rule.onNodeWithText("Dimensioning").assertDoesNotExist()
         rule.onNodeWithText("Price tag").performClick()

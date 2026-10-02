@@ -1,5 +1,8 @@
 package io.packagex.visiondemo.scanner
 
+import io.packagex.arcount.CountView
+import io.packagex.arcount.ItemCount
+import io.packagex.visiondemo.ar.promptText
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.designsystem.PXButtonKind
@@ -9,6 +12,7 @@ import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ModelState
 import io.packagex.visiondemo.model.Processing
+import io.packagex.visiondemo.model.RetrievalRow
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visionsdk.dto.ScannedCodeResult
@@ -19,7 +23,7 @@ import java.io.IOException
 /** Pure rules behind [ScannerViewModel], ported from iOS `DemoModel`. */
 
 internal fun ownerFor(mode: ScanMode) = when (mode) {
-    ScanMode.Ar -> CameraOwner.Ar
+    ScanMode.Retrieval -> CameraOwner.Ar
     ScanMode.DocAcq -> CameraOwner.Document
     else -> CameraOwner.Scanner
 }
@@ -108,4 +112,48 @@ internal fun noCodeCopy(mode: ScanMode, torchOn: Boolean): Triple<String, String
         if (text) "Fill the frame with the label and hold still, then capture again." else "Move closer so the code fills the frame, then try again.",
         if (torchOn) emptyList() else listOf(AlertAction("Turn on torch and retry", PXButtonKind.Secondary, ScannerAction.TorchRetry)),
     )
+}
+
+/**
+ * AR Item Count's hint line (spec 5.10): with an empty list, what to do about it; else the counter's prompt while it
+ * shows one; else what is in view of the list, and the units counted so far ([CountView.items]' lower bounds).
+ */
+internal fun retrievalHint(items: List<String>, codesInView: List<String>, view: CountView): String {
+    if (items.isEmpty()) {
+        val n = codesInView.size
+        return when (n) {
+            0 -> "Add item codes to find"
+            1 -> "1 code in view · add it from Item list"
+            else -> "$n codes in view · add them from Item list"
+        }
+    }
+    view.prompt?.let { return promptText(it, view.bracket) }
+    if (codesInView.isEmpty()) return "Pan across the shelf"
+    val n = codesInView.count { it in items }
+    val counted = view.items.sumOf { it.countLow }
+    return "${if (n == 0) "No" else "$n"} listed item${if (n == 1) "" else "s"} in view · $counted counted"
+}
+
+/**
+ * AR Item Count's shutter (spec 5.10): a row per code in view, then one per listed code counted so far that is not in
+ * view; a listed code carries its count ([counts], 0 while the counter has none for it), an unlisted one none.
+ */
+internal fun retrievalRows(codesInView: List<String>, items: List<String>, counts: List<ItemCount>): List<RetrievalRow> {
+    val byCode = counts.associateBy { it.code }
+    fun row(code: String): RetrievalRow {
+        val listed = code in items
+        val c = byCode[code]
+        return RetrievalRow(code, listed, if (listed) c?.countLow ?: 0 else null, if (listed) c?.countHigh ?: 0 else null)
+    }
+    val counted = counts.filter { it.countHigh > 0 && it.code in items && it.code !in codesInView }.map { it.code }
+    return (codesInView + counted).map(::row)
+}
+
+/** The item list's "Seen" rows (spec 5.10): each seen code, and whether it is listed ("In list") or can be added. */
+internal fun seenRows(seen: List<String>, items: List<String>): List<Pair<String, Boolean>> = seen.map { it to (it in items) }
+
+/** A listed code's count in the drawer: "× N", or "× N–M" while its range is open. */
+internal fun RetrievalRow.countText(): String? = countLow?.let { low ->
+    val high = countHigh ?: low
+    if (high > low) "× $low–$high" else "× $low"
 }

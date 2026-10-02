@@ -12,7 +12,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import io.packagex.visiondemo.designsystem.PX
 
 /**
- * AR Count's camera view: a [GLSurfaceView] that [controller] draws the ARCore feed and the markers into. A new
+ * AR Item Count's camera view: a [GLSurfaceView] that [controller] draws the ARCore feed and the markers into. A new
  * session starts when this enters the composition and closes when it leaves (mode switch). The ViewModel pauses and
  * resumes the session; [paused] only draws the ink scrim over the stopped surface (a SurfaceView can't be blurred like
  * the scanner preview).

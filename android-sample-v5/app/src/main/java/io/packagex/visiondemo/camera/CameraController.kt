@@ -138,10 +138,6 @@ class CameraController @Inject constructor(
             override fun onPriceTagResult(priceTagData: PriceTagData) {
                 _events.tryEmit(ScanEvent.PriceTag(priceTagData))
             }
-
-            override fun onItemRetrievalResult(scannedCodeResults: ScannedCodeResult) {
-                _events.tryEmit(ScanEvent.Retrieved(scannedCodeResults))
-            }
         })
 
         view.setCameraLifecycleCallback(object : CameraLifecycleCallback {

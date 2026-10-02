@@ -11,11 +11,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 
-/** Records what the ViewModel asked of AR Count; [count] stands in for the counter's view as the controller publishes it. */
+/**
+ * Records what the ViewModel asked of the AR session; [count], [codesInView] and [seen] stand in for what the
+ * controller publishes. [reset] empties the count and the seen list, as a new counter does; the codes in view stay.
+ */
 class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Unit = {}) : ArCount {
     override val count = MutableStateFlow(CountView.EMPTY)
     override val stream = MutableStateFlow<AppStream?>(null)
     override val screen = MutableStateFlow(ArScreen.NONE)
+    override val codesInView = MutableStateFlow(emptyList<String>())
+    override val seen = MutableStateFlow(emptyList<String>())
     private val errorChannel = Channel<String>(Channel.UNLIMITED)
     override val errors: Flow<String> = errorChannel.receiveAsFlow()
     private val exitChannel = Channel<String>(Channel.UNLIMITED)
@@ -24,7 +29,9 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     var paused = false
     var resets = 0
     var detaches = 0
-    val commands = mutableListOf<Command>()
+
+    /** Every list the ViewModel sent, and "reset" where it reset the counter, in order */
+    val calls = mutableListOf<String>()
 
     fun fail(message: String) { errorChannel.trySend(message) }
     /** The session can't run here (no session, no app stream configures). */
@@ -35,6 +42,7 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     override fun detach(view: GLSurfaceView?) { detaches++; onDetach() }
     override fun pause() { paused = true }
     override fun resume() { paused = false }
-    override fun command(command: Command) { commands += command }
-    override fun reset() { resets++; count.value = CountView.EMPTY }
+    override fun command(command: Command) {}
+    override fun reset() { resets++; calls += "reset"; count.value = CountView.EMPTY; seen.value = emptyList() }
+    override fun setItems(codes: Set<String>) { calls += codes.sorted().joinToString(",", "items ") }
 }

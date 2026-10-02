@@ -2,7 +2,6 @@ package io.packagex.visiondemo.scanner
 
 import androidx.compose.runtime.Immutable
 import io.packagex.arcount.CountView
-import io.packagex.visiondemo.ar.AppStream
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.designsystem.PXButtonKind
@@ -56,8 +55,11 @@ data class ScannerUiState(
     val feedback: Feedback? = null,
     /** Price tag: unique tags read so far; cleared only by ClearTags (iOS). The Price drawer renders these. */
     val tags: List<PriceTag> = emptyList(),
-    /** Item retrieval: codes reported in view within the last second. */
+    /** AR Item Count: the codes the AR session read within the last second ([io.packagex.visiondemo.ar.ArCount.codesInView]). */
     val codesInView: List<String> = emptyList(),
+    /** AR Item Count: every code the AR session read since it started or New Scan, the most recently first read first,
+     *  at most 30 (the item list's "Seen" section). */
+    val seen: List<String> = emptyList(),
     /** Item retrieval list: the codes to find (iOS `items`). */
     val items: List<String> = emptyList(),
     /** Zoom preset in use (reset to 1 on mode switch). */
@@ -72,11 +74,11 @@ data class ScannerUiState(
     val frontCamera: Boolean = false,
     /** Last tap-to-focus point, for the focus ring; a new [FocusTap.id] restarts the ring. */
     val focus: FocusTap? = null,
-    /** AR Count: what Compose shows of the counter's newest view (prompt, bracket, state, closed sections), without the
+    /** AR Item Count: what Compose shows of the counter's newest view (prompt, per-item counts), without the
      *  per-frame geometry the GL thread draws ([io.packagex.visiondemo.ar.forUi]). */
     val arCount: CountView = CountView.EMPTY,
-    /** AR Count: the app stream of the running session, whose working distance the hint shows; null while none runs. */
-    val arStream: AppStream? = null,
+    /** AR Item Count: past the entitlement gate with ARCore installed, so the AR session's view is shown and runs. */
+    val arOn: Boolean = false,
 )
 
 /** Single-code Barcode/QR results show over the camera as a code card (v6), not on the result screen. */

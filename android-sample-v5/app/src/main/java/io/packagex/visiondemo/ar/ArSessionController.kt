@@ -63,6 +63,15 @@ class ArSessionController @Inject constructor(
     private val _screen = MutableStateFlow(ArScreen.NONE)
     override val screen: StateFlow<ArScreen> = _screen.asStateFlow()
 
+    private val _codesInView = MutableStateFlow(emptyList<String>())
+    override val codesInView: StateFlow<List<String>> = _codesInView.asStateFlow()
+
+    private val _seen = MutableStateFlow(emptyList<String>())
+    override val seen: StateFlow<List<String>> = _seen.asStateFlow()
+
+    /** AR Item Count's list: sent to every new counter (attach, New Scan) */
+    private var items: Set<String> = emptySet()
+
     private val _errors = MutableSharedFlow<String>(extraBufferCapacity = 4)
     override val errors: Flow<String> = _errors
 
@@ -124,10 +133,15 @@ class ArSessionController @Inject constructor(
     override fun attach(view: GLSurfaceView) {
         detach(null)
         val tick = CountTick()
-        val m = ArMapper(counters.create(), onView = {
-            _count.value = it.forUi()
-            if (tick.onView(it, SystemClock.uptimeMillis())) haptics.tick() // spec 5.5 Feedback
-        })
+        val m = ArMapper(
+            counters.create(),
+            onView = {
+                _count.value = it.forUi()
+                if (tick.onView(it, SystemClock.uptimeMillis())) haptics.tick() // spec 5.5 Feedback
+            },
+            onCodes = { inView, seen -> _codesInView.value = inView; _seen.value = seen },
+        )
+        m.post(ArEvent.Items(items))
         val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onScreen = { _screen.value = it }, onFatal = ::onUpdateFailed, poses = poses)
         luma = LumaCopier { ts, img -> m.post(ArEvent.Luma(ts, img)) }
         // The renderer must be set before the surface exists; the GL thread waits paused until ARCore runs.
@@ -142,6 +156,8 @@ class ArSessionController @Inject constructor(
         rebuilds = 0
         _count.value = CountView.EMPTY
         _screen.value = ArScreen.NONE
+        _codesInView.value = emptyList()
+        _seen.value = emptyList()
         val s = createSession() ?: return
         session = s
         // Read on the engine worker before every scan: the attached mapper's, the constant once none is attached
@@ -169,6 +185,8 @@ class ArSessionController @Inject constructor(
         _count.value = CountView.EMPTY
         _stream.value = null
         _screen.value = ArScreen.NONE
+        _codesInView.value = emptyList()
+        _seen.value = emptyList()
     }
 
     override fun pause() {
@@ -186,7 +204,12 @@ class ArSessionController @Inject constructor(
     }
 
     override fun reset() {
-        mapper?.post(ArEvent.Reset(counters.create()))
+        mapper?.post(ArEvent.Reset(counters.create())) // the mapper gives the new counter the list
+    }
+
+    override fun setItems(codes: Set<String>) {
+        items = codes
+        mapper?.post(ArEvent.Items(codes))
     }
 
     /** The configured session; null when ARCore can't make or configure one here, after saying so (the mode exits). */

@@ -67,8 +67,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import io.packagex.visiondemo.ar.countText
-import io.packagex.visiondemo.ar.statusText
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.OcrParser
 import io.packagex.visiondemo.data.PriceTag
@@ -90,6 +88,7 @@ import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.OcrField
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.OcrTable
+import io.packagex.visiondemo.model.RetrievalRow
 import io.packagex.visiondemo.model.ScanResult
 import androidx.compose.foundation.layout.union
 
@@ -172,8 +171,7 @@ fun ResultDrawer(
                         onSelectedChange = { selectedField = it },
                     )
                     ScanResult.Price -> PriceContent(tags, onAction)
-                    is ScanResult.Retrieval -> RetrievalContent(result.codes, onAction)
-                    is ScanResult.Ar -> ArContent(result)
+                    is ScanResult.Retrieval -> RetrievalContent(result.rows, onAction)
                     is ScanResult.Document -> DocumentReview(
                         pages = result.pages,
                         index = docPage,
@@ -275,7 +273,7 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: 
                     }
                 }
                 Box(Modifier.weight(1f)) {
-                    val label = if (result is ScanResult.Ar) "New Scan" else "Scan next"
+                    val label = if (result is ScanResult.Retrieval) "New Scan" else "Scan next"
                     PXButton(title = label) { onAction(ScannerAction.ScanNext) }
                 }
             }
@@ -301,18 +299,12 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
     is ScanResult.Ocr -> Triple(result.title, result.subtitle, true)
     ScanResult.Price -> Triple("Found ${tags.size} Items", "${tags.count { !it.valid }} invalid", true)
     is ScanResult.Retrieval -> {
-        val n = result.codes.count { it.second }
+        val n = result.rows.count { it.inList }
         Triple(
             if (n == 0) "No listed items found" else "$n listed item${if (n == 1) "" else "s"} found",
             "$itemCount codes in list",
             true,
         )
-    }
-    is ScanResult.Ar -> {
-        val n = result.sections.size
-        val low = result.sections.sumOf { it.countLow }
-        val high = result.sections.sumOf { it.countHigh }
-        Triple("Shelf count", "$n ${if (n == 1) "section" else "sections"} · ${if (high > low) "$low–$high" else "$low"} units", true)
     }
     is ScanResult.Document -> Triple("Document captured", "${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"} · on-device", true)
 }
@@ -333,8 +325,9 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when 
         }
     }
     ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
-    is ScanResult.Retrieval -> result.codes.joinToString("\n") { "${it.first}\t${if (it.second) "In list" else "Not in list"}" }
-    is ScanResult.Ar -> result.sections.joinToString("\n") { "${it.gtins.joinToString(",")}\t${statusText(it.status)}\t${countText(it)}" }
+    is ScanResult.Retrieval -> result.rows.joinToString("\n") { r ->
+        listOfNotNull(r.code, if (r.inList) "In list" else "Not in list", r.countText()).joinToString("\t")
+    }
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
 }
 
@@ -387,31 +380,20 @@ private fun PriceContent(tags: List<PriceTag>, onAction: (ScannerAction) -> Unit
 }
 
 @Composable
-private fun RetrievalContent(codes: List<Pair<String, Boolean>>, onAction: (ScannerAction) -> Unit) {
-    if (codes.isEmpty()) {
+private fun RetrievalContent(rows: List<RetrievalRow>, onAction: (ScannerAction) -> Unit) {
+    if (rows.isEmpty()) {
         EmptyNote(text = "No codes in view. Pan across the shelf, then capture.")
     } else {
         Column {
-            codes.forEach { (code, inList) ->
-                RowLine(label = "Code", value = code) {
-                    Badge(text = if (inList) "In list" else "Not in list", tone = if (inList) BadgeTone.Success else BadgeTone.Neutral, dot = inList)
+            rows.forEach { r ->
+                RowLine(label = "Code", value = r.code) {
+                    r.countText()?.let { Text(it, style = mono(14.sp), color = PX.Text2) }
+                    Badge(text = if (r.inList) "In list" else "Not in list", tone = if (r.inList) BadgeTone.Success else BadgeTone.Neutral, dot = r.inList)
                 }
             }
         }
     }
     LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenItemList) }
-}
-
-/** One row per closed section: its status and shelf label, its GTINs, its count (a range while unresolved). */
-@Composable
-private fun ArContent(result: ScanResult.Ar) {
-    Column {
-        result.sections.forEach { s ->
-            RowLine(label = "${statusText(s.status)} · ${s.labelPayload ?: "no label"}", value = s.gtins.joinToString(", ").ifEmpty { "No GTIN" }) {
-                Text("× ${countText(s)}", style = mono(14.sp), color = PX.Text2)
-            }
-        }
-    }
 }
 
 @Composable

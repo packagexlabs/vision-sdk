@@ -39,6 +39,9 @@ sealed interface ArEvent {
 
     /** Trace to [recorder] from now on, null to stop; the old one is closed (main thread) */
     class Trace(val recorder: SessionRecorder?) : ArEvent
+
+    /** AR Item Count's list: the codes the counter counts, this one and every later one (main thread) */
+    data class Items(val codes: Set<String>) : ArEvent
 }
 
 /** What the GL thread does with the section anchor, in order. It holds one anchor at most. */
@@ -66,6 +69,8 @@ class ArMapper(
     /** Luma copies waiting at most: the oldest is dropped (counted in [droppedLumas]), so a slow counter holds little memory */
     private val lumaCapacity: Int = 2,
     private val log: (String, Throwable) -> Unit = { what, t -> Log.e(THREAD, what, t) },
+    /** AR Item Count: the codes in view and the seen list ([RecentReads]), at most every 250 ms of read time */
+    private val onCodes: (inView: List<String>, seen: List<String>) -> Unit = { _, _ -> },
 ) {
     private val lock = Object()
     private val queue = ArrayDeque<ArEvent>()
@@ -103,9 +108,20 @@ class ArMapper(
     /** The GL thread holds an anchor, or is about to: a Create was sent and no Detach since */
     private var anchorHeld = false
     private var recorder: SessionRecorder? = null
+    private val recent = RecentReads()
+    private var codesPublishedNs: Long? = null
+    private val latestReads = AtomicReference<List<Read>>(emptyList())
+
+    /** The item list (GL thread: listed codes get no neutral marker) */
+    @Volatile
+    var items: Set<String> = emptySet()
+        private set
 
     /** The newest view (GL thread) */
     fun latestView(): CountView = latest.get()
+
+    /** The reads of the last second, oldest first (GL thread: the neutral markers) */
+    fun recentReads(): List<Read> = latestReads.get()
 
     fun post(event: ArEvent) {
         synchronized(lock) {
@@ -187,6 +203,7 @@ class ArMapper(
                 recorder?.frame(e.record)
             }
             is ArEvent.Reads -> {
+                addRecent(e.timestampNs, e.reads)
                 counter.onReads(e.timestampNs, e.reads)
                 recorder?.run {
                     reads(e.timestampNs, e.reads)
@@ -209,14 +226,31 @@ class ArMapper(
                 closedSeen = 0
                 counterFirstId = nextCreateId
                 counter = e.counter
+                counter.setItems(items)
                 counter.onResume(lastFrameNs)
+                recent.clearSeen()
+                onCodes(recent.inView, recent.seen)
             }
             is ArEvent.Trace -> {
                 recorder?.close()
                 recorder = e.recorder
             }
+            is ArEvent.Items -> {
+                items = e.codes
+                counter.setItems(e.codes)
+            }
         }
         return afterCall()
+    }
+
+    private fun addRecent(timestampNs: Long, reads: List<Read>) {
+        recent.add(timestampNs, reads)
+        latestReads.set(recent.reads)
+        val last = codesPublishedNs
+        if (last == null || timestampNs < last || timestampNs - last >= RecentReads.PUBLISH_EVERY_NS) {
+            codesPublishedNs = timestampNs
+            onCodes(recent.inView, recent.seen)
+        }
     }
 
     private fun afterCall(): CountView {
