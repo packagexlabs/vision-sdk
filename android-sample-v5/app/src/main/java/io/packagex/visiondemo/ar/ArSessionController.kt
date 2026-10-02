@@ -237,19 +237,19 @@ class ArSessionController @Inject constructor(
 
     private fun start() {
         val s = session ?: return
-        val r = reader ?: return
-        if (running || opening || pauseWanted) return
-        // Before every open, as Google's shared-camera sample does: ARCore then feeds the app stream too.
-        if (runCatching { s.sharedCamera.setAppSurfaces(cameraId, listOf(r.surface)) }.onFailure { Log.w(TAG, "setAppSurfaces", it) }.isFailure) {
-            _errors.tryEmit("AR Count could not start the camera")
-            return
-        }
+        if (reader == null || running || opening || pauseWanted) return
         opening = true
         openCamera(s, ++generation, RETRIES)
     }
 
     private fun openCamera(s: Session, gen: Int, retriesLeft: Int) {
         if (gen != generation) return
+        val r = reader ?: return
+        // Before every open, retries too, as Google's shared-camera sample does: ARCore then feeds the app stream too.
+        if (runCatching { s.sharedCamera.setAppSurfaces(cameraId, listOf(r.surface)) }.onFailure { Log.w(TAG, "setAppSurfaces", it) }.isFailure) {
+            fail(gen, "AR Count could not start the camera")
+            return
+        }
         val callback = DeviceCallback(gen, retriesLeft)
         try {
             cameraManager.openCamera(cameraId, s.sharedCamera.createARDeviceStateCallback(callback, cameraHandler), cameraHandler)
