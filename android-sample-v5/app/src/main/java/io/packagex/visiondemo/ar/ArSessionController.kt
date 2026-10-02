@@ -86,12 +86,22 @@ class ArSessionController @Inject constructor(
     /** The engine (native); one per process, reused across sessions. */
     private val engine by lazy { BarcodeProcessor(ctx) }
 
+    /** The two newest pose records (GL thread), for the blur pre-skip on the camera thread (spec 5.6) */
+    private val poses = LatestPoses()
+
+    /** Images kept from the engine for predicted blur, all so far (camera thread) */
+    @Volatile private var blurSkipped = 0L
+
+    private val haptics by lazy { Haptics(ctx) }
+
     // One attached view's session (main thread; the camera thread reads the @Volatile ones)
     private var view: GLSurfaceView? = null
     private var renderer: ArCountRenderer? = null
     @Volatile private var session: Session? = null
     @Volatile private var mapper: ArMapper? = null
     @Volatile private var reader: ImageReader? = null
+    /** The luma copy for the patch tracker (spec 5.9) of the attached session */
+    @Volatile private var luma: LumaCopier? = null
     private var cameraId = ""
     private var streams: List<AppStream> = emptyList()
     private var streamIndex = 0
@@ -113,8 +123,13 @@ class ArSessionController @Inject constructor(
 
     override fun attach(view: GLSurfaceView) {
         detach(null)
-        val m = ArMapper(counters.create(), onView = { _count.value = it.forUi() })
-        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onScreen = { _screen.value = it }, onFatal = ::onUpdateFailed)
+        val tick = CountTick()
+        val m = ArMapper(counters.create(), onView = {
+            _count.value = it.forUi()
+            if (tick.onView(it, SystemClock.uptimeMillis())) haptics.tick() // spec 5.5 Feedback
+        })
+        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onScreen = { _screen.value = it }, onFatal = ::onUpdateFailed, poses = poses)
+        luma = LumaCopier { ts, img -> m.post(ArEvent.Luma(ts, img)) }
         // The renderer must be set before the surface exists; the GL thread waits paused until ARCore runs.
         view.preserveEGLContextOnPause = true
         view.setEGLContextClientVersion(2)
@@ -129,6 +144,8 @@ class ArSessionController @Inject constructor(
         _screen.value = ArScreen.NONE
         val s = createSession() ?: return
         session = s
+        // Read on the engine worker before every scan: the attached mapper's, the constant once none is attached
+        engine.desiredRefresh = { mapper?.desiredRefreshMs }
         m.start()
         if (setUpStreams(s)) start()
     }
@@ -143,6 +160,9 @@ class ArSessionController @Inject constructor(
         session = null
         mapper?.close()
         mapper = null
+        luma?.close()
+        luma = null
+        poses.clear()
         renderer = null
         this.view = null
         metas.clear()
@@ -242,8 +262,29 @@ class ArSessionController @Inject constructor(
             image.close()
             return
         }
-        engine.process(image) { ts, reads, stats -> m.post(ArEvent.Reads(ts, reads, stats)) }
+        val ts = image.timestamp
+        // The luma copy (spec 5.8 step 1): one bulk copy of the Y plane here, the downscale on its own thread; every
+        // image, blurred ones too (the patch tracker works while the camera moves)
+        val l = luma
+        if (l != null) {
+            runCatching { image.planes[0].let { y -> l.offer(ts, y.buffer, image.width, image.height, y.rowStride) } }
+                .onFailure { Log.w(TAG, "no luma copy", it) }
+        }
+        // The blur pre-skip (spec 5.6): an image predicted too blurred for a decode is not handed to the engine
+        if (skipForBlur(poses.blurPx(ts, metas.exposureAt(ts)), image.width)) {
+            image.close()
+            blurSkipped++
+            return
+        }
+        engine.process(image) { t, reads, stats ->
+            val event = ArEvent.Reads(t, reads, stats.copy(pipe = pipeCounters(l)))
+            // After the luma copy of the same image, so the counter has the frame's pixels when its reads come
+            if (l == null) m.post(event) else l.afterLuma(t) { m.post(event) }
+        }
     }
+
+    private fun pipeCounters(l: LumaCopier?) =
+        PipeCounters(l?.frames ?: 0, l?.copyNs ?: 0, l?.scaleNs ?: 0, l?.dropped ?: 0, blurSkipped)
 
     private fun start() {
         val s = session ?: return

@@ -12,7 +12,8 @@ internal const val BORDER_PX = 2.0
  * frame rate; [prepareMs] picture motion and handing the frame to the detector, [detectMs] the detector's last look,
  * [decodeMs] localizer and decoder; [barcodes] boxes, [decoded] of them with a text shown) and [scanMs], the whole
  * `scanAll` call on the worker; [droppedImages], the images so far that waited for the engine and were replaced by a
- * newer one, unread.
+ * newer one, unread; [refreshAfterMs], the engine's refresh for this image (-1: not told); [pipe], the app's own work
+ * on the images so far.
  */
 data class EngineStats(
     val fps: Float,
@@ -23,10 +24,26 @@ data class EngineStats(
     val decoded: Int,
     val scanMs: Float,
     val droppedImages: Long,
+    val refreshAfterMs: Long = -1L,
+    val pipe: PipeCounters = PipeCounters(),
 )
 
-internal fun FrameStats.toEngineStats(scanMs: Float, droppedImages: Long) =
-    EngineStats(framesPerSecond, prepareMs, detectMs, decodeMs, barcodes, decoded, scanMs, droppedImages)
+/**
+ * The app's own work on the app-stream images, all of it so far (the 2 s line takes differences): the luma copies of
+ * spec 5.9 ([lumaFrames] made, [lumaCopyNs] copying on the camera thread, [lumaScaleNs] downscaling on the luma
+ * thread, [lumaDropped] replaced before the downscale took them) and [blurSkipped], the images kept from the engine
+ * for predicted blur (5.6).
+ */
+data class PipeCounters(
+    val lumaFrames: Long = 0,
+    val lumaCopyNs: Long = 0,
+    val lumaScaleNs: Long = 0,
+    val lumaDropped: Long = 0,
+    val blurSkipped: Long = 0,
+)
+
+internal fun FrameStats.toEngineStats(scanMs: Float, droppedImages: Long, refreshAfterMs: Long = -1L) =
+    EngineStats(framesPerSecond, prepareMs, detectMs, decodeMs, barcodes, decoded, scanMs, droppedImages, refreshAfterMs)
 
 /**
  * Every corner of [corners] (x0, y0, ... x3, y3, 0..1 of a [uprightWidth] x [uprightHeight] frame that [rotationDegrees]

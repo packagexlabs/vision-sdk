@@ -13,6 +13,7 @@ import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.FatalException
 import com.google.ar.core.exceptions.SessionPausedException
 import io.packagex.arcount.CountView
+import io.packagex.arcount.Marker
 import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.UnitState
 import javax.microedition.khronos.egl.EGLConfig
@@ -34,6 +35,8 @@ class ArCountRenderer(
     private val onScreen: (ArScreen) -> Unit,
     /** `update()` threw [FatalException]: the session is to be rebuilt (spec 6). Nothing is updated until it resumes. */
     private val onFatal: (FatalException) -> Unit,
+    /** Every frame's [PoseRecord] goes here too, for the camera thread's blur pre-skip (spec 5.6) */
+    private val poses: LatestPoses? = null,
 ) : GLSurfaceView.Renderer {
     /** Set once ARCore runs; null draws nothing. */
     @Volatile
@@ -110,7 +113,9 @@ class ArCountRenderer(
                 mapper.post(ArEvent.Resumed(ts))
             }
             applyAnchorOps(s)
-            mapper.post(ArEvent.Frame(record(frame, ts)))
+            val rec = record(frame, ts)
+            poses?.add(rec)
+            mapper.post(ArEvent.Frame(rec))
         }
         draw(frame, mapper.latestView())
     }
@@ -164,8 +169,9 @@ class ArCountRenderer(
     private fun draw(frame: Frame, view: CountView) {
         val g = geometry ?: return
         val bracket = view.bracket?.takeIf { it.inImage }
+        val markers = placeMarkers(frame, view, g)
         // Per marker its centre and a point sizeU to its right (its size on screen), then the gaps, then the bracket
-        val n = view.markers.size * 2 + view.gaps.size + (if (bracket != null) 1 else 0)
+        val n = markers.size * 2 + view.gaps.size + (if (bracket != null) 1 else 0)
         if (n == 0) {
             publish(ArScreen.NONE)
             return
@@ -176,7 +182,7 @@ class ArCountRenderer(
             image[i++] = g.cpuU(u).toFloat()
             image[i++] = g.cpuV(v).toFloat()
         }
-        view.markers.forEach { put(it.u, it.v); put(it.u + it.sizeU, it.v) }
+        markers.forEach { (_, p) -> put(p.u, p.v); put(p.u + p.sizeU, p.v) }
         view.gaps.forEach { put(it.u, it.v) }
         bracket?.let { put(it.u, it.v) }
         val onView = FloatArray(n * 2)
@@ -184,7 +190,7 @@ class ArCountRenderer(
 
         val out = ArrayList<ScreenMarker>(n)
         var k = 0
-        for (m in view.markers) {
+        for ((m, _) in markers) {
             val x = onView[k]
             val y = onView[k + 1]
             val sizePx = hypot(onView[k + 2] - x, onView[k + 3] - y)
@@ -204,6 +210,25 @@ class ArCountRenderer(
         bracketPoint?.let { out += ScreenMarker(it.x, it.y, dp(7f), NEON, dp(11f), WHITE) }
         marks.draw(out, viewportWidth, viewportHeight)
         publish(ArScreen(bracketPoint, gaps))
+    }
+
+    /**
+     * The markers of [view] where this frame shows them (spec 5.5, no frame of lag): one with an anchor point is
+     * projected with this frame's camera and anchor poses and the stream's intrinsics; the others stay where the
+     * counter put them. A point behind the camera is not drawn.
+     */
+    private fun placeMarkers(frame: Frame, view: CountView, g: StreamGeometry): List<Pair<Marker, MarkerPlace>> {
+        if (view.markers.isEmpty()) return emptyList()
+        val a = anchor?.takeIf { it.trackingState != TrackingState.STOPPED }
+        if (a == null || view.markers.none { it.anchorPoint != null }) return view.markers.map { it to MarkerPlace(it.u, it.v, it.sizeU) }
+        val camera = frame.camera
+        val i = camera.imageIntrinsics
+        val focal = i.focalLength
+        val principal = i.principalPoint
+        val intrinsics = g.intrinsics(focal[0].toDouble(), focal[1].toDouble(), principal[0].toDouble(), principal[1].toDouble())
+        val cameraPose = camera.pose.toPose()
+        val anchorPose = a.pose.toPose()
+        return view.markers.mapNotNull { m -> placeMarker(m, cameraPose, anchorPose, intrinsics)?.let { m to it } }
     }
 
     /** To the overlay, when a point moved by a pixel or more, or one came or went. */

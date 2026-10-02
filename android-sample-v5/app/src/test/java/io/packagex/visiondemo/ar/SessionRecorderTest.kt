@@ -74,4 +74,17 @@ class SessionRecorderTest {
         assertTrue(logged[0], logged[0].startsWith("engine: 2 images in 2.0 s (1.0/s, engine fps 7.0), scan mean 83 max 120 ms"))
         assertTrue(logged[0], logged[0].endsWith("; 3 images replaced by a newer one unread, 1 reads batches dropped"))
     }
+
+    @Test fun theTwoSecondLineHasTheRefreshTheLumaCopyAndTheBlurSkips() {
+        val logged = mutableListOf<String>()
+        val rec = SessionRecorder(StringWriter(), metas, log = { logged += it })
+        val s = EngineStats(7f, 5f, 20f, 18f, 3, 2, 45f, 0, refreshAfterMs = 300, pipe = PipeCounters(10, 10 * ms, 40 * ms, 0, 1))
+        rec.engine(0, s, reads = 1, dropped = 0)
+        rec.engine(2_000 * ms, s.copy(pipe = PipeCounters(70, 130 * ms, 260 * ms, 4, 9)), reads = 1, dropped = 0)
+        // 60 copies in 120 ms; 56 of them downscaled in 220 ms
+        assertTrue(
+            logged[0],
+            logged[0].contains("decode 18 ms, refresh 300 ms, luma 60 copies mean 2.00 ms on the camera thread + 3.93 ms downscale, 4 replaced, 8 images skipped for blur, per image"),
+        )
+    }
 }

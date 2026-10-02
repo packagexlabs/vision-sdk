@@ -31,5 +31,14 @@ class BarcodeProcessorTest {
         assertEquals(0L, AR_REFRESH_AFTER_MS)
     }
 
+    @Test
+    fun `the counter's refresh is used from its first view, the constant before`() {
+        assertEquals(0L, refreshFor(null, AR_REFRESH_AFTER_MS))
+        assertEquals(300L, refreshFor(300, AR_REFRESH_AFTER_MS))
+        assertEquals(0L, refreshFor(0, 250L))
+        assertEquals(0L, refreshFor(-5, 250L))
+        assertEquals(250L, refreshFor(null, 250L))
+    }
+
     private fun onClasspath(name: String) = runCatching { Class.forName(name, false, javaClass.classLoader) }.isSuccess
 }
