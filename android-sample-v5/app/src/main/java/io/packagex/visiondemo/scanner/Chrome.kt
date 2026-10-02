@@ -451,7 +451,10 @@ internal fun hintFor(state: ScannerUiState): String {
     // Text Templates reads the scanner's text/document indications (iOS codeSeen).
     val codeSeen = if (state.mode == ScanMode.TextTemplates) state.seesDocument || state.seesText else state.codeInFrame
     var h = when (state.mode) {
-        ScanMode.Ocr -> if (state.seesDocument) {
+        // A VLM type reads any photo: nothing to wait for in view.
+        ScanMode.Ocr -> if (state.prefs.vlm) {
+            if (auto) "Frame the subject · hold still" else "Frame the subject · tap to capture"
+        } else if (state.seesDocument) {
             if (auto) "Hold Still" else "Hold Still · tap to capture"
         } else {
             "Point camera to document"

@@ -7,12 +7,14 @@ import io.packagex.visiondemo.ar.promptText
 import io.packagex.texttemplates.sdk.PXGuidance
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.data.Prefs
+import io.packagex.visiondemo.data.VlmPrompts
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.model.Box
 import io.packagex.visiondemo.model.DetectedCode
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ModelState
+import io.packagex.visiondemo.model.Phase
 import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.RetrievalRow
 import io.packagex.visiondemo.model.ScanMode
@@ -34,6 +36,18 @@ internal fun ownerFor(mode: ScanMode, ttStream: Boolean = false) = when (mode) {
 
 /** Doc types with an on-device model (the VLM prompts are cloud-only). */
 internal val DocType.onDevice get() = this in setOf(DocType.SL, DocType.BOL, DocType.IL, DocType.DC)
+
+/** A cloud VLM type (the default prompt or a custom one, [VlmPrompts]) is picked: it reads any photo, so capture
+ *  needs no text or document in view (wild card picks its own type, so it isn't one). */
+internal val Prefs.vlm get() = !wildCard && (docType == DocType.VLM || VlmPrompts.spec(docType) != null)
+
+/** Vision Scanner Auto with a VLM type: nothing to detect, so it captures once the live view has held [VLM_AUTO_MS]. */
+internal fun vlmAutoArmed(s: ScannerUiState) = !s.home && s.mode == ScanMode.Ocr && s.prefs.autoCapture && s.prefs.vlm &&
+    s.result == null && s.sheet == null && s.alert == null && s.phase == Phase.Idle && !s.paused && !s.gated &&
+    !s.permissionDenied && s.detectionEnabled
+
+/** The SDK's own wait before a document auto capture (`secondsToWaitBeforeDocumentCapture`). */
+internal const val VLM_AUTO_MS = 3_000L
 
 /** iOS `cloudSelected`: wild card picks its own routes; otherwise cloud unless on-device is chosen and exists. */
 internal fun cloudSelected(p: Prefs) = !p.wildCard && (!p.docType.onDevice || p.processing == Processing.Cloud)

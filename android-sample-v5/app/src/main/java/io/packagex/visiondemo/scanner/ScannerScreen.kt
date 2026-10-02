@@ -39,8 +39,6 @@ import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.VisionTheme
 import io.packagex.visiondemo.model.DetectedCode
-import io.packagex.visiondemo.model.Phase
-import io.packagex.visiondemo.model.ScanMode
 import kotlinx.coroutines.launch
 
 /**
@@ -110,10 +108,6 @@ fun ScannerScreen(
         }
 
         hud?.let { CodeHud(code = it, onAction = onAction) }
-
-        if ((state.mode == ScanMode.Ocr || state.mode == ScanMode.TextTemplates) && state.phase == Phase.Processing) {
-            ProcessingSpinner(onCancel = { onAction(ScannerAction.CancelProcessing) })
-        }
 
         // White capture flash (iOS :44).
         if (state.flash) Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.6f)))

@@ -34,9 +34,11 @@ import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScannerConfig
+import io.packagex.visionsdk.core.DetectionMode
 import io.packagex.visionsdk.core.ScanningMode
 import io.packagex.visionsdk.dto.BarcodeSymbology
 import io.packagex.visionsdk.dto.ScannedCodeResult
+import io.packagex.visionsdk.exceptions.VisionSDKException
 import io.packagex.visionsdk.ui.views.VisionCameraView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -198,7 +200,12 @@ class FakeCamera : DetectionGatedCamera() {
     override fun sdkApply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { lastConfig = config; lastScanning = scanning }
     override fun sdkPauseDetection() { detectionPaused = true }
     override fun sdkResumeDetection() { detectionPaused = false }
-    override fun capture() { captures++ }
+    /** Like the SDK, a capture in OCR detection with no text in view fails with NoTextDetected instead. */
+    var textInView = true
+    override fun capture() {
+        captures++
+        if (lastConfig?.detection == DetectionMode.OCR && !textInView) emit(ScanEvent.Failure(VisionSDKException.NoTextDetected))
+    }
     override fun sdkRescan() { rescans++; running = true; detectionPaused = false }
     override fun torch(on: Boolean) { torchOn = on }
     override fun zoom(ratio: Float) { zoomRatio = ratio }

@@ -24,6 +24,9 @@ sealed interface ScanResult {
     data class Retrieval(val rows: List<RetrievalRow>) : ScanResult
     /** Every page of the document so far (iOS `.docacq`). */
     data class Document(val pages: List<DocumentPage>) : ScanResult
+    /** The photo just taken while its extraction runs (or after it failed), with the header's [title]/[subtitle]
+     *  meanwhile; the result replaces it. Never kept as the last result. */
+    data class Pending(val image: Bitmap, val title: String, val subtitle: String) : ScanResult
     /** A Text Templates prediction (iOS `.tt`): the captured [image] (One-Shot's still, Stream's grayscale frame),
      *  the [path] it came from, and [repredicted] once the user re-ran it against another loaded template. */
     data class TextTemplate(
