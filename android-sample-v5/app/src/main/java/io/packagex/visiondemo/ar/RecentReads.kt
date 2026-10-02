@@ -1,6 +1,6 @@
 package io.packagex.visiondemo.ar
 
-import io.packagex.arcount.Gtin
+import io.packagex.arcount.ItemCode
 import io.packagex.arcount.Read
 
 /**
@@ -47,13 +47,13 @@ class RecentReads(private val windowNs: Long = IN_VIEW_NS, private val seenCap: 
 }
 
 /**
- * The reads that get a neutral marker (white outline, no fill) in the frame taken at [nowNs]: codes not in [listed]
- * (listed ones have the counter's unit markers), read [windowNs] before it or later; per code and engine track the newest
+ * The reads whose quad is outlined (white, thin; no pin, no anchor) in the frame taken at [nowNs]: codes not in [listed]
+ * (listed ones have pins), read [windowNs] before it or later; per code and engine track the newest
  * read only, so a code read in every frame of a pan has one marker, where it was read last.
  */
 fun unlistedReads(reads: List<Read>, listed: Set<String>, nowNs: Long, windowNs: Long = NEUTRAL_WINDOW_NS): List<Read> =
-    listed.map { Gtin.normalize(it) }.toSet().let { keys ->
-        reads.filter { Gtin.normalize(it.text, it.symbology) !in keys && it.timestampNs >= nowNs - windowNs } // GTINs as the counter
+    listedKeys(listed).let { keys ->
+        reads.filter { ItemCode.key(it) !in keys && it.timestampNs >= nowNs - windowNs } // codes keyed as the counter (and the pins) key them
     }.groupBy { it.text to it.engineId }
         .map { (_, same) -> same.maxBy { it.timestampNs } }
 

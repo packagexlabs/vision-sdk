@@ -1,12 +1,21 @@
 package io.packagex.visiondemo.ar
 
+import io.packagex.arcount.Intrinsics
+import io.packagex.arcount.ItemCode
 import io.packagex.arcount.ItemCount
 import io.packagex.arcount.Pose
+import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Quat
 import io.packagex.arcount.Ray
+import io.packagex.arcount.Read
+import io.packagex.arcount.Tracking
+import io.packagex.arcount.UnitPoint
+import io.packagex.arcount.UnitState
 import io.packagex.arcount.Vec3
+import io.packagex.arcount.ray
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -15,8 +24,8 @@ class PinBookTest {
     private val ms = 1_000_000L
 
     /** A read of [payload] from a camera at the origin looking at [at] (rays along -Z, as ARCore's camera looks) */
-    private fun seen(payload: String, at: Vec3, from: Vec3 = Vec3(at.x, at.y, 0.0)) =
-        Sighting(payload, null, at, Quat.IDENTITY, Ray(from, (at - from).unit()))
+    private fun seen(code: String, at: Vec3, from: Vec3 = Vec3(at.x, at.y, 0.0)) =
+        Sighting(code, at, Quat.IDENTITY, Ray(from, (at - from).unit()))
 
     private fun bookWithPin(payload: String, at: Vec3): Pair<PinBook, Pin> {
         val b = PinBook()
@@ -194,14 +203,122 @@ class PinBookTest {
         assertTrue(m.mapReady)
     }
 
-    @Test fun colourIsGreenCountedGreyListedWhiteUnlisted() {
-        val listed = setOf("5901234123457", "A1")
+    @Test fun colourIsGreenCountedGreyListedAndNoneUnlisted() {
+        val keys = listedKeys(setOf("5901234123457", "A1"))
         val items = listOf(ItemCount("5901234123457", 2, 2, true), ItemCount("A1", 0, 1, true))
-        assertEquals(PinColour.COUNTED, pinColour("5901234123457", "EAN_13", listed, items))
-        assertEquals(PinColour.LISTED, pinColour("A1", null, listed, items)) // range 0..1: not counted yet
-        assertEquals(PinColour.UNLISTED, pinColour("B2", null, listed, items))
-        // GTINs compare as 14 digits, as the counter does
-        assertEquals(PinColour.COUNTED, pinColour("05901234123457", null, listed, items))
-        assertEquals(PinColour.LISTED, pinColour("5901234123457", null, listed, emptyList()))
+        assertEquals(PinColour.COUNTED, pinColour(ItemCode.key("5901234123457"), keys, items))
+        assertEquals(PinColour.LISTED, pinColour("A1", keys, items)) // range 0..1: not counted yet
+        assertNull(pinColour("B2", keys, items))
+        // GTINs compare as 14 digits, as the counter keys them
+        assertEquals(PinColour.COUNTED, pinColour(ItemCode.key("05901234123457"), keys, items))
+        assertEquals(PinColour.LISTED, pinColour(ItemCode.key("5901234123457"), keys, emptyList()))
+    }
+
+    // Hit checks: the hit reprojected into its read's own frame, and its depth there
+
+    private val k4k = Intrinsics(2896.0, 2896.0, 1920.0, 1080.0, 3840, 2160)
+    private val capture = PoseRecord(0, Pose.IDENTITY, null, Tracking.TRACKING, null, k4k)
+
+    /** A read 200 px wide centred on pixel ([u], [v]) */
+    private fun readAt(u: Double, v: Double) = Read(0, "A", listOf(u - 100, v - 50, u + 100, v - 50, u + 100, v + 50, u - 100, v + 50), 1)
+
+    @Test fun aHitOnTheReadsRayReprojectsOntoItsCentre() {
+        val r = readAt(2400.0, 700.0)
+        val hit = capture.ray(r.centreU, r.centreV, null).at(0.4)
+        val c = checkHit(hit, r, capture)
+        assertEquals(0.0, c.errorPx, 1e-6)
+        assertEquals(0.4 * (-k4k.rayInCamera(2400.0, 700.0).z), c.depthM, 1e-9)
+        assertTrue(c.accepted)
+    }
+
+    @Test fun aHitOffTheRayByMoreThanHalfTheQuadOrTwentyFivePixelsIsRejected() {
+        val r = readAt(1920.0, 1080.0) // 200 px wide: the limit is 100 px
+        fun at(px: Double) = Vec3(px / 2896.0 * 0.5, 0.0, -0.5) // px to the right of the centre, 0.5 m away
+        assertTrue(checkHit(at(99.0), r, capture).accepted)
+        assertFalse(checkHit(at(101.0), r, capture).accepted)
+        val small = Read(0, "A", listOf(1900.0, 1070.0, 1940.0, 1070.0, 1940.0, 1090.0, 1900.0, 1090.0), 1) // 40 px wide: 25 px
+        assertTrue(checkHit(at(24.0), small, capture).accepted)
+        assertFalse(checkHit(at(26.0), small, capture).accepted)
+    }
+
+    @Test fun aHitOutsideFifteenCentimetresToOneAndAHalfMetresIsRejected() {
+        val r = readAt(1920.0, 1080.0)
+        assertFalse(checkHit(Vec3(0.0, 0.0, -0.10), r, capture).accepted)
+        assertTrue(checkHit(Vec3(0.0, 0.0, -0.15), r, capture).accepted)
+        assertTrue(checkHit(Vec3(0.0, 0.0, -1.5), r, capture).accepted)
+        assertFalse(checkHit(Vec3(0.0, 0.0, -1.75), r, capture).accepted) // the floor behind the shelf
+        val behind = checkHit(Vec3(0.0, 0.0, 0.5), r, capture)
+        assertFalse(behind.accepted)
+        assertEquals(Double.POSITIVE_INFINITY, behind.errorPx, 0.0)
+    }
+
+    // The core's unit points
+
+    private fun unit(key: String, at: Vec3, code: String = "A") = UnitPoint(key, 1, code, UnitState.COUNTED, at)
+
+    @Test fun aUnitPointMakesAPinAtTheCoresPoint() {
+        val b = PinBook()
+        val placed = b.follow(listOf(unit("s1/1", Vec3(0.0, 0.0, -0.4))), 0)
+        assertEquals(1, placed.size)
+        val pin = placed.single()
+        assertTrue(pin.fromCore)
+        assertEquals("s1/1", pin.unitKey)
+        assertEquals(Vec3(0.0, 0.0, -0.4), pin.pose.t)
+    }
+
+    @Test fun aCorePinMovesOnlyWhenTheCoresPointMovesMoreThanThreeCentimetres() {
+        val b = PinBook()
+        val pin = b.follow(listOf(unit("s1/1", Vec3(0.0, 0.0, -0.4))), 0).single()
+        assertTrue(b.follow(listOf(unit("s1/1", Vec3(0.02, 0.0, -0.4))), 1).isEmpty())
+        assertEquals(Vec3(0.0, 0.0, -0.4), pin.pose.t)
+        assertEquals(listOf(pin), b.follow(listOf(unit("s1/1", Vec3(0.04, 0.0, -0.4))), 2))
+        assertEquals(Vec3(0.04, 0.0, -0.4), pin.pose.t)
+        assertEquals(1, b.pins.size)
+    }
+
+    @Test fun aProvisionalPinSnapsToTheCoresPoint() {
+        val (b, pin) = bookWithPin("A", Vec3(0.0, 0.0, -0.5))
+        assertFalse(pin.fromCore)
+        val placed = b.follow(listOf(unit("s1/1", Vec3(0.08, 0.0, -0.45))), 1)
+        assertEquals(listOf(pin), placed)
+        assertTrue(pin.fromCore)
+        assertEquals(Vec3(0.08, 0.0, -0.45), pin.pose.t)
+        assertEquals(1, b.pins.size)
+    }
+
+    @Test fun identicalUnitsAPitchApartKeepTheirOwnPinsAndAreNeverMerged() {
+        val b = PinBook()
+        b.follow(listOf(unit("s1/1", Vec3(0.0, 0.0, -0.4)), unit("s1/2", Vec3(0.06, 0.0, -0.4))), 0)
+        assertEquals(2, b.pins.size)
+        assertTrue(b.mergeSiblings().isEmpty())
+        assertEquals(2, b.pins.size)
+    }
+
+    @Test fun pinsOutliveTheirSectionAndTheNextSectionsUnitTakesThePinInPlace() {
+        val b = PinBook()
+        val pin = b.follow(listOf(unit("s1/1", Vec3(0.0, 0.0, -0.4))), 0).single()
+        // The section closed: no points; the pin stays
+        assertTrue(b.follow(emptyList(), 1).isEmpty())
+        assertEquals(listOf(pin), b.pins)
+        // A new section's unit of the same barcode, 1 cm off: the same pin, not moved
+        assertTrue(b.follow(listOf(unit("s2/1", Vec3(0.01, 0.0, -0.4))), 2).isEmpty())
+        assertEquals("s2/1", pin.unitKey)
+        assertEquals(1, b.pins.size)
+        // Another code at the same place is another pin
+        assertEquals(1, b.follow(listOf(unit("s2/2", Vec3(0.01, 0.0, -0.4), code = "B")), 3).size)
+        assertEquals(2, b.pins.size)
+    }
+
+    @Test fun aProvisionalPinNearACorePinOfItsCodeIsMergedAway() {
+        val b = PinBook()
+        val core = b.follow(listOf(unit("s1/1", Vec3(0.30, 0.0, -0.4))), 0).single()
+        // A provisional pin 20 cm from it (its rays miss the core pin), seen after it
+        var born: List<Pin> = emptyList()
+        repeat(PIN_CONFIRM_COUNT) { born = b.place(listOf(seen("A", Vec3(0.10, 0.0, -0.4))), (10 + it) * ms, true) }
+        val provisional = born.single()
+        // A better triangulation moves the core pin to 10 cm from it: the provisional one goes, though seen later
+        assertEquals(listOf(core), b.follow(listOf(unit("s1/1", Vec3(0.0, 0.0, -0.4))), 20 * ms))
+        assertEquals(listOf(provisional), b.mergeSiblings())
+        assertEquals(listOf(core), b.pins)
     }
 }

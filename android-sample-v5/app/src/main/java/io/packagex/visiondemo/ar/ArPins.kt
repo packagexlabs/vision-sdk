@@ -12,6 +12,7 @@ import com.google.ar.core.Point
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import io.packagex.arcount.CountView
+import io.packagex.arcount.ItemCode
 import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Quat
 import io.packagex.arcount.Ray
@@ -20,16 +21,18 @@ import io.packagex.arcount.Tracking
 import io.packagex.arcount.Vec3
 import io.packagex.arcount.ray
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.math.hypot
 import com.google.ar.core.Pose as ArPose
 
 /**
- * AR Item Count's pins on the GL thread: the old AR Barcode renderer's placement (ceff1a4^ ArBarcodeRenderer) over the
- * mapper's reads. Each new frame: the motion gate, the anchors' positions (a STOPPED anchor re-homed at its last
- * position), the sibling merge, candidate expiry, then every read batch that is fresh and captured since the camera was
- * last immoderate: each read's capture-time centre ray (its frame's [PoseRecord]) is hit-tested on this frame, and the
- * [PinBook] matches or confirms; a confirmed pin gets its own world anchor. Pins stay through freezes, abandoned
- * sections and tracking pauses (not drawn while the frame or the anchor does not track) until [clear] (New Scan) or the
- * session goes. Drawn each frame with that frame's camera, at a constant size on screen.
+ * AR Item Count's pins on the GL thread, for listed codes only. Each new frame: the motion gate, the anchors' positions
+ * (a STOPPED anchor re-homed at its last position), the core's unit points ([CountView.unitPoints]: a pin at each,
+ * moved only when the core's point moves more than 3 cm), the sibling merge, candidate expiry, then every read batch
+ * that is fresh and captured since the camera was last immoderate: each listed read's capture-time centre ray (its
+ * frame's [PoseRecord]) is hit-tested on this frame, the hit must reproject onto the read and lie at a plausible depth
+ * ([checkHit]), and the [PinBook] matches or confirms a provisional pin. Every pin is its own world anchor: pins stay
+ * through freezes, closed and abandoned sections and tracking pauses (not drawn while the frame or the anchor does not
+ * track) until [clear] (New Scan) or the session goes. Drawn each frame with that frame's camera, at a constant size.
  */
 class ArPins(private val density: Float) {
     private val book = PinBook()
@@ -42,13 +45,22 @@ class ArPins(private val density: Float) {
     @Volatile
     private var clearWanted = false
 
+    private var listed: Set<String>? = null
+    private var keys: Set<String> = emptySet()
+    private var followed: CountView? = null
+
     private val viewMatrix = FloatArray(16)
     private val projMatrix = FloatArray(16)
     private val world = FloatArray(4)
     private val eye = FloatArray(4)
     private val clip = FloatArray(4)
+
+    // The 3 s line: hit kinds, the hits' reprojection errors and rejections, and the ray check
     private val hitKinds = HashMap<String, Int>()
-    private var hitStatNs = 0L
+    private val errors = ArrayList<Double>()
+    private var rejectedReprojection = 0
+    private var rejectedDepth = 0
+    private var statNs = 0L
 
     /** New Scan (main thread): every pin and candidate goes on the next frame. */
     fun clear() {
@@ -56,7 +68,17 @@ class ArPins(private val density: Float) {
     }
 
     /** GL thread, once per new frame, with its record ([PoseRecord.timestampNs] is the reads' clock). */
-    fun onFrame(session: Session, frame: Frame, rec: PoseRecord, reads: ConcurrentLinkedQueue<ArEvent.Reads>, g: StreamGeometry, viewportWidth: Int, viewportHeight: Int) {
+    fun onFrame(
+        session: Session,
+        frame: Frame,
+        rec: PoseRecord,
+        reads: ConcurrentLinkedQueue<ArEvent.Reads>,
+        view: CountView,
+        items: Set<String>,
+        g: StreamGeometry,
+        viewportWidth: Int,
+        viewportHeight: Int,
+    ) {
         if (clearWanted) {
             clearWanted = false
             anchors.values.forEach { it.detach() }
@@ -65,6 +87,7 @@ class ArPins(private val density: Float) {
             reads.clear()
             Log.i(TAG, "pins cleared (New Scan), live=0")
         }
+        keysOf(items)
         val ts = rec.timestampNs
         val tracking = rec.frameTracking == Tracking.TRACKING
         motion.onFrame(ts, rec.camera, tracking)
@@ -75,6 +98,10 @@ class ArPins(private val density: Float) {
             return
         }
         refreshPositions(session)
+        if (view !== followed) {
+            followed = view
+            for (pin in book.follow(view.unitPoints, ts)) place(session, pin)
+        }
         if (book.mergePending) book.mergeSiblings().forEach { removed(it, "merged with its sibling") }
         book.expireCandidates(ts)
         var later: ArrayList<ArEvent.Reads>? = null
@@ -91,44 +118,54 @@ class ArPins(private val density: Float) {
             book.place(sightings, ts, motion.mapReady && motion.cameraModerate).forEach { create(session, it) }
         }
         later?.let { reads.addAll(it) }
+        if (ts - statNs > STAT_NS) {
+            statNs = ts
+            logStats(frame, rec, g, viewportWidth, viewportHeight)
+        }
     }
 
     /** GL thread, every drawn frame: each pin whose anchor tracks, projected with this frame's camera. */
-    fun marks(frame: Frame, view: CountView, listed: Set<String>, viewportWidth: Int, viewportHeight: Int): List<ScreenMarker> {
+    fun marks(frame: Frame, view: CountView, viewportWidth: Int, viewportHeight: Int): List<ScreenMarker> {
         val camera = frame.camera
         if (book.pins.isEmpty() || camera.trackingState != TrackingState.TRACKING) return emptyList()
         camera.getViewMatrix(viewMatrix, 0)
         camera.getProjectionMatrix(projMatrix, 0, 0.05f, 100f)
         val out = ArrayList<ScreenMarker>(book.pins.size)
         for (pin in book.pins) {
+            val colour = pinColour(pin.code, keys, view.items) ?: continue
             val a = anchors[pin.id] ?: continue
             if (a.trackingState != TrackingState.TRACKING) continue
             val p = a.pose
-            world[0] = p.tx()
-            world[1] = p.ty()
-            world[2] = p.tz()
-            world[3] = 1f
-            Matrix.multiplyMV(eye, 0, viewMatrix, 0, world, 0)
-            Matrix.multiplyMV(clip, 0, projMatrix, 0, eye, 0)
-            val w = clip[3]
-            if (w <= 0f) continue // behind the camera
-            val nx = clip[0] / w
-            val ny = clip[1] / w
-            if (nx < -1.1f || nx > 1.1f || ny < -1.1f || ny > 1.1f) continue
-            val x = (nx + 1f) / 2f * viewportWidth
-            val y = (1f - ny) / 2f * viewportHeight
-            out += when (pinColour(pin.payload, pin.symbology, listed, view.items)) {
-                PinColour.COUNTED -> ScreenMarker(x, y, dp(DOT_DP), GREEN, dp(RING_DP), WHITE)
-                PinColour.LISTED -> ScreenMarker(x, y, dp(DOT_DP), GREY, dp(RING_DP), WHITE)
-                PinColour.UNLISTED -> ScreenMarker(x, y, 0f, null, dp(RING_DP), WHITE)
-            }
+            val (x, y) = toView(p.tx(), p.ty(), p.tz(), viewportWidth, viewportHeight) ?: continue
+            if (x < -0.05f * viewportWidth || x > 1.05f * viewportWidth || y < -0.05f * viewportHeight || y > 1.05f * viewportHeight) continue
+            out += ScreenMarker(x, y, dp(DOT_DP), if (colour == PinColour.COUNTED) GREEN else GREY, dp(RING_DP), WHITE)
         }
         return out
     }
 
-    /** The batch's reads that land in the view and hit real geometry within reach (old drainDetections' per-detection rules) */
+    /** A world point in view pixels through [viewMatrix] and [projMatrix]; null behind the camera */
+    private fun toView(x: Float, y: Float, z: Float, viewportWidth: Int, viewportHeight: Int): Pair<Float, Float>? {
+        world[0] = x
+        world[1] = y
+        world[2] = z
+        world[3] = 1f
+        Matrix.multiplyMV(eye, 0, viewMatrix, 0, world, 0)
+        Matrix.multiplyMV(clip, 0, projMatrix, 0, eye, 0)
+        val w = clip[3]
+        if (w <= 0f) return null
+        return (clip[0] / w + 1f) / 2f * viewportWidth to (1f - clip[1] / w) / 2f * viewportHeight
+    }
+
+    private fun keysOf(items: Set<String>) {
+        if (items === listed) return
+        listed = items
+        keys = listedKeys(items)
+    }
+
+    /** The batch's listed reads that land in the view and hit real geometry that passes [checkHit] (old drainDetections' per-detection rules) */
     private fun sightings(frame: Frame, reads: List<Read>, capture: PoseRecord, g: StreamGeometry, viewportWidth: Int, viewportHeight: Int): List<Sighting> {
-        val usable = reads.filter { !it.touchesBorder } // a cut symbol's corners, and so its centre, are guessed
+        // A cut symbol's corners, and so its centre, are guessed; unlisted codes get no pin
+        val usable = reads.filter { !it.touchesBorder && ItemCode.key(it) in keys }
         if (usable.isEmpty()) return emptyList()
         val image = FloatArray(usable.size * 2)
         usable.forEachIndexed { i, r ->
@@ -143,17 +180,22 @@ class ArPins(private val density: Float) {
             val vy = onView[2 * i + 1]
             if (vx < 0 || vy < 0 || vx > viewportWidth || vy > viewportHeight) return@forEachIndexed
             val ray = r.ray(capture, anchor = null) // world ray of the capture-time camera
-            val hit = bestHit(frame, ray, capture.timestampNs) ?: return@forEachIndexed
+            val hit = bestHit(frame, ray) ?: return@forEachIndexed
             val h = hit.hitPose
             val at = Vec3(h.tx().toDouble(), h.ty().toDouble(), h.tz().toDouble())
-            if ((at - ray.origin).norm() > PIN_MAX_HIT_M) return@forEachIndexed
-            out += Sighting(r.text, r.symbology, at, Quat(h.qx().toDouble(), h.qy().toDouble(), h.qz().toDouble(), h.qw().toDouble()), ray)
+            val check = checkHit(at, r, capture)
+            if (check.errorPx.isFinite()) errors += check.errorPx
+            if (!check.accepted) {
+                if (check.depthM !in PIN_MIN_DEPTH_M..PIN_MAX_DEPTH_M) rejectedDepth++ else rejectedReprojection++
+                return@forEachIndexed
+            }
+            out += Sighting(ItemCode.key(r), at, Quat(h.qx().toDouble(), h.qy().toDouble(), h.qz().toDouble(), h.qw().toDouble()), ray)
         }
         return out
     }
 
     /** Real geometry only, the nearest: a tracked plane hit inside its polygon, a depth point or a feature point (old bestHit) */
-    private fun bestHit(frame: Frame, ray: Ray, ts: Long): HitResult? {
+    private fun bestHit(frame: Frame, ray: Ray): HitResult? {
         val o = floatArrayOf(ray.origin.x.toFloat(), ray.origin.y.toFloat(), ray.origin.z.toFloat())
         val d = floatArrayOf(ray.dir.x.toFloat(), ray.dir.y.toFloat(), ray.dir.z.toFloat())
         val hit = frame.hitTest(o, 0, d, 0)
@@ -163,12 +205,54 @@ class ArPins(private val density: Float) {
                 (t is Plane && t.isPoseInPolygon(h.hitPose)) || t is DepthPoint || t is Point
             }
         hitKinds.merge(hit?.trackable?.javaClass?.simpleName ?: "NONE", 1, Int::plus)
-        if (ts - hitStatNs > HIT_STAT_NS) { // how often real geometry is there (old HitDiag)
-            hitStatNs = ts
-            Log.d(TAG, "hits=$hitKinds candidates=${book.candidateCount} live=${book.pins.size} warm=${motion.mapReady}")
-            hitKinds.clear()
-        }
         return hit
+    }
+
+    /**
+     * Every [STAT_NS]: the hit kinds (old HitDiag), the hits' reprojection errors into their reads' frames and what the
+     * gates rejected, and the ray check: points of the stream image sent 1 m along the model's ray (this frame's pose
+     * and stream intrinsics, as the reads' rays are made) and projected back with ARCore's own view and projection,
+     * against ARCore's own image-to-view mapping of the same points. A model that is right gives a pixel or two.
+     */
+    private fun logStats(frame: Frame, rec: PoseRecord, g: StreamGeometry, viewportWidth: Int, viewportHeight: Int) {
+        val sorted = errors.sorted()
+        val reproj = if (sorted.isEmpty()) "none" else "median %.1f max %.1f px (%d)".format(sorted[sorted.size / 2], sorted.last(), sorted.size)
+        val core = book.pins.count { it.fromCore }
+        Log.i(
+            TAG,
+            "hits=$hitKinds reprojection $reproj, rejected $rejectedReprojection reprojection $rejectedDepth depth; " +
+                "${rayCheck(frame, rec, g, viewportWidth, viewportHeight)}; candidates=${book.candidateCount} live=${book.pins.size} (core $core, provisional ${book.pins.size - core}) warm=${motion.mapReady}",
+        )
+        hitKinds.clear()
+        errors.clear()
+        rejectedReprojection = 0
+        rejectedDepth = 0
+    }
+
+    private fun rayCheck(frame: Frame, rec: PoseRecord, g: StreamGeometry, viewportWidth: Int, viewportHeight: Int): String {
+        val camera = frame.camera
+        camera.getViewMatrix(viewMatrix, 0)
+        camera.getProjectionMatrix(projMatrix, 0, 0.05f, 100f)
+        val k = rec.intrinsics
+        val image = FloatArray(CHECK_POINTS.size)
+        for (i in CHECK_POINTS.indices step 2) {
+            image[i] = g.cpuU(CHECK_POINTS[i]).toFloat()
+            image[i + 1] = g.cpuV(CHECK_POINTS[i + 1]).toFloat()
+        }
+        val arcore = FloatArray(image.size)
+        frame.transformCoordinates2d(Coordinates2d.IMAGE_NORMALIZED, image, Coordinates2d.VIEW, arcore)
+        // View pixels per stream pixel, from the centre and the first corner point as ARCore maps them
+        val streamPx = hypot((CHECK_POINTS[2] - CHECK_POINTS[0]) * k.width, (CHECK_POINTS[3] - CHECK_POINTS[1]) * k.height)
+        val viewPerStream = hypot(arcore[2] - arcore[0], arcore[3] - arcore[1]) / streamPx
+        val errs = ArrayList<Double>()
+        for (i in CHECK_POINTS.indices step 2) {
+            val at = rec.camera.apply(k.rayInCamera(CHECK_POINTS[i] * k.width, CHECK_POINTS[i + 1] * k.height))
+            val (x, y) = toView(at.x.toFloat(), at.y.toFloat(), at.z.toFloat(), viewportWidth, viewportHeight) ?: continue
+            errs += hypot(x - arcore[i], y - arcore[i + 1]) / viewPerStream * 3840.0 / k.width
+        }
+        if (errs.isEmpty() || !viewPerStream.isFinite() || viewPerStream <= 0) return "rayCheck n/a"
+        errs.sort()
+        return "rayCheck model vs ARCore median %.1f max %.1f px (4K)".format(errs[errs.size / 2], errs.last())
     }
 
     /** Old markerPosition: a tracking anchor's position is cached; a STOPPED one is re-made as a world anchor there */
@@ -190,6 +274,7 @@ class ArPins(private val density: Float) {
         }
     }
 
+    /** A provisional pin from hit tests */
     private fun create(session: Session, pin: Pin) {
         val a = runCatching { session.createAnchor(pin.pose.toArPose()) }
             .onFailure { Log.w(TAG, "pin ${pin.id} anchor not created", it) }
@@ -200,12 +285,30 @@ class ArPins(private val density: Float) {
         }
         anchors[pin.id] = a
         val t = pin.pose.t
-        Log.i(TAG, "pin ${pin.id} created ${pin.payload} at %.3f,%.3f,%.3f, live=${book.pins.size}".format(t.x, t.y, t.z))
+        Log.i(TAG, "pin ${pin.id} created ${pin.code} provisional (hit) at %.3f,%.3f,%.3f, live=${book.pins.size}".format(t.x, t.y, t.z))
+    }
+
+    /** A pin at the core's point: new, snapped from provisional, or moved by a better triangulation; a new anchor there */
+    private fun place(session: Session, pin: Pin) {
+        val old = anchors[pin.id]
+        val a = runCatching { session.createAnchor(pin.pose.toArPose()) }
+            .onFailure { Log.w(TAG, "pin ${pin.id} anchor not made at the core's point", it) }
+            .getOrNull()
+        if (a == null) {
+            if (old == null) book.remove(pin.id) else book.unplace(pin.id)
+            return
+        }
+        val t = pin.pose.t
+        val what = if (old == null) "created" else "moved"
+        val by = old?.pose?.let { " by %.1f cm".format(hypot(hypot(it.tx() - t.x, it.ty() - t.y), it.tz() - t.z) * 100) } ?: ""
+        old?.detach()
+        anchors[pin.id] = a
+        Log.i(TAG, "pin ${pin.id} $what ${pin.code} at core unit ${pin.unitKey} %.3f,%.3f,%.3f$by, live=${book.pins.size}".format(t.x, t.y, t.z))
     }
 
     private fun removed(pin: Pin, why: String) {
         anchors.remove(pin.id)?.detach()
-        Log.i(TAG, "pin ${pin.id} removed ($why) ${pin.payload}, live=${book.pins.size}")
+        Log.i(TAG, "pin ${pin.id} removed ($why) ${pin.code}, live=${book.pins.size}")
     }
 
     private fun dp(v: Float) = v * density
@@ -213,7 +316,10 @@ class ArPins(private val density: Float) {
     private companion object {
         const val TAG = "ArPins"
         const val RECORDS = 32
-        const val HIT_STAT_NS = 3_000_000_000L
+        const val STAT_NS = 3_000_000_000L
+
+        /** Normalized stream points of the ray check: the centre, then four points near the corners */
+        val CHECK_POINTS = doubleArrayOf(0.5, 0.5, 0.2, 0.2, 0.8, 0.2, 0.2, 0.8, 0.8, 0.8)
 
         /** The old renderer's and iOS's marker: a 6 dp dot inside an 11 dp ring */
         const val DOT_DP = 6f

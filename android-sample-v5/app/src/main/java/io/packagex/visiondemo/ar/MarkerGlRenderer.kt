@@ -149,3 +149,64 @@ class MarkerGlRenderer(density: Float) {
         return shader
     }
 }
+
+/**
+ * Thin outlines of quads, in view pixels, drawn into the GL frame like [MarkerGlRenderer]'s marks: AR Item Count's
+ * unlisted reads (the decoded quad, white, 2 px where the GL implementation allows wide lines, else 1 px).
+ */
+class OutlineGlRenderer {
+    private var program = 0
+    private var posAttrib = 0
+    private var colorUniform = 0
+    private var buffer = ByteBuffer.allocateDirect(8 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
+
+    fun createOnGlThread() {
+        val vertex =
+            """
+            attribute vec2 a_Pos;
+            void main() { gl_Position = vec4(a_Pos, 0.0, 1.0); }
+            """.trimIndent()
+        val fragment =
+            """
+            precision mediump float;
+            uniform vec3 u_Color;
+            void main() { gl_FragColor = vec4(u_Color, 1.0); }
+            """.trimIndent()
+        program = GLES20.glCreateProgram()
+        GLES20.glAttachShader(program, compile(GLES20.GL_VERTEX_SHADER, vertex))
+        GLES20.glAttachShader(program, compile(GLES20.GL_FRAGMENT_SHADER, fragment))
+        GLES20.glLinkProgram(program)
+        posAttrib = GLES20.glGetAttribLocation(program, "a_Pos")
+        colorUniform = GLES20.glGetUniformLocation(program, "u_Color")
+    }
+
+    /** [quads]: 8 numbers a quad (x0, y0 .. x3, y3, view pixels), each drawn as a closed outline of [color] (RGB 0..1) */
+    fun draw(quads: FloatArray, color: FloatArray, viewportWidth: Int, viewportHeight: Int) {
+        if (quads.isEmpty() || viewportWidth <= 0 || viewportHeight <= 0) return
+        if (buffer.capacity() < quads.size) buffer = ByteBuffer.allocateDirect(quads.size * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
+        buffer.clear()
+        for (i in quads.indices step 2) {
+            buffer.put(quads[i] / viewportWidth * 2f - 1f)
+            buffer.put(1f - quads[i + 1] / viewportHeight * 2f)
+        }
+        buffer.position(0)
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST)
+        GLES20.glUseProgram(program)
+        GLES20.glLineWidth(2f)
+        GLES20.glUniform3fv(colorUniform, 1, color, 0)
+        GLES20.glVertexAttribPointer(posAttrib, 2, GLES20.GL_FLOAT, false, 0, buffer)
+        GLES20.glEnableVertexAttribArray(posAttrib)
+        for (q in 0 until quads.size / 8) GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, q * 4, 4)
+        GLES20.glDisableVertexAttribArray(posAttrib)
+    }
+
+    private fun compile(type: Int, source: String): Int {
+        val shader = GLES20.glCreateShader(type)
+        GLES20.glShaderSource(shader, source)
+        GLES20.glCompileShader(shader)
+        val status = IntArray(1)
+        GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, status, 0)
+        check(status[0] != 0) { "Shader compile failed: " + GLES20.glGetShaderInfoLog(shader) }
+        return shader
+    }
+}

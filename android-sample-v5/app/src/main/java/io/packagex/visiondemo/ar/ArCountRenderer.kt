@@ -51,6 +51,7 @@ class ArCountRenderer(
 
     private val background = BackgroundRenderer()
     private val marks = MarkerGlRenderer(density)
+    private val outlines = OutlineGlRenderer()
 
     /** AR Item Count's persistent markers, one per physical barcode (GL thread) */
     private val pins = ArPins(density)
@@ -84,6 +85,7 @@ class ArCountRenderer(
         GLES20.glClearColor(0f, 0f, 0f, 1f)
         background.createOnGlThread()
         marks.createOnGlThread()
+        outlines.createOnGlThread()
         textureSet = false
     }
 
@@ -128,7 +130,7 @@ class ArCountRenderer(
             val rec = record(frame, ts)
             poses?.add(rec)
             mapper.post(ArEvent.Frame(rec))
-            geometry?.let { pins.onFrame(s, frame, rec, mapper.pinReads, it, viewportWidth, viewportHeight) }
+            geometry?.let { pins.onFrame(s, frame, rec, mapper.pinReads, mapper.latestView(), mapper.items, it, viewportWidth, viewportHeight) }
         }
         draw(frame, mapper.latestView())
     }
@@ -191,9 +193,10 @@ class ArCountRenderer(
 
     private fun draw(frame: Frame, view: CountView) {
         logView(view)
-        // AR Item Count: the pins replace the core's unit markers and the neutral rings on unlisted reads
-        val pinMarks = pins.marks(frame, view, mapper.items, viewportWidth, viewportHeight)
+        // AR Item Count: pins on listed codes replace the core's unit markers; unlisted reads get their quad outlined
+        val pinMarks = pins.marks(frame, view, viewportWidth, viewportHeight)
         val g = geometry
+        g?.let { drawUnlisted(frame, it) }
         val bracket = view.bracket?.takeIf { it.inImage }
         // The gaps' points, then the bracket's
         val n = if (g == null) 0 else view.gaps.size + (if (bracket != null) 1 else 0)
@@ -228,6 +231,23 @@ class ArCountRenderer(
         bracketPoint?.let { out += ScreenMarker(it.x, it.y, dp(7f), NEON, dp(11f), WHITE) }
         marks.draw(out, viewportWidth, viewportHeight)
         publish(ArScreen(bracketPoint, gaps))
+    }
+
+    /** The decoded quad of each unlisted code read in the last 0.5 s (its newest read per engine track), white and thin */
+    private fun drawUnlisted(frame: Frame, g: StreamGeometry) {
+        val reads = unlistedReads(mapper.recentReads(), mapper.items, lastTimestampNs)
+        if (reads.isEmpty()) return
+        val image = FloatArray(reads.size * 8)
+        var i = 0
+        for (r in reads) {
+            for (c in 0 until 4) {
+                image[i++] = g.cpuU(r.corners[2 * c] / g.streamWidth).toFloat()
+                image[i++] = g.cpuV(r.corners[2 * c + 1] / g.streamHeight).toFloat()
+            }
+        }
+        val onView = FloatArray(image.size)
+        frame.transformCoordinates2d(Coordinates2d.IMAGE_NORMALIZED, image, Coordinates2d.VIEW, onView)
+        outlines.draw(onView, WHITE, viewportWidth, viewportHeight)
     }
 
     /** One line per core state change, per break (as it happens, or with its section once closed) and per closed section */

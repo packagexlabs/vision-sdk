@@ -1,19 +1,25 @@
 package io.packagex.visiondemo.ar
 
-import io.packagex.arcount.Gtin
+import io.packagex.arcount.ItemCode
 import io.packagex.arcount.ItemCount
 import io.packagex.arcount.Pose
+import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Quat
 import io.packagex.arcount.Ray
+import io.packagex.arcount.Read
+import io.packagex.arcount.UnitPoint
 import io.packagex.arcount.Vec3
 import kotlin.math.abs
 import kotlin.math.acos
+import kotlin.math.hypot
+import kotlin.math.max
 
 /*
- * AR Item Count's pins: one persistent marker per physical barcode, independent of the counting core. The rules are the
- * old AR Barcode renderer's (ArBarcodeRenderer at ceff1a4^, "markers without animation or smoothing"), with its
- * constants; iOS ScannerController is its port. Pure: the GL thread's [ArPins] feeds it ARCore's hits and holds the
- * anchors.
+ * AR Item Count's pins: one persistent marker per physical barcode of a listed code. Where the counting core has a
+ * triangulated depth for the barcode's unit, the pin sits at the core's point ([PinBook.follow]); before that, a
+ * provisional pin comes from hit tests under the old AR Barcode renderer's rules (ArBarcodeRenderer at ceff1a4^,
+ * "markers without animation or smoothing"), with its constants, and only hits that pass [checkHit]. Pure: the GL
+ * thread's [ArPins] feeds it and holds the anchors.
  */
 
 /** A new pin needs this many agreeing sightings (old candidateConfirmCount) */
@@ -31,8 +37,15 @@ internal const val PIN_CANDIDATE_RADIUS_M = 0.08
 /** A sighting re-sights a pin of its payload within this lateral distance of its ray; also the sibling-merge radius (old assignRadiusLocalizedM) */
 internal const val PIN_ASSIGN_RADIUS_M = 0.15
 
-/** Hits farther than this from the capture camera are bad geometry (old 3.0 m check) */
-internal const val PIN_MAX_HIT_M = 3.0
+/** A hit is kept only this far in front of the capture camera (camera depth, metres): the floor behind a shelf is not */
+internal const val PIN_MIN_DEPTH_M = 0.15
+internal const val PIN_MAX_DEPTH_M = 1.5
+
+/** A hit's reprojection into its read's own frame must land this close to the read's centre: pixels at 4K, or half the quad's width if more */
+internal const val PIN_MAX_REPROJECTION_PX_4K = 25.0
+
+/** A core-placed pin moves only when the core's point for its unit moved more than this (a better triangulation) */
+internal const val PIN_CORE_MOVE_M = 0.03
 
 /** A read batch older than this, against the newest frame, is dropped (old 500 ms batch staleness) */
 internal const val PIN_MAX_BATCH_AGE_NS = 500_000_000L
@@ -87,13 +100,42 @@ class PinMotion {
     fun accepts(captureNs: Long, nowNs: Long): Boolean = nowNs - captureNs <= PIN_MAX_BATCH_AGE_NS && lastImmoderateNs < captureNs
 }
 
-/** One read, hit-tested: its [payload], the world [hit] (with the hit's [rotation]) of its capture-time centre [ray] */
-data class Sighting(val payload: String, val symbology: String?, val hit: Vec3, val rotation: Quat, val ray: Ray)
+/** One read of a listed code, hit-tested: its [code] key ([ItemCode.key]), the world [hit] (with the hit's [rotation]) of its capture-time centre [ray] */
+data class Sighting(val code: String, val hit: Vec3, val rotation: Quat, val ray: Ray)
 
-/** A pin: its world [position] (the anchor's last tracked one), birth [pose], and when a sighting last claimed it */
-class Pin(val id: Int, val payload: String, val symbology: String?, val pose: Pose) {
+/** How a hit relates to its read: [errorPx] from the read's centre once reprojected into the read's frame, [depthM] in that camera */
+data class HitCheck(val errorPx: Double, val depthM: Double, val accepted: Boolean)
+
+/**
+ * The hit [hit] (world) of [read]'s centre ray, reprojected into the read's own frame ([capture]'s pose and intrinsics):
+ * accepted when it lands within max([PIN_MAX_REPROJECTION_PX_4K] at 4K, half the quad's width) of the read's centre and
+ * lies [PIN_MIN_DEPTH_M]..[PIN_MAX_DEPTH_M] in front of the camera. A hit behind the camera has no pixel: infinite error.
+ */
+fun checkHit(hit: Vec3, read: Read, capture: PoseRecord): HitCheck {
+    val inCamera = capture.camera.inverse().apply(hit)
+    val depth = -inCamera.z
+    val k = capture.intrinsics
+    val px = k.project(inCamera)
+    val error = px?.let { (u, v) -> hypot(u - read.centreU, v - read.centreV) } ?: Double.POSITIVE_INFINITY
+    val limit = max(PIN_MAX_REPROJECTION_PX_4K * k.width / 3840.0, read.widthPx / 2)
+    return HitCheck(error, depth, error <= limit && depth in PIN_MIN_DEPTH_M..PIN_MAX_DEPTH_M)
+}
+
+/**
+ * A pin of [code]: its anchor's [pose], its world [position] (the anchor's last tracked one), when a sighting last
+ * claimed it; [unitKey] the core unit it follows and [corePoint] where the core put that unit when the pin was last
+ * placed (null: a provisional pin from hit tests).
+ */
+class Pin(val id: Int, val code: String, pose: Pose) {
+    var pose: Pose = pose
+        internal set
     var position: Vec3 = pose.t
     var lastSeenNs = 0L
+    var unitKey: String? = null
+        internal set
+    var corePoint: Vec3? = null
+        internal set
+    val fromCore: Boolean get() = corePoint != null
 }
 
 /**
@@ -108,13 +150,14 @@ fun lateral(ray: Ray, p: Vec3): Double {
 }
 
 /**
- * The pins and the candidates of one session (old ArBarcodeRenderer's markers and candidates): exclusive one-to-one
- * assignment of a batch's sightings to same-payload pins by smallest lateral distance; the rest feed candidates, which
- * become pins after [PIN_CONFIRM_COUNT] agreeing sightings, born at the latest one. A pin is never moved by a sighting
- * (only ARCore moves its anchor) and never expires: it goes on [clear] (New Scan) or a sibling merge.
+ * The pins and the candidates of one session. Hit tests (old ArBarcodeRenderer's markers and candidates): exclusive
+ * one-to-one assignment of a batch's sightings to same-code pins by smallest lateral distance; the rest feed
+ * candidates, which become provisional pins after [PIN_CONFIRM_COUNT] agreeing sightings, born at the latest one. The
+ * core ([follow]): each unit point takes its pin, snapping a provisional one to the core's point. A sighting never moves
+ * a pin; only ARCore (its anchor) and the core do. A pin never expires: it goes on [clear] (New Scan) or a merge.
  */
 class PinBook {
-    private class Candidate(val payload: String, val symbology: String?) {
+    private class Candidate(val code: String) {
         val positions = ArrayDeque<Vec3>()
         var lastSeenNs = 0L
     }
@@ -146,7 +189,7 @@ class PinBook {
         val pairings = ArrayList<Pairing>()
         sightings.forEachIndexed { i, s ->
             for (pin in list) {
-                if (pin.payload != s.payload) continue
+                if (pin.code != s.code) continue
                 val d = lateral(s.ray, pin.position)
                 if (d <= PIN_ASSIGN_RADIUS_M) pairings += Pairing(i, pin, d)
             }
@@ -170,9 +213,9 @@ class PinBook {
     }
 
     private fun accumulate(s: Sighting, nowNs: Long): Pin? {
-        val cand = candidates.firstOrNull { it.payload == s.payload && lateral(s.ray, it.positions.last()) < PIN_CANDIDATE_RADIUS_M }
+        val cand = candidates.firstOrNull { it.code == s.code && lateral(s.ray, it.positions.last()) < PIN_CANDIDATE_RADIUS_M }
         if (cand == null) {
-            candidates += Candidate(s.payload, s.symbology).also {
+            candidates += Candidate(s.code).also {
                 it.positions.addLast(s.hit)
                 it.lastSeenNs = nowNs
             }
@@ -184,16 +227,83 @@ class PinBook {
         if (cand.positions.size < PIN_CONFIRM_COUNT) return null
         candidates.remove(cand)
         // Born at the raw latest agreeing hit, not an average (old AR_MARKER_SMOOTHING = false), as a world anchor
-        val pin = Pin(nextId++, s.payload, s.symbology, Pose(s.hit, s.rotation)).also { it.lastSeenNs = nowNs }
+        val pin = Pin(nextId++, s.code, Pose(s.hit, s.rotation)).also { it.lastSeenNs = nowNs }
         list += pin
         mergePending = true
         return pin
     }
 
     /**
-     * Old mergeSiblingMarkers: same-payload pins at (nearly) the same spot, within [PIN_ASSIGN_RADIUS_M], are a birth
-     * race; the most recently seen stays (a tie keeps the later one). Same-payload pins farther apart are different
-     * physical copies and both stay. The removed pins go back, for their anchors.
+     * The core's unit points ([io.packagex.arcount.CountView.unitPoints]) take their pins: the pin already following a
+     * unit; else, nearest first, a free pin of its code (a provisional one within [PIN_ASSIGN_RADIUS_M], or one that
+     * followed a unit no longer reported, e.g. of a closed section, within [PIN_CORE_MOVE_M]); else a new pin. A pin
+     * is placed at the core's point when it was provisional or the point moved more than [PIN_CORE_MOVE_M]; the pins
+     * placed (new or moved) go back, for new anchors. Pins of units no longer reported stay where they are.
+     */
+    fun follow(points: List<UnitPoint>, nowNs: Long): List<Pin> {
+        if (points.isEmpty()) return emptyList()
+        val placed = ArrayList<Pin>()
+        val reported = points.mapTo(HashSet()) { it.key }
+        val taken = HashSet<Int>()
+        val open = ArrayList<UnitPoint>()
+        for (u in points) {
+            val pin = list.firstOrNull { it.unitKey == u.key }
+            if (pin == null) open += u else {
+                taken += pin.id
+                if (moveTo(pin, u)) placed += pin
+            }
+        }
+        data class Pairing(val u: UnitPoint, val pin: Pin, val d: Double)
+        val pairings = ArrayList<Pairing>()
+        for (u in open) {
+            for (pin in list) {
+                if (pin.code != u.code || pin.id in taken || pin.unitKey in reported) continue
+                val d = (pin.position - u.world).norm()
+                if (d <= if (pin.fromCore) PIN_CORE_MOVE_M else PIN_ASSIGN_RADIUS_M) pairings += Pairing(u, pin, d)
+            }
+        }
+        pairings.sortBy { it.d }
+        val linked = HashSet<String>()
+        for (p in pairings) {
+            if (p.pin.id in taken || p.u.key in linked) continue
+            taken += p.pin.id
+            linked += p.u.key
+            p.pin.unitKey = p.u.key
+            if (moveTo(p.pin, p.u)) placed += p.pin
+        }
+        for (u in open) {
+            if (u.key in linked) continue
+            val pin = Pin(nextId++, u.code, Pose(u.world, Quat.IDENTITY)).also {
+                it.unitKey = u.key
+                it.corePoint = u.world
+                it.lastSeenNs = nowNs
+            }
+            list += pin
+            placed += pin
+            mergePending = true
+        }
+        return placed
+    }
+
+    private fun moveTo(pin: Pin, u: UnitPoint): Boolean {
+        val c = pin.corePoint
+        if (c != null && (c - u.world).norm() <= PIN_CORE_MOVE_M) return false
+        pin.corePoint = u.world
+        pin.pose = Pose(u.world, Quat.IDENTITY)
+        pin.position = u.world
+        return true
+    }
+
+    /** The pin's anchor could not be (re)made at the core's point: it is placed again on the next [follow] */
+    fun unplace(id: Int) {
+        list.firstOrNull { it.id == id }?.corePoint = null
+    }
+
+    /**
+     * Old mergeSiblingMarkers, for provisional pins: a provisional pin within [PIN_ASSIGN_RADIUS_M] of another pin of
+     * its code is a birth race or the core's pin of the same barcode; it goes (two provisional ones: the most recently
+     * seen stays, a tie keeps the later one). Two pins at the core's points are never merged: the core tells identical
+     * units a pitch apart. The removed pins go back, for their anchors.
      */
     fun mergeSiblings(): List<Pin> {
         mergePending = false
@@ -205,8 +315,9 @@ class PinBook {
             while (j < list.size) {
                 val a = list[i]
                 val b = list[j]
-                if (a.payload == b.payload && (a.position - b.position).norm() <= PIN_ASSIGN_RADIUS_M) {
-                    if (a.lastSeenNs > b.lastSeenNs) {
+                if (a.code == b.code && !(a.fromCore && b.fromCore) && (a.position - b.position).norm() <= PIN_ASSIGN_RADIUS_M) {
+                    val keepA = if (a.fromCore != b.fromCore) a.fromCore else a.lastSeenNs > b.lastSeenNs
+                    if (keepA) {
                         removed += b
                     } else {
                         removed += a
@@ -235,15 +346,17 @@ class PinBook {
     }
 }
 
-/** How a pin is drawn: green dot (listed, counted), grey dot (listed, none counted yet), white outline (not listed) */
-enum class PinColour { COUNTED, LISTED, UNLISTED }
+/** How a pin is drawn: green dot (its code counted), grey dot (listed, none counted yet) */
+enum class PinColour { COUNTED, LISTED }
+
+/** The code keys of the item list, as the core keys its units ([ItemCode.key]) */
+fun listedKeys(listed: Set<String>): Set<String> = listed.mapTo(HashSet()) { ItemCode.key(it) }
 
 /**
- * [payload]'s colour against the item list [listed] and the counter's [items]: GTINs compare as 14 digits, as the
- * counter does (and as the neutral rings did); counted when its code's [ItemCount.countLow] is above 0.
+ * The colour of a pin of [code] (a key) against the item list's [keys] and the counter's [items]: counted when its
+ * code's [ItemCount.countLow] is above 0; null when the code is not listed (not drawn).
  */
-fun pinColour(payload: String, symbology: String?, listed: Set<String>, items: List<ItemCount>): PinColour {
-    val key = Gtin.normalize(payload, symbology)
-    if (listed.none { Gtin.normalize(it) == key }) return PinColour.UNLISTED
-    return if (items.any { it.countLow > 0 && Gtin.normalize(it.code) == key }) PinColour.COUNTED else PinColour.LISTED
+fun pinColour(code: String, keys: Set<String>, items: List<ItemCount>): PinColour? {
+    if (code !in keys) return null
+    return if (items.any { it.countLow > 0 && ItemCode.key(it.code) == code }) PinColour.COUNTED else PinColour.LISTED
 }
