@@ -8,14 +8,19 @@ import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.RoutedExtractionException
 import io.packagex.visiondemo.data.ScanError
 import io.packagex.visiondemo.data.UnsupportedDocumentException
+import io.packagex.visiondemo.data.VlmPrompts
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
+import io.packagex.visiondemo.model.OcrField
+import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanResult
 import io.packagex.visionsdk.dto.ScannedCodeResult
 import io.packagex.visionsdk.exceptions.VisionSDKException
 import kotlinx.coroutines.CancellationException
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.net.ConnectException
 import java.net.UnknownHostException
 import java.util.Locale
@@ -53,22 +58,57 @@ internal suspend fun runOcrExtraction(
 internal fun ocrResult(x: Extraction, bitmap: Bitmap?, p: Prefs, cloudSelected: Boolean, seconds: Double): OcrOutcome {
     // Wild card: bills of lading go to the cloud, the rest are read on-device (large).
     val cloud = if (p.wildCard) x.type == DocType.BOL else cloudSelected
-    val r = OcrParser.parse(x.json, x.type)
+    VlmPrompts.spec(x.type)?.let { return vlmResult(x, bitmap, it) }
+    // Default-prompt VLM: only the model's answer (data.model_response[0]), titled by the document it read
+    // (invoice, receipt, shipping label, …); the rest of the response is request bookkeeping.
+    var vlmTitle: String? = null
+    val r = if (x.type == DocType.VLM) {
+        when (val answer = VlmPrompts.answer(x.json)) {
+            is VlmPrompts.Answer.Obj -> {
+                val kind = (answer.json["document_type"] as? JsonPrimitive)?.takeIf { it.isString }?.content
+                vlmTitle = kind?.split(" ")?.joinToString(" ") { w -> w.lowercase().replaceFirstChar { it.uppercase() } }
+                val body = JsonObject(answer.json - "document_type")
+                OcrParser.parse(body, body, if (vlmTitle == "Shipping Label") DocType.SL else x.type, x.json).copy(docType = x.type)
+            }
+            is VlmPrompts.Answer.Text -> {
+                val f = OcrField("|response|0", "response", "Response", answer.text, null, null, emptyList())
+                OcrResult(x.type, listOf(f), emptyList(), f, x.json)
+            }
+            null -> OcrResult(x.type, emptyList(), emptyList(), null, x.json)
+        }
+    } else {
+        OcrParser.parse(x.json, x.type)
+    }
     if (x.type != DocType.DC && r.fields.isEmpty() && r.tables.isEmpty()) {
         return OcrOutcome.Failed("No Text Found", OcrParser.message(x.json) ?: "Fill the frame with the label and hold still, then capture again.")
     }
     val title = when {
         x.type == DocType.DC -> "Document classified"
         p.wildCard -> "${x.type.label} (wild card)"
-        else -> x.type.label
+        else -> vlmTitle ?: x.type.label
     }
     val secs = String.format(Locale.US, "%.1f", seconds)
     val subtitle = when {
-        x.type in setOf(DocType.Tire, DocType.IdCard, DocType.Plate) -> "Cloud · VLM"
         cloud -> "Cloud · $secs s"
         else -> "On-device · ${if (p.wildCard || activeModel(p)?.second == ModelSize.Large) "large" else "micro"} · $secs s"
     }
     return OcrOutcome.Done(ScanResult.Ocr(r.copy(cloud = cloud), bitmap, title, subtitle))
+}
+
+/**
+ * iOS `finishOCR`'s custom-prompt branch: only the fields of the model's answer (`data.model_response[0]`),
+ * in the prompt's order, titled by the type; the rest of the response is request bookkeeping.
+ */
+private fun vlmResult(x: Extraction, bitmap: Bitmap?, spec: VlmPrompts.Spec): OcrOutcome {
+    val answer = VlmPrompts.answer(x.json)
+        ?: return OcrOutcome.Failed("Nothing recognized", OcrParser.message(x.json) ?: "VLM returned no structured data. Please try again.")
+    val fields = VlmPrompts.fields(answer, spec.order, keepDocumentType = x.type == DocType.IdCard).mapIndexed { i, f ->
+        OcrField("${f.section ?: ""}|${f.key}|$i", f.key, f.label, f.value, f.section, null, emptyList())
+    }
+    if (fields.isEmpty()) return OcrOutcome.Failed("Nothing recognized", "The VLM could not read any field. Please try again.")
+    val primary = fields.firstOrNull { it.key == spec.primaryKey } ?: fields.firstOrNull { it.label == "Full Name" } ?: fields.first()
+    val r = OcrResult(x.type, fields, emptyList(), primary, x.json, cloud = true)
+    return OcrOutcome.Done(ScanResult.Ocr(r, bitmap, spec.title, "Cloud · VLM"))
 }
 
 /** iOS `finishOCR`'s error branch. */

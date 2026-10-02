@@ -73,7 +73,11 @@ object OcrParser {
      */
     fun parse(json: String, type: DocType): OcrResult {
         val top = parseJsonObject(json) ?: return OcrResult(type, emptyList(), emptyList(), null, json)
-        val root = top["data"] as? JsonObject ?: top
+        return parse(top["data"] as? JsonObject ?: top, top, type, json)
+    }
+
+    /** [root] is the object to list; [top] the whole response, searched for on-device boxes; [rawJson] is kept on the result. */
+    fun parse(root: JsonObject, top: JsonObject, type: DocType, rawJson: String): OcrResult {
         val leaves = mutableListOf<Pair<List<String>, String>>()
         val tables = mutableListOf<Triple<List<String>, List<String>, List<List<String>>>>()
         walk(root, emptyList(), leaves, tables)
@@ -143,7 +147,7 @@ object OcrParser {
             ?: fields.firstOrNull { it.label == "Full Name" }
             ?: fields.firstOrNull()
 
-        return OcrResult(type, fields, tbl, primary, json)
+        return OcrResult(type, fields, tbl, primary, rawJson)
     }
 
     private fun isScalar(v: JsonElement) = v !is JsonObject && v !is JsonArray

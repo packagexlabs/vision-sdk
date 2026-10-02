@@ -70,6 +70,7 @@ import androidx.compose.ui.zIndex
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.OcrParser
 import io.packagex.visiondemo.data.PriceTag
+import io.packagex.visiondemo.data.VlmPrompts
 import io.packagex.visiondemo.designsystem.Badge
 import io.packagex.visiondemo.designsystem.BadgeTone
 import io.packagex.visiondemo.designsystem.CloseButton
@@ -441,8 +442,7 @@ private fun OcrContent(
     }
 
     // iOS :182 (`o.cloud, o.docType.vlmPrompt == nil`), not gated on `boxed`.
-    val isVlmPromptType = o.docType == DocType.Tire || o.docType == DocType.IdCard || o.docType == DocType.Plate
-    if (o.cloud && !isVlmPromptType) {
+    if (o.cloud && VlmPrompts.spec(o.docType) == null) {
         Text(
             "Cloud results do not include field locations. Switch to On-device to see linked boxes.",
             style = inter(13.sp), color = PX.Text2,

@@ -78,7 +78,8 @@ enum class DocType(val label: String) {
     VLM("VLM"),
     Tire("Vehicle / Tire ID"),
     IdCard("ID Card / Passport"),
-    Plate("License Plate")
+    Plate("License Plate"),
+    Meter("Meter Reading")
 }
 
 enum class ModelSize {
