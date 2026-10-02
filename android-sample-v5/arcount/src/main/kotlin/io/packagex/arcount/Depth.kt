@@ -16,7 +16,7 @@ enum class DepthGate { WIDE, DENSE }
 /**
  * A least-squares point over the inlier rays.
  *
- * @property covariance from the normal equations with every ray weighted by 1 / (σray · range)², scaled up by the
+ * @property covariance from the normal equations with every ray weighted by its weight / (σray · range)², scaled up by the
  *   fit's own residual variance when that is larger than σray says (never down)
  * @property sigmaZ the standard deviation along the mean viewing direction
  * @property spanRad the largest angle between two inlier rays
@@ -39,18 +39,21 @@ class RayFit(
 
 /** Triangulation of one unit from its rays (spec 5.4, depth) */
 object Triangulation {
-    /** The closed-form least-squares point of [rays] (3×3 normal equations) and its covariance; null when degenerate */
-    fun leastSquares(rays: List<Ray>, sigmaRad: Double): Pair<Vec3, Mat3>? {
+    /**
+     * The closed-form least-squares point of [rays] (3×3 normal equations) and its covariance; null when degenerate.
+     * [weights] scale each ray's 1 / σ²: (σray / σ)² for a ray of noise σ, 1 for a decoded read's (spec 5.9).
+     */
+    fun leastSquares(rays: List<Ray>, sigmaRad: Double, weights: List<Double> = List(rays.size) { 1.0 }): Pair<Vec3, Mat3>? {
         if (rays.size < 2) return null
-        val first = solve(rays) { 1.0 } ?: return null
-        return solve(rays) { r -> 1.0 / (sigmaRad * max((first.first - r.origin).norm(), 1e-3)).pow(2) }
+        val first = solve(rays, weights) { 1.0 } ?: return null
+        return solve(rays, weights) { r -> 1.0 / (sigmaRad * max((first.first - r.origin).norm(), 1e-3)).pow(2) }
     }
 
-    private fun solve(rays: List<Ray>, weight: (Ray) -> Double): Pair<Vec3, Mat3>? {
+    private fun solve(rays: List<Ray>, weights: List<Double>, weight: (Ray) -> Double): Pair<Vec3, Mat3>? {
         var a = Mat3.ZERO
         var b = Vec3.ZERO
-        for (r in rays) {
-            val w = weight(r)
+        for ((i, r) in rays.withIndex()) {
+            val w = weight(r) * weights[i]
             val p = Mat3.across(r.dir) * w
             a += p
             b += p * r.origin
@@ -66,21 +69,26 @@ object Triangulation {
     }
 
     /**
-     * Least squares with iterative rejection: the ray with the largest angular residual goes while it exceeds
-     * rejectSigmas · σray; then the gates of spec 5.4 and the 8 cm – 1.5 m depth range decide whether the depth holds.
+     * Least squares with iterative rejection: the ray with the largest angular residual in units of its own σ goes
+     * while that exceeds rejectSigmas; then the gates of spec 5.4 and the 8 cm – 1.5 m depth range decide whether the
+     * depth holds. A ray of weight w has σ = σray / √w; residuals, their RMS and the residual variance are taken in
+     * those units, so with every weight 1 this is the unweighted fit.
      */
-    fun fit(rays: List<Ray>, sigmaRad: Double, config: CountConfig): RayFit? {
+    fun fit(rays: List<Ray>, sigmaRad: Double, config: CountConfig, weights: List<Double> = List(rays.size) { 1.0 }): RayFit? {
         val inliers = rays.toMutableList()
-        var solution = leastSquares(inliers, sigmaRad) ?: return null
+        val w = weights.toMutableList()
+        var solution = leastSquares(inliers, sigmaRad, w) ?: return null
+        fun norm(i: Int) = residual(inliers[i], solution.first) * sqrt(w[i])
         while (inliers.size > 2) {
-            val worst = inliers.indices.maxBy { residual(inliers[it], solution.first) }
-            if (residual(inliers[worst], solution.first) <= config.rejectSigmas * sigmaRad) break
+            val worst = inliers.indices.maxBy { norm(it) }
+            if (norm(worst) <= config.rejectSigmas * sigmaRad) break
             inliers.removeAt(worst)
-            solution = leastSquares(inliers, sigmaRad) ?: return null
+            w.removeAt(worst)
+            solution = leastSquares(inliers, sigmaRad, w) ?: return null
         }
         val (x, cov0) = solution
         val dof = 2 * inliers.size - 3
-        val s2 = if (dof > 0) inliers.sumOf { (residual(it, x) / sigmaRad).pow(2) } / dof else 1.0
+        val s2 = if (dof > 0) inliers.indices.sumOf { w[it] * (residual(inliers[it], x) / sigmaRad).pow(2) } / dof else 1.0
         val cov = if (s2 > 1.0) cov0 * s2 else cov0
         val range = inliers.map { (x - it.origin).norm() }.average()
         val meanOrigin = inliers.fold(Vec3.ZERO) { s, r -> s + r.origin } * (1.0 / inliers.size)
@@ -96,7 +104,7 @@ object Triangulation {
             }
         }
         val inFront = inliers.all { (it.dir dot (x - it.origin)) > 0 }
-        val rms = sqrt(inliers.sumOf { residual(it, x).pow(2) } / inliers.size)
+        val rms = sqrt(inliers.indices.sumOf { w[it] * residual(inliers[it], x).pow(2) } / inliers.size)
         val gate = when {
             !inFront || range < config.minDepth || range > config.maxDepth -> null
             rms > config.maxRmsResidualSigmas * sigmaRad -> null
@@ -111,20 +119,25 @@ object Triangulation {
     private fun rad(deg: Double) = deg * PI / 180
 }
 
-/** A unit's last [maxRays] rays, in the anchor frame */
+/** A unit's last [maxRays] rays, in the anchor frame, each with its weight in the fit (1: a decoded read's) */
 class DepthTrack(private val maxRays: Int) {
     private val window = ArrayDeque<Ray>()
+    private val weights = ArrayDeque<Double>()
 
     val rays: List<Ray> get() = window.toList()
 
     val size get() = window.size
 
-    fun add(ray: Ray) {
+    fun add(ray: Ray, weight: Double = 1.0) {
         window.addLast(ray)
-        while (window.size > maxRays) window.removeFirst()
+        weights.addLast(weight)
+        while (window.size > maxRays) {
+            window.removeFirst()
+            weights.removeFirst()
+        }
     }
 
-    fun fit(sigmaRad: Double, config: CountConfig) = Triangulation.fit(window.toList(), sigmaRad, config)
+    fun fit(sigmaRad: Double, config: CountConfig) = Triangulation.fit(window.toList(), sigmaRad, config, weights.toList())
 }
 
 /**

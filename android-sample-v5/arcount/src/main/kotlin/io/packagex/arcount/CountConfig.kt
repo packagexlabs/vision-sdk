@@ -85,4 +85,34 @@ data class CountConfig(
     // Host hooks (5.1): label recognition, and the label payload's GTINs (pack hierarchy included)
     val isLabel: ((Read) -> Boolean)? = null,
     val gtinsOfLabel: ((String) -> Set<String>?)? = null,
+    // Motion (5.3, 5.9): the camera moves when its centre is faster than stopSpeed (m/s) or it turns faster than
+    // stopRotationDegPerS; it settles after stillFramesToSettle frames below both
+    val stopSpeed: Double = 0.02,
+    val stopRotationDegPerS: Double = 3.0,
+    val stillFramesToSettle: Int = 2,
+    // Refresh schedule (5.3): the engine's refresh in ms while moving, a burst of 0 for burstFrames engine frames on a
+    // settle or a new unit, then ×backoffFactor per second after backoffAfterNs without a new unit, up to refreshMaxMs
+    val refreshMovingMs: Int = 300,
+    val burstFrames: Int = 8,
+    val backoffAfterNs: Long = 3_000_000_000L,
+    val backoffFactor: Double = 1.5,
+    val refreshMaxMs: Int = 1000,
+    // Patch tracker (5.9): NCC floor and drop fraction of the unit's last nccHistory NCCs, lifetime since the last
+    // decode, the tracked ray's noise in pixels at the stream's f (σray until measured), the patch half-size as a
+    // fraction of the quad's larger side, clamped to patchMinHalf..patchMaxHalf luma px, and the luma frames kept
+    val minNcc: Double = 0.5,
+    val nccDropFraction: Double = 0.6,
+    val nccHistory: Int = 10,
+    val trackMaxAgeNs: Long = 3_000_000_000L,
+    val sigmaTrackPx: Double = 15.0,
+    val patchHalfFraction: Double = 0.6,
+    val patchMinHalf: Int = 6,
+    val patchMaxHalf: Int = 24,
+    val lumaFrames: Int = 8,
+    // A tracked position must lie within trackGateSigmas · σ_p̂ + trackGateLumaPx luma px of the prediction
+    val trackGateSigmas: Double = 3.0,
+    val trackGateLumaPx: Double = 4.0,
+    // Not in the spec: a track's rays count only once the camera has moved across the unit's ray far enough for a
+    // parallax of this many σray since the capture; the rays before are held until then (decode error is shared)
+    val trackMinParallaxSigmas: Double = 10.0,
 )

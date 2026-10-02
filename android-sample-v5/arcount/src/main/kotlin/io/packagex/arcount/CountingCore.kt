@@ -18,6 +18,16 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
     private var nextGapId = 1
     private var shownGaps: List<GapSpot> = emptyList()
     private var cached: CountView? = null
+    private val lumas = LumaRing(config.lumaFrames)
+    private val tracks = PatchTracks(config)
+    private val schedule = RefreshSchedule(config)
+
+    /** Time spent following patches, and the frames it was spent on (spec 5.9) */
+    internal var trackNanos = 0L
+        private set
+    internal var trackFrames = 0
+        private set
+    internal val patchTracks: PatchTracks get() = tracks
 
     /** The open section's units */
     internal val units: List<CountUnit> get() = machine.section?.table?.units ?: emptyList()
@@ -42,6 +52,9 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         machine.onFrame(frame)
         for (p in pairing.addRecord(frame)) machine.onReads(p)
         watchMotion(prev, frame)
+        schedule.onFrame(frame)
+        afterReads(frame.timestampNs)
+        lumas.at(frame.timestampNs)?.let { trackFrame(frame, it) }
         cached = null
     }
 
@@ -49,9 +62,36 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         // review M1: a corner that is not a finite number would throw in the ray, or place a NaN anchor: drop it here
         val finite = reads.filter { r -> r.corners.all { it.isFinite() } }
         nonFiniteReads += reads.size - finite.size
+        schedule.onEngineFrame()
         machine.noteReads(timestampNs, finite)
         pairing.addReads(timestampNs, finite)?.let { machine.onReads(it) }
+        afterReads(latest?.timestampNs ?: timestampNs)
         cached = null
+    }
+
+    override fun onLuma(timestampNs: Long, img: LumaImage, streamPxPerLumaPx: Double) {
+        val frame = LumaFrame(timestampNs, img, streamPxPerLumaPx)
+        lumas.add(frame)
+        afterReads(latest?.timestampNs ?: timestampNs)
+        latest?.takeIf { it.timestampNs == timestampNs }?.let { trackFrame(it, frame) }
+        cached = null
+    }
+
+    /** After an association: patches re-captured at the new reads (only while COUNTING), and new units start a burst */
+    private fun afterReads(nowNs: Long) {
+        val t = machine.section?.table
+        if (machine.state == SectionState.COUNTING && t != null) tracks.capture(t, lumas) else tracks.clear()
+        schedule.onUnits(t, nowNs)
+    }
+
+    /** Follows the units' patches into [r], whose luma copy is [luma] (spec 5.9) */
+    private fun trackFrame(r: PoseRecord, luma: LumaFrame) {
+        val t = machine.section?.table ?: return
+        if (machine.state != SectionState.COUNTING) return
+        val start = System.nanoTime()
+        tracks.track(t, r, luma, schedule.motion.moving)
+        trackNanos += System.nanoTime() - start
+        trackFrames++
     }
 
     override fun onCommand(command: Command, timestampNs: Long) {
@@ -88,6 +128,7 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
             gaps = shownGaps.mapNotNull { g -> Prediction.pixel(g.point, tac, k)?.let { (u, v) -> Gap(g.id, u / k.width, v / k.height) } },
             bracket = if (live) bracket(s!!, t!!, r) else null,
             closed = machine.closed.toList(),
+            desiredRefreshMs = schedule.desiredMs(lumas.fed && counting && t!!.units.isNotEmpty(), r.timestampNs),
         )
     }
 
@@ -144,7 +185,8 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
 
     /**
      * Markers (spec 5.5): a unit whose last read is at most a second old and whose warp is certain to a tenth of a
-     * pitch, at its warped quad; a unit added by hand at its point on the plane.
+     * pitch or whose patch is tracked, at its warped quad or its tracked position; a unit added by hand at its point
+     * on the plane. Each carries its anchor-frame point and metric size for the app to project at its own frame.
      */
     private fun markers(t: UnitTable, r: PoseRecord): List<Marker> {
         val k = r.intrinsics
@@ -152,15 +194,25 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         return t.units.mapNotNull { u ->
             if (u.state == UnitState.MANUAL) {
                 val (pu, pv) = Prediction.pixel(u.point, tac, k) ?: return@mapNotNull null
-                return@mapNotNull Marker(u.id, u.state, pu / k.width, pv / k.height, t.pitchPx(k.fx, Prediction.cameraDepth(u.point, tac)) / k.width)
+                val size = t.pitchPx(k.fx, Prediction.cameraDepth(u.point, tac)) / k.width
+                return@mapNotNull Marker(u.id, u.state, pu / k.width, pv / k.height, size, u.point, t.pitch)
             }
             if (r.timestampNs - u.lastReadNs > config.markerMaxAgeNs) return@mapNotNull null
             val p = t.predict(u, r) ?: return@mapNotNull null
-            if (p.sigmaPx > config.markerSigmaPitchFraction * t.pitchPx(k.fx, p.z)) return@mapNotNull null
+            val tracked = tracks.anchorPoint(u)
+            if (tracked == null && p.sigmaPx > config.markerSigmaPitchFraction * t.pitchPx(k.fx, p.z)) return@mapNotNull null
             val quad = warp(u, tac, k) ?: return@mapNotNull null
             val width = hypot(quad[1].first - quad[0].first, quad[1].second - quad[0].second)
-            Marker(u.id, u.state, quad.sumOf { it.first } / 4 / k.width, quad.sumOf { it.second } / 4 / k.height, width / k.width)
+            val (cu, cv) = tracked?.let { Prediction.pixel(it, tac, k) } ?: (quad.sumOf { it.first } / 4 to quad.sumOf { it.second } / 4)
+            Marker(u.id, u.state, cu / k.width, cv / k.height, width / k.width, tracked ?: u.point, sizeM(u))
         }
+    }
+
+    /** The symbol's width in metres: its last quad's tl → tr length at the unit's camera depth then */
+    private fun sizeM(u: CountUnit): Double {
+        val read = u.lastRead ?: return 0.0
+        val last = u.lastRecord ?: return 0.0
+        return read.widthPx * Prediction.cameraDepth(u.point, last.cameraInAnchor()) / last.intrinsics.fx
     }
 
     /** The last decoded quad warped by T_ac(now) · T_ac(last)⁻¹ at the unit's depth (spec 5.5) */

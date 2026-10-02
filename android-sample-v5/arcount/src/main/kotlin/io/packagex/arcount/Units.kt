@@ -346,6 +346,21 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         }
     }
 
+    /**
+     * A tracked position's ray (spec 5.9), of weight (σray / σtrack)² in the unit's fit; its read, pose and
+     * observations stay the last decode's. A depth a gate accepts is taken; otherwise the unit keeps what it had.
+     */
+    fun addTrackedRay(u: CountUnit, ray: Ray, weight: Double, f: Double) {
+        u.track.add(ray, weight)
+        val fit = u.track.fit(config.sigmaRayPx / f, config) ?: return
+        if (fit.gate == null) return
+        if (u.depthGate == null) note("unit ${u.id}: depth ${"%.3f".format(fit.range)} m by ${fit.gate} over ${fit.inliers} rays, tracked")
+        u.point = fit.point
+        u.covariance = fit.covariance
+        u.sigmaZ = fit.sigmaZ
+        u.depthGate = fit.gate
+    }
+
     private fun placeOnPlane(u: CountUnit) {
         val ray = u.lastRay ?: return
         val f = u.lastRecord?.intrinsics?.fx ?: return
