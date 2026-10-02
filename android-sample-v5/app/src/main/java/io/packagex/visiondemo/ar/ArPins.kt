@@ -1,5 +1,6 @@
 package io.packagex.visiondemo.ar
 
+import android.media.Image
 import android.opengl.Matrix
 import android.util.Log
 import com.google.ar.core.Anchor
@@ -25,14 +26,13 @@ import kotlin.math.hypot
 import com.google.ar.core.Pose as ArPose
 
 /**
- * AR Item Count's pins on the GL thread, for listed codes only. Each new frame: the motion gate, the anchors' positions
- * (a STOPPED anchor re-homed at its last position), the core's unit points ([CountView.unitPoints]: a pin at each,
- * moved only when the core's point moves more than 3 cm), the sibling merge, candidate expiry, then every read batch
- * that is fresh and captured since the camera was last immoderate: each listed read's capture-time centre ray (its
- * frame's [PoseRecord]) is hit-tested on this frame, the hit must reproject onto the read and lie at a plausible depth
- * ([checkHit]), and the [PinBook] matches or confirms a provisional pin. Every pin is its own world anchor: pins stay
- * through freezes, closed and abandoned sections and tracking pauses (not drawn while the frame or the anchor does not
- * track) until [clear] (New Scan) or the session goes. Drawn each frame with that frame's camera, at a constant size.
+ * AR Item Count's pins on the GL thread, for listed codes only, placed and removed as the iOS demo's AR scanner does
+ * ([PinBook]). Each new frame: the motion and warm-up gates, the anchors' positions (a STOPPED anchor re-homed at its last
+ * position), then every read batch at most 0.5 s old whose frame tracked: each listed read's capture-time centre ray
+ * (its frame's [PoseRecord]) is hit-tested on this frame (a depth point only where its depth is confident), and the
+ * [PinBook] claims a pin or confirms a candidate, which gets its own world anchor. Pins go only by the sibling merge,
+ * [clear] (New Scan) or the session going; through tracking pauses they are kept and not drawn. Drawn each frame with
+ * that frame's camera, at a constant size.
  */
 class ArPins(private val density: Float) {
     private val book = PinBook()
@@ -47,7 +47,6 @@ class ArPins(private val density: Float) {
 
     private var listed: Set<String>? = null
     private var keys: Set<String> = emptySet()
-    private var followed: CountView? = null
 
     private val viewMatrix = FloatArray(16)
     private val projMatrix = FloatArray(16)
@@ -58,8 +57,8 @@ class ArPins(private val density: Float) {
     // The 3 s line: hit kinds, the hits' reprojection errors and rejections, and the ray check
     private val hitKinds = HashMap<String, Int>()
     private val errors = ArrayList<Double>()
-    private var rejectedReprojection = 0
-    private var rejectedDepth = 0
+    private var farHits = 0
+    private var lowConfidence = 0
     private var statNs = 0L
 
     /** New Scan (main thread): every pin and candidate goes on the next frame. */
@@ -73,7 +72,6 @@ class ArPins(private val density: Float) {
         frame: Frame,
         rec: PoseRecord,
         reads: ConcurrentLinkedQueue<ArEvent.Reads>,
-        view: CountView,
         items: Set<String>,
         g: StreamGeometry,
         viewportWidth: Int,
@@ -93,35 +91,50 @@ class ArPins(private val density: Float) {
         motion.onFrame(ts, rec.camera, tracking)
         records.addLast(rec)
         while (records.size > RECORDS) records.removeFirst()
-        if (!tracking) { // old renderer: batches decoded before or during the gap are not trusted
+        if (!tracking) { // ARCore hit-tests nothing on a frame it does not track; the reads waiting are stale after it
             reads.clear()
             return
         }
         refreshPositions(session)
-        if (view !== followed) {
-            followed = view
-            for (pin in book.follow(view.unitPoints, ts)) place(session, pin)
+        val confidence = DepthConfidence(frame)
+        try {
+            drain(session, frame, rec, reads, confidence, g, viewportWidth, viewportHeight)
+        } finally {
+            confidence.close()
         }
-        if (book.mergePending) book.mergeSiblings().forEach { removed(it, "merged with its sibling") }
-        book.expireCandidates(ts)
+        if (ts - statNs > STAT_NS) {
+            statNs = ts
+            logStats(frame, rec, g, viewportWidth, viewportHeight)
+        }
+    }
+
+    /** The read batches waiting, in order (iOS place() per decode) */
+    private fun drain(
+        session: Session,
+        frame: Frame,
+        rec: PoseRecord,
+        reads: ConcurrentLinkedQueue<ArEvent.Reads>,
+        confidence: DepthConfidence,
+        g: StreamGeometry,
+        viewportWidth: Int,
+        viewportHeight: Int,
+    ) {
+        val ts = rec.timestampNs
         var later: ArrayList<ArEvent.Reads>? = null
         while (true) {
             val batch = reads.poll() ?: break
-            if (!motion.accepts(batch.timestampNs, ts)) continue
+            if (!motion.fresh(batch.timestampNs, ts)) continue
             val capture = records.lastOrNull { it.timestampNs == batch.timestampNs }
             if (capture == null) {
                 if (batch.timestampNs > ts) (later ?: ArrayList<ArEvent.Reads>().also { later = it }) += batch // its frame is not drawn yet
                 continue
             }
-            if (capture.frameTracking != Tracking.TRACKING) continue
-            val sightings = sightings(frame, batch.reads, capture, g, viewportWidth, viewportHeight)
-            book.place(sightings, ts, motion.mapReady && motion.cameraModerate).forEach { create(session, it) }
+            if (capture.frameTracking != Tracking.TRACKING) continue // iOS: the detection frame's tracking must be normal
+            val sightings = sightings(frame, rec, confidence, batch.reads, capture, g, viewportWidth, viewportHeight)
+            book.place(sightings, batch.timestampNs, ts, motion.mayCreate(batch.timestampNs)) { create(session, it) }
+                .forEach { removed(it, "merged with its sibling") }
         }
         later?.let { reads.addAll(it) }
-        if (ts - statNs > STAT_NS) {
-            statNs = ts
-            logStats(frame, rec, g, viewportWidth, viewportHeight)
-        }
     }
 
     /** GL thread, every drawn frame: each pin whose anchor tracks, projected with this frame's camera. */
@@ -162,19 +175,40 @@ class ArPins(private val density: Float) {
         keys = listedKeys(items)
     }
 
-    /** The batch's listed reads that land in the view and hit real geometry that passes [checkHit] (old drainDetections' per-detection rules) */
-    private fun sightings(frame: Frame, reads: List<Read>, capture: PoseRecord, g: StreamGeometry, viewportWidth: Int, viewportHeight: Int): List<Sighting> {
-        // A cut symbol's corners, and so its centre, are guessed; unlisted codes get no pin
+    /**
+     * The batch's listed reads that land in the view and hit real geometry within [PIN_MAX_HIT_M] of the capture camera
+     * (iOS place()'s per-detection rules); each with its box in its own stream image and the 40 dp match floor in
+     * that image's pixels.
+     */
+    private fun sightings(
+        frame: Frame,
+        now: PoseRecord,
+        confidence: DepthConfidence,
+        reads: List<Read>,
+        capture: PoseRecord,
+        g: StreamGeometry,
+        viewportWidth: Int,
+        viewportHeight: Int,
+    ): List<Sighting> {
+        // A cut symbol's corners, and so its centre, are guessed (iOS skips it too); unlisted codes get no pin
         val usable = reads.filter { !it.touchesBorder && ItemCode.key(it) in keys }
         if (usable.isEmpty()) return emptyList()
-        val image = FloatArray(usable.size * 2)
+        val n = usable.size
+        // The read centres, then two points 100 stream pixels apart for the view's scale
+        val image = FloatArray(n * 2 + 4)
         usable.forEachIndexed { i, r ->
             image[2 * i] = g.cpuU(r.centreU / g.streamWidth).toFloat()
             image[2 * i + 1] = g.cpuV(r.centreV / g.streamHeight).toFloat()
         }
+        image[2 * n] = g.cpuU(0.5).toFloat()
+        image[2 * n + 1] = g.cpuV(0.5).toFloat()
+        image[2 * n + 2] = g.cpuU(0.5 + 100.0 / g.streamWidth).toFloat()
+        image[2 * n + 3] = g.cpuV(0.5).toFloat()
         val onView = FloatArray(image.size)
         frame.transformCoordinates2d(Coordinates2d.IMAGE_NORMALIZED, image, Coordinates2d.VIEW, onView)
-        val out = ArrayList<Sighting>(usable.size)
+        val viewPerStream = hypot(onView[2 * n + 2] - onView[2 * n], onView[2 * n + 3] - onView[2 * n + 1]) / 100.0
+        val floorPx = if (viewPerStream > 0) PIN_MATCH_FLOOR_DP * density / viewPerStream else 0.0
+        val out = ArrayList<Sighting>(n)
         usable.forEachIndexed { i, r ->
             val vx = onView[2 * i]
             val vy = onView[2 * i + 1]
@@ -183,27 +217,31 @@ class ArPins(private val density: Float) {
             val hit = bestHit(frame, ray) ?: return@forEachIndexed
             val h = hit.hitPose
             val at = Vec3(h.tx().toDouble(), h.ty().toDouble(), h.tz().toDouble())
-            val check = checkHit(at, r, capture)
-            if (check.errorPx.isFinite()) errors += check.errorPx
-            if (!check.accepted) {
-                if (check.depthM !in PIN_MIN_DEPTH_M..PIN_MAX_DEPTH_M) rejectedDepth++ else rejectedReprojection++
+            if ((at - ray.origin).norm() > PIN_MAX_HIT_M) {
+                farHits++
                 return@forEachIndexed
             }
-            out += Sighting(ItemCode.key(r), at, Quat(h.qx().toDouble(), h.qy().toDouble(), h.qz().toDouble(), h.qw().toDouble()), ray)
+            // A depth point's distance came from depth-from-motion: kept only where its depth is confident
+            if (hit.trackable is DepthPoint && !depthConfident(confidence.at(at, now, g))) {
+                lowConfidence++
+                return@forEachIndexed
+            }
+            checkHit(at, r, capture).errorPx.takeIf { it.isFinite() }?.let { errors += it }
+            out += sightingOf(r, capture, at, Quat(h.qx().toDouble(), h.qy().toDouble(), h.qz().toDouble(), h.qw().toDouble()), ray, floorPx)
         }
         return out
     }
 
-    /** Real geometry only, the nearest: a tracked plane hit inside its polygon, a depth point or a feature point (old bestHit) */
+    /**
+     * Real geometry only (iOS raycast): a tracked plane hit inside its polygon first; else the nearest feature point
+     * (or depth point, ARCore's other measured geometry).
+     */
     private fun bestHit(frame: Frame, ray: Ray): HitResult? {
         val o = floatArrayOf(ray.origin.x.toFloat(), ray.origin.y.toFloat(), ray.origin.z.toFloat())
         val d = floatArrayOf(ray.dir.x.toFloat(), ray.dir.y.toFloat(), ray.dir.z.toFloat())
-        val hit = frame.hitTest(o, 0, d, 0)
-            .filter { it.trackable.trackingState == TrackingState.TRACKING }
-            .firstOrNull { h ->
-                val t = h.trackable
-                (t is Plane && t.isPoseInPolygon(h.hitPose)) || t is DepthPoint || t is Point
-            }
+        val hits = frame.hitTest(o, 0, d, 0).filter { it.trackable.trackingState == TrackingState.TRACKING }
+        val hit = hits.firstOrNull { h -> h.trackable.let { it is Plane && it.isPoseInPolygon(h.hitPose) } }
+            ?: hits.firstOrNull { it.trackable is Point || it.trackable is DepthPoint }
         hitKinds.merge(hit?.trackable?.javaClass?.simpleName ?: "NONE", 1, Int::plus)
         return hit
     }
@@ -217,16 +255,15 @@ class ArPins(private val density: Float) {
     private fun logStats(frame: Frame, rec: PoseRecord, g: StreamGeometry, viewportWidth: Int, viewportHeight: Int) {
         val sorted = errors.sorted()
         val reproj = if (sorted.isEmpty()) "none" else "median %.1f max %.1f px (%d)".format(sorted[sorted.size / 2], sorted.last(), sorted.size)
-        val core = book.pins.count { it.fromCore }
         Log.i(
             TAG,
-            "hits=$hitKinds reprojection $reproj, rejected $rejectedReprojection reprojection $rejectedDepth depth; " +
-                "${rayCheck(frame, rec, g, viewportWidth, viewportHeight)}; candidates=${book.candidateCount} live=${book.pins.size} (core $core, provisional ${book.pins.size - core}) warm=${motion.mapReady}",
+            "hits=$hitKinds reprojection $reproj, rejected $farHits beyond ${PIN_MAX_HIT_M} m, $lowConfidence depth points below confidence $MIN_DEPTH_CONFIDENCE; " +
+                "${rayCheck(frame, rec, g, viewportWidth, viewportHeight)}; candidates=${book.candidateCount} live=${book.pins.size} warm=${motion.mapReady}",
         )
         hitKinds.clear()
         errors.clear()
-        rejectedReprojection = 0
-        rejectedDepth = 0
+        farHits = 0
+        lowConfidence = 0
     }
 
     private fun rayCheck(frame: Frame, rec: PoseRecord, g: StreamGeometry, viewportWidth: Int, viewportHeight: Int): String {
@@ -274,36 +311,15 @@ class ArPins(private val density: Float) {
         }
     }
 
-    /** A provisional pin from hit tests */
-    private fun create(session: Session, pin: Pin) {
+    /** A confirmed candidate's own world anchor (iOS create); false when ARCore makes none, and the pin is not born */
+    private fun create(session: Session, pin: Pin): Boolean {
         val a = runCatching { session.createAnchor(pin.pose.toArPose()) }
             .onFailure { Log.w(TAG, "pin ${pin.id} anchor not created", it) }
-            .getOrNull()
-        if (a == null) {
-            book.remove(pin.id)
-            return
-        }
+            .getOrNull() ?: return false
         anchors[pin.id] = a
         val t = pin.pose.t
-        Log.i(TAG, "pin ${pin.id} created ${pin.code} provisional (hit) at %.3f,%.3f,%.3f, live=${book.pins.size}".format(t.x, t.y, t.z))
-    }
-
-    /** A pin at the core's point: new, snapped from provisional, or moved by a better triangulation; a new anchor there */
-    private fun place(session: Session, pin: Pin) {
-        val old = anchors[pin.id]
-        val a = runCatching { session.createAnchor(pin.pose.toArPose()) }
-            .onFailure { Log.w(TAG, "pin ${pin.id} anchor not made at the core's point", it) }
-            .getOrNull()
-        if (a == null) {
-            if (old == null) book.remove(pin.id) else book.unplace(pin.id)
-            return
-        }
-        val t = pin.pose.t
-        val what = if (old == null) "created" else "moved"
-        val by = old?.pose?.let { " by %.1f cm".format(hypot(hypot(it.tx() - t.x, it.ty() - t.y), it.tz() - t.z) * 100) } ?: ""
-        old?.detach()
-        anchors[pin.id] = a
-        Log.i(TAG, "pin ${pin.id} $what ${pin.code} at core unit ${pin.unitKey} %.3f,%.3f,%.3f$by, live=${book.pins.size}".format(t.x, t.y, t.z))
+        Log.i(TAG, "pin ${pin.id} created ${pin.code} at %.3f,%.3f,%.3f, live=${book.pins.size + 1}".format(t.x, t.y, t.z))
+        return true
     }
 
     private fun removed(pin: Pin, why: String) {
@@ -312,6 +328,43 @@ class ArPins(private val density: Float) {
     }
 
     private fun dp(v: Float) = v * density
+
+    /**
+     * The frame's raw depth confidence image, acquired on the first lookup and closed with [close]; none (depth off, not
+     * yet available) means no gate.
+     */
+    private class DepthConfidence(private val frame: Frame) {
+        private var image: Image? = null
+        private var tried = false
+        private val point = FloatArray(2)
+        private val tex = FloatArray(2)
+
+        /** The confidence (0-255) where [hit] lies in this frame ([now], whose intrinsics are the stream's of [g]); null when unknown */
+        fun at(hit: Vec3, now: PoseRecord, g: StreamGeometry): Int? {
+            val img = image() ?: return null
+            val (u, v) = imageNormalized(hit, now.camera, now.intrinsics) ?: return null
+            point[0] = g.cpuU(u).toFloat()
+            point[1] = g.cpuV(v).toFloat()
+            frame.transformCoordinates2d(Coordinates2d.IMAGE_NORMALIZED, point, Coordinates2d.TEXTURE_NORMALIZED, tex)
+            val (x, y) = depthPixel(tex[0], tex[1], img.width, img.height) ?: return null
+            val plane = img.planes[0]
+            return plane.buffer.get(y * plane.rowStride + x * plane.pixelStride).toInt() and 0xFF
+        }
+
+        private fun image(): Image? {
+            if (!tried) {
+                tried = true
+                // NotYetAvailableException, or depth not enabled: no image, no gate
+                image = runCatching { frame.acquireRawDepthConfidenceImage() }.getOrNull()
+            }
+            return image
+        }
+
+        fun close() {
+            image?.close()
+            image = null
+        }
+    }
 
     private companion object {
         const val TAG = "ArPins"

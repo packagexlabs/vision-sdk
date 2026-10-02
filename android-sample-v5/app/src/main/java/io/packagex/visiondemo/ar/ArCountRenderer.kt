@@ -130,7 +130,7 @@ class ArCountRenderer(
             val rec = record(frame, ts)
             poses?.add(rec)
             mapper.post(ArEvent.Frame(rec))
-            geometry?.let { pins.onFrame(s, frame, rec, mapper.pinReads, mapper.latestView(), mapper.items, it, viewportWidth, viewportHeight) }
+            geometry?.let { pins.onFrame(s, frame, rec, mapper.pinReads, mapper.items, it, viewportWidth, viewportHeight) }
         }
         draw(frame, mapper.latestView())
     }
