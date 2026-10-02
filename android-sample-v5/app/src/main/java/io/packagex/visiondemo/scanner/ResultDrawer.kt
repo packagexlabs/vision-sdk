@@ -67,6 +67,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import io.packagex.visiondemo.ar.countText
+import io.packagex.visiondemo.ar.statusText
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.OcrParser
 import io.packagex.visiondemo.data.PriceTag
@@ -306,7 +308,12 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
             true,
         )
     }
-    is ScanResult.Ar -> Triple("Scan Results", "${result.rows.sumOf { it.count }} barcodes · ${result.rows.size} unique", true)
+    is ScanResult.Ar -> {
+        val n = result.sections.size
+        val low = result.sections.sumOf { it.countLow }
+        val high = result.sections.sumOf { it.countHigh }
+        Triple("Shelf count", "$n ${if (n == 1) "section" else "sections"} · ${if (high > low) "$low–$high" else "$low"} units", true)
+    }
     is ScanResult.Document -> Triple("Document captured", "${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"} · on-device", true)
 }
 
@@ -327,7 +334,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when 
     }
     ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
     is ScanResult.Retrieval -> result.codes.joinToString("\n") { "${it.first}\t${if (it.second) "In list" else "Not in list"}" }
-    is ScanResult.Ar -> result.rows.joinToString("\n") { "${it.name?.let { n -> "$n · " }.orEmpty()}${it.value} × ${it.count}" }
+    is ScanResult.Ar -> result.sections.joinToString("\n") { "${it.gtins.joinToString(",")}\t${statusText(it.status)}\t${countText(it)}" }
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
 }
 
@@ -395,12 +402,13 @@ private fun RetrievalContent(codes: List<Pair<String, Boolean>>, onAction: (Scan
     LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenItemList) }
 }
 
+/** One row per closed section: its status and shelf label, its GTINs, its count (a range while unresolved). */
 @Composable
 private fun ArContent(result: ScanResult.Ar) {
     Column {
-        result.rows.forEach { row ->
-            RowLine(label = row.name?.let { "${row.symbology} · $it" } ?: row.symbology, value = row.value) {
-                Text("× ${row.count}", style = mono(14.sp), color = PX.Text2)
+        result.sections.forEach { s ->
+            RowLine(label = "${statusText(s.status)} · ${s.labelPayload ?: "no label"}", value = s.gtins.joinToString(", ").ifEmpty { "No GTIN" }) {
+                Text("× ${countText(s)}", style = mono(14.sp), color = PX.Text2)
             }
         }
     }

@@ -71,6 +71,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.packagex.visiondemo.ar.arHint
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.RecomposeLog
@@ -181,7 +182,7 @@ private val WindowInsets.Companion.chromeInsets: WindowInsets
  *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`.
  *  Single-code Barcode/QR only — [ScanMode.viewfinder] is already null for every other mode; the multi
  *  check here hides them for multi-code Barcode/QR. Vision Scanner, Price tag, Item retrieval, Document
- *  Acquisition and AR Barcode never show brackets. */
+ *  Acquisition and AR Count never show brackets. */
 @Composable
 fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Viewfinder")
@@ -431,7 +432,6 @@ private fun chipFor(state: ScannerUiState): Triple<String, String, ScannerAction
             "· ${state.items.size} ${if (state.items.size == 1) "code" else "codes"}",
             ScannerAction.OpenSheet(SheetKind.Items),
         )
-        ScanMode.Ar -> Triple("Items", "· ${state.itemNames.size}", ScannerAction.OpenSheet(SheetKind.ArItems))
         else -> null
     }
 }
@@ -463,9 +463,7 @@ private fun hintFor(state: ScannerUiState): String {
         } else {
             "Point camera to document"
         }
-        ScanMode.Ar -> state.arCounts.sumOf { it.count }.let { n ->
-            if (n > 0) "$n markers pinned · tap the shutter to finish" else "One marker per barcode value, pinned where it was last seen"
-        }
+        ScanMode.Ar -> arHint(state.arCount, state.arStream)
         ScanMode.DocAcq -> if (state.seesDocument) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"
         } else {

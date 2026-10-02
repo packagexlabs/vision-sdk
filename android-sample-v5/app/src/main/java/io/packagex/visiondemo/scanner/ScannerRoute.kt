@@ -61,6 +61,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import io.packagex.visiondemo.ar.ArCountOverlay
 import io.packagex.visiondemo.ar.ArSurface
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.RecomposeLog
@@ -210,6 +211,17 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 }
             },
             boxes = { boxes.value },
+            overlay = {
+                if (state.mode == ScanMode.Ar && !state.permissionDenied && state.result == null && !state.paused) {
+                    // Where the GL thread drew the bracket and the gaps: read while placing the count and on taps only.
+                    val arScreen = viewModel.ar.screen.collectAsStateWithLifecycle()
+                    ArCountOverlay(
+                        state.arCount, arScreen,
+                        onCommand = { viewModel.onAction(ScannerAction.ArCommand(it)) },
+                        onTouch = { viewModel.onAction(ScannerAction.UserActive) },
+                    )
+                }
+            },
             drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, viewModel::onAction) } },
             sheets = { SheetHost(state, viewModel::onAction) },
             onAction = viewModel::onAction,

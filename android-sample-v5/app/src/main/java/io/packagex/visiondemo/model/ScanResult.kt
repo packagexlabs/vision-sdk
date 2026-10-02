@@ -1,7 +1,7 @@
 package io.packagex.visiondemo.model
 
 import android.graphics.Bitmap
-import io.packagex.visiondemo.ar.ArRow
+import io.packagex.arcount.SectionResult
 import io.packagex.visiondemo.document.DocumentPage
 
 /** What the result drawer shows. Ported from iOS `Model/Types.swift`'s `ScanResult`. */
@@ -19,8 +19,8 @@ sealed interface ScanResult {
     data object Price : ScanResult
     /** Codes in view when the shutter was pressed, each flagged when it is in the item list (iOS `.retrieval`). */
     data class Retrieval(val codes: List<Pair<String, Boolean>>) : ScanResult
-    /** One row per AR payload: value, symbology, marked instances and catalog name (iOS `.ar`). */
-    data class Ar(val rows: List<ArRow>) : ScanResult
+    /** AR Count: the sections closed so far, one result each (spec 5.7), oldest first. */
+    data class Ar(val sections: List<SectionResult>) : ScanResult
     /** Every page of the document so far (iOS `.docacq`). */
     data class Document(val pages: List<DocumentPage>) : ScanResult
 }

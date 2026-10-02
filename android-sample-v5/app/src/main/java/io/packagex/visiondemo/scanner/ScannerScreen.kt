@@ -64,6 +64,8 @@ fun ScannerScreen(
     cameraView: @Composable () -> Unit,
     /** Live detection boxes, read only while drawing (see [BoxesOverlay]); [ScannerRoute] passes them apart from [state]. */
     boxes: () -> List<DetectedCode> = { state.boxes },
+    /** A mode's own controls over the camera: above the scrim, below the chrome (AR Count's prompt, count and buttons). */
+    overlay: @Composable () -> Unit = {},
     drawer: @Composable () -> Unit = {},
     sheets: @Composable () -> Unit = {},
     onAction: (ScannerAction) -> Unit,
@@ -100,6 +102,8 @@ fun ScannerScreen(
         Box(Modifier.fillMaxSize().background(scrimBrush))
 
         Viewfinder(state = state, onAction = onAction)
+
+        overlay()
 
         if (state.result == null || hud != null) {
             Chrome(state = state, onAction = onAction)
