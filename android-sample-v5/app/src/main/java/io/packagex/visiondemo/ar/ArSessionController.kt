@@ -21,6 +21,7 @@ import com.google.ar.core.CameraConfig
 import com.google.ar.core.CameraConfigFilter
 import com.google.ar.core.Config
 import com.google.ar.core.Session
+import com.google.ar.core.exceptions.FatalException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.packagex.arcount.Command
 import io.packagex.arcount.CountView
@@ -110,7 +111,7 @@ class ArSessionController @Inject constructor(
     override fun attach(view: GLSurfaceView) {
         detach(null)
         val m = ArMapper(counters.create(), onView = { _count.value = it.forUi() })
-        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onScreen = { _screen.value = it })
+        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onScreen = { _screen.value = it }, onFatal = ::onUpdateFailed)
         // The renderer must be set before the surface exists; the GL thread waits paused until ARCore runs.
         view.preserveEGLContextOnPause = true
         view.setEGLContextClientVersion(2)
@@ -324,6 +325,13 @@ class ArSessionController @Inject constructor(
         Log.w(TAG, "configure failed with the app stream $failed; trying ${streams[streamIndex]}")
         useStream(streams[streamIndex])
         start()
+    }
+
+    /** GL thread: ARCore's update() failed for good. Spec 6 treats it as a lost camera: the session is rebuilt. */
+    private fun onUpdateFailed(e: FatalException) {
+        Log.e(TAG, "ARCore update failed", e)
+        val gen = generation
+        main.post { rebuild(gen, "update failed") }
     }
 
     /** Main thread: the camera failed while ARCore ran (spec 6). The section freezes on the gap; the camera opens again. */

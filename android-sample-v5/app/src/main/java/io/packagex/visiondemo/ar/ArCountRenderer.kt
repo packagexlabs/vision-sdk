@@ -9,6 +9,7 @@ import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.CameraNotAvailableException
+import com.google.ar.core.exceptions.FatalException
 import com.google.ar.core.exceptions.SessionPausedException
 import io.packagex.arcount.CountView
 import io.packagex.arcount.PoseRecord
@@ -30,6 +31,8 @@ class ArCountRenderer(
     private val metas: CaptureMetaRing,
     private val density: Float,
     private val onScreen: (ArScreen) -> Unit,
+    /** `update()` threw [FatalException]: the session is to be rebuilt (spec 6). Nothing is updated until it resumes. */
+    private val onFatal: (FatalException) -> Unit,
 ) : GLSurfaceView.Renderer {
     /** Set once ARCore runs; null draws nothing. */
     @Volatile
@@ -90,6 +93,10 @@ class ArCountRenderer(
         } catch (e: CameraNotAvailableException) {
             return
         } catch (e: SessionPausedException) {
+            return
+        } catch (e: FatalException) {
+            session = null // until the rebuilt session resumes (ArSessionController sets it again)
+            onFatal(e)
             return
         }
         background.draw(frame)

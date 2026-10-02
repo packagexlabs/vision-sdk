@@ -80,6 +80,24 @@ class ArMapperTest {
         assertEquals(setOf("ArMapper"), c.threads)
     }
 
+    @Test fun aCounterThatThrowsLosesThatEventNotTheMapperThread() {
+        val c = RecordingCounter(view = open)
+        val failing = object : ArCounter by c {
+            override fun onReads(timestampNs: Long, reads: List<Read>) {
+                c.onReads(timestampNs, reads)
+                error("counter bug")
+            }
+        }
+        val logged = Collections.synchronizedList(mutableListOf<Throwable>())
+        val m = ArMapper(failing, log = { _, t -> logged += t }).apply { start() }
+        listOf(frame(1), reads(1), frame(2), reads(2), frame(3)).forEach(m::post)
+        awaitCalls(c, 5)
+        m.close()
+        assertEquals(listOf("frame 1", "reads 1", "frame 2", "reads 2", "frame 3"), c.calls)
+        assertEquals(listOf("counter bug", "counter bug"), logged.map { it.message })
+        assertEquals(open, m.latestView())
+    }
+
     @Test fun readsBeyondFourWaitingDropTheOldestButFramesNever() {
         val c = RecordingCounter()
         val m = ArMapper(c)

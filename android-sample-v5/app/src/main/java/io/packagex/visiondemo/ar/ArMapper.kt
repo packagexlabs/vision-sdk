@@ -1,5 +1,6 @@
 package io.packagex.visiondemo.ar
 
+import android.util.Log
 import io.packagex.arcount.AnchorRequest
 import io.packagex.arcount.ArCounter
 import io.packagex.arcount.Command
@@ -52,12 +53,13 @@ sealed interface AnchorOp {
  * frames are never dropped. After each call it asks the counter for an anchor and hands the GL thread [anchorOps]:
  * an anchor is created once per request and never moved or re-created (spec 5.1), and let go when its section ends
  * (closed, back to IDLE) or a new request replaces it. The newest view goes to [latestView] (GL thread) and to
- * [onView] (once per batch of events).
+ * [onView] (once per batch of events). An event the counter throws on goes to [log] and is lost, the session is not.
  */
 class ArMapper(
     counter: ArCounter,
     private val onView: (CountView) -> Unit = {},
     private val readsCapacity: Int = 4,
+    private val log: (String, Throwable) -> Unit = { what, t -> Log.e(THREAD, what, t) },
 ) {
     private val lock = Object()
     private val queue = ArrayDeque<ArEvent>()
@@ -141,7 +143,14 @@ class ArMapper(
     private fun handle(batch: List<ArEvent>) {
         if (batch.isEmpty()) return
         var view: CountView? = null
-        for (e in batch) view = handle(e)
+        for (e in batch) {
+            // A counter bug must not take the app down: this thread has no other handler
+            try {
+                view = handle(e)
+            } catch (t: Throwable) {
+                log("the counter failed on ${e::class.simpleName}", t)
+            }
+        }
         view?.let { latest.set(it); onView(it) }
     }
 
