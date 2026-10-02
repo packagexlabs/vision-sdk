@@ -103,7 +103,7 @@ dependencies {
     implementation(libs.profileinstaller); baselineProfile(project(":baselineprofile"))
     implementation(libs.coroutines.android); implementation(libs.datastore.preferences); implementation(libs.serialization.json)
     implementation(libs.vision.sdk); implementation(libs.barcode.scanner)
-    implementation(libs.arcore)
+    implementation(libs.arcore); implementation(project(":arcount"))
     implementation(libs.camerax.core); implementation(libs.camerax.camera2); implementation(libs.camerax.lifecycle); implementation(libs.camerax.view)
     implementation(libs.litert); implementation(libs.litert.gpu); implementation(libs.litert.gpu.api); implementation(libs.mlkit.text)
     implementation(files(visionSdkAndroidDir.resolve("app/libs/docscanner-release.aar")))
