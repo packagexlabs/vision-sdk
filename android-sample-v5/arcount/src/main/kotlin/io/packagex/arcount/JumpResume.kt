@@ -80,3 +80,24 @@ internal object JumpResume {
     }
 }
 
+/**
+ * One world jump over consecutive frames (ruling R6): the correction is the composition of the per-frame corrections
+ * of the frames the jump detector flags, consecutive from the first, within [CountConfig.jumpRunNs] of it; for pure
+ * translations that is minus the sum of the camera's apparent displacements in the anchor frame.
+ */
+internal class JumpRun(private val startNs: Long, first: Pose) {
+    enum class Step { ADDED, PAST_THE_RUN, NOT_CONSECUTIVE }
+
+    var correction = first
+        private set
+    private var lastNs = startNs
+
+    /** The flagged frame at [ts], whose previous frame is at [prevNs], with its correction [d] */
+    fun extend(prevNs: Long, ts: Long, d: Pose, maxNs: Long): Step {
+        if (prevNs != lastNs) return Step.NOT_CONSECUTIVE
+        lastNs = ts
+        if (ts - startNs > maxNs) return Step.PAST_THE_RUN
+        correction = correction * d
+        return Step.ADDED
+    }
+}

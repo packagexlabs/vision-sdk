@@ -86,6 +86,8 @@ data class CountConfig(
     // listed code is in view for this long after a read of it
     val sectionReach: Double = 1.0,
     val itemSeenNs: Long = 1_000_000_000L,
+    // Ruling R6: a world jump's correction sums the flagged consecutive frames within this long of the first
+    val jumpRunNs: Long = 500_000_000L,
     // Host hooks (5.1): label recognition, and the label payload's GTINs (pack hierarchy included)
     val isLabel: ((Read) -> Boolean)? = null,
     val gtinsOfLabel: ((String) -> Set<String>?)? = null,

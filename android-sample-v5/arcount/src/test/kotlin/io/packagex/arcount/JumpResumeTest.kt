@@ -150,4 +150,54 @@ class JumpResumeTest {
         assertFalse(core.events.any { it.contains("resumed") })
         assertEquals(SectionStatus.ABANDONED, core.view().closed.single().status)
     }
+
+    // ruling R6: a jump spread over consecutive frames
+
+    @Test
+    fun aJumpRunAddsConsecutiveFastFramesForHalfASecondOnly() {
+        val d = Pose(Vec3(-0.02, 0.0, 0.0), Quat.IDENTITY)
+        val run = JumpRun(0, d)
+        assertEquals(JumpRun.Step.ADDED, run.extend(0, FRAME_NS, d, 500_000_000L))
+        assertEquals(-0.04, run.correction.t.x, 1e-12)
+        // a frame that does not follow the run's last one starts another
+        assertEquals(JumpRun.Step.NOT_CONSECUTIVE, run.extend(5 * FRAME_NS, 6 * FRAME_NS, d, 500_000_000L))
+        for (i in 2..20) run.extend((i - 1) * FRAME_NS, i * FRAME_NS, d, 500_000_000L)
+        // frames 0..15 lie within 0.5 s of the first: 16 steps
+        assertEquals(-0.32, run.correction.t.x, 1e-12)
+    }
+
+    @Test
+    fun theCorrectionSumsTheFastFramesOfTheFirstHalfSecondOfAJump() {
+        val core = CountingCore()
+        core.setItems(setOf(GTIN14))
+        val sim = Sim(row(4, 0.07, x0 = -0.105), CoreCounter(core), noisePx = 1.0)
+        sim.run(Paths.hold(cameraAt(0.0), 5.5))
+        sim.hidden = { true }
+        // ARCore slides 2 cm a frame for a second: only the first half second is the jump
+        repeat(30) {
+            sim.jumpCamera(Vec3(0.02, 0.0, 0.0))
+            sim.step(cameraAt(0.0))
+        }
+        assertEquals(SectionState.FROZEN, core.view().state)
+        assertEquals(-0.32, core.machine.section!!.pending!!.t.x, 1e-9)
+        assertEquals(1, core.machine.section!!.breaks.size)
+    }
+
+    @Test
+    fun aJumpOverThreeFramesResumesWithTheirSum() {
+        val core = CountingCore()
+        core.setItems(linkedSetOf(GTIN14, b))
+        val sim = Sim(shelf, CoreCounter(core), noisePx = 1.0)
+        sim.run(Paths.hold(cameraAt(0.0), 5.5))
+        sim.run(Paths.move(Vec3.ZERO, Vec3(0.30, 0.0, 0.0), 0.03))
+        repeat(3) {
+            sim.jumpCamera(Vec3(0.025, 0.0, 0.0))
+            sim.step(cameraAt(0.30))
+        }
+        sim.run(Paths.move(Vec3(0.30, 0.0, 0.0), Vec3(0.66, 0.0, 0.0), 0.03))
+        sim.run(Paths.hold(cameraAt(0.66), 1.0))
+        sim.command(Command.Finish)
+        assertTrue(core.events.any { it.contains("resumed with the jump's correction, alias 0") })
+        assertEquals(listOf(ItemCount(GTIN14, 4, 4, false), ItemCount(b, 3, 3, true)), core.view().items)
+    }
 }

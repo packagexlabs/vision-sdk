@@ -83,6 +83,10 @@ class Section internal constructor(id: String, val labelPayload: String?, gtins:
 
     /** Ruling R2: the correction measured from the world jumps since the last resume, relative to the poses the section sees */
     internal var pending: Pose? = null
+
+    /** Ruling R6: the jump being measured, while its flagged frames follow one another */
+    internal var run: JumpRun? = null
+    internal var runBase: Pose? = null
     internal var handoff: Handoff? = null
 }
 
@@ -332,7 +336,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             }
             r.anchor == null || r.anchorTracking != Tracking.TRACKING -> freeze(s, ts, BreakReason.ANCHOR_NOT_TRACKING)
             prev?.anchor != null && jumped(prev, r) -> {
-                if (s.items) s.pending = JumpResume.compose(s.pending, JumpResume.step(prev, r))
+                if (s.items) startRun(s, prev, r)
                 freeze(s, ts, BreakReason.WORLD_JUMP)
             }
             else -> {
@@ -403,7 +407,21 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             else -> null
         }
         val at = s.attempt
-        if (reason == BreakReason.WORLD_JUMP && s.items) s.pending = JumpResume.compose(s.pending, JumpResume.step(prev!!, r))
+        if (reason != BreakReason.WORLD_JUMP) s.run = null
+        if (reason == BreakReason.WORLD_JUMP && s.items) {
+            val d = JumpResume.step(prev!!, r)
+            when (s.run?.extend(prev.timestampNs, r.timestampNs, d, config.jumpRunNs) ?: JumpRun.Step.NOT_CONSECUTIVE) {
+                // one jump over several frames: one break, the cut-off moves with it
+                JumpRun.Step.ADDED, JumpRun.Step.PAST_THE_RUN -> {
+                    s.pending = JumpResume.compose(s.runBase, s.run!!.correction)
+                    s.frozenAtNs = r.timestampNs
+                    if (at != null) note("${s.id}: the jump goes on inside the resume window, attempt cancelled")
+                    s.attempt = null
+                    return
+                }
+                JumpRun.Step.NOT_CONSECUTIVE -> startRun(s, prev, r)
+            }
+        }
         if (reason != null) {
             if (at != null) {
                 note("${s.id}: $reason inside the resume window, attempt cancelled")
@@ -565,9 +583,17 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
                     note("${s.id}: resumed with the jump's correction, alias ${v.with.pitches}")
                 }
                 s.pending = null
+                s.run = null
                 resume(s, ts)
             }
         }
+    }
+
+    /** Ruling R6: a flagged frame that starts a jump; its correction composes onto any earlier jump's */
+    private fun startRun(s: Section, prev: PoseRecord, r: PoseRecord) {
+        s.runBase = s.pending
+        s.run = JumpRun(r.timestampNs, JumpResume.step(prev, r))
+        s.pending = JumpResume.compose(s.runBase, s.run!!.correction)
     }
 
     /** Ruling R1: an anchor 0.40 m along the camera's optical axis, gravity-aligned, facing the camera */
@@ -624,6 +650,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         s.anchor = aNew
         s.fix = null
         s.pending = null
+        s.run = null
         s.attempt = null
         s.breakList.clear()
         s.liveSinceNs = ts
