@@ -21,8 +21,12 @@ class BackgroundRenderer {
     private var textureUniform = 0
 
     fun createOnGlThread() {
+        val previous = textureId
         val textures = IntArray(1)
         GLES20.glGenTextures(1, textures, 0)
+        // ponytail: a new GL context (pause on a device that does not keep it) starts naming textures again at 1, and
+        // ARCore does not re-attach its camera image to a name it already has: the background stays black. Take another.
+        if (textures[0] == previous) GLES20.glGenTextures(1, textures, 0)
         textureId = textures[0]
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId)
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
