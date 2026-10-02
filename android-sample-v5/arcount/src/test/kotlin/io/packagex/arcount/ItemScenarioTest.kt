@@ -11,12 +11,11 @@ import kotlin.random.Random
  * show no definite count above the truth at any frame, and end with the truth inside each listed code's range.
  * Set `ARCOUNT_SIM_OUT=<dir>` to keep each violating run's events (`ARCOUNT_SIM_ALL=1`: every run's).
  *
- * "jumpbreak" (a one-pitch world jump the anchor does not follow, so T_ac jumps) is left out by default: it breaks the
- * requirement in every run, by the spec's rule, not by a defect. The resume fails, the section closes ABANDONED, and
- * the next section counts again the units still in view (P8 report, hazard H1). Run it with
- * `ARCOUNT_SIM_MOTIONS=jumpbreak`. "longrow" (one row of three bays back to back, 1.8 m, walked in one pass) is left
- * out for the same kind of reason: the section closes at the reach with units in view, and the next one counts them
- * again (hazard H2).
+ * "jumpbreak" is a one-pitch world jump the anchor does not follow, so T_ac jumps; the resume finds the jump's
+ * correction (ruling R2). "longrow" is one row of three bays back to back, 1.8 m, walked in one pass: the section hands
+ * its units over to a new anchor at the reach (ruling R1). "jumpsame" (only on request: `ARCOUNT_SIM_MOTIONS=jumpsame`)
+ * makes the same jump over nine identical A units, where the pitch aliases tie: the section is abandoned and adds
+ * [0, its high] to the count (ruling R3), and the cell shows how wide that makes the range.
  */
 class ItemScenarioTest {
     private val b = "TP6056F32"
@@ -40,6 +39,7 @@ class ItemScenarioTest {
             "walk2m" -> bay(rnd, 0.0, 1) + bay(rnd, 1.4, 101)
             // three bays back to back: one row longer than the reach
             "longrow" -> (0 until 3).fold(emptyList<Symbol>()) { acc, i -> acc + bay(rnd, (acc.maxOfOrNull { it.centre.x } ?: -0.07) + 0.07, 1 + 100 * i) }
+            "jumpsame" -> List(9) { i -> Symbol(GTIN, Vec3(0.07 * i, 0.04, -0.30), i + 1) }
             else -> bay(rnd, 0.0, 1)
         }
         val truth = mapOf(GTIN14 to shelf.count { it.text == GTIN }, b to shelf.count { it.text == b })
@@ -61,7 +61,7 @@ class ItemScenarioTest {
                 go(Paths.move(Vec3(end, 0.0, 0.0), Vec3.ZERO, 0.03))
             }
             "walk2m", "longrow" -> go(Paths.move(Vec3.ZERO, Vec3(2.0, 0.0, 0.0), 0.03))
-            "jumpanchored", "jumpbreak" -> {
+            "jumpanchored", "jumpbreak", "jumpsame" -> {
                 go(Paths.move(Vec3.ZERO, Vec3(0.30, 0.0, 0.0), 0.03))
                 // ARCore's world jumps one pitch along the row; with "jumpanchored" the anchor's world pose moves with
                 // it, as ARCore updates anchors, so T_ac holds; with "jumpbreak" it stays and T_ac jumps
@@ -112,7 +112,7 @@ class ItemScenarioTest {
     }
 
     private companion object {
-        val MOTIONS = (System.getenv("ARCOUNT_SIM_MOTIONS") ?: "oneway,thereback,walk2m,jumpanchored").split(',')
+        val MOTIONS = (System.getenv("ARCOUNT_SIM_MOTIONS") ?: "oneway,thereback,walk2m,jumpanchored,jumpbreak,longrow").split(',')
         val SEEDS = System.getenv("ARCOUNT_SIM_SEEDS")?.toInt() ?: 5
     }
 }

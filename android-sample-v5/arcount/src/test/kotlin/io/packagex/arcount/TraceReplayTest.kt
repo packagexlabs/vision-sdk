@@ -19,7 +19,8 @@ import java.io.File
  * A trace recorded in label mode carries the old app's anchors, which appear and go with its sections; so item mode
  * answers the core's own anchor requests instead: each anchor at the world pose asked for, tracking while the frame
  * tracks, and moved with every correction ARCore made to the trace's own anchor between two consecutive frames (the
- * only record of ARCore's anchor updates). `ARCOUNT_TRACE_ANCHORS=1` keeps the trace's anchors.
+ * only record of ARCore's anchor updates); the first record after a new one carries the one it replaced
+ * (previousAnchor). `ARCOUNT_TRACE_ANCHORS=1` keeps the trace's anchors.
  */
 class TraceReplayTest {
     @Test
@@ -41,10 +42,12 @@ class TraceReplayTest {
         var lastAnchor: Pose? = null
         val synthetic = items != null && System.getenv("ARCOUNT_TRACE_ANCHORS") == null
         var mine: Pose? = null
+        var replaced: Pose? = null
         fun answer(ts: Long) {
             if (!synthetic) return
             val req = core.anchorRequest() ?: return
             println("${s(ts)}  -> anchor created where the core asked, ${req.world.t}")
+            replaced = mine
             mine = req.world
             core.onAnchorCreated(true)
         }
@@ -80,7 +83,8 @@ class TraceReplayTest {
                         if (m != null && a != null && lastAnchor != null && a != lastAnchor) mine = a * lastAnchor!!.inverse() * m
                         lastAnchor = a
                         val tracking = if (f.frameTracking == Tracking.TRACKING) Tracking.TRACKING else Tracking.PAUSED
-                        core.onFrame(f.copy(anchor = mine, anchorTracking = mine?.let { tracking }))
+                        core.onFrame(f.copy(anchor = mine, anchorTracking = mine?.let { tracking }, previousAnchor = replaced))
+                        replaced = null
                         answer(f.timestampNs)
                     } else {
                         val a = f.anchor
