@@ -41,6 +41,32 @@ class LumaCopyTest {
         assertEquals(0, px(img, 0, 0)); assertEquals(239, px(img, 959, 539)); assertEquals(px(img, 500, 0), px(img, 500, 300))
     }
 
+    @Test fun rowsAreAveragedFourAcrossAndRoundedAndRowPaddingIsSkipped() {
+        val src = byteArrayOf(10, 11, 12, 14, 200.toByte(), 200.toByte(), 201.toByte(), 201.toByte(), 99, /* padding */ 1, 2, 3, 4, 5, 6, 7, 8, 9, 99)
+        val img = downscaleRows4(src, 8, 2, 9)
+        assertEquals(2, img.width); assertEquals(2, img.height)
+        assertEquals(12, px(img, 0, 0)) // 47 / 4 = 11.75
+        assertEquals(201, px(img, 1, 0)) // 200.5, rounded up
+        assertEquals(3, px(img, 0, 1)); assertEquals(7, px(img, 1, 1)) // 2.5 and 6.5, rounded up
+    }
+
+    @Test fun theCameraThreadKeepsRowTwoOfEachFourAndTheImageIsAQuarterEachWay() {
+        val got = Collections.synchronizedList(mutableListOf<LumaImage>())
+        val done = CountDownLatch(1)
+        val copier = LumaCopier { _, img -> got += img; done.countDown() }
+        val w = 16
+        val h = 8
+        val stride = 20
+        val plane = ByteBuffer.allocateDirect(stride * h)
+        for (y in 0 until h) for (x in 0 until stride) plane.put(y * stride + x, (if (x < w) y * 10 else 255).toByte())
+        copier.offer(1L, plane, w, h, stride)
+        assertTrue(done.await(2, TimeUnit.SECONDS))
+        copier.close()
+        val img = got[0]
+        assertEquals(4, img.width); assertEquals(2, img.height)
+        assertArrayEquals(byteArrayOf(20, 20, 20, 20, 60, 60, 60, 60), img.data) // rows 2 and 6
+    }
+
     @Test fun theCopyIsMadeBeforeOfferReturnsSoThePlaneCanBeReusedAtOnce() {
         val got = Collections.synchronizedList(mutableListOf<Pair<Long, LumaImage>>())
         val done = CountDownLatch(1)
@@ -66,7 +92,7 @@ class LumaCopyTest {
             post = { ts, _ -> events += "luma $ts" },
             downscale = { src, w, h, stride ->
                 if (first) { first = false; inWork.countDown(); release.await(2, TimeUnit.SECONDS) }
-                downscaleLuma4(src, w, h, stride)
+                downscaleRows4(src, w, h, stride)
             },
         )
         val plane = ByteBuffer.allocateDirect(64)
@@ -113,9 +139,30 @@ class LumaCopyTest {
             downscaleLuma4(dst, w, h, w)
             return (System.nanoTime() - t) / 1e6
         }
-        repeat(20) { copyMs(); scaleMs() } // warm-up: the JIT
+        // What LumaCopier does now: one row in four on the camera thread, then the 4x1 average
+        val rows = h / LUMA_SCALE
+        val kept = ByteArray(rows * w)
+        fun rowCopyMs(): Double {
+            val t = System.nanoTime()
+            val src = plane.duplicate()
+            src.clear()
+            for (j in 0 until rows) {
+                src.position((j * LUMA_SCALE + LUMA_ROW) * w)
+                src.get(kept, j * w, w)
+            }
+            return (System.nanoTime() - t) / 1e6
+        }
+        fun rowScaleMs(): Double {
+            val t = System.nanoTime()
+            downscaleRows4(kept, w, rows, w)
+            return (System.nanoTime() - t) / 1e6
+        }
+        repeat(20) { copyMs(); scaleMs(); rowCopyMs(); rowScaleMs() } // warm-up: the JIT
         val copies = List(30) { copyMs() }.sorted()
         val scales = List(30) { scaleMs() }.sorted()
-        println("luma copy 4K on the JVM: copy median %.2f ms p90 %.2f ms; downscale median %.2f ms p90 %.2f ms".format(copies[15], copies[27], scales[15], scales[27]))
+        val rowCopies = List(30) { rowCopyMs() }.sorted()
+        val rowScales = List(30) { rowScaleMs() }.sorted()
+        println("luma copy 4K on the JVM: whole plane copy median %.2f ms p90 %.2f ms, 4x4 downscale median %.2f ms p90 %.2f ms".format(copies[15], copies[27], scales[15], scales[27]))
+        println("luma copy 4K on the JVM: 1-in-4 rows copy median %.2f ms p90 %.2f ms, 4x1 downscale median %.2f ms p90 %.2f ms".format(rowCopies[15], rowCopies[27], rowScales[15], rowScales[27]))
     }
 }
