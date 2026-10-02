@@ -138,6 +138,7 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { ar.count.collect { v -> _state.update { it.copy(arCount = v) } } }
         viewModelScope.launch { ar.stream.collect { st -> _state.update { it.copy(arStream = st) } } }
         viewModelScope.launch { ar.errors.collect(::toast) }
+        viewModelScope.launch { ar.exits.collect(::leaveAr) }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
         // No idle pause while a capture or extraction runs, nor while AR Count runs: a worker counting with the trigger
@@ -355,6 +356,13 @@ class ScannerViewModel @Inject constructor(
     private fun syncAr() {
         if (s.mode != ScanMode.Ar || s.home) return
         if (s.paused || s.result != null) ar.pause() else ar.resume()
+    }
+
+    /** AR Count can't run here (spec 6: no session, or no app stream configures): the message, then the module cards. */
+    private fun leaveAr(message: String) {
+        if (s.mode != ScanMode.Ar || s.home) return
+        toast(message)
+        goHome()
     }
 
     private fun setTorch(on: Boolean) {

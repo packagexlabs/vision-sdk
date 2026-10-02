@@ -18,6 +18,8 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     override val screen = MutableStateFlow(ArScreen.NONE)
     private val errorChannel = Channel<String>(Channel.UNLIMITED)
     override val errors: Flow<String> = errorChannel.receiveAsFlow()
+    private val exitChannel = Channel<String>(Channel.UNLIMITED)
+    override val exits: Flow<String> = exitChannel.receiveAsFlow()
     override var tracing = false
     var paused = false
     var resets = 0
@@ -25,6 +27,8 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     val commands = mutableListOf<Command>()
 
     fun fail(message: String) { errorChannel.trySend(message) }
+    /** The session can't run here (no session, no app stream configures). */
+    fun exit(message: String) { exitChannel.trySend(message) }
 
     override fun installed() = installed
     override fun attach(view: GLSurfaceView) {}

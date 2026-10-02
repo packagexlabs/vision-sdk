@@ -179,6 +179,26 @@ class ScannerViewModelArTest {
         }
     }
 
+    // Spec 6: no session can be made, or after the last stream size fails, the mode exits with a message.
+    @Test fun aSessionThatCannotRunLeavesTheModeWithItsMessage() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
+        v.effects.test {
+            ar.exit("AR isn't available on this device")
+            assertEquals(ScannerEffect.Toast("AR isn't available on this device"), awaitItem())
+        }
+        assertTrue(v.state.value.home); assertEquals(1, ar.detaches); assertEquals(CameraOwner.None, cam.owner)
+    }
+
+    @Test fun anExitOnceArIsLeftIsIgnored() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
+        v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
+        v.effects.test {
+            ar.exit("AR Count could not configure the camera"); advanceUntilIdle()
+            expectNoEvents()
+        }
+        assertFalse(v.state.value.home); assertEquals(ScanMode.Barcode, v.state.value.mode)
+    }
+
     @Test fun tracesFollowTheSetting() = runTest {
         ar.tracing = true   // left over from the previous ViewModel
         val prefs = FakePreferences()

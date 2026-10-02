@@ -66,6 +66,9 @@ class ArSessionController @Inject constructor(
     private val _errors = MutableSharedFlow<String>(extraBufferCapacity = 4)
     override val errors: Flow<String> = _errors
 
+    private val _exits = MutableSharedFlow<String>(extraBufferCapacity = 1)
+    override val exits: Flow<String> = _exits
+
     override var tracing = false
         set(value) {
             if (field == value) return
@@ -166,31 +169,35 @@ class ArSessionController @Inject constructor(
         mapper?.post(ArEvent.Reset(counters.create()))
     }
 
+    /** The configured session; null when ARCore can't make or configure one here, after saying so (the mode exits). */
     private fun createSession(): Session? {
-        val s = try {
-            Session(ctx, EnumSet.of(Session.Feature.SHARED_CAMERA))
-        } catch (e: Exception) { // UnavailableException, SecurityException
+        var made: Session? = null
+        return try {
+            val s = Session(ctx, EnumSet.of(Session.Feature.SHARED_CAMERA)).also { made = it }
+            // ARCore's CPU image is for tracking only: 1280x720 at 30 fps (spec 5.2); the engine reads the app stream.
+            val configs = s.getSupportedCameraConfigs(CameraConfigFilter(s).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30)))
+                .ifEmpty { s.getSupportedCameraConfigs(CameraConfigFilter(s)) }
+            val size = cpuImageSize(configs.map { it.imageSize.width to it.imageSize.height })
+            configs.firstOrNull { (it.imageSize.width to it.imageSize.height) == size }?.let { s.cameraConfig = it }
+            s.configure(
+                Config(s).apply {
+                    focusMode = Config.FocusMode.AUTO // FIXED left the feed soft at barcode range on the Memor 35
+                    updateMode = Config.UpdateMode.BLOCKING // paces the GL thread to the camera
+                    planeFindingMode = Config.PlaneFindingMode.DISABLED
+                    lightEstimationMode = Config.LightEstimationMode.DISABLED
+                    depthMode = Config.DepthMode.DISABLED
+                    instantPlacementMode = Config.InstantPlacementMode.DISABLED
+                },
+            )
+            Log.i(TAG, "ARCore CPU image ${s.cameraConfig.imageSize} at ${s.cameraConfig.fpsRange} fps on camera ${s.cameraConfig.cameraId}")
+            s
+        } catch (e: Exception) { // UnavailableException, SecurityException; FatalException from any step (the emulator's)
             Log.w(TAG, "ARCore unavailable", e)
-            _errors.tryEmit("AR isn't supported on this device")
-            return null
+            runCatching { made?.close() }
+            // Once attach() has returned: leaving the mode detaches, which must not run inside it (or the view's factory)
+            main.post { _exits.tryEmit("AR isn't available on this device") }
+            null
         }
-        // ARCore's CPU image is for tracking only: 1280x720 at 30 fps (spec 5.2); the engine reads the app stream.
-        val configs = s.getSupportedCameraConfigs(CameraConfigFilter(s).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30)))
-            .ifEmpty { s.getSupportedCameraConfigs(CameraConfigFilter(s)) }
-        val size = cpuImageSize(configs.map { it.imageSize.width to it.imageSize.height })
-        configs.firstOrNull { (it.imageSize.width to it.imageSize.height) == size }?.let { s.cameraConfig = it }
-        s.configure(
-            Config(s).apply {
-                focusMode = Config.FocusMode.AUTO // FIXED left the feed soft at barcode range on the Memor 35
-                updateMode = Config.UpdateMode.BLOCKING // paces the GL thread to the camera
-                planeFindingMode = Config.PlaneFindingMode.DISABLED
-                lightEstimationMode = Config.LightEstimationMode.DISABLED
-                depthMode = Config.DepthMode.DISABLED
-                instantPlacementMode = Config.InstantPlacementMode.DISABLED
-            },
-        )
-        Log.i(TAG, "ARCore CPU image ${s.cameraConfig.imageSize} at ${s.cameraConfig.fpsRange} fps on camera ${s.cameraConfig.cameraId}")
-        return s
     }
 
     /** The app streams the camera offers as YUV, largest first; the first one is set up. */
@@ -319,7 +326,7 @@ class ArSessionController @Inject constructor(
         stopCamera()
         if (++streamIndex >= streams.size) {
             Log.e(TAG, "no app stream configures; the last tried was $failed")
-            _errors.tryEmit("AR Count could not configure the camera")
+            _exits.tryEmit("AR Count could not configure the camera")
             return
         }
         Log.w(TAG, "configure failed with the app stream $failed; trying ${streams[streamIndex]}")

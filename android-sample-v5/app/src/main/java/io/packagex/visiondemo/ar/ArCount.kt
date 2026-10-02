@@ -26,6 +26,9 @@ interface ArCount {
     /** Messages to toast (the session or its camera could not start). */
     val errors: Flow<String>
 
+    /** Why AR Count can't run here (no session can be made, no app stream configures): say so and leave the mode (spec 6). */
+    val exits: Flow<String>
+
     /** Settings › Advanced › "AR Count traces": the session writes a [SessionRecorder] trace while true. */
     var tracing: Boolean
 
@@ -58,6 +61,7 @@ object NoArCount : ArCount {
     override val stream: StateFlow<AppStream?> = MutableStateFlow(null)
     override val screen: StateFlow<ArScreen> = MutableStateFlow(ArScreen.NONE)
     override val errors: Flow<String> = emptyFlow()
+    override val exits: Flow<String> = emptyFlow()
     override var tracing = false
     override fun installed() = true // nothing to install: entering AR just shows no camera
     override fun attach(view: GLSurfaceView) {}
