@@ -114,4 +114,40 @@ class JumpResumeTest {
         assertEquals(SectionState.COUNTING, core.view().state)
         assertTrue(core.events.none { it.contains("tie") })
     }
+    // ruling R5: a code with one unit in the section cannot alias
+
+    /** Four listed codes, one unit each, 10 cm apart; [codes] names them (repeat one for two units of a code) */
+    private fun uniques(codes: List<String>): Pair<Sim, CountingCore> {
+        val core = CountingCore()
+        core.setItems(codes.toCollection(LinkedHashSet()))
+        val symbols = codes.mapIndexed { i, c -> Symbol(c, Vec3(0.10 * i, 0.04, -0.30), i + 1) }
+        val sim = Sim(symbols, CoreCounter(core), noisePx = 1.0)
+        sim.run(Paths.hold(cameraAt(0.15), 5.5))
+        assertEquals(4, core.units.count { it.state == UnitState.COUNTED })
+        // a 5 cm jump the anchor does not follow; afterwards only the unit with engine id 2 reads
+        sim.hidden = { it.engineId != 2 }
+        sim.jumpCamera(Vec3(0.05, 0.0, 0.0))
+        sim.step(cameraAt(0.15))
+        assertTrue(core.events.any { it.contains("FROZEN, WORLD_JUMP") })
+        return sim to core
+    }
+
+    @Test
+    fun oneReReadOfAUniqueCodeResumes() {
+        val (sim, core) = uniques(listOf("U1", "U2", "U3", "U4"))
+        sim.run(Paths.hold(cameraAt(0.15), 1.0))
+        assertEquals(SectionState.COUNTING, core.view().state)
+        assertTrue(core.events.any { it.contains("resumed with the jump's correction, alias 0") })
+        sim.hidden = { false }
+        sim.run(Paths.hold(cameraAt(0.15), 1.0))
+        assertEquals(4, core.units.size)
+    }
+
+    @Test
+    fun oneReReadOfACodeWithTwoUnitsStillDoesNotResume() {
+        val (sim, core) = uniques(listOf("U1", "U2", "U2", "U4"))
+        sim.run(Paths.hold(cameraAt(0.15), 6.0))
+        assertFalse(core.events.any { it.contains("resumed") })
+        assertEquals(SectionStatus.ABANDONED, core.view().closed.single().status)
+    }
 }

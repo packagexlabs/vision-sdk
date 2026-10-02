@@ -36,6 +36,10 @@ internal object JumpResume {
     fun hypotheses(base: Pose, pitch: Double, shelfAxis: Vec3, aliases: Boolean = true): List<Hypothesis> =
         (if (aliases) ALIASES else listOf(0)).map { k -> Hypothesis(Pose(shelfAxis * (k * pitch), Quat.IDENTITY) * base, k) }
 
+    /** Ruling R5: the units that are the only COUNTED, TENTATIVE or AMBIGUOUS unit of their code in the section */
+    fun uniqueUnits(t: UnitTable): Set<Int> =
+        t.units.filter { it.state != UnitState.MANUAL }.groupBy { it.gtin }.values.filter { it.size == 1 }.map { it.single().id }.toSet()
+
     sealed interface Verdict {
         data class Resume(val with: Hypothesis) : Verdict
 
@@ -50,7 +54,9 @@ internal object JumpResume {
      * One frame of the window: each candidate still standing checks [reads] under its correction. A read in the
      * ambiguity band of a COUNTED unit it did not match (with [anyBand], of any unit: the rule without a measured
      * jump), or a code read where a COUNTED unit of another code is predicted, rules it out; else its COUNTED re-reads
-     * accumulate. One candidate with [minUnits] re-reads and no other with as many resumes. Ties never resume: once
+     * accumulate; a re-read of a unit whose code has no other unit in the section (COUNTED, TENTATIVE or AMBIGUOUS)
+     * counts twice, as no alias can put another unit of that code under it (ruling R5). One candidate with [minUnits]
+     * and no other with as many resumes. Ties never resume: once
      * two have had as many at once ([tied]), only the measured correction (no alias shift) may still resume, and only
      * once every other candidate is ruled out.
      */
@@ -62,7 +68,8 @@ internal object JumpResume {
         }
         val standing = hs.filterNot { it.ruledOut }
         if (standing.isEmpty()) return Verdict.AllRuledOut
-        val passing = standing.filter { it.reread.size >= minUnits }
+        val unique = uniqueUnits(t)
+        val passing = standing.filter { h -> h.reread.sumOf { if (it in unique) 2 else 1 } >= minUnits }
         return when {
             passing.size > 1 -> Verdict.Tie
             passing.isEmpty() -> if (tied) Verdict.Tie else Verdict.Wait
@@ -72,3 +79,4 @@ internal object JumpResume {
         }
     }
 }
+
