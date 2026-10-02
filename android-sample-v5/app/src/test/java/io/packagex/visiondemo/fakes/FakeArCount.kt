@@ -45,4 +45,5 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     override fun command(command: Command) {}
     override fun reset() { resets++; calls += "reset"; count.value = CountView.EMPTY; seen.value = emptyList() }
     override fun setItems(codes: Set<String>) { calls += codes.sorted().joinToString(",", "items ") }
+    override fun focus(x: Float, y: Float) { calls += "focus $x $y" }
 }

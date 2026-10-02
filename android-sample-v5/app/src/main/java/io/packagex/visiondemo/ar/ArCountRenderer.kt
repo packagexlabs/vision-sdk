@@ -68,7 +68,10 @@ class ArCountRenderer(
     private var textureSet = false
     private var lastTimestampNs = Long.MIN_VALUE
     private var lastScreen = ArScreen.NONE
-    private var lastTracking: TrackingState? = null
+    /** ARCore's tracking on the last frame (GL thread writes; read for the tap-to-focus log) */
+    @Volatile
+    var lastTracking: TrackingState? = null
+        private set
     private var lastState: SectionState? = null
     private val loggedBreaks = HashSet<Pair<Long, BreakReason>>()
     private var closedLogged = 0

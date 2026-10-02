@@ -19,6 +19,7 @@ import io.packagex.visiondemo.fakes.MainDispatcherRule
 import io.packagex.visiondemo.model.RetrievalRow
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
+import io.packagex.visiondemo.model.SheetKind
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -226,6 +227,17 @@ class ScannerViewModelArTest {
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
         val rows = (v.state.value.result as ScanResult.Retrieval).rows
         assertEquals(listOf("Apple", null), rows.map { it.name })
+    }
+
+    @Test fun aTapInArFocusesTheArSessionAndDrawsTheRing() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
+        assertTrue(v.state.value.arOn)
+        v.onAction(ScannerAction.Focus(0.25f, 0.5f))
+        assertEquals("focus 0.25 0.5", ar.calls.last())
+        assertEquals(null, cam.focusPoint)   // not the SDK camera
+        assertEquals(FocusTap(0.25f, 0.5f, 1), v.state.value.focus)
+        v.onAction(ScannerAction.OpenSheet(SheetKind.Items)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
+        assertEquals("focus 0.25 0.5", ar.calls.last())   // not under a sheet
     }
 
     // --- the AR plumbing, as AR Count had it ---

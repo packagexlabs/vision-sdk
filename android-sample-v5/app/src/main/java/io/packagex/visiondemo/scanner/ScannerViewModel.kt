@@ -381,10 +381,15 @@ class ScannerViewModel @Inject constructor(
         toast(if (front) "Front camera" else "Back camera")
     }
 
-    /** Tap-to-focus and its ring, only on the live camera (iOS CameraScreen :17-21). */
+    /** Tap-to-focus and its ring, only on the live camera (iOS CameraScreen :17-21); in AR Item Count, the AR session's. */
     private fun focus(x: Float, y: Float) {
-        if (!ownCamera || s.result != null || s.sheet != null || s.alert != null) return
-        if (s.mode == ScanMode.DocAcq) document.focus(x, y) else camera.focus(x, y)
+        if (s.result != null || s.sheet != null || s.alert != null) return
+        when {
+            s.mode == ScanMode.Retrieval -> if (s.arOn && !s.paused) ar.focus(x, y) else return
+            !ownCamera -> return
+            s.mode == ScanMode.DocAcq -> document.focus(x, y)
+            else -> camera.focus(x, y)
+        }
         _state.update { it.copy(focus = FocusTap(x, y, (it.focus?.id ?: 0) + 1)) }
     }
 

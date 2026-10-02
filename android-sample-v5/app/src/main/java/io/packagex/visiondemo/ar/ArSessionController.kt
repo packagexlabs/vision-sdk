@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CaptureRequest
 import android.hardware.camera2.CaptureResult
 import android.hardware.camera2.TotalCaptureResult
+import android.hardware.camera2.params.MeteringRectangle
 import android.media.ImageReader
 import android.opengl.GLSurfaceView
 import android.os.Handler
@@ -211,6 +212,46 @@ class ArSessionController @Inject constructor(
     override fun setItems(codes: Set<String>) {
         items = codes
         mapper?.post(ArEvent.Items(codes))
+    }
+
+    /**
+     * Tap to focus while ARCore runs (it owns the repeating request, AUTO focus): one capture with AF_TRIGGER_START and
+     * AF/AE regions of 1/8 of the active array at the tap ([meteringRegion]), then one with AF_TRIGGER_IDLE, both to
+     * ARCore's surfaces and the app stream; never a repeating request. Any failure, or no running session: nothing.
+     */
+    override fun focus(x: Float, y: Float) {
+        val s = session ?: return
+        val r = reader ?: return
+        if (!running) return
+        val gen = generation
+        cameraHandler.post {
+            val d = device
+            val cs = captureSession
+            if (gen != generation || d == null || cs == null) return@post
+            try {
+                val chars = cameraManager.getCameraCharacteristics(cameraId)
+                val active = chars.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE) ?: return@post
+                val orientation = chars.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 90
+                val g = meteringRegion(x, y, orientation, 0, active.width(), active.height()) // portrait-locked: display rotation 0
+                val m = MeteringRectangle(active.left + g.left, active.top + g.top, g.width, g.height, MeteringRectangle.METERING_WEIGHT_MAX)
+                val afRegions = (chars.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AF) ?: 0) > 0
+                val aeRegions = (chars.get(CameraCharacteristics.CONTROL_MAX_REGIONS_AE) ?: 0) > 0
+                val surfaces = s.sharedCamera.arCoreSurfaces + r.surface
+                fun request(trigger: Int) = d.createCaptureRequest(CameraDevice.TEMPLATE_RECORD).apply {
+                    surfaces.forEach(::addTarget)
+                    set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_AUTO)
+                    if (afRegions) set(CaptureRequest.CONTROL_AF_REGIONS, arrayOf(m))
+                    if (aeRegions) set(CaptureRequest.CONTROL_AE_REGIONS, arrayOf(m))
+                    set(CaptureRequest.CONTROL_AF_TRIGGER, trigger)
+                }.build()
+                cs.capture(request(CaptureRequest.CONTROL_AF_TRIGGER_START), null, cameraHandler)
+                cs.capture(request(CaptureRequest.CONTROL_AF_TRIGGER_IDLE), null, cameraHandler)
+                Log.i(TAG, "tapFocus at %.2f,%.2f -> region $m (AF regions $afRegions, AE regions $aeRegions), tracking ${renderer?.lastTracking}".format(x, y))
+                main.postDelayed({ Log.i(TAG, "tapFocus +1 s: ARCore tracking ${renderer?.lastTracking}") }, 1_000)
+            } catch (e: Exception) { // closed meanwhile, CameraAccessException, IllegalArgumentException
+                Log.w(TAG, "tapFocus failed", e)
+            }
+        }
     }
 
     /** The configured session; null when ARCore can't make or configure one here, after saying so (the mode exits). */

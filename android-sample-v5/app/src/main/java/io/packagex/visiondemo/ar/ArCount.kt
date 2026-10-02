@@ -63,6 +63,9 @@ interface ArCount {
 
     /** AR Item Count's list (spec 5.10): the codes counted, by this session's counter and by every later one. */
     fun setItems(codes: Set<String>)
+
+    /** Tap to focus at ([x], [y]), 0..1 of the view: one AF trigger on the running session, never a repeating request. */
+    fun focus(x: Float, y: Float)
 }
 
 /** Default for ViewModels built without AR (tests, previews). */
@@ -83,6 +86,7 @@ object NoArCount : ArCount {
     override fun command(command: Command) {}
     override fun reset() {}
     override fun setItems(codes: Set<String>) {}
+    override fun focus(x: Float, y: Float) {}
 }
 
 /** Where the GL thread drew the section's bracket (null: none, or not in the image) and the gap markers on its last
