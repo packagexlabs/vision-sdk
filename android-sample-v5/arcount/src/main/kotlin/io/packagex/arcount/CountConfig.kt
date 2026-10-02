@@ -32,6 +32,12 @@ data class CountConfig(
     val maxPitch: Double = 0.12,
     // Association (5.4)
     val gateCost: Double = 0.25,
+    // Gate confidence (coordinator ruling R1): a unit takes a read by gate only while sigma_p <= gateMaxSigmaFraction
+    // * pitch_px; its gate radius is max(gateCost * pitch_px, gateSigmas * sigma_p), at most gateMaxCost * pitch_px.
+    // A unit less sure than that is a band candidate only.
+    val gateMaxSigmaFraction: Double = 0.25,
+    val gateSigmas: Double = 2.0,
+    val gateMaxCost: Double = 0.5,
     val engineIdPenalty: Double = 0.1,
     val duplicateFraction: Double = 0.5,
     val ambiguityPitchFraction: Double = 0.75,

@@ -254,7 +254,11 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
     private fun opposite(a: Read, b: Read) =
         (a.corners[2] - a.corners[0]) * (b.corners[2] - b.corners[0]) + (a.corners[3] - a.corners[1]) * (b.corners[3] - b.corners[1]) < 0
 
-    /** One-to-one, per GTIN, inside the gate: cost |p − p̂| / pitch_px, +0.1 inside the matrix for another engine id */
+    /**
+     * One-to-one, per GTIN, inside the gate: cost |p − p̂| / pitch_px, +0.1 inside the matrix for another engine id.
+     * Only a unit whose σ_p̂ is within [CountConfig.gateMaxSigmaFraction] of its pitch_px takes a read by gate; its
+     * gate radius is max(gateCost · pitch_px, gateSigmas · σ_p̂), at most gateMaxCost · pitch_px (ruling R1).
+     */
     private fun match(record: PoseRecord, reads: List<Candidate>, units: List<CountUnit>): Map<Int, CountUnit> {
         if (reads.isEmpty() || units.isEmpty()) return emptyMap()
         val f = record.intrinsics.fx
@@ -262,8 +266,12 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         val cost = Array(reads.size) { i ->
             DoubleArray(units.size) { j ->
                 val p = preds[j]
-                val g = if (p == null || units[j].gtin != reads[i].gtin) Double.POSITIVE_INFINITY else hypot(reads[i].read.centreU - p.u, reads[i].read.centreV - p.v) / pitchPx(f, p.z)
-                if (g > config.gateCost) Double.POSITIVE_INFINITY else g + if (reads[i].read.engineId != units[j].lastEngineId) config.engineIdPenalty else 0.0
+                if (p == null || units[j].gtin != reads[i].gtin) return@DoubleArray Double.POSITIVE_INFINITY
+                val px = pitchPx(f, p.z)
+                if (p.sigmaPx > config.gateMaxSigmaFraction * px) return@DoubleArray Double.POSITIVE_INFINITY
+                val radius = minOf(maxOf(config.gateCost * px, config.gateSigmas * p.sigmaPx), config.gateMaxCost * px)
+                val d = hypot(reads[i].read.centreU - p.u, reads[i].read.centreV - p.v)
+                if (d > radius) Double.POSITIVE_INFINITY else d / px + if (reads[i].read.engineId != units[j].lastEngineId) config.engineIdPenalty else 0.0
             }
         }
         return Hungarian.assign(cost).withIndex().filter { it.value >= 0 }.associate { it.index to units[it.value] }

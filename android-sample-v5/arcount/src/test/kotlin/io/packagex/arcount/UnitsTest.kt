@@ -116,6 +116,32 @@ class UnitsTest {
     }
 
     @Test
+    fun aUnitWhosePredictionIsUnsureToAQuarterPitchTakesNoReadByGateOnlyThroughTheBand() {
+        val t = table()
+        t.see(0, 0.0, unit(0.0, id = 1))
+        // 5 cm sideways without a read: no depth, so sigma is about 240 px, over a quarter pitch (145 px)
+        val r = record(FRAME_NS, 0.05)
+        assertTrue(t.predict(t.units[0], r)!!.sigmaPx > 0.25 * t.pitchPx(K4K.fx, depth))
+        t.see(1, 0.05, unit(0.0, id = 1))
+        assertEquals(listOf(UnitState.TENTATIVE, UnitState.AMBIGUOUS), t.states())
+    }
+
+    @Test
+    fun theGateWidensToTwoSigmaWhileSigmaIsUnderAQuarterPitch() {
+        val t = table()
+        t.see(0, 0.0, unit(0.0, id = 1))
+        // 2 cm sideways: sigma about 100 px, so the gate is 2 sigma (about 200 px), not a quarter pitch (145 px)
+        val r = record(FRAME_NS, 0.02)
+        val p = t.predict(t.units[0], r)!!
+        val quarter = 0.25 * t.pitchPx(K4K.fx, p.z)
+        assertTrue(p.sigmaPx < quarter && 2 * p.sigmaPx > quarter)
+        val offsetPx = (quarter + 2 * p.sigmaPx) / 2
+        val x = 0.02 + (p.u + offsetPx - K4K.cx) * depth / K4K.fx
+        t.see(1, 0.02, unit(x, id = 1))
+        assertEquals(listOf(UnitState.COUNTED), t.states())
+    }
+
+    @Test
     fun anUnmatchedReadBeyondTheBandIsANewTentativeUnit() {
         val t = table()
         t.see(0, 0.0, unit(0.0, id = 1))
