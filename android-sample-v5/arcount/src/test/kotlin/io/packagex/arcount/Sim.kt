@@ -72,6 +72,10 @@ class Sim(
     var anchorTracking = Tracking.TRACKING
     var hidden: (Symbol) -> Boolean = { false }
     var readsEnabled = true
+
+    /** The engine's decode budget: at most this many codes per engine frame, taken in turn */
+    var readsPerFrame = Int.MAX_VALUE
+    private var turn = 0
     val anchorRequests = ArrayList<AnchorRequest>()
     var lastRecord: PoseRecord? = null
         private set
@@ -100,7 +104,7 @@ class Sim(
         val reported = Pose(camera.t + cameraShift, camera.q)
         val a = anchor?.let { Pose(it.t + anchorShift, it.q) }
         val record = PoseRecord(ts, reported, a, tracking, a?.let { anchorTracking }, K4K, EXPOSURE_NS)
-        val reads = if (readsEnabled && frame % engineEvery == 0) shoot(camera, symbols.filterNot(hidden), ts, noisePx, rnd) else null
+        val reads = if (readsEnabled && frame % engineEvery == 0) budget(shoot(camera, symbols.filterNot(hidden), ts, noisePx, rnd)) else null
         if (readsFirst && reads != null) counter.reads(ts, reads)
         counter.frame(record)
         if (!readsFirst && reads != null) counter.reads(ts, reads)
@@ -112,6 +116,12 @@ class Sim(
             counter.anchorCreated(true)
         }
         frame++
+    }
+
+    private fun budget(reads: List<Read>): List<Read> {
+        if (reads.size <= readsPerFrame) return reads
+        turn++
+        return List(readsPerFrame) { reads[(turn * readsPerFrame + it) % reads.size] }
     }
 
     fun run(path: List<Pose>, each: () -> Unit = {}) {

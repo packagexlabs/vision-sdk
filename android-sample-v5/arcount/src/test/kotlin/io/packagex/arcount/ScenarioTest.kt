@@ -200,6 +200,33 @@ class ScenarioTest {
         assertEquals(1, core.view().bracket!!.countHigh)
     }
 
+    /**
+     * Stop-and-read (spec 5.5, phase B): 12 cm walks at 15 cm/s without decodes, 1.5 s still stops, the engine's
+     * measured budget of one code per frame, 15 px of ray noise. The spec's merge rule then folds distinct
+     * neighbours together (a miss, reported), but a count above the truth is never shown as a number.
+     */
+    @Test
+    fun stopAndReadWithOneDecodePerFrameNeverShowsMoreThanTheTruth() {
+        for (seed in 1..3) {
+            views.clear()
+            val (sim, core) = session(row(10, 0.06) + label(), noisePx = 15.0, seed = seed)
+            sim.readsPerFrame = 1
+            sim.go(Paths.hold(home, 5.5))
+            var x = 0.0
+            for (next in listOf(0.12, 0.24, 0.36, 0.48, 0.60)) {
+                sim.readsEnabled = false
+                sim.go(Paths.move(Vec3(x, 0.0, 0.0), Vec3(next, 0.0, 0.0), 0.15))
+                sim.readsEnabled = true
+                sim.go(Paths.hold(cameraAt(next), 1.5))
+                x = next
+            }
+            sim.command(Command.Finish)
+            val result = core.view().closed.single()
+            neverMoreThan(10, core)
+            assertTrue(result.status != SectionStatus.COMPLETE || result.counted == 10)
+        }
+    }
+
     @Test
     fun readsThatComeAfterTheirFrameCountTheSame() {
         val (sim, core) = session(row(10, 0.06) + label(), seed = 7, readsFirst = false)
