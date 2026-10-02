@@ -35,6 +35,7 @@ import io.packagex.visiondemo.designsystem.LinkLabel
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.PXButton
 import io.packagex.visiondemo.designsystem.PXButtonKind
+import io.packagex.visiondemo.designsystem.SectionLabel
 import io.packagex.visiondemo.designsystem.SheetScaffold
 import io.packagex.visiondemo.designsystem.VisionTheme
 import io.packagex.visiondemo.designsystem.inter
@@ -42,6 +43,7 @@ import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visiondemo.scanner.ScannerAction
 import io.packagex.visiondemo.scanner.ScannerUiState
+import io.packagex.visiondemo.scanner.seenRows
 
 /** Ported 1:1 from iOS `UI/Sheets.swift` `ItemsSheet`, plus a manual "Add by code" field for [ScannerAction.AddItem]
  *  (typed entry) -- iOS's plain Item list sheet has none; only its (Task 11) AR items sheet does. */
@@ -98,6 +100,29 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(Icons.Filled.Close, contentDescription = null, tint = PX.Muted, modifier = Modifier.size(14.dp))
+                }
+            }
+            HorizontalDivider(color = PX.Hairline)
+        }
+    }
+
+    // Every code the AR session read (spec 5.10), so the worker sees what the camera reads and can list it
+    SectionLabel("Seen")
+    if (state.seen.isEmpty()) {
+        Text("No codes read yet. Pan across the shelf.", style = inter(13.sp), color = PX.Muted)
+    }
+    Column {
+        seenRows(state.seen, state.items).forEach { (code, listed) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(vertical = 4.dp),
+            ) {
+                Text(code, style = mono(14.sp), color = PX.Ink, modifier = Modifier.weight(1f))
+                if (listed) {
+                    Badge(text = "In list", tone = BadgeTone.Success, dot = true)
+                } else {
+                    LinkLabel("Add") { onAction(ScannerAction.AddItem(code)) }
                 }
             }
             HorizontalDivider(color = PX.Hairline)

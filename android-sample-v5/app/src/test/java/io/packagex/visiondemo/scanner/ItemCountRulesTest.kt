@@ -7,7 +7,7 @@ import io.packagex.visiondemo.model.RetrievalRow
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** AR Item Count's hint and drawer rows (spec 5.10). */
+/** AR Item Count's hint, drawer rows and seen rows (spec 5.10). */
 class ItemCountRulesTest {
     private val counts = CountView.EMPTY.copy(items = listOf(ItemCount("A", 2, 2, true), ItemCount("B", 3, 4, false), ItemCount("C", 0, 0, false)))
 
@@ -52,5 +52,9 @@ class ItemCountRulesTest {
         assertEquals("× 2", RetrievalRow("A", true, 2, 2).countText())
         assertEquals("× 3–4", RetrievalRow("B", true, 3, 4).countText())
         assertEquals(null, RetrievalRow("Z", false, null, null).countText())
+    }
+
+    @Test fun seenRowsCarryTheInListBadge() {
+        assertEquals(listOf("C" to false, "A" to true), seenRows(listOf("C", "A"), listOf("A", "B")))
     }
 }

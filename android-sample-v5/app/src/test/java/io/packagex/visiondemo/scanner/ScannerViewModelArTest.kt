@@ -143,7 +143,7 @@ class ScannerViewModelArTest {
 
     @Test fun newScanResetsTheCounterAndKeepsTheList() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
-        ar.count.value = counting; advanceUntilIdle()
+        ar.count.value = counting; ar.seen.value = listOf("Z", "A"); advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
         assertTrue(ar.paused)   // the result covers the camera
         v.onAction(ScannerAction.CloseResult); advanceUntilIdle()
@@ -151,7 +151,7 @@ class ScannerViewModelArTest {
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
         v.onAction(ScannerAction.ScanNext); advanceUntilIdle()   // "New Scan"
         assertFalse(ar.paused); assertEquals(1, ar.resets)
-        assertEquals(CountView.EMPTY, v.state.value.arCount)
+        assertEquals(CountView.EMPTY, v.state.value.arCount); assertEquals(emptyList<String>(), v.state.value.seen)
         assertEquals(listOf("A", "B"), v.state.value.items)
     }
 
@@ -173,7 +173,7 @@ class ScannerViewModelArTest {
         assertTrue(ar.paused)
     }
 
-    // --- Add Item ---
+    // --- Add Item and the seen list ---
 
     @Test fun addItemAddsTheArCodesInView() = runTest {
         catalog.items.value = listOf("A")
@@ -188,6 +188,17 @@ class ScannerViewModelArTest {
             assertEquals(ScannerEffect.Toast("Code already in list"), awaitItem())
         }
         assertEquals(listOf("A", "B"), v.state.value.items)
+    }
+
+    @Test fun theSeenListFollowsTheSessionAndItsAddUsesTheAddPath() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
+        ar.seen.value = listOf("Z", "A"); advanceUntilIdle()
+        assertEquals(listOf("Z" to false, "A" to true), seenRows(v.state.value.seen, v.state.value.items))
+        v.onAction(ScannerAction.AddItem("Z")); advanceUntilIdle()   // the Seen row's Add
+        assertEquals(listOf("A", "B", "Z"), v.state.value.items); assertEquals("items A,B,Z", ar.calls.last())
+        assertEquals(listOf("Z" to true, "A" to true), seenRows(v.state.value.seen, v.state.value.items))
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle(); v.onAction(ScannerAction.ScanNext); advanceUntilIdle()
+        assertEquals(emptyList<String>(), v.state.value.seen)
     }
 
     // --- the AR plumbing, as AR Count had it ---

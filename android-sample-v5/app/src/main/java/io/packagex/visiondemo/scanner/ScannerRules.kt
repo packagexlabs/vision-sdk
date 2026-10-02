@@ -149,6 +149,9 @@ internal fun retrievalRows(codesInView: List<String>, items: List<String>, count
     return (codesInView + counted).map(::row)
 }
 
+/** The item list's "Seen" rows (spec 5.10): each seen code, and whether it is listed ("In list") or can be added. */
+internal fun seenRows(seen: List<String>, items: List<String>): List<Pair<String, Boolean>> = seen.map { it to (it in items) }
+
 /** A listed code's count in the drawer: "× N", or "× N–M" while its range is open. */
 internal fun RetrievalRow.countText(): String? = countLow?.let { low ->
     val high = countHigh ?: low

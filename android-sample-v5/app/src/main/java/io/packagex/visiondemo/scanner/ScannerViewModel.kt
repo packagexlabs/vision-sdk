@@ -136,6 +136,7 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { catalog.items.collect { i -> _state.update { it.copy(items = i) } } }
         viewModelScope.launch { ar.count.collect { v -> _state.update { it.copy(arCount = v) } } }
         viewModelScope.launch { ar.codesInView.collect { c -> _state.update { it.copy(codesInView = c) } } }
+        viewModelScope.launch { ar.seen.collect { c -> _state.update { it.copy(seen = c) } } }
         // The counter counts the list's codes (spec 5.10); the session keeps the list for its next counters.
         viewModelScope.launch { state.map { it.items }.distinctUntilChanged().collect { ar.setItems(it.toSet()) } }
         viewModelScope.launch { ar.errors.collect(::toast) }
