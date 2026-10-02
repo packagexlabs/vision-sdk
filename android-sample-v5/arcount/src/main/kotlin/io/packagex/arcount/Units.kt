@@ -184,6 +184,12 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
             u.state = COUNTED
             u.linkedTo = null
         }
+        for (u in matches.values.filter { it.state == AMBIGUOUS }) {
+            val linked = apartFrom(u, record) ?: continue
+            note("unit ${u.id}: COUNTED, read by gate with a depth, apart from unit $linked")
+            u.state = COUNTED
+            u.linkedTo = null
+        }
         val free = before.filter { it.id !in matchedIds }
         val created = ArrayList<CountUnit>()
         for ((i, c) in reads1.withIndex()) {
@@ -404,6 +410,21 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
             }
         }
         return candidates.map { it.id }
+    }
+
+    /**
+     * Ruling R8: AMBIGUOUS [u], just read by gate, counts when it and its linked unit both have a depth a gate
+     * accepted and their predictions lie half a pitch_px apart or more; it is then never merged. Returns the linked
+     * unit's id, or null.
+     */
+    private fun apartFrom(u: CountUnit, record: PoseRecord): Int? {
+        val linked = all.firstOrNull { it.id == u.linkedTo } ?: return null
+        if (!u.hasDepth || !linked.hasDepth) return null
+        val pu = predict(u, record) ?: return null
+        val pl = predict(linked, record) ?: return null
+        val f = record.intrinsics.fx
+        val half = config.duplicateFraction * maxOf(pitchPx(f, pu.z), pitchPx(f, pl.z))
+        return if (hypot(pu.u - pl.u, pu.v - pl.v) >= half) linked.id else null
     }
 
     /** A read updates the unit's quad, pose, observations, rays and point */

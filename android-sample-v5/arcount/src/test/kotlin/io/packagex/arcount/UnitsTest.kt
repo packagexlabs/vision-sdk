@@ -196,6 +196,27 @@ class UnitsTest {
     }
 
     @Test
+    fun anAmbiguousUnitReadByGateWithADepthAPitchFromItsLinkedUnitCountsAndNeverMerges() {
+        val t = table()
+        val v = unit(0.0, id = 1)
+        val u = unit(0.06, id = 2)
+        for (i in 0..3) t.see(i, 0.002 * i, v)
+        // 2 cm on, V still without depth (sigma about 100 px): its band holds its true neighbour's first read
+        t.see(4, 0.026, u)
+        assertEquals(listOf(UnitState.COUNTED, UnitState.AMBIGUOUS), t.states())
+        assertEquals(null, t.units[0].depthGate)
+        // V's fifth read gives it a depth; U's own reads at its own place give it one, and rule it a second unit
+        t.see(5, 0.03, v)
+        for (i in 6..12) t.see(i, 0.035 + 0.005 * (i - 6), u)
+        assertTrue(t.events.joinToString("\n"), t.units.all { it.hasDepth })
+        assertEquals(listOf(UnitState.COUNTED, UnitState.COUNTED), t.states())
+        assertEquals(null, t.units[1].linkedTo)
+        // frames reading only V were evidence of a merge while U was AMBIGUOUS; now they are not
+        for (i in 13..16) t.see(i, 0.04 + 0.005 * (i - 13), v)
+        assertEquals(listOf(UnitState.COUNTED, UnitState.COUNTED), t.states())
+    }
+
+    @Test
     fun noMergeWhileAnotherUnitInViewGoesUnreadForTheEngineHadNoBudgetToSpare() {
         val t = ambiguousNextToV()
         for (i in 2..7) t.see(i, 0.0, unit(0.0, id = 1))

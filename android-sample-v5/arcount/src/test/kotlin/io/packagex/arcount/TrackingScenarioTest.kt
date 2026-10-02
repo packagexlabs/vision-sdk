@@ -74,6 +74,19 @@ class TrackingScenarioTest {
         }
     }
 
+    @Test
+    fun atOneDecodePerFrameWithEachLumaCopyAFrameLateTheSlideCountsTenComplete() {
+        // A unit's first read lands in the band of a neighbour still without depth and starts AMBIGUOUS; once both
+        // have depth and are apart, its own read by gate rules it a separate unit, not a merge into the neighbour
+        for (noise in listOf(1.0, 15.0)) {
+            val run = stopAndRead(1, seed = 1, stop = "slide", back = false, noisePx = noise, tracking = true, lumaFramesLate = 2)
+            val result = run.core.view().closed.single()
+            assertTrue("$noise px: $result", truthKept(run))
+            assertEquals("$noise px", SectionStatus.COMPLETE, result.status)
+            assertEquals("$noise px", 10, result.counted)
+        }
+    }
+
     /** The full table, off and on; run with ARCOUNT_TABLE=1 (several minutes) */
     @Test
     fun stopAndReadTable() {
