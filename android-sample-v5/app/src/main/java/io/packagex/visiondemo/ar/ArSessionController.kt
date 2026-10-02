@@ -425,8 +425,10 @@ class ArSessionController @Inject constructor(
                 if (gen != generation) return@post
                 if (running) {
                     rebuild(gen, "error $error")
+                } else if (device != null) { // opened: the stream configuration failed, which some HALs report here
+                    Log.w(TAG, "camera error $error while configuring the capture session")
+                    nextStream(gen)
                 } else { // still opening: the scanner may not have let go yet
-                    device = null
                     retryOrFail(gen, retriesLeft)
                 }
             }
