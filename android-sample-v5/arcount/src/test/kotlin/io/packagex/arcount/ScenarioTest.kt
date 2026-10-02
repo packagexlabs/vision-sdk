@@ -3,6 +3,7 @@ package io.packagex.arcount
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 
 /** The whole core as the simulator's counter */
@@ -201,30 +202,61 @@ class ScenarioTest {
     }
 
     /**
-     * Stop-and-read (spec 5.5, phase B): 12 cm walks at 15 cm/s without decodes, 1.5 s still stops, the engine's
-     * measured budget of one code per frame, 15 px of ray noise. The spec's merge rule then folds distinct
-     * neighbours together (a miss, reported), but a count above the truth is never shown as a number.
+     * Stop-and-read (spec 5.5, phase B): 12 cm walks at 15 cm/s without decodes, then at each stop 1.5 s still
+     * ("still"), 1.5 s of ±5.5 mm sway ("sway") or a 5 cm slide at 5 cm/s ("slide"); [budget] codes decoded per
+     * engine frame (refresh 0 on the Memor's worker pool: 2–3; 1 is the worst case).
      */
-    @Test
-    fun stopAndReadWithOneDecodePerFrameNeverShowsMoreThanTheTruth() {
-        for (seed in 1..3) {
-            views.clear()
-            val (sim, core) = session(row(10, 0.06) + label(), noisePx = 15.0, seed = seed)
-            sim.readsPerFrame = 1
-            sim.go(Paths.hold(home, 5.5))
-            var x = 0.0
-            for (next in listOf(0.12, 0.24, 0.36, 0.48, 0.60)) {
-                sim.readsEnabled = false
-                sim.go(Paths.move(Vec3(x, 0.0, 0.0), Vec3(next, 0.0, 0.0), 0.15))
-                sim.readsEnabled = true
-                sim.go(Paths.hold(cameraAt(next), 1.5))
-                x = next
+    private fun stopAndRead(budget: Int, seed: Int, stop: String = "still", back: Boolean = false, noisePx: Double = 15.0): CountingCore {
+        views.clear()
+        val (sim, core) = session(row(10, 0.06) + label(), noisePx = noisePx, seed = seed)
+        sim.readsPerFrame = budget
+        sim.go(Paths.hold(home, 5.5))
+        var x = 0.0
+        val out = listOf(0.12, 0.24, 0.36, 0.48, 0.60)
+        for (next in if (back) out + listOf(0.48, 0.36, 0.24, 0.12, 0.0) else out) {
+            sim.readsEnabled = false
+            sim.go(Paths.move(Vec3(x, 0.0, 0.0), Vec3(next, 0.0, 0.0), 0.15))
+            sim.readsEnabled = true
+            x = next
+            when (stop) {
+                "still" -> sim.go(Paths.hold(cameraAt(x), 1.5))
+                "sway" -> sim.go(Paths.sway(Vec3(x, 0.0, 0.0), 0.0055, 1.0, 1.5))
+                else -> {
+                    sim.go(Paths.move(Vec3(x, 0.0, 0.0), Vec3(x + 0.05, 0.0, 0.0), 0.05))
+                    x += 0.05
+                }
             }
-            sim.command(Command.Finish)
-            val result = core.view().closed.single()
-            neverMoreThan(10, core)
-            assertTrue(result.status != SectionStatus.COMPLETE || result.counted == 10)
         }
+        sim.command(Command.Finish)
+        return core
+    }
+
+    /** No definite count above the truth at any time, and every section not abandoned holds the truth in its range */
+    private fun truthKept(core: CountingCore) {
+        neverMoreThan(10, core)
+        for (r in core.view().closed.filter { it.status != SectionStatus.ABANDONED }) {
+            assertTrue("${r.countLow}..${r.countHigh}", r.countLow <= 10 && r.countHigh >= 10)
+        }
+    }
+
+    @Test
+    fun stopAndReadAtOneTwoOrThreeDecodesPerFrameNeverShowsMoreThanTheTruthAndKeepsItInTheRange() {
+        for (budget in 1..3) for (seed in 1..3) truthKept(stopAndRead(budget, seed))
+    }
+
+    /**
+     * Fix round 1, 3 of 240 simulated runs (report §5), not tuned away by ruling: there-and-back at 15 px.
+     * Slide, budget 2: the 0.40 m plane prior misses by one pitch after 24 cm, a neighbour's read falls in the
+     * gate, the mixed rays triangulate at ~0.40 m, and "both read in one frame" counts a duplicate: 11 COUNTED.
+     * Sway, budget 3: gate (a) takes a 5-ray depth of 0.165 m for a unit at 0.30 m, the section leaves view
+     * (LEFT_SECTION), the resume fails, and the restarted section closes COMPLETE 4.
+     */
+    @Ignore("known failure, sdd/p3-core-report.md §5 (fix round 1)")
+    @Test
+    fun thereAndBackStopAndReadAtFifteenPixelsKeepsTheTruthInTheRange() {
+        truthKept(stopAndRead(2, 3, stop = "slide", back = true))
+        truthKept(stopAndRead(2, 4, stop = "slide", back = true))
+        truthKept(stopAndRead(3, 1, stop = "sway", back = true))
     }
 
     @Test
