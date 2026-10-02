@@ -1,0 +1,303 @@
+{
+ "status": 201,
+ "message": "Shipping Label Inference processed and extracted successfully, but there was a post processing error.",
+ "errors": [],
+ "code": null,
+ "pagination": null,
+ "search": null,
+ "data": {
+  "object": "shipping_label_inference",
+  "metadata": {},
+  "recipient": {
+   "contact_id": null,
+   "name": "Ada Lovelace",
+   "business": "Ada Lovelace",
+   "email": null,
+   "phone": null,
+   "address": {
+    "id": null,
+    "uuid": "TEST_uuid",
+    "object": "address",
+    "line1": "100 main st",
+    "line2": null,
+    "city": "springfield",
+    "state": "California",
+    "state_code": "CA",
+    "postal_code": "00000",
+    "country": "United States",
+    "country_code": "US",
+    "formatted_address": "100 main st, springfield, CA, 00000, United States",
+    "textarea": "100 main st, springfield, CA, 00000, United States",
+    "coordinates": null,
+    "timezone": null,
+    "verified": false,
+    "usps_cass": null,
+    "usps_cass_checked": false,
+    "hash": "TEST_hash",
+    "duplicate_id": null,
+    "updated_by": null,
+    "created_at": null,
+    "updated_at": null,
+    "deleted_at": null
+   },
+   "notes": null,
+   "groups": [],
+   "extracted_name": "Ada Lovelace",
+   "searched_name": "Ada Lovelace",
+   "extracted_business": "Ada Lovelace",
+   "searched_business": "Ada Lovelace",
+   "matching_decision": {
+    "error": "no_matches",
+    "reason": "No candidate contacts were found for the searched name.",
+    "matches": "none",
+    "best_score": "N/A",
+    "matched_by": [],
+    "unmatched_by": [],
+    "single_token_search": false
+   }
+  },
+  "sender": {
+   "contact_id": null,
+   "name": "Grace Hopper",
+   "business": "Grace Hopper",
+   "email": null,
+   "phone": null,
+   "address": {
+    "id": null,
+    "uuid": "TEST_uuid",
+    "object": "address",
+    "line1": "200 oak ave",
+    "line2": null,
+    "city": "riverton",
+    "state": "Virginia",
+    "state_code": "VA",
+    "postal_code": "00000",
+    "country": "United States",
+    "country_code": "US",
+    "formatted_address": "200 oak ave, riverton, VA, 00000, United States",
+    "textarea": "200 oak ave, riverton, VA, 00000, United States",
+    "coordinates": null,
+    "timezone": null,
+    "verified": false,
+    "usps_cass": null,
+    "usps_cass_checked": false,
+    "hash": "TEST_hash",
+    "duplicate_id": null,
+    "updated_by": null,
+    "created_at": null,
+    "updated_at": null,
+    "deleted_at": null
+   },
+   "notes": null,
+   "groups": [],
+   "extracted_name": "Grace Hopper",
+   "searched_name": null,
+   "extracted_business": "Grace Hopper",
+   "searched_business": null,
+   "matching_decision": null
+  },
+  "rma_number": null,
+  "purchase_order": null,
+  "reference_number": null,
+  "invoice_number": null,
+  "tracking_number": "9402037903201896224902",
+  "order_number": null,
+  "barcode_values": [
+   "9402037903201896224902",
+   "420926609402037903201896224902"
+  ],
+  "created_at": 1790925367,
+  "updated_at": 1790925371,
+  "id": "TEST_id",
+  "image_url": "https://example.com/image.jpg",
+  "media_urls": [
+   "https://example.com/image.jpg"
+  ],
+  "images": null,
+  "timings": {
+   "stages": [
+    {
+     "index": 0,
+     "stage": "prepare",
+     "time_ms": 212
+    },
+    {
+     "index": 1,
+     "stage": "upload",
+     "time_ms": 292
+    },
+    {
+     "index": 2,
+     "stage": "ocr",
+     "time_ms": 193
+    },
+    {
+     "index": 3,
+     "stage": "extract",
+     "time_ms": 2817
+    },
+    {
+     "index": 4,
+     "stage": "select",
+     "time_ms": 0
+    },
+    {
+     "index": 5,
+     "stage": "provider_lookup",
+     "time_ms": 14
+    },
+    {
+     "index": 6,
+     "stage": "match",
+     "time_ms": 23
+    }
+   ],
+   "stage_ms": 3366,
+   "total_ms": 4104,
+   "total_stages": 7
+  },
+  "location_id": null,
+  "destination_location": null,
+  "organization_id": "org_TEST",
+  "raw_text": "(raw text removed)",
+  "layout": null,
+  "extracted_recipient_name": "Ada Lovelace",
+  "extracted_sender_name": "Grace Hopper",
+  "provider_name": "USPS",
+  "provider_id": "usps",
+  "service_level_name": "Ground Advantage",
+  "service_level_id": "ground",
+  "notes": null,
+  "account_id": null,
+  "weight": null,
+  "provider": {
+   "id": "usps",
+   "name": "USPS",
+   "service_level": {
+    "id": "ground",
+    "name": "Ground Advantage"
+   },
+   "provider_service_level": {
+    "id": "ground_advantage"
+   },
+   "tracking_number": "9402037903201896224902",
+   "tracking_number_barcode": null
+  },
+  "providers": [
+   {
+    "name": "USPS",
+    "id": "usps",
+    "service_level": {
+     "id": "ground",
+     "name": "Ground Advantage"
+    },
+    "provider_service_level": {
+     "id": "ground_advantage"
+    },
+    "tracking_number": "9402037903201896224902",
+    "tracking_number_barcode": "420926609402037903201896224902"
+   }
+  ],
+  "dimensions": {
+   "length": null,
+   "width": null,
+   "height": null
+  },
+  "matches": {
+   "senders": [],
+   "recipients": []
+  },
+  "status": "error",
+  "errors": [
+   "no_matches",
+   "missing_location"
+  ],
+  "exceptions": {
+   "unknown_contact": false,
+   "addressed_generically": false,
+   "damaged_label": false,
+   "arrived_opened": false,
+   "suspicious": false,
+   "missing_label": false,
+   "missing_parent_shipment": false,
+   "multiple_shipments": false
+  },
+  "error_details": {
+   "missing_inference_values": [],
+   "missing_match_values": [],
+   "match_errors": [
+    "recipient"
+   ]
+  },
+  "tracker_id": null,
+  "transform": {
+   "tracker": null,
+   "id": null
+  },
+  "hash": "TEST_hash",
+  "barcode_list": [
+   "9402037903201896224902",
+   "420926609402037903201896224902"
+  ],
+  "additional_attributes": null,
+  "options": {
+   "images": {
+    "classification": "from_extraction_only",
+    "on_ambiguity": "use_best",
+    "barcodes_from_all": false
+   },
+   "postprocess": {
+    "parse_addresses": [],
+    "required_properties": [],
+    "require_unique_hash": false,
+    "extraction_status": "completed",
+    "provider_selection": "use_last"
+   },
+   "match": {
+    "search": [
+     "recipient"
+    ],
+    "search_score_threshold": 0.8,
+    "search_fuzziness": 0,
+    "use_combined_score": false,
+    "use_best_match": true,
+    "use_legacy_search": false,
+    "location": true,
+    "required_properties": [],
+    "throw_recipient_match_error": true,
+    "throw_sender_match_error": true,
+    "name_ignore_terms": [],
+    "group_ignore_terms": [],
+    "order_by": "_precedence",
+    "multi_hop_order": "by_score"
+   },
+   "tracker": {
+    "create_automatically": false,
+    "create_synchronously": false,
+    "status": "pickup_available",
+    "type": "outbound",
+    "parcel": "always_create",
+    "use_existing_tracking_number": false,
+    "chained_status": "package_at_waypoint",
+    "auto_close_shipments_option": "on_provider_updates",
+    "auto_close_shipments_status": "delivered",
+    "auto_close_shipments_exception_status": "canceled",
+    "create_destination_shipment": false,
+    "destination_shipment_location_id": null
+   },
+   "transform": {
+    "tracker": "outbound",
+    "use_existing_tracking_number": false
+   }
+  },
+  "checksum": "TEST_checksum",
+  "updated_by": "key_TEST",
+  "created_by": "key_TEST",
+  "tags": [],
+  "child_shipments": [],
+  "tracker": null,
+  "logs": [],
+  "_searchV2": null
+ },
+ "endpoint": null
+}

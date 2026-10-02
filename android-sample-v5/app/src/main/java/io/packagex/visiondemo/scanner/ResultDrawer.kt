@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import io.packagex.texttemplates.sdk.PXTemplateInfo
+import io.packagex.visiondemo.data.DocumentFields
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.JsonFields
 import io.packagex.visiondemo.data.OcrParser
@@ -339,7 +340,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
     is ScanResult.Ocr -> {
         val documentClass = OcrParser.documentClass(result.result.rawJson)
         if (documentClass != null) {
-            documentClass
+            DocumentFields.documentClass(documentClass)
         } else {
             val fields = result.result.fields.joinToString("\n") { f -> "${f.section?.let { "$it · " }.orEmpty()}${f.label}: ${f.value}" }
             val tables = result.result.tables.joinToString("\n") { t ->
@@ -528,7 +529,7 @@ private fun OcrContent(
     val o = scan.result
     val documentClass = remember(o.rawJson) { OcrParser.documentClass(o.rawJson) }
     if (documentClass != null) {
-        DocumentClassCard(documentClass)
+        DocumentClassCard(DocumentFields.documentClass(documentClass))
         return
     }
 

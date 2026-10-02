@@ -1,0 +1,28 @@
+{
+ "status": 201,
+ "message": "Document Classification Inference created successfully",
+ "errors": [],
+ "code": null,
+ "pagination": null,
+ "search": null,
+ "data": {
+  "object": "document_classification_inference",
+  "id": "TEST_id",
+  "organization_id": "org_TEST",
+  "location_id": null,
+  "status": "inferred",
+  "image_url": "https://example.com/image.jpg",
+  "raw_text": "(raw text removed)",
+  "inference": {
+   "document_class": "shipping_label"
+  },
+  "metadata": {},
+  "created_at": 1790925367,
+  "created_by": "key_TEST",
+  "updated_at": 1790925368,
+  "updated_by": "key_TEST",
+  "checksum": "TEST_checksum",
+  "_search": null
+ },
+ "endpoint": null
+}
