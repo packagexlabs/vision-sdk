@@ -211,7 +211,9 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         val matchedIds = matches.values.map { it.id }.toSet()
         val free = all.filter { it.id !in matchedIds }
         val inBand = reads1.indices.any { it !in matches && bandOf(reads1[it], record, free) != null }
-        val counted = free.filter { it.state == COUNTED }
+        // ruling R7: only a COUNTED unit confident enough to take a read by gate rules out a resume by its band
+        val k = record.intrinsics
+        val counted = free.filter { u -> u.state == COUNTED && predict(u, record)?.let { it.sigmaPx <= config.gateMaxSigmaFraction * pitchPx(k.fx, it.z) } == true }
         val inCountedBand = reads1.indices.any { it !in matches && bandOf(reads1[it], record, counted) != null }
         return ResumeCheck(matches.values.filter { it.state == COUNTED }.map { it.id }.toSet(), inBand, codeConflict(record, reads), inCountedBand)
     }

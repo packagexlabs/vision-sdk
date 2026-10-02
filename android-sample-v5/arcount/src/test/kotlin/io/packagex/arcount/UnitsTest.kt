@@ -1,6 +1,7 @@
 package io.packagex.arcount
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -286,5 +287,22 @@ class UnitsTest {
         assertEquals(0.06, t.pitch, 0.0)
         t.see(1, 0.0, *row)
         assertEquals(0.08, t.pitch, 1e-9)
+    }
+
+    // ruling R7: only a COUNTED unit whose prediction could take a read by gate rules out a resume by its band
+    @Test
+    fun aReadNearACountedUnitWithAnUncertainPredictionDoesNotRuleOutAResume() {
+        val t = table()
+        t.see(0, 0.0, unit(0.0))
+        t.see(1, 0.0, unit(0.0))
+        val u = t.units.single()
+        assertEquals(UnitState.COUNTED, u.state)
+        u.sigmaZ = 1.0
+        val r = record(2 * FRAME_NS, 0.10)
+        val p = t.predict(u, r)!!
+        assertTrue(p.sigmaPx > CountConfig().gateMaxSigmaFraction * t.pitchPx(r.intrinsics.fx, p.z))
+        val check = t.check(r, shoot(r.camera, listOf(unit(0.10, id = 2)), r.timestampNs))
+        assertTrue(check.inBand)
+        assertFalse(check.inCountedBand)
     }
 }
