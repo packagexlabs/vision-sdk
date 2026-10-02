@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 
 /**
- * What the scanner ViewModel and [ArSurface] need from AR Count; [ArSessionController] is the real one, tests use a
- * fake. All calls are made on the main thread. [pause]/[resume] are idempotent and remembered across [attach], so the
+ * What the scanner ViewModel and [ArSurface] need from the AR session of AR Item Count; [ArSessionController] is the
+ * real one, tests use a fake. All calls are made on the main thread. [pause]/[resume] are idempotent and remembered across [attach], so the
  * ViewModel can pause before the view exists.
  */
 interface ArCount {
@@ -23,13 +23,20 @@ interface ArCount {
     /** Where the GL thread drew the bracket and the gaps on its last frame, in view pixels. */
     val screen: StateFlow<ArScreen>
 
+    /** AR Item Count: the distinct codes read within the last second, at most every 250 ms; empty while no session runs. */
+    val codesInView: StateFlow<List<String>>
+
+    /** AR Item Count: every distinct code read in this session, the most recently first read first, at most 30;
+     *  [reset] clears it. */
+    val seen: StateFlow<List<String>>
+
     /** Messages to toast (the session or its camera could not start). */
     val errors: Flow<String>
 
-    /** Why AR Count can't run here (no session can be made, no app stream configures): say so and leave the mode (spec 6). */
+    /** Why AR Item Count can't run here (no session can be made, no app stream configures): say so and leave the mode (spec 6). */
     val exits: Flow<String>
 
-    /** Settings › Advanced › "AR Count traces": the session writes a [SessionRecorder] trace while true. */
+    /** Settings › Advanced › "AR traces": the session writes a [SessionRecorder] trace while true. */
     var tracing: Boolean
 
     /** ARCore is installed and supported. False can also mean "not known yet": then ask for the install. */
@@ -53,6 +60,9 @@ interface ArCount {
 
     /** "New Scan": a new counter on the running session; the closed sections go with the old one. */
     fun reset()
+
+    /** AR Item Count's list (spec 5.10): the codes counted, by this session's counter and by every later one. */
+    fun setItems(codes: Set<String>)
 }
 
 /** Default for ViewModels built without AR (tests, previews). */
@@ -60,6 +70,8 @@ object NoArCount : ArCount {
     override val count: StateFlow<CountView> = MutableStateFlow(CountView.EMPTY)
     override val stream: StateFlow<AppStream?> = MutableStateFlow(null)
     override val screen: StateFlow<ArScreen> = MutableStateFlow(ArScreen.NONE)
+    override val codesInView: StateFlow<List<String>> = MutableStateFlow(emptyList())
+    override val seen: StateFlow<List<String>> = MutableStateFlow(emptyList())
     override val errors: Flow<String> = emptyFlow()
     override val exits: Flow<String> = emptyFlow()
     override var tracing = false
@@ -70,6 +82,7 @@ object NoArCount : ArCount {
     override fun resume() {}
     override fun command(command: Command) {}
     override fun reset() {}
+    override fun setItems(codes: Set<String>) {}
 }
 
 /** Where the GL thread drew the section's bracket (null: none, or not in the image) and the gap markers on its last

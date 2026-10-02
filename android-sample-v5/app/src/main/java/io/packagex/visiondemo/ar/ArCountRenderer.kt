@@ -164,8 +164,11 @@ class ArCountRenderer(
     private fun draw(frame: Frame, view: CountView) {
         val g = geometry ?: return
         val bracket = view.bracket?.takeIf { it.inImage }
-        // Per marker its centre and a point sizeU to its right (its size on screen), then the gaps, then the bracket
-        val n = view.markers.size * 2 + view.gaps.size + (if (bracket != null) 1 else 0)
+        // AR Item Count: a neutral ring on each code read lately that is not listed (spec 5.10)
+        val unlisted = unlistedReads(mapper.recentReads(), mapper.items, lastTimestampNs)
+        // Per marker its centre and a point sizeU to its right (its size on screen), then the unlisted reads' centres,
+        // then the gaps, then the bracket
+        val n = view.markers.size * 2 + unlisted.size + view.gaps.size + (if (bracket != null) 1 else 0)
         if (n == 0) {
             publish(ArScreen.NONE)
             return
@@ -177,6 +180,7 @@ class ArCountRenderer(
             image[i++] = g.cpuV(v).toFloat()
         }
         view.markers.forEach { put(it.u, it.v); put(it.u + it.sizeU, it.v) }
+        unlisted.forEach { put(it.centreU / g.streamWidth, it.centreV / g.streamHeight) }
         view.gaps.forEach { put(it.u, it.v) }
         bracket?.let { put(it.u, it.v) }
         val onView = FloatArray(n * 2)
@@ -191,6 +195,10 @@ class ArCountRenderer(
             k += 4
             val r = (sizePx * 0.25f).coerceIn(dp(5f), dp(16f))
             out += ScreenMarker(x, y, r, colorOf(m.state), r + dp(3f), WHITE)
+        }
+        repeat(unlisted.size) {
+            out += ScreenMarker(onView[k], onView[k + 1], 0f, null, dp(10f), WHITE)
+            k += 2
         }
         val gaps = ArrayList<ScreenGap>(view.gaps.size)
         for (gap in view.gaps) {
