@@ -85,6 +85,7 @@ import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.PXButton
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.designsystem.RecomposeLog
+import io.packagex.visiondemo.designsystem.ShimmerRows
 import io.packagex.visiondemo.designsystem.inter
 import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
@@ -114,6 +115,8 @@ fun ResultDrawer(
     itemCount: Int = 0,
     /** Text Templates: the templates loaded into the pool, for "Re-predict as…" (iOS `model.tt`). */
     ttLoaded: List<PXTemplateInfo> = emptyList(),
+    /** [ScanResult.Pending]: its extraction is still running (shimmer), not failed. */
+    loading: Boolean = false,
     onAction: (ScannerAction) -> Unit,
 ) {
     RecomposeLog("ResultDrawer")
@@ -154,6 +157,11 @@ fun ResultDrawer(
                     Image(bitmap = img.asImageBitmap(), contentDescription = "Captured label", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
                 }
             }
+            (result as? ScanResult.Pending)?.image?.let { img ->
+                ResultImage {
+                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                }
+            }
 
             Column(
                 modifier = Modifier
@@ -164,6 +172,7 @@ fun ResultDrawer(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 when (result) {
+                    is ScanResult.Pending -> if (loading) ShimmerRows() else EmptyNote("Nothing was read from this photo.")
                     is ScanResult.Codes -> CodesContent(result.codes, onAction)
                     is ScanResult.Ocr -> OcrContent(
                         scan = result,
@@ -201,7 +210,7 @@ fun ResultDrawer(
                 }
             }
 
-            DrawerFooter(result = result, tags = tags, docEnhanced = docEnhanced, edits = ttEdits, onAction = onAction)
+            if (result is ScanResult.Pending) PendingFooter(onAction) else DrawerFooter(result = result, tags = tags, docEnhanced = docEnhanced, edits = ttEdits, onAction = onAction)
         }
 
         if (reportOpen && result is ScanResult.Ocr) {
@@ -301,6 +310,17 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: 
     }
 }
 
+/** While the photo is being read: Cancel stops the extraction and closes (as Close does). */
+@Composable
+private fun PendingFooter(onAction: (ScannerAction) -> Unit) {
+    Column {
+        HorizontalDivider(color = PX.Hairline)
+        Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 10.dp, bottom = 20.dp)) {
+            PXButton(title = "Cancel", kind = PXButtonKind.Secondary) { onAction(ScannerAction.CloseResult) }
+        }
+    }
+}
+
 private fun canReport(result: ScanResult): Boolean =
     (result is ScanResult.Ocr && result.result.docType.reportSupported) || (result is ScanResult.TextTemplate && result.prediction.scanId != null)
 
@@ -318,6 +338,7 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
         }
     }
     is ScanResult.Ocr -> Triple(result.title, result.subtitle, true)
+    is ScanResult.Pending -> Triple(result.title, result.subtitle, false)
     ScanResult.Price -> Triple("Found ${tags.size} Items", "${tags.count { !it.valid }} invalid", true)
     is ScanResult.Retrieval -> {
         val n = result.rows.count { it.inList }
@@ -352,6 +373,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
     is ScanResult.Retrieval -> result.rows.joinToString("\n") { r ->
         listOfNotNull(r.code, if (r.inList) "In list" else "Not in list", r.countText()).joinToString("\t")
     }
+    is ScanResult.Pending -> ""
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
     is ScanResult.TextTemplate -> result.fields.toSortedMap().entries.joinToString("\n") { (k, f) -> "$k: ${edits[k] ?: f.text}" }
 }

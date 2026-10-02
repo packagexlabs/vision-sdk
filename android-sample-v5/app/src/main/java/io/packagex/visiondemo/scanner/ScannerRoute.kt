@@ -198,7 +198,7 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                     ArCountOverlay(onTouch = { viewModel.onAction(ScannerAction.UserActive) })
                 }
             },
-            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.tt.loaded, viewModel::onAction) } },
+            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.tt.loaded, state.phase == Phase.Processing, viewModel::onAction) } },
             sheets = { SheetHost(state, viewModel::onAction) },
             onAction = viewModel::onAction,
         )

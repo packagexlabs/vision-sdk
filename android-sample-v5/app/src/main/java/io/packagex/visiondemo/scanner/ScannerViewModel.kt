@@ -24,6 +24,7 @@ import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.data.TextTemplates
 import io.packagex.visiondemo.data.NoTextTemplates
 import io.packagex.visiondemo.data.TtPath
+import io.packagex.visiondemo.data.VlmPrompts
 import io.packagex.texttemplates.sdk.PXErrorCode
 import io.packagex.texttemplates.sdk.PXException
 import io.packagex.texttemplates.sdk.PXScanEvent
@@ -182,7 +183,10 @@ class ScannerViewModel @Inject constructor(
     fun onAction(a: ScannerAction) {
         camera.userActive()
         // An alert button: dismiss the alert, then run its action (iOS: every AlertAction sets alert = nil first).
-        if (a != ScannerAction.DismissAlert && s.alert?.actions?.any { it.action == a } == true) _state.update { it.copy(alert = null) }
+        if (a != ScannerAction.DismissAlert && s.alert?.actions?.any { it.action == a } == true) {
+            _state.update { it.copy(alert = null) }
+            if (s.result is ScanResult.Pending) closeResult()   // the failed capture's screen goes with its alert
+        }
         when (a) {
             is ScannerAction.SetMode -> setMode(a.m)
             ScannerAction.GoHome -> goHome()
@@ -206,7 +210,7 @@ class ScannerViewModel @Inject constructor(
             ScannerAction.DismissAlert -> {
                 retry = null
                 _state.update { it.copy(alert = null) }
-                if (usesScanner) camera.rescan()
+                if (s.result is ScanResult.Pending) closeResult() else if (usesScanner) camera.rescan()
             }
             is ScannerAction.PermissionResult -> {
                 _state.update { it.copy(permissionDenied = !a.granted) }
@@ -601,12 +605,13 @@ class ScannerViewModel @Inject constructor(
         val gen = modeGeneration
         val p = s.prefs
         val retryThis = { runOcr(bitmap, codes) }
-        _state.update { it.copy(phase = Phase.Processing) }
+        val title = if (p.wildCard) "Wild card" else VlmPrompts.spec(p.docType)?.title ?: p.docType.label
+        openPending(bitmap, title, "Extracting · ${if (cloudSelected(p)) "Cloud" else "On-device"}")
         viewModelScope.launch {
             val outcome = runOcrExtraction(extraction, bitmap, codes, p)
             if (gen != modeGeneration) return@launch   // user switched mode or cancelled while this was in flight
             when (outcome) {
-                is OcrOutcome.Done -> show(outcome.result)
+                is OcrOutcome.Done -> finish(outcome.result)
                 is OcrOutcome.Failed -> fail(outcome.title, outcome.message, retryThis, outcome.extra)
             }
         }
@@ -635,12 +640,12 @@ class ScannerViewModel @Inject constructor(
     /** One-Shot: the SDK camera's still, predicted against the loaded pool (iOS `predictTemplate`). */
     private fun predictTemplate(bitmap: Bitmap) {
         val gen = modeGeneration
-        _state.update { it.copy(phase = Phase.Processing) }
+        openPending(bitmap, "Text Templates", "Predicting…")
         viewModelScope.launch {
             try {
                 val r = tt.predict(bitmap)
                 if (gen != modeGeneration) return@launch
-                show(ScanResult.TextTemplate(r, bitmap, TtPath.OneShot))
+                finish(ScanResult.TextTemplate(r, bitmap, TtPath.OneShot))
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -740,6 +745,19 @@ class ScannerViewModel @Inject constructor(
         }
     }
 
+    /** The result screen opens on the photo just taken, loading until [finish] or [fail]. */
+    private fun openPending(image: Bitmap, title: String, subtitle: String) {
+        _state.update { it.copy(phase = Phase.Processing, result = ScanResult.Pending(image, title, subtitle)) }
+        if (usesScanner) camera.pauseDetection()   // nothing to detect under the result screen
+    }
+
+    /** The extraction's result replaces the loading screen at once (no success flash: the camera is covered). */
+    private fun finish(r: ScanResult) {
+        _state.update { it.copy(phase = Phase.Idle) }
+        haptic()
+        present(r)
+    }
+
     private fun present(r: ScanResult) {
         _state.update { it.copy(result = r, lastResult = it.mode to r, feedback = null) }
         if (usesScanner) camera.pauseDetection()   // nothing to detect under the drawer
@@ -759,6 +777,7 @@ class ScannerViewModel @Inject constructor(
     }
 
     private fun closeResult() {
+        if (s.result is ScanResult.Pending && s.phase == Phase.Processing) return cancelProcessing()
         if (pendingShow != null) {
             pendingShow?.cancel(); pendingShow = null
             _state.update { it.copy(feedback = null) }
@@ -771,12 +790,13 @@ class ScannerViewModel @Inject constructor(
         syncAr()   // AR resumes without a reset: markers and counts are kept (iOS :504)
     }
 
-    /** Abandons a slow request (VLM can take up to 90 s): its late result is dropped via the generation. */
+    /** Abandons a slow request (VLM can take up to 90 s): its late result is dropped via the generation, and its
+     *  loading result screen closes. */
     private fun cancelProcessing() {
         if (s.phase == Phase.Idle) return
         modeGeneration++
         _state.update { it.copy(phase = Phase.Idle) }
-        if (usesScanner) camera.rescan()
+        if (s.result is ScanResult.Pending) closeResult() else if (usesScanner) camera.rescan()
         toast("Cancelled")
     }
 
