@@ -46,6 +46,30 @@ class MachineCounter(val m: SectionMachine) : Counter {
     override fun anchorCreated(ok: Boolean) = m.onAnchorCreated(ok)
 }
 
+/** The whole core, each frame's reads handed over only after the next pose record: a decode that finished late (spec 3) */
+class LateCounter(val core: CountingCore) : Counter {
+    private val pending = ArrayList<Pair<Long, List<Read>>>()
+
+    override fun resume(ts: Long) = core.onResume(ts)
+
+    override fun frame(r: PoseRecord) {
+        core.onFrame(r)
+        val due = pending.filter { it.first < r.timestampNs }
+        pending.removeAll(due)
+        for ((ts, reads) in due) core.onReads(ts, reads)
+    }
+
+    override fun reads(ts: Long, reads: List<Read>) {
+        pending += ts to reads
+    }
+
+    override fun command(c: Command, ts: Long) = core.onCommand(c, ts)
+
+    override fun anchorRequest() = core.anchorRequest()
+
+    override fun anchorCreated(ok: Boolean) = core.onAnchorCreated(ok)
+}
+
 /**
  * A synthetic AR session: a camera path at 30 fps over a shelf of [symbols], ARCore's pose records (with the anchor
  * once the counter asks for one, created where it asks), and the engine's reads every [engineEvery] frames, made

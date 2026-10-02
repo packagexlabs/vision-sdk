@@ -51,6 +51,11 @@ class Section internal constructor(val id: String, val labelPayload: String?, gt
     internal var quietSinceNs = openedNs
     internal var lastSectionReadNs = openedNs
     internal var attempt: ResumeAttempt? = null
+
+    /** Capture times before which a late batch of reads changes nothing: the anchor's first pose, the last break, this segment's start */
+    internal var liveSinceNs = Long.MAX_VALUE
+    internal var frozenAtNs = Long.MIN_VALUE
+    internal var segmentStartNs = Long.MIN_VALUE
     internal val labelTrack = DepthTrack(maxRays)
 }
 
@@ -70,6 +75,10 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     var lastRecord: PoseRecord? = null
         private set
     val events: List<String> get() = log.toList()
+
+    /** Batches of reads dropped because they were captured before the section's state last changed (a break, the anchor, a resume) */
+    var staleBatches = 0
+        private set
 
     private val results = ArrayList<SectionResult>()
     private val log = ArrayDeque<String>()
@@ -214,6 +223,8 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         }
         s.table = UnitTable(config, frame)
         s.anchor = a
+        s.liveSinceNs = r.timestampNs
+        s.segmentStartNs = r.timestampNs
         note("${s.id}: anchor live")
     }
 
@@ -291,6 +302,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
 
     private fun openReads(s: Section, r: PoseRecord, reads: List<Read>) {
         val ts = r.timestampNs
+        if (stale(s, ts, if (s.table == null) s.openedNs else s.liveSinceNs)) return
         if (r.frameTracking != Tracking.TRACKING) return
         val labels = reads.filter { isLabel(it, r, s) }
         val units = reads.filterNot { it in labels }
@@ -323,6 +335,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     }
 
     private fun countingReads(s: Section, r: PoseRecord, reads: List<Read>) {
+        if (stale(s, r.timestampNs, s.segmentStartNs)) return
         if (r.frameTracking != Tracking.TRACKING || r.anchor == null || r.anchorTracking != Tracking.TRACKING) return
         val labels = reads.filter { isLabel(it, r, s) }
         nextLabel(s, labels, r)?.let {
@@ -332,11 +345,23 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         }
         if (s.labelled) labels.firstOrNull { it.text == s.labelPayload && !it.touchesBorder }?.let { refineLabel(s, it, r) }
         val out = s.table?.associate(r, reads.filterNot { it in labels }, s.segment) ?: return
-        if (out.accepted > 0) s.lastSectionReadNs = r.timestampNs
+        if (out.accepted > 0) s.lastSectionReadNs = max(s.lastSectionReadNs, r.timestampNs)
+    }
+
+    /**
+     * A batch captured before [since] (the anchor's first pose, the last break, or the start of this segment) was decoded
+     * from a pose the section no longer stands on: it is dropped and counted, so it can neither resume nor change a unit.
+     */
+    private fun stale(s: Section, captureNs: Long, since: Long): Boolean {
+        if (captureNs >= since) return false
+        staleBatches++
+        note("${s.id}: reads captured before the section's last change of state dropped")
+        return true
     }
 
     private fun frozenReads(s: Section, r: PoseRecord, reads: List<Read>) {
         val ts = r.timestampNs
+        if (stale(s, ts, s.frozenAtNs)) return
         if (guardHolds(ts) || r.frameTracking != Tracking.TRACKING || r.anchor == null || r.anchorTracking != Tracking.TRACKING) return
         val labels = reads.filter { isLabel(it, r, s) }
         nextLabel(s, labels, r)?.let {
@@ -365,6 +390,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         if (at.reread.size < config.resumeMinUnits) return
         s.attempt = null
         s.segment++
+        s.segmentStartNs = ts
         s.lastInSectionNs = ts
         s.quietSinceNs = ts
         s.lastSectionReadNs = ts
@@ -485,6 +511,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
 
     private fun freeze(s: Section, ts: Long, reason: BreakReason) {
         s.breakList += ts to reason
+        s.frozenAtNs = ts
         s.attempt = null
         state = FROZEN
         note("${s.id}: FROZEN, $reason")
