@@ -237,8 +237,31 @@ class UnitsTest {
         t.see(1, 0.0, unit(0.0))
         assertEquals(listOf(UnitState.MANUAL, UnitState.AMBIGUOUS), t.states())
         assertEquals(Counts(counted = 0, manual = 1, tentative = 0, ambiguous = 1), t.counts())
+        // taken back: the read stays AMBIGUOUS (review I2); with no other unit in band, its next read counts it (R2)
         assertTrue(t.removeLastManual())
-        assertEquals(listOf(UnitState.TENTATIVE), t.states())
+        assertEquals(listOf(UnitState.AMBIGUOUS), t.states())
+        t.see(2, 0.0, unit(0.0))
+        assertEquals(listOf(UnitState.COUNTED), t.states())
+    }
+
+    @Test
+    fun takingBackAUnitAddedByHandNeverLetsADuplicateOfACountedUnitCount() {
+        // the plane is still at the 0.40 m label prior, the shelf at 0.30 m
+        val t = table(planeDepth = 0.40)
+        t.see(0, 0.0, unit(0.0, id = 1))
+        t.see(1, 0.0, unit(0.0, id = 1))
+        val v = t.units.single()
+        assertEquals(UnitState.COUNTED, v.state)
+        // a tap on the bracket puts a unit by hand one pitch past it
+        t.addManual(v.point + t.frame.plane.shelfAxis * t.pitch, Vec3.ZERO, 2 * FRAME_NS)
+        // 12 cm to the left the same code is read again: too unsure for V's gate, in both bands, nearer the hand-added unit
+        t.see(40, -0.12, unit(0.0, id = 1))
+        assertEquals(UnitState.AMBIGUOUS, t.units.last().state)
+        // the worker takes the tap back, and the code is read again
+        assertTrue(t.removeLastManual())
+        t.see(41, -0.12, unit(0.0, id = 1))
+        assertEquals(1, t.counts().counted)
+        assertTrue(t.counts().high >= 2)
     }
 
     @Test
