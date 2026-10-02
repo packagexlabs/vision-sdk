@@ -447,7 +447,11 @@ class ScannerViewModel @Inject constructor(
             is ScanEvent.PriceTag -> {   // iOS codeScannerViewDidCapturePrice: collect unique tags; the shutter shows them
                 if (s.mode != ScanMode.Price) return
                 val tag = PriceTag.from(e.data.productSKU, e.data.productPrice)
-                if (s.tags.none { it.sku == tag.sku }) _state.update { it.copy(tags = it.tags + tag) }
+                if (s.tags.any { it.sku == tag.sku }) return
+                _state.update { it.copy(tags = it.tags + tag) }
+                // Auto capture: a new tag opens the list, as Auto opens a code's result; Manual keeps collecting for the shutter.
+                if (s.prefs.autoCapture && s.result == null && pendingShow == null && s.sheet == null && s.alert == null &&
+                    s.phase == Phase.Idle && !s.gated) show(ScanResult.Price)
             }
             is ScanEvent.Retrieved -> if (s.mode == ScanMode.Retrieval) sawInView(e.code.scannedCode)
             is ScanEvent.Failure -> onFailure(e.e)
