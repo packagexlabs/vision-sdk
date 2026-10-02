@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Who currently owns the camera sensor. Only [Scanner] leaves [VisionCameraView] running. */
-enum class CameraOwner { None, Scanner, Ar, Document }
+enum class CameraOwner { None, Scanner, Ar, Document, TextTemplates }
 
 /** Pure ownership rule, factored out so it's testable without a real [VisionCameraView]. */
 internal fun scannerMustStop(owner: CameraOwner) = owner != CameraOwner.Scanner

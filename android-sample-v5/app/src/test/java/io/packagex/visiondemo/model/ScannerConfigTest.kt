@@ -29,7 +29,7 @@ class ScannerConfigTest {
         assertTrue(c.needsEntitlement); assertNull(c.detection)
     }
     @Test fun priceTagSeventhFrame() = assertEquals(7, scannerConfig(ScanMode.Price, false, true).nthFrame)
-    @Test fun dialHasNoDimOrTextTemplates() =
-        assertEquals(listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "AR Item Count", "Document Acquisition"),
+    @Test fun modesHaveNoDimensioning() =
+        assertEquals(listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "AR Item Count", "Document Acquisition", "Text Templates"),
                      ScanMode.entries.map { it.label })
 }

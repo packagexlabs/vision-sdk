@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import io.packagex.arcount.CountView
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PriceTag
+import io.packagex.visiondemo.data.TtState
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.model.DetectedCode
 import io.packagex.visiondemo.model.DocType
@@ -79,6 +80,12 @@ data class ScannerUiState(
     val arCount: CountView = CountView.EMPTY,
     /** AR Item Count: past the entitlement gate with ARCore installed, so the AR session's view is shown and runs. */
     val arOn: Boolean = false,
+    /** Text Templates: account, templates and integration mode (iOS `model.tt`). */
+    val tt: TtState = TtState(),
+    /** Text Templates Stream: the session's latest guidance or failure, for the hint (iOS `guidance`). */
+    val ttGuidance: String? = null,
+    /** Text Templates Stream: the SDK camera has let go of the sensor, so `PXScannerView` may mount (iOS `altCameraReady`). */
+    val ttCameraReady: Boolean = false,
 )
 
 /** Single-code Barcode/QR results show over the camera as a code card (v6), not on the result screen. */

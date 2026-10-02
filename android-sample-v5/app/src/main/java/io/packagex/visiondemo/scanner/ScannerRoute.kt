@@ -62,6 +62,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 import io.packagex.visiondemo.ar.ArCountOverlay
+import io.packagex.texttemplates.sdk.PXScanConfiguration
+import io.packagex.texttemplates.sdk.PXScannerView
 import io.packagex.visiondemo.ar.ArSurface
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.RecomposeLog
@@ -199,6 +201,8 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                     if (state.mode == ScanMode.Retrieval) {
                         // AR Item Count: the AR session's view once past the gate and ARCore is installed (spec 5.10)
                         if (state.arOn && !state.permissionDenied) ArSurface(controller = viewModel.ar, paused = state.paused)
+                    } else if (state.mode == ScanMode.TextTemplates && state.tt.stream) {
+                        TtStreamSurface(state, viewModel)
                     } else if (cameraViewRaw != null) {
                         CameraSurface(view = cameraViewRaw, paused = state.paused)
                     } else {
@@ -217,7 +221,7 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                     ArCountOverlay(onTouch = { viewModel.onAction(ScannerAction.UserActive) })
                 }
             },
-            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, viewModel::onAction) } },
+            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.tt.loaded, viewModel::onAction) } },
             sheets = { SheetHost(state, viewModel::onAction) },
             onAction = viewModel::onAction,
         )
@@ -240,6 +244,32 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
         }
     }
 }
+
+/**
+ * Text Templates Stream (iOS `TTStreamLayer`): `PXScannerView` owns CameraX and the scan session over the loaded
+ * pool. Mounted only while it would scan -- once the SDK camera has let go ([ScannerUiState.ttCameraReady]), with
+ * templates loaded and nothing over the camera -- so every result, sheet or pause ends the session and closing it
+ * starts a fresh one; otherwise the camera stays dark.
+ */
+@Composable
+private fun TtStreamSurface(state: ScannerUiState, viewModel: ScannerViewModel) {
+    val client = viewModel.tt.client
+    val live = client != null && state.ttCameraReady && state.tt.loadedIds.isNotEmpty() && !state.permissionDenied &&
+        !state.paused && state.result == null && state.sheet == null && state.alert == null
+    if (live && client != null) {
+        PXScannerView(
+            client = client,
+            modifier = Modifier.fillMaxSize(),
+            configuration = TtStreamConfig,
+            onEvent = viewModel::onTtEvent,
+        )
+    } else {
+        Box(Modifier.fillMaxSize().background(PX.Ink))
+    }
+}
+
+/** The captured frame rides on each prediction, for the result image and Report (iOS `includeCapturedImage`). */
+private val TtStreamConfig = PXScanConfiguration(includeCapturedImage = true)
 
 /** A picked photo as a software bitmap (the extraction reads its pixels), upright per its EXIF,
  *  with the long edge capped at [MAX_PHOTO_EDGE] px (aspect kept) so a large photo can't exhaust memory. */

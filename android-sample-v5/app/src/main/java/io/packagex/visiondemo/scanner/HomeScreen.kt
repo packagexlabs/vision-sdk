@@ -25,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Inventory
@@ -56,7 +57,7 @@ import io.packagex.visiondemo.model.gated
 
 /**
  * v6 entry point: one card per module, each opening its own camera ([ScannerAction.SetMode]).
- * Ported from the VisionSDK Demo v6 design's Home screen. Dimensioning and Text Templates are not in this sample.
+ * Ported from the VisionSDK Demo v6 design's Home screen. Dimensioning is not in this sample.
  */
 @Composable
 fun HomeScreen(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
@@ -84,7 +85,7 @@ fun HomeScreen(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifie
 
 /** The design's two sections, in its order. */
 internal val HOME_CODES = listOf(ScanMode.Barcode, ScanMode.QR, ScanMode.Price, ScanMode.Retrieval)
-internal val HOME_DATA = listOf(ScanMode.Ocr, ScanMode.DocAcq)
+internal val HOME_DATA = listOf(ScanMode.Ocr, ScanMode.DocAcq, ScanMode.TextTemplates)
 
 @Composable
 private fun CardSection(title: String, modes: List<ScanMode>, state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
@@ -149,6 +150,7 @@ private fun cardIcon(mode: ScanMode): ImageVector = when (mode) {
     ScanMode.Retrieval -> Icons.Filled.Inventory
     ScanMode.Ocr -> Icons.Filled.DocumentScanner
     ScanMode.DocAcq -> Icons.Filled.Description
+    ScanMode.TextTemplates -> Icons.AutoMirrored.Filled.ListAlt
 }
 
 /** The design's card copy (v6 `DESC`). */
@@ -159,6 +161,7 @@ private fun cardDescription(mode: ScanMode): String = when (mode) {
     ScanMode.Retrieval -> "Find items from a pick list."
     ScanMode.Ocr -> "Labels, BOLs, IDs, plates, tires."
     ScanMode.DocAcq -> "Scan pages to a searchable PDF."
+    ScanMode.TextTemplates -> "Match text to a saved template."
 }
 
 @Preview(showBackground = true)

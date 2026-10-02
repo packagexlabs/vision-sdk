@@ -99,7 +99,7 @@ import io.packagex.visiondemo.model.zooms
 @Composable
 fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Chrome")
-    val usesScanner = ownerFor(state.mode) == CameraOwner.Scanner
+    val usesScanner = ownerFor(state.mode, state.tt.stream) == CameraOwner.Scanner
     Column(modifier = modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -380,7 +380,7 @@ private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit,
 
 @Composable
 private fun LastThumb(result: ScanResult, modifier: Modifier = Modifier) {
-    val image = (result as? ScanResult.Ocr)?.image ?: (result as? ScanResult.Document)?.pages?.lastOrNull()?.shown(enhanced = true)
+    val image = (result as? ScanResult.Ocr)?.image ?: (result as? ScanResult.TextTemplate)?.image ?: (result as? ScanResult.Document)?.pages?.lastOrNull()?.shown(enhanced = true)
     if (image != null) {
         Image(bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop, modifier = modifier)
     } else {
@@ -431,6 +431,11 @@ private fun chipFor(state: ScannerUiState): Triple<String, String, ScannerAction
             "· ${state.items.size} ${if (state.items.size == 1) "code" else "codes"}",
             ScannerAction.OpenSheet(SheetKind.Items),
         )
+        ScanMode.TextTemplates -> Triple(
+            "Templates",
+            "· ${if (state.tt.syncing) "syncing…" else if (state.tt.loadedIds.isEmpty()) "not loaded" else "${state.tt.loadedIds.size} loaded"}",
+            ScannerAction.OpenSheet(SheetKind.TextTemplates),
+        )
         else -> null
     }
 }
@@ -444,23 +449,32 @@ private fun bottomReserveDp(state: ScannerUiState): Dp {
 
 internal fun hintFor(state: ScannerUiState): String {
     if (state.gated) return "Authentication required"
-    if (!state.detectionEnabled && ownerFor(state.mode) == CameraOwner.Scanner) return "Detection paused"
+    if (!state.detectionEnabled && ownerFor(state.mode, state.tt.stream) == CameraOwner.Scanner) return "Detection paused"
     when (state.phase) {
         Phase.Scanning -> return "Capturing…"
         Phase.Processing -> return if (state.mode == ScanMode.DocAcq) {
             "Processing page…"
+        } else if (state.mode == ScanMode.TextTemplates) {
+            "Predicting…"
         } else {
             "Extracting · ${if (cloudSelected(state.prefs)) "Cloud" else "On-device"}"
         }
         Phase.Idle -> {}
     }
     val auto = state.prefs.autoCapture
-    val codeSeen = state.codeInFrame
+    // Text Templates reads the scanner's text/document indications (iOS codeSeen).
+    val codeSeen = if (state.mode == ScanMode.TextTemplates) state.seesDocument || state.seesText else state.codeInFrame
     var h = when (state.mode) {
         ScanMode.Ocr -> if (state.seesDocument) {
             if (auto) "Hold Still" else "Hold Still · tap to capture"
         } else {
             "Point camera to document"
+        }
+        ScanMode.TextTemplates -> when {
+            !state.tt.hasEmail -> "Set up your account to start"
+            state.tt.loadedIds.isEmpty() -> "Load templates to start"
+            state.tt.stream -> state.ttGuidance ?: "Point camera at a label"
+            else -> if (codeSeen) "Label detected · tap to predict" else "Point camera at a label"
         }
         ScanMode.DocAcq -> if (state.seesDocument) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"

@@ -1,0 +1,288 @@
+{
+ "status": 201,
+ "message": "Item Label Inference created successfully",
+ "errors": [],
+ "code": null,
+ "pagination": null,
+ "search": null,
+ "data": {
+  "object": "item_label_inference",
+  "id": "TEST_id",
+  "organization_id": "org_TEST",
+  "location_id": null,
+  "status": "inferred",
+  "image_url": "https://example.com/image.jpg",
+  "raw_text": "(raw text removed)",
+  "inference": {
+   "supplier": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": null,
+    "address": {
+     "id": null,
+     "uuid": null,
+     "object": "address",
+     "line1": null,
+     "line2": null,
+     "city": null,
+     "state": null,
+     "state_code": null,
+     "postal_code": null,
+     "country": null,
+     "country_code": null,
+     "formatted_address": null,
+     "textarea": null,
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": null,
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "sender": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": null,
+    "address": {
+     "id": null,
+     "uuid": null,
+     "object": "address",
+     "line1": null,
+     "line2": null,
+     "city": null,
+     "state": null,
+     "state_code": null,
+     "postal_code": null,
+     "country": null,
+     "country_code": null,
+     "formatted_address": null,
+     "textarea": null,
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": null,
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "transit": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": null,
+    "address": {
+     "id": null,
+     "uuid": null,
+     "object": "address",
+     "line1": null,
+     "line2": null,
+     "city": null,
+     "state": null,
+     "state_code": null,
+     "postal_code": null,
+     "country": null,
+     "country_code": null,
+     "formatted_address": null,
+     "textarea": null,
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": null,
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "recipient": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": "Ada Lovelace",
+    "address": {
+     "id": null,
+     "uuid": "TEST_uuid",
+     "object": "address",
+     "line1": "100 main st",
+     "line2": null,
+     "city": "springfield",
+     "state": null,
+     "state_code": null,
+     "postal_code": "00000",
+     "country": null,
+     "country_code": null,
+     "formatted_address": "100 main st, springfield, 00000",
+     "textarea": "100 main st, springfield, 00000",
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": "TEST_hash",
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "customer": {
+    "sku": null
+   },
+   "item": {
+    "sku": "B07887XCRX",
+    "name": null,
+    "numbers": null,
+    "quantity": 1,
+    "dimensions": {
+     "raw": null,
+     "length": {
+      "value": null,
+      "unit": null
+     },
+     "width": {
+      "value": null,
+      "unit": null
+     },
+     "height": {
+      "value": null,
+      "unit": null
+     }
+    },
+    "weight": {
+     "value": 47,
+     "unit": "lb"
+    },
+    "volume": {
+     "value": null,
+     "unit": null
+    },
+    "color": null,
+    "model": null,
+    "upc": null,
+    "gtin": null,
+    "version": null,
+    "season": null,
+    "mac_address": null
+   },
+   "package": {
+    "dimensions": {
+     "raw": null,
+     "length": {
+      "value": null,
+      "unit": null
+     },
+     "width": {
+      "value": null,
+      "unit": null
+     },
+     "height": {
+      "value": null,
+      "unit": null
+     }
+    },
+    "weight": {
+     "value": 47,
+     "unit": "lb"
+    },
+    "volume": {
+     "value": null,
+     "unit": null
+    }
+   },
+   "pallet": {
+    "id": null,
+    "number": null
+   },
+   "carton": {
+    "number": null
+   },
+   "lot": {
+    "number": null
+   },
+   "barcode_values": [
+    "TB7063"
+   ],
+   "purchase_orders": [
+    "174371087"
+   ],
+   "sales_orders": [
+    "174371087"
+   ],
+   "serial_numbers": null,
+   "origin": {
+    "country": null
+   },
+   "dates": {
+    "manufacturing": {
+     "year": 2019,
+     "month": 7,
+     "day": 11
+    },
+    "expiry": {
+     "year": null,
+     "month": null,
+     "day": null
+    }
+   },
+   "additional_attributes": [
+    {
+     "cartonId": "19-3993D-0048",
+     "customerName": "Sample Moving & Storage"
+    },
+    {
+     "itemSku": "B07887XCRX",
+     "customerAddress": "Sample Moving & Storage"
+    },
+    {
+     "Sku:": "B07887XCRX",
+     "Carrier": "STD",
+     "Deliver To": "Sample Moving & Storage",
+     "Project ID": "19-3993D-0048",
+     "Ship Dock:": "SHIP45",
+     "Consignment": "174371087",
+     "Load Sequence": "10",
+     "Service Level:": "NOR",
+     "Hazardous? (Y/N)": "N",
+     "Count of Containers:": "1"
+    }
+   ]
+  },
+  "metadata": {},
+  "created_at": 1790925367,
+  "created_by": "key_TEST",
+  "updated_at": 1790925375,
+  "updated_by": "key_TEST",
+  "checksum": "TEST_checksum",
+  "_search": null
+ },
+ "endpoint": null
+}

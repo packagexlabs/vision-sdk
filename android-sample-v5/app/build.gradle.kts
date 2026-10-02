@@ -21,6 +21,8 @@ android {
         buildConfigField("String", "VISION_ENV", secret("VISION_ENV").ifEmpty { "staging" }.toJavaStringLiteral())
         buildConfigField("String", "STAGING_API_KEY", secret("STAGING_API_KEY").toJavaStringLiteral())
         buildConfigField("String", "PRODUCTION_API_KEY", secret("PRODUCTION_API_KEY").toJavaStringLiteral())
+        // Text Templates (pxtexttemplates): sent as X-API-Key; empty omits the header (iOS MOBILE_API_KEY).
+        buildConfigField("String", "MOBILE_API_KEY", secret("MOBILE_API_KEY").toJavaStringLiteral())
         buildConfigField("String", "IL_FEEDBACK_URL", secret("IL_FEEDBACK_URL").ifEmpty { "https://lvlm-api-567462092481.us-east1.run.app" }.toJavaStringLiteral())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -103,6 +105,7 @@ dependencies {
     implementation(libs.profileinstaller); baselineProfile(project(":baselineprofile"))
     implementation(libs.coroutines.android); implementation(libs.datastore.preferences); implementation(libs.serialization.json)
     implementation(libs.vision.sdk); implementation(libs.barcode.scanner)
+    implementation(project(":pxtexttemplates"))
     implementation(libs.arcore); implementation(project(":arcount"))
     implementation(libs.camerax.core); implementation(libs.camerax.camera2); implementation(libs.camerax.lifecycle); implementation(libs.camerax.view)
     implementation(libs.litert); implementation(libs.litert.gpu); implementation(libs.litert.gpu.api); implementation(libs.mlkit.text)

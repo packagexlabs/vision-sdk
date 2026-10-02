@@ -17,7 +17,8 @@ enum class ScanMode(val label: String) {
     Price("Price tag"),
     // Counts the item list's codes on ARCore and the AR counting core (spec 2026-10-02-ar-session-counting-design 5.10)
     Retrieval("AR Item Count"),
-    DocAcq("Document Acquisition")
+    DocAcq("Document Acquisition"),
+    TextTemplates("Text Templates")
 }
 
 val ScanMode.isCode: Boolean
@@ -91,7 +92,11 @@ enum class Processing {
 }
 
 enum class SheetKind {
-    Settings, DocType, Items, Models
+    Settings, DocType, Items, Models,
+    /** Text Templates: account, templates, integration mode (iOS `.tt`). */
+    TextTemplates,
+    /** Text Templates account setup, shown first while no email is set (iOS `.ttSetup`). */
+    TtSetup
 }
 
 enum class Phase {

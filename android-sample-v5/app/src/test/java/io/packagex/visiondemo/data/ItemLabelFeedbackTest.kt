@@ -10,7 +10,7 @@ import org.junit.Test
 
 class ItemLabelFeedbackTest {
     @Test fun correctionIsFlagged() {
-        val r = OcrParser.parse("""{"data":{"inference":{"item_name":"Soap"}}}""", DocType.IL)
+        val r = OcrParser.parse("""{"data":{"inference":{"item":{"name":"Soap"}}}}""", DocType.IL)
         val f = r.fields.single()
         val p = ItemLabelFeedback.payload(r, mapOf(f.id to ItemLabelFeedback.Entry("Soap bar", thumbs = false)), nowSeconds = 1.0)
         val e = p["feedback_data"]!!.jsonArray.single().jsonObject

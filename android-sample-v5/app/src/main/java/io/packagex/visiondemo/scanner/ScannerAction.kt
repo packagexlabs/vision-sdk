@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.RectF
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.Prefs
+import io.packagex.visiondemo.data.TtPath
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ScanMode
@@ -97,6 +98,22 @@ sealed interface ScannerAction {
     // AR Item Count
     /** Outcome of [ScannerEffect.InstallArCore]. */
     data class ArInstallResult(val result: ArInstall) : ScannerAction
+
+    // Text Templates
+    /** Account email from the setup card or the Text Templates sheet; [fromSetup] closes the setup card. */
+    data class TtSetEmail(val email: String, val fromSetup: Boolean) : ScannerAction
+    /** "Sign out": clears the email and goes straight to the setup card, as on first use. */
+    data object TtSignOut : ScannerAction
+    data object TtSync : ScannerAction
+    /** "Load templates" (syncs first when nothing is cached), also the no-templates alert's action. */
+    data object TtLoad : ScannerAction
+    data object TtUnload : ScannerAction
+    data object TtClearScans : ScannerAction
+    data object TtClearTemplateCache : ScannerAction
+    /** One-Shot (the SDK scanner's still) or Stream (`PXScannerView`'s own camera). */
+    data class TtSetPath(val path: TtPath) : ScannerAction
+    /** Result screen "Re-predict as…": the retained scan against another loaded template. */
+    data class TtRepredict(val templateId: String) : ScannerAction
 }
 
 enum class ArInstall { Installed, Declined, Unsupported }

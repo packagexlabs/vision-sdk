@@ -28,7 +28,8 @@ fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): Scann
         showBoxes = showBoxesPref && multi,
         needsEntitlement = false
     )
-    ScanMode.Ocr -> ScannerConfig(
+    // Text Templates One-Shot captures a still like Vision Scanner (iOS sdkMode .ocr); Stream runs its own camera.
+    ScanMode.Ocr, ScanMode.TextTemplates -> ScannerConfig(
         detection = DetectionMode.OCR,
         multiple = false,
         nthFrame = 7,

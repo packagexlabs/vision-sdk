@@ -21,6 +21,12 @@ import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.data.ReportRepository
 import io.packagex.visiondemo.data.ScanError
 import io.packagex.visiondemo.data.Secrets
+import io.packagex.visiondemo.data.TextTemplates
+import io.packagex.visiondemo.data.NoTextTemplates
+import io.packagex.visiondemo.data.TtPath
+import io.packagex.texttemplates.sdk.PXErrorCode
+import io.packagex.texttemplates.sdk.PXException
+import io.packagex.texttemplates.sdk.PXScanEvent
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.document.DocumentCamera
 import io.packagex.visiondemo.document.NoDocumentCamera
@@ -73,8 +79,9 @@ class ScannerViewModel @Inject constructor(
     secrets: Secrets,
     internal val ar: ArCount = NoArCount,
     internal val document: DocumentCamera = NoDocumentCamera,
+    internal val tt: TextTemplates = NoTextTemplates,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(ScannerUiState(missingKey = if (secrets.isMissing) secrets.missingMessage else null))
+    private val _state = MutableStateFlow(ScannerUiState(missingKey = if (secrets.isMissing) secrets.missingMessage else null, tt = tt.state.value))
     val state: StateFlow<ScannerUiState> = _state.asStateFlow()
 
     private val _effects = Channel<ScannerEffect>(Channel.BUFFERED)
@@ -116,8 +123,13 @@ class ScannerViewModel @Inject constructor(
         override fun effect(e: ScannerEffect) { _effects.trySend(e) }
     })
 
+    /** The owner last handed the sensor ([configureCamera]), and the pending hand-off between the SDK camera
+     *  and Text Templates' `PXScannerView`. */
+    private var claimed = CameraOwner.None
+    private var handoff: Job? = null
+
     private val s get() = _state.value
-    private val usesScanner get() = ownerFor(s.mode) == CameraOwner.Scanner
+    private val usesScanner get() = ownerFor(s.mode, s.tt.stream) == CameraOwner.Scanner
     /** A camera the user drives (torch, flip, focus): the SDK scanner, or Document Acquisition's (iOS usesScanner). */
     private val ownCamera get() = usesScanner || s.mode == ScanMode.DocAcq
     /** AR Item Count: the mode runs on the AR session (spec 5.10). */
@@ -141,6 +153,8 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { state.map { it.items }.distinctUntilChanged().collect { ar.setItems(it.toSet()) } }
         viewModelScope.launch { ar.errors.collect(::toast) }
         viewModelScope.launch { ar.exits.collect(::leaveAr) }
+        viewModelScope.launch { tt.state.collect { t -> _state.update { it.copy(tt = t) } } }
+        viewModelScope.launch { tt.refresh() }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
         // No idle pause while a capture or extraction runs, nor while AR Item Count runs: a worker panning the shelf
@@ -231,6 +245,15 @@ class ScannerViewModel @Inject constructor(
                 ArInstall.Declined -> leaveAr("AR Item Count needs Google Play Services for AR")
                 ArInstall.Unsupported -> leaveAr("AR isn't supported on this device")
             }
+            is ScannerAction.TtSetEmail -> setTtEmail(a.email, a.fromSetup)
+            ScannerAction.TtSignOut -> { tt.signOut(); openSheet(SheetKind.TtSetup) }   // straight to sign-in, as on first use
+            ScannerAction.TtSync -> if (!s.tt.syncing) viewModelScope.launch { toast(tt.sync()) }
+            ScannerAction.TtLoad -> viewModelScope.launch { toast(tt.load()) }
+            ScannerAction.TtUnload -> viewModelScope.launch { toast(tt.unload()) }
+            ScannerAction.TtClearScans -> viewModelScope.launch { toast(tt.clearScans()) }
+            ScannerAction.TtClearTemplateCache -> viewModelScope.launch { toast(tt.clearTemplateCache()) }
+            is ScannerAction.TtSetPath -> setTtPath(a.path)
+            is ScannerAction.TtRepredict -> repredict(a.templateId)
         }
     }
 
@@ -245,11 +268,12 @@ class ScannerViewModel @Inject constructor(
             it.copy(
                 home = false, mode = m, result = null, sheet = null, pendingSheet = null, phase = Phase.Idle, boxes = emptyList(),
                 codeInFrame = false, seesDocument = false, seesText = false, torch = false, gated = m.gated,
-                entitlementChecking = false, feedback = null,
+                entitlementChecking = false, feedback = null, ttGuidance = null,
             )
         }
         if (!s.permissionDenied) configureCamera()
         syncAr()
+        if (m == ScanMode.TextTemplates && !s.tt.hasEmail) openSheet(SheetKind.TtSetup)   // account first (iOS setup gate)
     }
 
     /** Back to the module cards: the mode is left as for a switch and no camera runs until a card is opened. */
@@ -262,7 +286,7 @@ class ScannerViewModel @Inject constructor(
                 codeInFrame = false, seesDocument = false, seesText = false, entitlementChecking = false, feedback = null,
             )
         }
-        camera.claim(CameraOwner.None)
+        configureCamera()   // no owner on the module cards
     }
 
     /** Ends the current mode's work and releases its camera (iOS setMode, the leaving half). */
@@ -284,12 +308,33 @@ class ScannerViewModel @Inject constructor(
     /** Hands the sensor to the mode's owner (none on the module cards); for the scanner, applies its config; for gated
      *  modes, the entitlement check (AR Item Count's AR session starts once it passes). */
     private fun configureCamera() {
-        camera.claim(if (s.home) CameraOwner.None else ownerFor(s.mode))
-        if (s.home) return
-        if (usesScanner) {
-            applyConfig()
-            if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) resumeDetection()
+        val owner = if (s.home) CameraOwner.None else ownerFor(s.mode, s.tt.stream)
+        val from = claimed
+        claimed = owner
+        handoff?.cancel(); handoff = null
+        if (s.ttCameraReady) _state.update { it.copy(ttCameraReady = false) }   // unmounts PXScannerView
+        when {
+            // PXScannerView unbinds all of CameraX when it leaves: let it go before the SDK camera starts (iOS handOffCamera).
+            owner == CameraOwner.Scanner && from == CameraOwner.TextTemplates ->
+                handoff = viewModelScope.launch { delay(HANDOFF_MS); handoff = null; startScanner() }
+            owner == CameraOwner.Scanner -> startScanner()
+            else -> {
+                camera.claim(owner)
+                // ... and PXScannerView binds only once the SDK camera has released the sensor.
+                if (owner == CameraOwner.TextTemplates) {
+                    handoff = viewModelScope.launch { delay(HANDOFF_MS); handoff = null; _state.update { it.copy(ttCameraReady = true) } }
+                }
+                // AR Item Count: the entitlement check first; its AR session starts once it passes (spec 5.10)
+                if (!s.home && owner == CameraOwner.Ar && s.mode.gated) checkEntitlement(s.mode)
+            }
         }
+    }
+
+    /** The SDK camera runs for the mode: its config, detection and (gated modes) the entitlement check. */
+    private fun startScanner() {
+        camera.claim(CameraOwner.Scanner)
+        applyConfig()
+        if (s.result == null && (s.sheet == null || s.sheet == SheetKind.Items)) resumeDetection()
         if (s.mode.gated) checkEntitlement(s.mode)
     }
 
@@ -433,6 +478,16 @@ class ScannerViewModel @Inject constructor(
                 // The codes in view and the listed codes counted so far; the drawer's New Scan starts a fresh count.
                 show(ScanResult.Retrieval(retrievalRows(s.codesInView, s.items, s.arCount.items)))
             }
+            ScanMode.TextTemplates -> when {
+                !s.tt.hasEmail -> openSheet(SheetKind.TtSetup)
+                s.tt.loadedIds.isEmpty() -> _state.update { it.copy(alert = ttNotLoadedAlert(s.tt.hasEmail)) }
+                s.tt.stream -> toast("Stream captures on its own. Hold a label in view.")   // the SDK camera is off in Stream
+                else -> {
+                    flashOnce()
+                    _state.update { it.copy(phase = Phase.Scanning) }
+                    camera.capture()
+                }
+            }
             ScanMode.Barcode, ScanMode.QR, ScanMode.Ocr -> {
                 // Wild card prepares its own models (iOS :427).
                 if (s.mode == ScanMode.Ocr && !s.prefs.wildCard && !cloudSelected(s.prefs) && !ensureModelReady()) return
@@ -475,7 +530,11 @@ class ScannerViewModel @Inject constructor(
                 show(ScanResult.Codes(e.codes.map { it.toDetected() }))
             }
             is ScanEvent.Boxes -> onBoxes(if (s.mode == ScanMode.QR) e.qr else e.barcodes + e.qr)   // iOS :945
-            is ScanEvent.Captured -> if (s.mode == ScanMode.Ocr) runOcr(e.bitmap, e.codes) else _state.update { it.copy(phase = Phase.Idle) }
+            is ScanEvent.Captured -> when (s.mode) {
+                ScanMode.Ocr -> runOcr(e.bitmap, e.codes)
+                ScanMode.TextTemplates -> predictTemplate(e.bitmap)
+                else -> _state.update { it.copy(phase = Phase.Idle) }
+            }
             is ScanEvent.PriceTag -> {   // iOS codeScannerViewDidCapturePrice: collect unique tags; the shutter shows them
                 if (s.mode != ScanMode.Price) return
                 val tag = PriceTag.from(e.data.productSKU, e.data.productPrice)
@@ -489,7 +548,7 @@ class ScannerViewModel @Inject constructor(
             // Vision Scanner's hint text (iOS seesText/seesDocument); DocAcq gets the same fields from its
             // own boundary detector (DocumentFlow), not from this SDK callback. Only Vision Scanner reads them: in other
             // modes the per-frame flags would change the state (and recompose the screen) for nothing.
-            is ScanEvent.Indications -> if (s.mode == ScanMode.Ocr) _state.update { it.copy(seesText = e.text, seesDocument = e.document) }
+            is ScanEvent.Indications -> if (s.mode == ScanMode.Ocr || s.mode == ScanMode.TextTemplates) _state.update { it.copy(seesText = e.text, seesDocument = e.document) }
             ScanEvent.Started -> {}
         }
     }
@@ -544,6 +603,7 @@ class ScannerViewModel @Inject constructor(
     }
 
     private fun sendReport(fields: Set<String>, message: String) {
+        (s.result as? ScanResult.TextTemplate)?.let { return reportTemplate(it, fields, message) }
         val r = s.result as? ScanResult.Ocr ?: return
         val modelSize = activeModel(s.prefs)?.second ?: ModelSize.Micro   // iOS `activeModel?.1 ?? .micro`
         viewModelScope.launch {
@@ -558,6 +618,100 @@ class ScannerViewModel @Inject constructor(
         val r = s.result as? ScanResult.Ocr ?: return
         val image = r.image ?: return toast("No image to send")
         viewModelScope.launch { toast(submitFeedback(image, r.result, entries, comment)) }
+    }
+
+    // MARK: Text Templates
+
+    /** One-Shot: the SDK camera's still, predicted against the loaded pool (iOS `predictTemplate`). */
+    private fun predictTemplate(bitmap: Bitmap) {
+        val gen = modeGeneration
+        _state.update { it.copy(phase = Phase.Processing) }
+        viewModelScope.launch {
+            try {
+                val r = tt.predict(bitmap)
+                if (gen != modeGeneration) return@launch
+                show(ScanResult.TextTemplate(r, bitmap, TtPath.OneShot))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (gen != modeGeneration) return@launch
+                val code = (e as? PXException)?.errorCode
+                if (code == PXErrorCode.NO_OCR_DATA) return@launch noCodeFound()
+                val offline = code == PXErrorCode.NETWORK_ERROR || e is IOException
+                fail(if (offline) "You're offline" else "Prediction failed", e.message ?: "Something went wrong", retry = { camera.rescan(); shutter() })
+            }
+        }
+    }
+
+    /** Stream: events from `PXScannerView`'s session, from any thread (iOS TTStreamLayer). */
+    fun onTtEvent(e: PXScanEvent) {
+        viewModelScope.launch {
+            if (s.home || s.mode != ScanMode.TextTemplates || !s.tt.stream) return@launch   // queued before a switch
+            when (e) {
+                is PXScanEvent.Guidance -> _state.update { it.copy(ttGuidance = e.guidance.hint()) }
+                is PXScanEvent.Failed -> _state.update { it.copy(ttGuidance = e.message) }
+                is PXScanEvent.Prediction -> {
+                    if (s.result != null || pendingShow != null || s.sheet != null || s.alert != null) return@launch
+                    camera.userActive()
+                    show(ScanResult.TextTemplate(e.result, e.result.capturedImage, TtPath.Stream))
+                }
+                is PXScanEvent.RegionResolved -> {}
+            }
+        }
+    }
+
+    private fun setTtEmail(email: String, fromSetup: Boolean) {
+        if (!tt.setEmail(email)) return toast("Please enter a valid email address.")
+        if (fromSetup) {
+            dismissing = true
+            _state.update { it.copy(sheet = null) }
+            toast("Account saved. Load templates from the Templates chip.")
+        } else {
+            toast("Email saved")
+        }
+    }
+
+    /** One-Shot uses the SDK camera, Stream `PXScannerView`'s own: hand the sensor over (iOS `setTTPath`). */
+    private fun setTtPath(p: TtPath) {
+        if (p == s.tt.path) return
+        tt.setPath(p)
+        _state.update { it.copy(tt = it.tt.copy(path = p), ttGuidance = null) }   // at once, so the hand-off sees it
+        if (!s.home && s.mode == ScanMode.TextTemplates && !s.permissionDenied) configureCamera()
+    }
+
+    /** "Re-predict as…": the retained scan against another loaded template, no re-scan (iOS ResultDrawer). */
+    private fun repredict(templateId: String) {
+        val r = s.result as? ScanResult.TextTemplate ?: return
+        val scanId = r.prediction.scanId ?: return
+        viewModelScope.launch {
+            try {
+                val q = tt.repredict(scanId, templateId)
+                if (s.result != r) return@launch   // closed or replaced meanwhile
+                val next = r.copy(repredicted = q)
+                _state.update { it.copy(result = next, lastResult = it.mode to next) }
+                toast("As: ${q.templateName ?: templateId}")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                toast(e.message ?: "Re-predict failed")
+            }
+        }
+    }
+
+    /** iOS ReportCard `submit` for a Text Templates result: the scan's image goes up with the picked fields. */
+    private fun reportTemplate(r: ScanResult.TextTemplate, fields: Set<String>, message: String) {
+        val scanId = r.prediction.scanId ?: return
+        val image = r.image ?: return toast("Stream results have no captured image to report")
+        viewModelScope.launch {
+            try {
+                tt.report(scanId, image, message + " · " + fields.sorted().joinToString(", "))
+                toast("Report sent · ${fields.size} field${if (fields.size == 1) "" else "s"}")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                toast("Report failed (${e.message})")
+            }
+        }
     }
 
     // MARK: Results
@@ -703,4 +857,10 @@ class ScannerViewModel @Inject constructor(
     private fun toast(text: String) { _effects.trySend(ScannerEffect.Toast(text)) }
 
     private fun haptic() { if (s.prefs.sound) _effects.trySend(ScannerEffect.Haptic) }
+
+    private companion object {
+        const val IN_VIEW_MS = 1_000L
+        /** Time for one camera pipeline to let the sensor go before the other binds (iOS handOffCamera's 300 ms). */
+        const val HANDOFF_MS = 300L
+    }
 }

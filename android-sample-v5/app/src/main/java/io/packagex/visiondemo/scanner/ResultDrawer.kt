@@ -40,7 +40,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -67,7 +70,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import io.packagex.texttemplates.sdk.PXTemplateInfo
+import io.packagex.visiondemo.data.DocumentFields
 import io.packagex.visiondemo.data.ItemLabelFeedback
+import io.packagex.visiondemo.data.JsonFields
 import io.packagex.visiondemo.data.OcrParser
 import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.data.VlmPrompts
@@ -91,6 +97,7 @@ import io.packagex.visiondemo.model.OcrTable
 import io.packagex.visiondemo.model.RetrievalRow
 import io.packagex.visiondemo.model.ScanResult
 import androidx.compose.foundation.layout.union
+import kotlin.math.roundToInt
 
 /**
  * The result of the last capture, full screen (v6: no half-height drawer). Fills whatever slot the caller
@@ -105,6 +112,8 @@ fun ResultDrawer(
     tags: List<PriceTag> = emptyList(),
     /** `ScannerUiState.items.size`, for the retrieval subtitle (iOS `model.items.count`). */
     itemCount: Int = 0,
+    /** Text Templates: the templates loaded into the pool, for "Re-predict as…" (iOS `model.tt`). */
+    ttLoaded: List<PXTemplateInfo> = emptyList(),
     onAction: (ScannerAction) -> Unit,
 ) {
     RecomposeLog("ResultDrawer")
@@ -122,6 +131,8 @@ fun ResultDrawer(
     // Document: Enhanced / Original (kept across captures, as iOS @State) and the page shown (the newest, iOS onAppear).
     var docEnhanced by remember { mutableStateOf(true) }
     var docPage by remember(result) { mutableIntStateOf((result as? ScanResult.Document)?.pages?.lastIndex ?: 0) }
+    // Text Templates: values picked from a field's suggestions (iOS `ttEdits`); a re-predict is a new result.
+    var ttEdits by remember(result) { mutableStateOf(mapOf<String, String>()) }
 
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -137,6 +148,11 @@ fun ResultDrawer(
             // v6: the captured image sits in its own fixed-height, scrollable frame above the details.
             (result as? ScanResult.Ocr)?.let { boxedOcr(it) }?.let { (img, fields) ->
                 ResultImage { BoxedOcrImage(image = img, fields = fields, selected = selectedField, onSelect = { selectedField = it }) }
+            }
+            (result as? ScanResult.TextTemplate)?.image?.let { img ->
+                ResultImage {
+                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured label", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                }
             }
 
             Column(
@@ -172,6 +188,7 @@ fun ResultDrawer(
                     )
                     ScanResult.Price -> PriceContent(tags, onAction)
                     is ScanResult.Retrieval -> RetrievalContent(result.rows, onAction)
+                    is ScanResult.TextTemplate -> TtContent(result, ttLoaded, ttEdits, onEdit = { k, v -> ttEdits = ttEdits + (k to v) }, onAction)
                     is ScanResult.Document -> DocumentReview(
                         pages = result.pages,
                         index = docPage,
@@ -184,11 +201,14 @@ fun ResultDrawer(
                 }
             }
 
-            DrawerFooter(result = result, tags = tags, docEnhanced = docEnhanced, onAction = onAction)
+            DrawerFooter(result = result, tags = tags, docEnhanced = docEnhanced, edits = ttEdits, onAction = onAction)
         }
 
         if (reportOpen && result is ScanResult.Ocr) {
             ReportCard(result = result.result, onAction = onAction, onClose = { reportOpen = false })
+        }
+        if (reportOpen && result is ScanResult.TextTemplate) {
+            ReportCard(keys = result.fields.keys.sorted(), onAction = onAction, onClose = { reportOpen = false })
         }
         zoomedImage?.let { img -> ImageViewer(image = img, onClose = { zoomedImage = null }) }
     }
@@ -232,7 +252,7 @@ private fun DrawerHeader(result: ScanResult, tags: List<PriceTag>, itemCount: In
 }
 
 @Composable
-private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: Boolean, onAction: (ScannerAction) -> Unit) {
+private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: Boolean, edits: Map<String, String>, onAction: (ScannerAction) -> Unit) {
     val context = LocalContext.current
     Column {
         HorizontalDivider(color = PX.Hairline)
@@ -250,7 +270,7 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: 
                     .clickable {
                         val send = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, summaryFor(result, tags))
+                            putExtra(Intent.EXTRA_TEXT, summaryFor(result, tags, edits))
                         }
                         context.startActivity(Intent.createChooser(send, null))
                     }
@@ -269,7 +289,7 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: 
                     // Label "to clipboard" so the VM's "Copied <label>" toast reads "Copied to clipboard",
                     // matching iOS's fixed string (:83).
                     PXButton(title = "Copy", kind = PXButtonKind.Secondary) {
-                        onAction(ScannerAction.Copy("to clipboard", summaryFor(result, tags)))
+                        onAction(ScannerAction.Copy("to clipboard", summaryFor(result, tags, edits)))
                     }
                 }
                 Box(Modifier.weight(1f)) {
@@ -281,7 +301,8 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: 
     }
 }
 
-private fun canReport(result: ScanResult): Boolean = result is ScanResult.Ocr && result.result.docType.reportSupported
+private fun canReport(result: ScanResult): Boolean =
+    (result is ScanResult.Ocr && result.result.docType.reportSupported) || (result is ScanResult.TextTemplate && result.prediction.scanId != null)
 
 private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int): Triple<String, String, Boolean> = when (result) {
     is ScanResult.Codes -> {
@@ -307,15 +328,18 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
         )
     }
     is ScanResult.Document -> Triple("Document captured", "${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"} · on-device", true)
+    is ScanResult.TextTemplate -> result.templateName.let { name ->
+        Triple(name ?: "No confident match", "Template match · ${result.path.label} · ${result.fields.size} fields", name != null)
+    }
 }
 
-private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when (result) {
+private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<String, String> = emptyMap()): String = when (result) {
     // iOS :415-416: `.code` is the value only, `.multi` is every value, one per line.
     is ScanResult.Codes -> result.codes.joinToString("\n") { it.value }
     is ScanResult.Ocr -> {
         val documentClass = OcrParser.documentClass(result.result.rawJson)
         if (documentClass != null) {
-            documentClass
+            DocumentFields.documentClass(documentClass)
         } else {
             val fields = result.result.fields.joinToString("\n") { f -> "${f.section?.let { "$it · " }.orEmpty()}${f.label}: ${f.value}" }
             val tables = result.result.tables.joinToString("\n") { t ->
@@ -329,6 +353,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>): String = when 
         listOfNotNull(r.code, if (r.inList) "In list" else "Not in list", r.countText()).joinToString("\t")
     }
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
+    is ScanResult.TextTemplate -> result.fields.toSortedMap().entries.joinToString("\n") { (k, f) -> "$k: ${edits[k] ?: f.text}" }
 }
 
 // endregion
@@ -396,6 +421,87 @@ private fun RetrievalContent(rows: List<RetrievalRow>, onAction: (ScannerAction)
     LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenItemList) }
 }
 
+/** Text Templates: one row per predicted field with its confidence and suggestions, the frame's barcodes, and
+ *  "Re-predict as…" any other loaded template (iOS `ttContent`). */
+@Composable
+private fun TtContent(
+    result: ScanResult.TextTemplate,
+    loaded: List<PXTemplateInfo>,
+    edits: Map<String, String>,
+    onEdit: (String, String) -> Unit,
+    onAction: (ScannerAction) -> Unit,
+) {
+    Column {
+        result.fields.toSortedMap().forEach { (k, f) ->
+            val pct = (f.confidence * (if (f.confidence <= 1f) 100f else 1f)).roundToInt()
+            // The value plus the SDK's alternatives, deduplicated (the original review screen's "Change" menu).
+            val options = (listOf(f.text) + f.suggestions.orEmpty().map { it.text }).distinct()
+            val value = edits[k] ?: f.text
+            RowLine(label = JsonFields.humanize(k), value = value.ifEmpty { "—" }) {
+                if (options.size > 1) {
+                    var open by remember { mutableStateOf(false) }
+                    Box {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .heightIn(min = 28.dp)
+                                .clip(CircleShape)
+                                .background(PX.Purple.copy(alpha = 0.12f))
+                                .clickable { open = true }
+                                .padding(horizontal = 10.dp, vertical = 6.dp)
+                                .semantics { contentDescription = "Change ${JsonFields.humanize(k)}" },
+                        ) {
+                            Text("Change", style = montserrat(11.sp), color = PX.Purple)
+                            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = PX.Purple, modifier = Modifier.size(12.dp))
+                        }
+                        DropdownMenu(expanded = open, onDismissRequest = { open = false }, containerColor = Color.White) {
+                            options.forEach { opt ->
+                                DropdownMenuItem(
+                                    text = { Text(opt.ifEmpty { "—" }, style = inter(14.sp), color = PX.Ink) },
+                                    leadingIcon = if (opt == value) { { Icon(Icons.Filled.Check, contentDescription = null, tint = PX.Purple) } } else null,
+                                    onClick = { open = false; onEdit(k, opt) },
+                                )
+                            }
+                        }
+                    }
+                }
+                Badge(text = "$pct%", tone = if (pct >= 90) BadgeTone.Success else if (pct >= 75) BadgeTone.Brand else BadgeTone.Danger)
+            }
+        }
+        if (result.fields.isEmpty()) EmptyNote("No fields predicted. Re-predict as another template, or scan again.")
+    }
+    val barcodes = result.repredicted?.barcodes ?: result.prediction.barcodes
+    if (barcodes.isNotEmpty()) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("Barcodes (${barcodes.size})", style = montserrat(11.sp), color = PX.Muted)
+            barcodes.forEach { b -> Text("${b.format} · ${b.data}", style = mono(14.sp), color = PX.Ink) }
+        }
+    }
+    // Any loaded template, as the original's template menu (not just the detector's candidates).
+    val others = loaded.filter { it.name != result.templateName }
+    if (result.prediction.scanId != null && others.isNotEmpty()) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Re-predict as…", style = montserrat(13.sp), color = PX.Ink)
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                others.forEach { t ->
+                    Text(
+                        t.name,
+                        style = inter(13.sp),
+                        color = PX.Ink,
+                        modifier = Modifier
+                            .heightIn(min = 44.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(1.dp, PX.Hairline, RoundedCornerShape(10.dp))
+                            .clickable { onAction(ScannerAction.TtRepredict(t.id)) }
+                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun OcrContent(
     scan: ScanResult.Ocr,
@@ -413,7 +519,7 @@ private fun OcrContent(
     val o = scan.result
     val documentClass = remember(o.rawJson) { OcrParser.documentClass(o.rawJson) }
     if (documentClass != null) {
-        DocumentClassCard(documentClass)
+        DocumentClassCard(DocumentFields.documentClass(documentClass))
         return
     }
 
