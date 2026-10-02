@@ -121,6 +121,32 @@ over a debug build from the same machine but isn't fit for distribution. Never c
 its passwords; `secrets.properties` is git-ignored and `secrets.properties.example` lists the names
 with empty values.
 
+## Local Models build
+
+The Android counterpart of the iOS "VisionSDK Demo v5 (Local Models)" scheme: the `localRelease` build
+type is `release` plus every on-device OCR model the Models sheet offers (shipping label micro/large,
+BOL large, item label large, document classification micro/large, and the key-value micro model BOL and
+item label use). Nothing is downloaded; the default `release` build is unchanged.
+
+```bash
+./gradlew :app:assembleLocalRelease -PvisionSdkAndroidDir=<vision-sdk-android>   # app/build/outputs/apk/localRelease/app-localRelease.apk
+./gradlew :app:installLocalRelease  -PvisionSdkAndroidDir=<vision-sdk-android>
+```
+
+- **Build time.** `fetchBundledModels` (`app/bundled-models.gradle.kts`) makes the SDK's own
+  `v1/sdk/connect` call per model with `<VISION_ENV>_API_KEY`, decrypts the download link the way the SDK
+  does (with the environment keys in the vision-sdk-android checkout's `VisionSDK.kt`) and downloads the
+  payload as served — still encrypted. Each download is checked against the server's MD5 of the decrypted
+  model. Payloads are cached in `build/bundled-models/` (git-ignored, never commit them) and fetched again
+  only when the server has a new version. Needs network and the API key at build time.
+- **First launch.** `BundledModels.kt` hands each payload to `ModelManager.installBundledModel()`, which
+  unwraps its key and re-encrypts it with the device key exactly like a download, into the same place.
+  This takes a while once; later launches skip installed versions (and put back a model the SDK deleted).
+  The active document type's model is then loaded up front, as `preloadBundledModel()` does on iOS; the
+  Vision Scanner never prompts for a download.
+- The bundled models are a fixed version; "Check for updates" in the Models sheet still works and would
+  download a newer one.
+
 ## Baseline profiles and startup benchmarks
 
 `:baselineprofile` (a `com.android.test` module using the `androidx.baselineprofile` plugin) drives
