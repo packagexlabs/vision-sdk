@@ -107,7 +107,7 @@ fun ScannerScreen(
 
         hud?.let { CodeHud(code = it, onAction = onAction) }
 
-        if (state.mode == ScanMode.Ocr && state.phase == Phase.Processing) {
+        if ((state.mode == ScanMode.Ocr || state.mode == ScanMode.TextTemplates) && state.phase == Phase.Processing) {
             ProcessingSpinner(onCancel = { onAction(ScannerAction.CancelProcessing) })
         }
 

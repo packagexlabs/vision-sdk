@@ -65,11 +65,15 @@ val DocType.reportSupported: Boolean get() = reportKeys.isNotEmpty()
  * Ported from iOS `UI/Overlays.swift`'s `ReportCard`.
  */
 @Composable
-fun ReportCard(result: OcrResult, onAction: (ScannerAction) -> Unit, onClose: () -> Unit) {
+fun ReportCard(result: OcrResult, onAction: (ScannerAction) -> Unit, onClose: () -> Unit) =
+    ReportCard(keys = result.docType.reportKeys, onAction = onAction, onClose = onClose)
+
+/** [keys]: the chips to pick from (report-model keys, or a Text Templates result's field names). */
+@Composable
+fun ReportCard(keys: List<String>, onAction: (ScannerAction) -> Unit, onClose: () -> Unit) {
     var picked by remember { mutableStateOf(setOf<String>()) }
     var message by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-    val keys = result.docType.reportKeys
 
     Box(
         modifier = Modifier

@@ -17,7 +17,8 @@ enum class ScanMode(val label: String) {
     Price("Price tag"),
     Retrieval("AR Item Count"),
     Ar("AR Barcode"),
-    DocAcq("Document Acquisition")
+    DocAcq("Document Acquisition"),
+    TextTemplates("Text Templates")
 }
 
 val ScanMode.isCode: Boolean
@@ -91,7 +92,11 @@ enum class Processing {
 }
 
 enum class SheetKind {
-    Settings, DocType, Items, ArItems, Models
+    Settings, DocType, Items, ArItems, Models,
+    /** Text Templates: account, templates, integration mode (iOS `.tt`). */
+    TextTemplates,
+    /** Text Templates account setup, shown first while no email is set (iOS `.ttSetup`). */
+    TtSetup
 }
 
 enum class Phase {

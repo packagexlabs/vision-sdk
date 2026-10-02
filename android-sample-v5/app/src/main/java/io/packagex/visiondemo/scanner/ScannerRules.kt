@@ -1,5 +1,6 @@
 package io.packagex.visiondemo.scanner
 
+import io.packagex.texttemplates.sdk.PXGuidance
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.designsystem.PXButtonKind
@@ -18,9 +19,11 @@ import java.io.IOException
 
 /** Pure rules behind [ScannerViewModel], ported from iOS `DemoModel`. */
 
-internal fun ownerFor(mode: ScanMode) = when (mode) {
+/** [ttStream]: Text Templates in Stream, where `PXScannerView` runs its own CameraX pipeline (iOS usesScanner). */
+internal fun ownerFor(mode: ScanMode, ttStream: Boolean = false) = when (mode) {
     ScanMode.Ar -> CameraOwner.Ar
     ScanMode.DocAcq -> CameraOwner.Document
+    ScanMode.TextTemplates -> if (ttStream) CameraOwner.TextTemplates else CameraOwner.Scanner
     else -> CameraOwner.Scanner
 }
 
@@ -100,9 +103,32 @@ internal val noItemsAlert = Alert(
     ),
 )
 
+/** iOS `ttNotLoaded`: shutter in Text Templates with an empty pool. */
+internal fun ttNotLoadedAlert(hasEmail: Boolean) = Alert(
+    "No templates loaded",
+    "No templates loaded — load them before scanning a label.",
+    listOf(
+        if (hasEmail) AlertAction("Sync and load templates", action = ScannerAction.TtLoad)
+        else AlertAction("Enter your email", action = ScannerAction.OpenSheet(SheetKind.TtSetup)),
+        AlertAction("Cancel", PXButtonKind.Tertiary, ScannerAction.DismissAlert),
+    ),
+)
+
+/** Text Templates Stream's hint for the session's guidance (iOS shows the guidance code). */
+internal fun PXGuidance.hint(): String = when (this) {
+    PXGuidance.Searching -> "Point camera at a label"
+    PXGuidance.HoldStill -> "Hold still"
+    PXGuidance.Focusing -> "Focusing…"
+    PXGuidance.TooBlurry -> "Too blurry · hold steady"
+    PXGuidance.ImproveLighting -> "Improve the lighting"
+    PXGuidance.MoveCloser -> "Move closer"
+    PXGuidance.MoveBack -> "Move back"
+    is PXGuidance.Stabilizing -> "Hold still · $captured/$of"
+}
+
 /** iOS `noCodeFound`'s title, message and extra action (torch, unless it is already on). */
 internal fun noCodeCopy(mode: ScanMode, torchOn: Boolean): Triple<String, String, List<AlertAction>> {
-    val text = mode == ScanMode.Ocr
+    val text = mode == ScanMode.Ocr || mode == ScanMode.TextTemplates
     return Triple(
         if (text) "No Text Found" else if (mode == ScanMode.QR) "No QR Code Found" else "No Barcode Found",
         if (text) "Fill the frame with the label and hold still, then capture again." else "Move closer so the code fills the frame, then try again.",

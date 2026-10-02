@@ -15,6 +15,15 @@ import io.packagex.visiondemo.data.ModelRepository
 import io.packagex.visiondemo.data.PreferencesRepository
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.ReportRepository
+import io.packagex.visiondemo.data.TextTemplates
+import io.packagex.visiondemo.data.TtPath
+import io.packagex.visiondemo.data.TtState
+import io.packagex.texttemplates.sdk.PXClient
+import io.packagex.texttemplates.sdk.PXDetection
+import io.packagex.texttemplates.sdk.PXField
+import io.packagex.texttemplates.sdk.PXPredictionResult
+import io.packagex.texttemplates.sdk.PXQuickResult
+import io.packagex.texttemplates.sdk.PXRegionOfInterest
 import io.packagex.visiondemo.document.CaptureStart
 import io.packagex.visiondemo.document.DocumentCamera
 import io.packagex.visiondemo.document.DocumentPage
@@ -271,3 +280,40 @@ fun fakeBitmap(): Bitmap = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)
 /** A code128 [ScannedCodeResult] at [box]; needs Robolectric. */
 fun code(value: String, box: Rect = Rect(0, 0, 10, 10)) =
     ScannedCodeResult(value, box, BarcodeSymbology.code128, null, RectF(), 0f, null)
+
+/** Text Templates without the SDK: [state] is set directly; [predict] returns [prediction] after [delayMs]. */
+class FakeTextTemplates(initial: TtState = TtState()) : TextTemplates {
+    val flow = MutableStateFlow(initial)
+    override val state: StateFlow<TtState> = flow
+    override val client: PXClient? = null
+    var delayMs = 0L
+    var predictions = 0
+    var prediction = ttPrediction()
+    override fun setEmail(raw: String): Boolean {
+        if (!TtState.isValidEmail(raw)) return false
+        flow.value = flow.value.copy(email = raw.trim().lowercase()); return true
+    }
+    override fun signOut() { flow.value = flow.value.copy(email = "") }
+    override fun setPath(p: TtPath) { flow.value = flow.value.copy(path = p) }
+    override suspend fun refresh() {}
+    override suspend fun sync() = "synced"
+    override suspend fun load(): String { flow.value = flow.value.copy(loadedIds = flow.value.cached.map { it.id }); return "Loaded" }
+    override suspend fun unload(): String { flow.value = flow.value.copy(loadedIds = emptyList()); return "Unloaded" }
+    override suspend fun clearScans() = "Scan cache cleared"
+    override suspend fun clearTemplateCache() = "Template cache cleared"
+    override suspend fun predict(bitmap: Bitmap): PXPredictionResult { predictions++; delay(delayMs); return prediction }
+    override suspend fun repredict(scanId: String, templateId: String) =
+        PXQuickResult(templateId, "Other", mapOf("sku" to PXField("B2", 0.8f, null, null)), imageWidth = 100, imageHeight = 100)
+    override suspend fun report(scanId: String, image: Bitmap, reason: String) {}
+}
+
+fun ttPrediction(name: String? = "Shipping label") = PXPredictionResult(
+    templateId = "t1",
+    templateName = name,
+    predictions = mapOf("sku" to PXField("A1", 0.95f, null, null)),
+    detection = PXDetection(chosenId = "t1", ambiguous = false, candidates = emptyList()),
+    resolvedRegionOfInterest = PXRegionOfInterest(listOf(listOf(0f, 0f), listOf(1f, 1f)), PXRegionOfInterest.Source.DEFAULT, 100, 100),
+    imageWidth = 100,
+    imageHeight = 100,
+    scanId = "s1",
+)

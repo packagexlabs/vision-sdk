@@ -92,6 +92,8 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
                     SheetKind.Items -> ItemsSheet(state, onAction)
                     SheetKind.Models -> ModelsSheet(state, onAction)
                     SheetKind.ArItems -> ArItemsSheet(state, onAction)
+                    SheetKind.TextTemplates -> TtSheet(state, onAction)
+                    SheetKind.TtSetup -> TtSetupSheet(state, onAction)
                 }
             }
         }
@@ -107,4 +109,6 @@ private fun titleFor(kind: SheetKind): String = when (kind) {
     SheetKind.Items -> "Item list"
     SheetKind.Models -> "On-device models"
     SheetKind.ArItems -> "Items"
+    SheetKind.TextTemplates -> "Text Templates"
+    SheetKind.TtSetup -> "Set up Text Templates"
 }
