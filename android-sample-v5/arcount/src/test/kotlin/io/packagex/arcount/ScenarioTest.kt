@@ -3,7 +3,6 @@ package io.packagex.arcount
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-import org.junit.Ignore
 import org.junit.Test
 
 /** The whole core as the simulator's counter */
@@ -245,13 +244,11 @@ class ScenarioTest {
     }
 
     /**
-     * Fix round 1, 3 of 240 simulated runs (report §5), not tuned away by ruling: there-and-back at 15 px.
-     * Slide, budget 2: the 0.40 m plane prior misses by one pitch after 24 cm, a neighbour's read falls in the
-     * gate, the mixed rays triangulate at ~0.40 m, and "both read in one frame" counts a duplicate: 11 COUNTED.
-     * Sway, budget 3: gate (a) takes a 5-ray depth of 0.165 m for a unit at 0.30 m, the section leaves view
-     * (LEFT_SECTION), the resume fails, and the restarted section closes COMPLETE 4.
+     * The three runs that failed in fix round 1 (report §5), there-and-back at 15 px. Slide, budget 2: the 0.40 m
+     * plane prior missed by one pitch after 24 cm and a neighbour's read was taken by gate (R1), then a duplicate
+     * was counted against that wrongly placed partner (R2). Sway, budget 3: gate (a) took a 5-ray depth of 0.165 m
+     * for a unit at 0.30 m (R3) and the section froze with only ambiguous units in view (R4).
      */
-    @Ignore("known failure, sdd/p3-core-report.md §5 (fix round 1)")
     @Test
     fun thereAndBackStopAndReadAtFifteenPixelsKeepsTheTruthInTheRange() {
         truthKept(stopAndRead(2, 3, stop = "slide", back = true))
