@@ -36,6 +36,8 @@ data class CountConfig(
     val duplicateFraction: Double = 0.5,
     val ambiguityPitchFraction: Double = 0.75,
     val ambiguitySigmas: Double = 2.0,
+    // An AMBIGUOUS unit merges into its linked unit after this many frames that read the linked unit and every other
+    // unit of the GTIN in view but nothing in its gate (Units: settleAmbiguous; coverage rule, not the spec's literal one)
     val mergeFrames: Int = 3,
     // Section (5.1)
     val anchorDepth: Double = 0.40,

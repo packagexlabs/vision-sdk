@@ -154,7 +154,7 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
             created += u
             note("unit ${u.id}: ${u.state}" + (link?.let { " (in the band of unit ${it.id})" } ?: ""))
         }
-        val merged = settleAmbiguous(record, reads1, created)
+        val merged = settleAmbiguous(record, reads1, matchedIds + created.map { it.id })
         replane()
         pitch = Pitch.metric(all.filter { it.state == COUNTED }.map { frame.plane.along(it.point) }, config)
         return FrameOutcome(matched, created, dropped, merged, reads1.size)
@@ -311,15 +311,28 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         u.sigmaZ = prior.sigmaZ
     }
 
-    /** AMBIGUOUS units merge into their linked unit after [CountConfig.mergeFrames] frames with both in view and one read */
-    private fun settleAmbiguous(record: PoseRecord, reads: List<Candidate>, created: List<CountUnit>): List<Int> {
+    /**
+     * AMBIGUOUS unit U merges into its linked unit V after [CountConfig.mergeFrames] frames of evidence. A frame is
+     * evidence only when U and V are both predicted inside the image, V and every other unit of that GTIN predicted
+     * inside the image were read in it (units added by hand are never read and do not count), and no read lies in
+     * U's gate. Absence of a read is evidence only when the engine had decode budget to spare for that GTIN in that
+     * frame (the spec's "only one read of that GTIN" holds in every frame of an engine decoding one code a frame).
+     *
+     * @param read the ids of the units with a read in this frame: matched or created by it
+     */
+    private fun settleAmbiguous(record: PoseRecord, reads: List<Candidate>, read: Set<Int>): List<Int> {
         val merged = ArrayList<Int>()
         val k = record.intrinsics
-        for (a in all.filter { it.state == AMBIGUOUS && it !in created }) {
+        for (a in all.filter { it.state == AMBIGUOUS && it.id !in read }) {
             val linked = all.firstOrNull { it.id == a.linkedTo } ?: continue
-            val pa = predict(a, record)
-            val pl = predict(linked, record)
-            if (pa == null || pl == null || !pa.inImage(k) || !pl.inImage(k) || reads.count { it.gtin == a.gtin } != 1) continue
+            if (linked.id !in read) continue
+            val pa = predict(a, record) ?: continue
+            val pl = predict(linked, record) ?: continue
+            if (!pa.inImage(k) || !pl.inImage(k)) continue
+            val gate = config.gateCost * pitchPx(k.fx, pa.z)
+            if (reads.any { it.gtin == a.gtin && hypot(it.read.centreU - pa.u, it.read.centreV - pa.v) <= gate }) continue
+            val unread = all.any { it !== a && it.gtin == a.gtin && it.state != MANUAL && it.id !in read && predict(it, record)?.inImage(k) == true }
+            if (unread) continue
             a.mergeFrames++
             if (a.mergeFrames < config.mergeFrames) continue
             all.remove(a)

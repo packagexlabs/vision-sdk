@@ -134,17 +134,49 @@ class UnitsTest {
         assertEquals(listOf(UnitState.COUNTED, UnitState.COUNTED), t.states())
     }
 
+    /** V at 0 and W at 8 cm read; then U, 0.3 pitch from V, read alone: AMBIGUOUS linked to V */
+    private fun ambiguousNextToV(): UnitTable {
+        val t = table()
+        t.see(0, 0.0, unit(0.0, id = 1), unit(0.08, id = 3))
+        t.see(1, 0.0, unit(0.018, id = 2))
+        assertEquals(listOf(UnitState.TENTATIVE, UnitState.TENTATIVE, UnitState.AMBIGUOUS), t.states())
+        assertEquals(t.units[0].id, t.units[2].linkedTo)
+        return t
+    }
+
     @Test
-    fun anAmbiguousUnitMergesIntoItsLinkedUnitAfterThreeFramesWithOneRead() {
+    fun anAmbiguousUnitMergesAfterThreeFramesThatReadEveryOtherUnitInViewAndNothingInItsGate() {
+        val t = ambiguousNextToV()
+        t.see(2, 0.0, unit(0.0, id = 1), unit(0.08, id = 3))
+        t.see(3, 0.0, unit(0.0, id = 1), unit(0.08, id = 3))
+        assertEquals(3, t.units.size)
+        val out = t.see(4, 0.0, unit(0.0, id = 1), unit(0.08, id = 3))
+        assertEquals(listOf(UnitState.COUNTED, UnitState.COUNTED), t.states())
+        assertEquals(1, out.merged.size)
+    }
+
+    @Test
+    fun noMergeWhileAnotherUnitInViewGoesUnreadForTheEngineHadNoBudgetToSpare() {
+        val t = ambiguousNextToV()
+        for (i in 2..7) t.see(i, 0.0, unit(0.0, id = 1))
+        assertEquals(UnitState.AMBIGUOUS, t.units[2].state)
+    }
+
+    @Test
+    fun noMergeWhileTheLinkedUnitGoesUnread() {
+        val t = ambiguousNextToV()
+        for (i in 2..7) t.see(i, 0.0, unit(0.08, id = 3))
+        assertEquals(UnitState.AMBIGUOUS, t.units[2].state)
+    }
+
+    @Test
+    fun aReadInsideTheAmbiguousUnitsGateIsNoEvidenceOfItsAbsence() {
         val t = table()
         t.see(0, 0.0, unit(0.0, id = 1))
         t.see(1, 0.0, unit(0.018, id = 2))
-        t.see(2, 0.0, unit(0.0, id = 1))
-        t.see(3, 0.0, unit(0.0, id = 1))
-        assertEquals(2, t.units.size)
-        val out = t.see(4, 0.0, unit(0.0, id = 1))
-        assertEquals(listOf(UnitState.COUNTED), t.states())
-        assertEquals(1, out.merged.size)
+        // one code between them, inside both gates: matched to the linked unit by its engine id
+        for (i in 2..7) t.see(i, 0.0, unit(0.009, id = 1))
+        assertEquals(listOf(UnitState.COUNTED, UnitState.AMBIGUOUS), t.states())
     }
 
     @Test
