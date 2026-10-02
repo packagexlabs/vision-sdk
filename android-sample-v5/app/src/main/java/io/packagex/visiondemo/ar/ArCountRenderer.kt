@@ -8,6 +8,7 @@ import com.google.ar.core.Anchor
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
+import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.FatalException
 import com.google.ar.core.exceptions.SessionPausedException
@@ -57,6 +58,7 @@ class ArCountRenderer(
     private var textureSet = false
     private var lastTimestampNs = Long.MIN_VALUE
     private var lastScreen = ArScreen.NONE
+    private var lastTracking: TrackingState? = null
 
     /** ARCore was resumed: the next frame tells the counter, with its timestamp (spec 5.1 start-up guard). */
     fun resumed() {
@@ -142,6 +144,10 @@ class ArCountRenderer(
                 geometry = it
                 if (!it.sameAspect) Log.w(TAG, "the $st app stream is the middle band of the ${cpu[0]}x${cpu[1]} CPU image: a mapping not yet run on hardware")
             }
+        if (camera.trackingState != lastTracking) { // one line per change: device and emulator runs read tracking from the log
+            lastTracking = camera.trackingState
+            Log.i(TAG, "ARCore tracking ${camera.trackingState} (${camera.trackingFailureReason})")
+        }
         val a = anchor
         return poseRecordOf(
             timestampNs = ts,
