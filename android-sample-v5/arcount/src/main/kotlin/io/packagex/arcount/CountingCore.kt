@@ -19,6 +19,9 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
     private var shownGaps: List<GapSpot> = emptyList()
     private var cached: CountView? = null
 
+    /** Item mode (spec 5.10): each code's last read, by key, capture time */
+    private val lastSeen = HashMap<String, Long>()
+
     /** The open section's units */
     internal val units: List<CountUnit> get() = machine.section?.table?.units ?: emptyList()
 
@@ -49,6 +52,10 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         // review M1: a corner that is not a finite number would throw in the ray, or place a NaN anchor: drop it here
         val finite = reads.filter { r -> r.corners.all { it.isFinite() } }
         nonFiniteReads += reads.size - finite.size
+        for (r in finite) {
+            val key = ItemCode.key(r)
+            lastSeen[key] = maxOf(lastSeen[key] ?: Long.MIN_VALUE, timestampNs)
+        }
         machine.noteReads(timestampNs, finite)
         pairing.addReads(timestampNs, finite)?.let { machine.onReads(it) }
         cached = null
@@ -72,8 +79,13 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
 
     override fun view(): CountView = cached ?: build().also { cached = it }
 
+    override fun setItems(codes: Set<String>) {
+        machine.setItems(codes)
+        cached = null
+    }
+
     private fun build(): CountView {
-        val r = latest ?: return CountView.EMPTY.copy(closed = machine.closed.toList())
+        val r = latest ?: return CountView.EMPTY.copy(closed = machine.closed.toList(), items = items(null, null, emptyList()))
         val s = machine.section
         val t = s?.table
         val live = s != null && t != null && r.anchor != null
@@ -81,14 +93,35 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         shownGaps = if (counting) gapSpots(t!!) else emptyList()
         val tac = r.cameraInAnchor()
         val k = r.intrinsics
+        val shown = if (counting) itemMarkers(markers(t!!, r), t) else emptyList()
         return CountView(
             state = machine.state,
             prompt = prompt(r),
-            markers = if (counting) markers(t!!, r) else emptyList(),
+            markers = shown,
             gaps = shownGaps.mapNotNull { g -> Prediction.pixel(g.point, tac, k)?.let { (u, v) -> Gap(g.id, u / k.width, v / k.height) } },
             bracket = if (live) bracket(s!!, t!!, r) else null,
             closed = machine.closed.toList(),
+            items = items(r, if (s?.items == true) t else null, shown),
         )
+    }
+
+    /** In item mode, markers only on units of listed codes (spec 5.10) */
+    private fun itemMarkers(markers: List<Marker>, t: UnitTable): List<Marker> {
+        if (machine.section?.items != true) return markers
+        val keys = machine.itemList.keys
+        val code = t.units.associate { it.id to it.gtin }
+        return markers.filter { code[it.unitId] in keys }
+    }
+
+    /** Each listed code's count over the sections, and whether one of its units has a marker or it was read in the last second */
+    private fun items(r: PoseRecord?, open: UnitTable?, markers: List<Marker>): List<ItemCount> {
+        val list = machine.itemList
+        if (list.isEmpty()) return emptyList()
+        val code = open?.units?.associate { it.id to it.gtin } ?: emptyMap()
+        val marked = markers.mapNotNullTo(HashSet()) { code[it.unitId] }
+        return machine.itemTotals.view(list, open?.countsByCode() ?: emptyMap()) { key ->
+            key in marked || (r != null && lastSeen[key]?.let { r.timestampNs - it <= config.itemSeenNs } ?: false)
+        }
     }
 
     /** One prompt, by spec 5.5's priority; "Too dark" needs a light estimate the API does not carry, "Device hot" is the app's */
@@ -97,8 +130,8 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         val s = machine.section
         if (state != SectionState.COUNTING && machine.guardHolds(r.timestampNs)) return Prompt.HOLD_STILL_A_MOMENT
         when (state) {
-            SectionState.IDLE, SectionState.CLOSED -> return Prompt.SCAN_SHELF_LABEL
-            SectionState.FROZEN -> return Prompt.SCAN_LABEL_TO_CONTINUE
+            SectionState.IDLE, SectionState.CLOSED -> return if (machine.itemMode) fallback(r) else Prompt.SCAN_SHELF_LABEL
+            SectionState.FROZEN -> return if (s?.items == true) Prompt.REREAD_COUNTED_ITEMS else Prompt.SCAN_LABEL_TO_CONTINUE
             SectionState.OPEN -> return if (s != null && s.labelled && !s.seeded) Prompt.SCAN_SHELF_LABEL else fallback(r)
             SectionState.COUNTING -> Unit
         }

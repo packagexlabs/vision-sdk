@@ -82,6 +82,10 @@ data class CountConfig(
     val noDepthPromptNs: Long = 1_000_000_000L,
     val minModulePx: Double = 2.0,
     val fullResolutionWidth: Int = 3840,
+    // AR Item Count (5.10): an item section closes once the camera centre is farther than this from its anchor; a
+    // listed code is in view for this long after a read of it
+    val sectionReach: Double = 1.0,
+    val itemSeenNs: Long = 1_000_000_000L,
     // Host hooks (5.1): label recognition, and the label payload's GTINs (pack hierarchy included)
     val isLabel: ((Read) -> Boolean)? = null,
     val gtinsOfLabel: ((String) -> Set<String>?)? = null,

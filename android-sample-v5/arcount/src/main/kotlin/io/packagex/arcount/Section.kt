@@ -10,13 +10,19 @@ import kotlin.math.atan2
 import kotlin.math.hypot
 import kotlin.math.max
 
-/** A resume attempt (spec 5.1): the label re-read where it was opens a window for re-reading two COUNTED units */
-internal class ResumeAttempt(val startNs: Long, val label: Read, val record: PoseRecord) {
+/**
+ * A resume attempt (spec 5.1): the label re-read where it was opens a window for re-reading two COUNTED units; in item
+ * mode (spec 5.10) the first read of a listed code opens it, and [label] is null
+ */
+internal class ResumeAttempt(val startNs: Long, val label: Read?, val record: PoseRecord) {
     val reread = HashSet<Int>()
 }
 
-/** One section (spec 5.1): one SKU location with its label, GTIN set, anchor, units and breaks */
-class Section internal constructor(val id: String, val labelPayload: String?, gtins: Set<String>, val openedNs: Long, maxRays: Int) {
+/**
+ * One section (spec 5.1): one SKU location with its label, GTIN set, anchor, units and breaks. An item section (spec
+ * 5.10, [items]) has no label: its code set is the item list, and it holds every listed code's units.
+ */
+class Section internal constructor(val id: String, val labelPayload: String?, gtins: Set<String>, val openedNs: Long, maxRays: Int, val items: Boolean = false) {
     val labelled get() = labelPayload != null
     var gtins = gtins
         internal set
@@ -86,6 +92,12 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     private var resumedAtNs: Long? = null
     private var trackingSinceNs: Long? = null
     private var nextSection = 1
+    internal var itemList = ItemList(emptyList())
+        private set
+    internal val itemTotals = ItemTotals()
+
+    /** AR Item Count (spec 5.10): on while the item list is not empty */
+    val itemMode get() = !itemList.isEmpty()
 
     /** The start-up guard: TRACKING for 2 s and 5 s since resume() (the first frame when there was none) */
     fun guardHolds(nowNs: Long): Boolean {
@@ -135,12 +147,14 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     fun onCommand(command: Command, timestampNs: Long) {
         val s = section
         when (command) {
+            // item mode opens no section by trigger (spec 5.10): a section opens on a listed read
             Command.TriggerShort -> when {
-                s == null -> if (!guardHolds(timestampNs)) openUnlabelled(timestampNs)
+                s == null -> if (!itemMode && !guardHolds(timestampNs)) openUnlabelled(timestampNs)
                 state == COUNTING -> note("${s.id}: still-burst")
                 else -> Unit
             }
             Command.TriggerLong -> when {
+                itemMode -> Unit
                 s == null -> if (!guardHolds(timestampNs)) openUnlabelled(timestampNs)
                 state == COUNTING -> {
                     close(s, timestampNs, statusOf(s))
@@ -178,6 +192,34 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         return true
     }
 
+    /**
+     * The item list (spec 5.10). Within item mode the open section takes the new list at once: a removed code's units
+     * stay in it but are read no more, an added code counts from its next read. Turning item mode on or off ends the
+     * open section as Finish would.
+     */
+    fun setItems(codes: Collection<String>) {
+        val next = ItemList(codes)
+        itemList = next
+        note("items: ${next.keys}")
+        val s = section ?: return
+        if (s.items != itemMode) {
+            val ts = lastRecord?.timestampNs ?: s.openedNs
+            when (state) {
+                COUNTING -> close(s, ts, statusOf(s))
+                FROZEN -> close(s, ts, SectionStatus.CLOSED_FROZEN)
+                else -> {
+                    note("${s.id}: dropped, item mode changed before a unit was read")
+                    section = null
+                    state = IDLE
+                }
+            }
+            return
+        }
+        if (!s.items) return
+        s.gtins = s.gtins + next.keys
+        s.table?.frame?.gtins = next.keys
+    }
+
     fun anchorRequest(): AnchorRequest? = section?.request
 
     fun onAnchorCreated(ok: Boolean) {
@@ -200,6 +242,12 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             openAgain(s, r.timestampNs)
             return
         }
+        if (s.items && s.table != null && r.anchor != null && beyondReach(r)) {
+            note("${s.id}: camera beyond the section's reach before a unit was read, back to IDLE")
+            section = null
+            state = IDLE
+            return
+        }
         if (r.timestampNs - s.openedNs > config.openTimeoutNs) {
             note("${s.id}: no unit within ${config.openTimeoutNs / 1_000_000_000} s, back to IDLE")
             section = null
@@ -218,6 +266,8 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             val ray = Ray(inv.apply(seed.origin), inv.rotate(seed.dir))
             s.labelTrack.add(ray)
             SectionFrame(plane, s.gtins, ray, point)
+        } else if (s.items) {
+            SectionFrame(plane, itemList.keys, keyOf = ItemCode::key)
         } else {
             SectionFrame(plane, s.gtins)
         }
@@ -241,6 +291,14 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             else -> {
                 s.anchor = r.anchor
                 val t = s.table ?: return
+                // spec 5.10: leaving the view and silence are not breaks in item mode; going beyond the reach closes
+                if (s.items) {
+                    if (beyondReach(r)) {
+                        note("${s.id}: camera beyond the section's reach")
+                        close(s, ts, statusOf(s))
+                    }
+                    return
+                }
                 if (elementInImage(s, t, r)) s.lastInSectionNs = ts
                 if (t.units.none { it.state != UnitState.MANUAL && t.predict(it, r)?.inImage(r.intrinsics) == true }) s.quietSinceNs = ts
                 when {
@@ -310,11 +368,22 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             }
             return
         }
+        if (s.items && beyondReach(r)) {
+            failResume(s, r.timestampNs, null, null, "the camera went beyond the section's reach")
+            return
+        }
         if (at != null && r.timestampNs - at.startNs > config.resumeWindowNs) failResume(s, r.timestampNs, at.label, at.record, "two counted units not re-read within the window")
     }
 
+    /** Item mode (spec 5.10): the camera centre farther than [CountConfig.sectionReach] from the section anchor */
+    private fun beyondReach(r: PoseRecord) = r.cameraInAnchor().t.norm() > config.sectionReach
+
     private fun idleReads(r: PoseRecord, reads: List<Read>) {
         if (guardHolds(r.timestampNs) || r.frameTracking != Tracking.TRACKING) return
+        if (itemMode) {
+            reads.firstOrNull { !it.touchesBorder && ItemCode.key(it) in itemList.keys }?.let { openItem(it, r) }
+            return
+        }
         aimed(reads.filter { isLabel(it, r, null) }, r)?.let { openLabelled(it, r, r.timestampNs) }
     }
 
@@ -322,7 +391,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         val ts = r.timestampNs
         if (stale(s, ts, if (s.table == null) s.openedNs else s.liveSinceNs)) return
         if (r.frameTracking != Tracking.TRACKING) return
-        val labels = reads.filter { isLabel(it, r, s) }
+        val labels = if (s.items) emptyList() else reads.filter { isLabel(it, r, s) }
         val units = reads.filterNot { it in labels }
         if (s.labelled) {
             val own = labels.firstOrNull { it.text == s.labelPayload && !it.touchesBorder }
@@ -355,7 +424,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
     private fun countingReads(s: Section, r: PoseRecord, reads: List<Read>) {
         if (stale(s, r.timestampNs, s.segmentStartNs)) return
         if (r.frameTracking != Tracking.TRACKING || r.anchor == null || r.anchorTracking != Tracking.TRACKING) return
-        val labels = reads.filter { isLabel(it, r, s) }
+        val labels = if (s.items) emptyList() else reads.filter { isLabel(it, r, s) }
         nextLabel(s, labels, r)?.let {
             close(s, r.timestampNs, statusOf(s))
             openLabelled(it, r, r.timestampNs)
@@ -381,6 +450,10 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         val ts = r.timestampNs
         if (stale(s, ts, s.frozenAtNs)) return
         if (guardHolds(ts) || r.frameTracking != Tracking.TRACKING || r.anchor == null || r.anchorTracking != Tracking.TRACKING) return
+        if (s.items) {
+            itemResume(s, r, reads)
+            return
+        }
         val labels = reads.filter { isLabel(it, r, s) }
         nextLabel(s, labels, r)?.let {
             close(s, ts, SectionStatus.CLOSED_FROZEN)
@@ -409,7 +482,34 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             return
         }
         at.reread += check.countedReread
-        if (at.reread.size < config.resumeMinUnits) return
+        if (at.reread.size >= config.resumeMinUnits) resume(s, ts)
+    }
+
+    /**
+     * Item mode (spec 5.10): the first read of a listed code opens the resume window, captured at or after the
+     * break's cut-off; two COUNTED units re-read inside their gates within it resume, with no read in an ambiguity band.
+     */
+    private fun itemResume(s: Section, r: PoseRecord, reads: List<Read>) {
+        val ts = r.timestampNs
+        val t = s.table ?: return
+        val open = s.attempt
+        if (open != null && ts < open.startNs) return
+        if (open == null) {
+            if (reads.none { !it.touchesBorder && t.frame.keyOf(it) in t.frame.gtins }) return
+            s.attempt = ResumeAttempt(ts, null, r)
+            note("${s.id}: listed code read, resume window open")
+        }
+        val at = s.attempt ?: return
+        val check = t.check(r, reads)
+        if (check.inBand) {
+            failResume(s, ts, null, null, "a read fell in an ambiguity band")
+            return
+        }
+        at.reread += check.countedReread
+        if (at.reread.size >= config.resumeMinUnits) resume(s, ts)
+    }
+
+    private fun resume(s: Section, ts: Long) {
         s.attempt = null
         s.segment++
         s.segmentStartNs = ts
@@ -428,10 +528,11 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         return hypot(l.centreU - u, l.centreV - v) <= config.resumeLabelGate * t.pitchPx(r.intrinsics.fx, Prediction.cameraDepth(x, tac))
     }
 
-    private fun failResume(s: Section, ts: Long, label: Read, labelRecord: PoseRecord, why: String) {
+    /** Closes [s] as ABANDONED; a labelled one opens again at [label], an item section waits for the next listed read */
+    private fun failResume(s: Section, ts: Long, label: Read?, labelRecord: PoseRecord?, why: String) {
         note("${s.id}: resume failed, $why")
         close(s, ts, SectionStatus.ABANDONED)
-        openLabelled(label, labelRecord, ts)
+        if (label != null && labelRecord != null) openLabelled(label, labelRecord, ts)
     }
 
     /**
@@ -505,8 +606,22 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         note("${s.id}: OPEN, unlabelled")
     }
 
+    /** Item mode (spec 5.10): a section opens on the first read of a listed code, its anchor on that read's ray */
+    private fun openItem(read: Read, r: PoseRecord) {
+        val s = Section("S${nextSection++}", null, itemList.keys, r.timestampNs, config.maxRays, items = true)
+        section = s
+        state = OPEN
+        seed(s, read, r)
+        note("${s.id}: OPEN at listed code ${read.text}")
+    }
+
     /** OPEN again after an abandonment: same label and GTINs (none for an unlabelled section), waiting for its seed read */
     private fun openAgain(old: Section, ts: Long) {
+        if (old.items) {
+            section = null
+            state = if (state == OPEN) IDLE else CLOSED
+            return
+        }
         val s = Section("S${nextSection++}", old.labelPayload, if (old.labelled) old.gtins else emptySet(), ts, config.maxRays)
         section = s
         state = OPEN
@@ -541,6 +656,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
 
     private fun close(s: Section, ts: Long, status: SectionStatus) {
         val counts = s.table?.counts() ?: Counts(0, 0, 0, 0)
+        if (s.items) s.table?.let { itemTotals.add(it.countsByCode()) }
         results += sectionResult(s.id, s.labelPayload, s.gtins, status, counts, s.manualAdded, s.manualRemoved, s.breaks.toList(), (ts - s.openedNs) / 1_000_000)
         section = null
         state = CLOSED
