@@ -11,7 +11,8 @@ internal const val BORDER_PX = 2.0
  * What the engine took for one app-stream image, to explain slow 4K frames: its [ScanFrame.stats] ([fps] the engine's
  * frame rate; [prepareMs] picture motion and handing the frame to the detector, [detectMs] the detector's last look,
  * [decodeMs] localizer and decoder; [barcodes] boxes, [decoded] of them with a text shown) and [scanMs], the whole
- * `scanAll` call on the worker.
+ * `scanAll` call on the worker; [droppedImages], the images so far that waited for the engine and were replaced by a
+ * newer one, unread.
  */
 data class EngineStats(
     val fps: Float,
@@ -21,9 +22,11 @@ data class EngineStats(
     val barcodes: Int,
     val decoded: Int,
     val scanMs: Float,
+    val droppedImages: Long,
 )
 
-internal fun FrameStats.toEngineStats(scanMs: Float) = EngineStats(framesPerSecond, prepareMs, detectMs, decodeMs, barcodes, decoded, scanMs)
+internal fun FrameStats.toEngineStats(scanMs: Float, droppedImages: Long) =
+    EngineStats(framesPerSecond, prepareMs, detectMs, decodeMs, barcodes, decoded, scanMs, droppedImages)
 
 /**
  * Every corner of [corners] (x0, y0, ... x3, y3, 0..1 of a [uprightWidth] x [uprightHeight] frame that [rotationDegrees]

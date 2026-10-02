@@ -13,7 +13,6 @@ import io.packagex.arcount.Read
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The engine's refreshAfterMs while an AR Count session runs: 0 re-reads every shown barcode in every frame, as far as
@@ -34,16 +33,18 @@ internal fun runBehind(worker: ExecutorService, task: () -> Unit) {
 /**
  * The engine worker (spec 5.8), the spike's: images of the app stream go to BarcodeScannerApp's engine
  * ([BarcodeScanner.scanAll] of the planes, the whole frame, turned upright by the camera's SENSOR_ORIENTATION) on one
- * worker thread, single-flight: an image that comes while one is decoded is closed unread. The engine runs with
- * [ScannerSettings.repeatedPayloads] (a shelf of identical units) and [AR_REFRESH_AFTER_MS]. Every decoded image's
- * reads ([readsOf]) and what it took go to the callback, empty ones too: the counter learns which frames were decoded.
+ * worker thread, one at a time. An image that comes while one is decoded waits for the engine, the newest one only
+ * ([LatestWins]), so a decode a little longer than a frame (4K: about 39 ms, frames every 33 ms) does not leave the
+ * worker idle until the next frame. The engine runs with [ScannerSettings.repeatedPayloads] (a shelf of identical units)
+ * and [AR_REFRESH_AFTER_MS]. Every decoded image's reads ([readsOf]) and what it took go to the callback, empty ones
+ * too: the counter learns which frames were decoded.
  */
 class BarcodeProcessor(
     private val context: Context,
     private val refreshAfterMs: Long = AR_REFRESH_AFTER_MS,
 ) {
     private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "ArEngine") }
-    private val busy = AtomicBoolean(false)
+    private val intake = LatestWins<Decode>()
 
     @Volatile
     private var closed = false
@@ -55,8 +56,6 @@ class BarcodeProcessor(
     /** Clockwise turn that makes the camera's image upright; 90 (the Memor 35's) until [configureRotation]. */
     @Volatile
     private var rotationDegrees = 90
-
-    val isBusy: Boolean get() = busy.get()
 
     init {
         worker.execute {
@@ -80,55 +79,36 @@ class BarcodeProcessor(
         }
     }
 
-    /** Takes ownership of [image] and closes it when done; [onReads] runs on the worker with the image's timestamp. */
+    /**
+     * Takes ownership of [image] and closes it when done: decoded now, or after the decode in flight unless a newer
+     * image comes first; [onReads] runs on the worker with the image's timestamp.
+     */
     fun process(
         image: Image,
         onReads: (timestampNs: Long, reads: List<Read>, stats: EngineStats) -> Unit,
     ) {
-        if (closed || !busy.compareAndSet(false, true)) {
-            image.close()
-            return
-        }
-        // close() may have shut the worker down after the closed check above.
-        try {
-            worker.execute {
-                try {
-                    val scanner = scanner ?: return@execute
-                    val w = image.width
-                    val h = image.height
-                    val ts = image.timestamp
-                    val rotation = rotationDegrees
-                    val p = image.planes
-                    val started = System.nanoTime()
-                    val frame = scanner.scanAll(
-                        p[0].buffer, p[1].buffer, p[2].buffer, w, h, p[0].rowStride, p[1].rowStride, p[1].pixelStride,
-                        Rect(0, 0, w, h), rotation, ts,
-                    )
-                    val scanMs = (System.nanoTime() - started) / 1e6f
-                    onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs))
-                } catch (t: Throwable) {
-                    Log.w(TAG, "decode failed", t)
-                } finally {
-                    image.close()
-                    busy.set(false)
-                }
-            }
-        } catch (e: RejectedExecutionException) {
-            image.close()
-            busy.set(false)
-        }
+        val d = Decode(image, onReads)
+        if (closed) return d.close()
+        if (intake.offer(d)) submit(d)
     }
+
+    /** Closes the image waiting for the engine, unread: the capture it belongs to has stopped. */
+    fun dropPending() = intake.clear()
 
     /**
      * Closes [reader] on the worker, after the decode in flight: that decode reads the planes of one of its images,
-     * and `ImageReader.close()` frees every image it handed out. An image of it decoded later is closed by then and
-     * throws before the engine reads it.
+     * and `ImageReader.close()` frees every image it handed out. The image waiting is closed at once, and one of its
+     * images decoded later is closed by then and throws before the engine reads it.
      */
-    fun closeAfterDecode(reader: ImageReader) = runBehind(worker) { reader.close() }
+    fun closeAfterDecode(reader: ImageReader) {
+        intake.clear()
+        runBehind(worker) { reader.close() }
+    }
 
     fun close() {
         if (closed) return
         closed = true
+        intake.clear()
         // After any frame still queued: BarcodeScanner is closed only when no scan is running.
         worker.execute {
             scanner?.close()
@@ -137,7 +117,95 @@ class BarcodeProcessor(
         worker.shutdown()
     }
 
+    // Queued on the worker, behind anything queued meanwhile: a reader's close (closeAfterDecode) runs before the next decode.
+    private fun submit(d: Decode) {
+        try {
+            worker.execute { decode(d) }
+        } catch (e: RejectedExecutionException) { // closed: nothing is decoded any more
+            d.close()
+            while (true) (intake.next() ?: break).close()
+        }
+    }
+
+    /** Worker: [d] through the engine, then the image that came meanwhile, the newest one, at once. */
+    private fun decode(d: Decode) {
+        try {
+            scanner?.let { scan(it, d) }
+        } catch (t: Throwable) {
+            Log.w(TAG, "decode failed", t)
+        } finally {
+            d.close()
+        }
+        // Spec 5.8's blur pre-skip belongs at this hand-off too once it exists (wave 1 has none)
+        intake.next()?.let(::submit)
+    }
+
+    private fun scan(scanner: BarcodeScanner, d: Decode) {
+        val image = d.image
+        val w = image.width
+        val h = image.height
+        val ts = image.timestamp
+        val rotation = rotationDegrees
+        val p = image.planes
+        val started = System.nanoTime()
+        val frame = scanner.scanAll(
+            p[0].buffer, p[1].buffer, p[2].buffer, w, h, p[0].rowStride, p[1].rowStride, p[1].pixelStride,
+            Rect(0, 0, w, h), rotation, ts,
+        )
+        val scanMs = (System.nanoTime() - started) / 1e6f
+        d.onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs, intake.dropped))
+    }
+
+    /** An app-stream image for the engine, and where its reads go */
+    private class Decode(val image: Image, val onReads: (Long, List<Read>, EngineStats) -> Unit) : AutoCloseable {
+        override fun close() = image.close()
+    }
+
     private companion object {
         const val TAG = "ArEngine"
+    }
+}
+
+/**
+ * The engine's intake (spec 5.8 step 1): one item in work and at most one waiting, latest wins. An item that comes
+ * while one is in work waits in the slot; a newer one takes its place, and the one it replaces is closed unread and
+ * counted in [dropped]. Offered on the camera thread, taken on the worker, cleared on teardown.
+ */
+internal class LatestWins<T : AutoCloseable> {
+    private var working = false
+    private var pending: T? = null
+
+    /** Items closed unread because a newer one replaced them in the slot */
+    @Volatile
+    var dropped = 0L
+        private set
+
+    /** [item] came: true when it is to be worked on now (busy until [next] returns null), false when it waits. */
+    @Synchronized
+    fun offer(item: T): Boolean {
+        if (!working) {
+            working = true
+            return true
+        }
+        pending?.let {
+            it.close()
+            dropped++
+        }
+        pending = item
+        return false
+    }
+
+    /** The item in work is done: the waiting one, in work from now on, or null (idle) when none waits. */
+    @Synchronized
+    fun next(): T? = pending.also {
+        pending = null
+        if (it == null) working = false
+    }
+
+    /** Teardown: the waiting item, if any, is closed unread (not counted: nothing newer took its place). */
+    @Synchronized
+    fun clear() {
+        pending?.close()
+        pending = null
     }
 }

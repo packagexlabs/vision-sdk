@@ -115,12 +115,17 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
     private var decoded = 0
     private var reads = 0
     private var droppedBefore = 0L
+    private var imagesDroppedBefore = 0L
     private var lastFps = 0f
 
     /** Adds one image; the line of the window it closes, if it closes one. */
     fun add(timestampNs: Long, s: EngineStats, reads: Int, dropped: Long): String? {
-        if (startNs == Long.MIN_VALUE) start(timestampNs, dropped)
-        val line = if (timestampNs - startNs >= lengthNs && frames > 0) line(timestampNs, dropped).also { start(timestampNs, dropped) } else null
+        if (startNs == Long.MIN_VALUE) start(timestampNs, dropped, s.droppedImages)
+        val line = if (timestampNs - startNs >= lengthNs && frames > 0) {
+            line(timestampNs, dropped, s.droppedImages).also { start(timestampNs, dropped, s.droppedImages) }
+        } else {
+            null
+        }
         frames++
         scanSum += s.scanMs
         scanMax = maxOf(scanMax, s.scanMs)
@@ -134,7 +139,7 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
         return line
     }
 
-    private fun start(timestampNs: Long, dropped: Long) {
+    private fun start(timestampNs: Long, dropped: Long, imagesDropped: Long) {
         startNs = timestampNs
         frames = 0
         scanSum = 0.0
@@ -146,17 +151,18 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
         decoded = 0
         reads = 0
         droppedBefore = dropped
+        imagesDroppedBefore = imagesDropped
     }
 
-    private fun line(nowNs: Long, dropped: Long): String {
+    private fun line(nowNs: Long, dropped: Long, imagesDropped: Long): String {
         val seconds = (nowNs - startNs) / 1e9
         val n = frames.toDouble()
         return String.format(
             Locale.US,
             "engine: %d images in %.1f s (%.1f/s, engine fps %.1f), scan mean %.0f max %.0f ms, prepare %.0f, detect %.0f, decode %.0f ms, " +
-                "per image %.1f boxes, %.1f shown, %.1f reads; %d reads batches dropped",
+                "per image %.1f boxes, %.1f shown, %.1f reads; %d images replaced by a newer one unread, %d reads batches dropped",
             frames, seconds, frames / seconds, lastFps, scanSum / n, scanMax, prepareSum / n, detectSum / n, decodeSum / n,
-            barcodes / n, decoded / n, reads / n, dropped - droppedBefore,
+            barcodes / n, decoded / n, reads / n, imagesDropped - imagesDroppedBefore, dropped - droppedBefore,
         )
     }
 }

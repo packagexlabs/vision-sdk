@@ -219,11 +219,16 @@ class ArSessionController @Inject constructor(
         Log.i(TAG, "app stream $stream")
     }
 
-    /** Camera thread: an app-stream image goes to the engine unless it is busy (spec 5.8, single-flight). */
+    /**
+     * Camera thread: an app-stream image goes to the engine, decoded now or as the newest after the decode in flight
+     * (spec 5.8). At most three are held then, the reader's maxImages: the one decoded, the one waiting and the one
+     * acquired here, which replaces it; while two are held acquireLatestImage cannot skip ahead, so each frame's call
+     * takes the next queued image and the last call leaves the newest one waiting.
+     */
     private fun onImage(r: ImageReader) {
         val image = runCatching { r.acquireLatestImage() }.getOrNull() ?: return
         val m = mapper
-        if (m == null || engine.isBusy) {
+        if (m == null) {
             image.close()
             return
         }
@@ -352,6 +357,7 @@ class ArSessionController @Inject constructor(
             d.close()
             if (cb?.closed?.await(CLOSE_WAIT_MS, TimeUnit.MILLISECONDS) == false) Log.w(TAG, "camera not closed after $CLOSE_WAIT_MS ms")
         }
+        if (reader != null) engine.dropPending() // of the capture just stopped: never decoded after a pause or a reopen
     }
 
     private inner class DeviceCallback(private val gen: Int, private val retriesLeft: Int) : CameraDevice.StateCallback() {

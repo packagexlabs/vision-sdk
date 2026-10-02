@@ -75,6 +75,6 @@ class ReadsTest {
     }
 
     @Test fun engineStatsCarryTheFrameStats() {
-        assertEquals(EngineStats(12f, 5f, 20f, 18f, 4, 3, 47f), FrameStats(12f, 4, 3, 5f, 20f, 18f).toEngineStats(47f))
+        assertEquals(EngineStats(12f, 5f, 20f, 18f, 4, 3, 47f, 9L), FrameStats(12f, 4, 3, 5f, 20f, 18f).toEngineStats(47f, 9L))
     }
 }
