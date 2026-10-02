@@ -106,7 +106,19 @@ enum class Prompt {
 }
 
 /** A unit's marker in normalized coordinates (0..1) of the unrotated image of the latest frame */
-data class Marker(val unitId: Int, val state: UnitState, val u: Double, val v: Double, val sizeU: Double)
+/**
+ * [anchorPoint] (anchor frame) and [sizeM] (metres) let the app project the marker with the pose of the frame it
+ * draws (spec 5.5, no frame of lag); null when the marker has no 3D point
+ */
+data class Marker(
+    val unitId: Int,
+    val state: UnitState,
+    val u: Double,
+    val v: Double,
+    val sizeU: Double,
+    val anchorPoint: Vec3? = null,
+    val sizeM: Double = 0.0,
+)
 
 /** A place in the row where a unit should be and none was read: tapping it adds a unit by hand */
 data class Gap(val gapId: Int, val u: Double, val v: Double)
@@ -152,6 +164,8 @@ data class CountView(
     val closed: List<SectionResult>,
     /** AR Item Count (spec 5.10): every listed code with its count over all sections, in list order */
     val items: List<ItemCount> = emptyList(),
+    /** The engine's refresh for its next frames (spec 5.3 schedule); 0 re-reads every shown code in every frame */
+    val desiredRefreshMs: Int = 0,
 ) {
     companion object {
         val EMPTY = CountView(SectionState.IDLE, null, emptyList(), emptyList(), null, emptyList())
@@ -188,4 +202,7 @@ interface ArCounter {
 
     /** AR Item Count (spec 5.10): the item list, the codes counted; called whenever it changes. Empty: nothing counted. */
     fun setItems(codes: Set<String>) {}
+
+    /** A downscaled luma copy of the app-stream frame with this timestamp, for the patch tracker (spec 5.9) */
+    fun onLuma(timestampNs: Long, img: LumaImage, streamPxPerLumaPx: Double) {}
 }
