@@ -14,11 +14,11 @@ class TrackingScenarioTest {
          * 12 cm walks at 15 cm/s without decodes; at each stop 1.5 s still, 1.5 s of ±5.5 mm sway, or a 5 cm slide at
          * 5 cm/s; [budget] codes decoded per engine frame; [tracking]: the core gets a luma copy of every frame.
          */
-        fun stopAndRead(budget: Int, seed: Int, stop: String, back: Boolean, noisePx: Double, tracking: Boolean): Run {
+        fun stopAndRead(budget: Int, seed: Int, stop: String, back: Boolean, noisePx: Double, tracking: Boolean, lumaFramesLate: Int = 0): Run {
             val views = ArrayList<CountView>()
             val core = CountingCore(hostConfig)
             val sim = Sim(row(10, 0.06) + label(), CoreCounter(core), noisePx = noisePx, seed = seed)
-            if (tracking) sim.feedLuma(core, LumaScene({ sim.symbols }, seed = seed))
+            if (tracking) sim.feedLuma(core, LumaScene({ sim.symbols }, seed = seed), lumaFramesLate)
             sim.readsPerFrame = budget
             fun go(path: List<Pose>) = sim.run(path) { views += core.view() }
             go(Paths.hold(cameraAt(0.0), 5.5))
@@ -60,6 +60,20 @@ class TrackingScenarioTest {
         assertEquals(10, result.counted)
     }
 
+    @Test
+    fun withEachLumaCopyAfterItsPoseRecordTheSlideStillCountsTenComplete() {
+        // 1: right after its own record; 2: after the next frame's record too (a frame late); 3: two frames late
+        for (late in 1..3) {
+            val run = stopAndRead(2, seed = 1, stop = "slide", back = false, noisePx = 15.0, tracking = true, lumaFramesLate = late)
+            val result = run.core.view().closed.single()
+            assertTrue(truthKept(run))
+            assertEquals("$late frames late", SectionStatus.COMPLETE, result.status)
+            assertEquals(10, result.counted)
+            assertTrue(run.core.patchTracks.trackedRays > 0)
+            assertEquals(0, run.core.lateLumas)
+        }
+    }
+
     /** The full table, off and on; run with ARCOUNT_TABLE=1 (several minutes) */
     @Test
     fun stopAndReadTable() {
@@ -70,7 +84,8 @@ class TrackingScenarioTest {
         val sb = StringBuilder("| Path | Stop | Noise | Tracking | budget 1 | budget 2 | budget 3 | all codes |\n|---|---|---|---|---|---|---|---|\n")
         for (back in listOf(false, true)) for (stop in listOf("still", "sway", "slide")) for (noise in listOf(1.0, 15.0)) for (tracking in if (System.getenv("ARCOUNT_ON_ONLY") != null) listOf(true) else listOf(false, true)) {
             val cells = budgets.map { budget ->
-                val runs = (1..seeds).map { seed -> stopAndRead(budget, seed, stop, back, noise, tracking) }
+                val late = (System.getenv("ARCOUNT_LUMA_LATE") ?: "0").toInt()
+                val runs = (1..seeds).map { seed -> stopAndRead(budget, seed, stop, back, noise, tracking, late) }
                 runs.forEachIndexed { i, r ->
                     if (!truthKept(r)) failures += "back=$back stop=$stop noise=$noise tracking=$tracking budget=$budget seed=${i + 1}: ${r.core.view().closed}"
                 }
