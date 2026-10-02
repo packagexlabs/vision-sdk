@@ -5,9 +5,8 @@ import android.graphics.RectF
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.packagex.visiondemo.ar.ArCamera
-import io.packagex.visiondemo.ar.NoArCamera
-import io.packagex.visiondemo.ar.arRows
+import io.packagex.visiondemo.ar.ArCount
+import io.packagex.visiondemo.ar.NoArCount
 import io.packagex.visiondemo.camera.Camera
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.camera.ScanEvent
@@ -72,7 +71,7 @@ class ScannerViewModel @Inject constructor(
     private val entitlement: EntitlementRepository,
     private val catalog: ItemCatalogRepository,
     secrets: Secrets,
-    internal val ar: ArCamera = NoArCamera,
+    internal val ar: ArCount = NoArCount,
     internal val document: DocumentCamera = NoDocumentCamera,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ScannerUiState(missingKey = if (secrets.isMissing) secrets.missingMessage else null))
@@ -135,8 +134,8 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { models.states.collect { m -> _state.update { it.copy(models = m) } } }
         viewModelScope.launch { models.versions.collect { v -> _state.update { it.copy(modelVersions = v) } } }
         viewModelScope.launch { catalog.items.collect { i -> _state.update { it.copy(items = i) } } }
-        viewModelScope.launch { catalog.names.collect(::setNames) }
-        viewModelScope.launch { ar.counts.collect { c -> _state.update { it.copy(arCounts = c) } } }
+        viewModelScope.launch { ar.count.collect { v -> _state.update { it.copy(arCount = v) } } }
+        viewModelScope.launch { ar.stream.collect { st -> _state.update { it.copy(arStream = st) } } }
         viewModelScope.launch { ar.errors.collect(::toast) }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
@@ -201,7 +200,7 @@ class ScannerViewModel @Inject constructor(
             ScannerAction.AddItemsInView -> addItemsInView()
             is ScannerAction.RemoveItem -> setItems(s.items - a.sku)
             ScannerAction.ClearItems -> setItems(emptyList())
-            ScannerAction.ScanNext -> { closeResult(); if (s.mode == ScanMode.Ar) ar.clear() }   // AR "New Scan" (iOS scanNext)
+            ScannerAction.ScanNext -> { closeResult(); if (s.mode == ScanMode.Ar) ar.reset() }   // AR "New Scan": a new counter, its sections gone
             is ScannerAction.Copy -> { _effects.trySend(ScannerEffect.Copy(a.text)); toast("Copied ${a.label}") }
             is ScannerAction.SendFeedback -> sendFeedback(a.entries, a.comment)
             ScannerAction.ClearTags -> _state.update { it.copy(tags = emptyList()) }
@@ -218,8 +217,8 @@ class ScannerViewModel @Inject constructor(
                 toast("Image picked from Photos")
                 runOcr(a.bitmap, emptyList())
             }
-            is ScannerAction.NameArItem -> nameArItem(a.sku.trim(), a.name.trim())
-            is ScannerAction.RemoveArItem -> { setNames(s.itemNames - a.sku); viewModelScope.launch { catalog.remove(a.sku) } }
+            // The overlay sits on the live camera; nothing reaches the counter under a result.
+            is ScannerAction.ArCommand -> if (s.mode == ScanMode.Ar && !s.home && s.result == null) ar.command(a.command)
             is ScannerAction.ArInstallResult -> when (a.result) {
                 ArInstall.Installed -> { arInstalled = true; setMode(ScanMode.Ar) }
                 ArInstall.Declined -> toast("AR Barcode needs Google Play Services for AR")
@@ -236,7 +235,6 @@ class ScannerViewModel @Inject constructor(
         // First AR entry: install ARCore from the Activity and stay where we are until it is there.
         if (m == ScanMode.Ar && !arInstalled && !ar.installed()) { _effects.trySend(ScannerEffect.InstallArCore); return }
         if (!s.home) leaveMode()   // from home, the mode was already left
-        if (m == ScanMode.Ar) ar.clear()         // every AR entry starts a new scan (iOS reset)
         if (m == ScanMode.DocAcq) doc.enter()
         _state.update {
             it.copy(
@@ -346,7 +344,7 @@ class ScannerViewModel @Inject constructor(
     }
 
     /** ARCore runs unless the camera is paused (heat, idle, background) or a result covers it (iOS :482/:504).
-     *  It keeps running under sheets, so the Items sheet can name codes as they are found. */
+     *  It keeps running under the Settings sheet: a pause would break the section's tracking segment. */
     private fun syncAr() {
         if (s.mode != ScanMode.Ar || s.home) return
         if (s.paused || s.result != null) ar.pause() else ar.resume()
@@ -393,8 +391,9 @@ class ScannerViewModel @Inject constructor(
         if (s.phase != Phase.Idle || s.result != null || pendingShow != null || s.gated || s.permissionDenied) return
         if (!s.detectionEnabled && usesScanner) return toast("Detection is paused. Resume it in Settings › Advanced.")
         when (s.mode) {
-            ScanMode.Ar -> arRows(s.arCounts, s.itemNames).takeIf { it.isNotEmpty() }?.let { show(ScanResult.Ar(it)) }
-                ?: toast("No markers yet. Point at barcodes first.")
+            // The sections closed so far, as they were closed (spec 5.7); counting goes on behind the drawer's New Scan.
+            ScanMode.Ar -> s.arCount.closed.takeIf { it.isNotEmpty() }?.let { show(ScanResult.Ar(it)) }
+                ?: toast("No section closed yet. Count a shelf section, then tap Finish.")
             ScanMode.Price -> show(ScanResult.Price)   // iOS shows the drawer even with no tags yet
             ScanMode.DocAcq -> doc.shutter()
             ScanMode.Retrieval -> {
@@ -667,20 +666,6 @@ class ScannerViewModel @Inject constructor(
             ?: return toast(if (s.codesInView.isEmpty()) "Point the camera at a code, then tap Add Item" else "Code already in list")
         setItems(s.items + new)
         toast(if (new.size == 1) "Scanned and added $first" else "Added ${new.size} codes")
-    }
-
-    // MARK: AR item catalog
-
-    /** iOS `nameItem`: new markers and results pick the name up at once; AR keeps running under the sheet. */
-    private fun nameArItem(sku: String, name: String) {
-        if (sku.isEmpty() || name.isEmpty()) return
-        setNames(mapOf(sku to name) + (s.itemNames - sku))
-        viewModelScope.launch { catalog.name(sku, name) }
-    }
-
-    private fun setNames(names: Map<String, String>) {
-        _state.update { it.copy(itemNames = names) }
-        ar.catalog = names
     }
 
     // MARK: Models

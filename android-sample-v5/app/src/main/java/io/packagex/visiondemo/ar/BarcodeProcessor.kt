@@ -7,14 +7,21 @@ import android.hardware.camera2.CameraManager
 import android.media.Image
 import android.util.Log
 import com.example.barcodescanner.BarcodeScanner
-import com.example.barcodescanner.ScanFrame
-import io.packagex.visiondemo.BuildConfig
+import com.example.barcodescanner.ScannerSettings
+import io.packagex.arcount.Read
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
+
+/**
+ * The engine's refreshAfterMs while an AR Count session runs: 0 re-reads every shown barcode in every frame, as far as
+ * the frame's decode budget goes. Spec 5.3 says 100 while counting, but at 30 fps 100 re-reads only one shown barcode
+ * per frame (engine investigation, 2026-10-02). One constant, for the thermal fallback (spec 6) to raise later.
+ */
+internal const val AR_REFRESH_AFTER_MS = 0L
 
 /** Waits until every task queued on single-thread [worker] so far has run, at most [timeoutMs]; false on timeout.
  *  A shut-down worker has nothing left to wait for. */
@@ -28,65 +35,47 @@ internal fun awaitDrained(worker: ExecutorService, timeoutMs: Long): Boolean = t
 }
 
 /**
- * A barcode decoded from an ARCore CPU frame, with its centre expressed in the
- * *raw* (unrotated) image's pixel coordinates — the space ARCore's
- * `Coordinates2d.IMAGE_PIXELS` expects.
- */
-data class Detection(
-    val payload: String,
-    val format: String,
-    val rawX: Float,
-    val rawY: Float,
-)
-
-/**
- * Feeds ARCore CPU images to the barcode engine VisionSDK reads with (`com.packagexlabs:barcode-scanner`,
- * BarcodeScannerApp's [BarcodeScanner.scanAll] of the planes, the whole frame), on one worker thread,
- * single-flight. Only barcodes whose text shows are reported: the engine shows a text once two frames
- * agree and reports only what it sees in the frame, so no predicted position reaches the AR placement.
+ * The engine worker (spec 5.8), the spike's: images of the app stream go to BarcodeScannerApp's engine
+ * ([BarcodeScanner.scanAll] of the planes, the whole frame, turned upright by the camera's SENSOR_ORIENTATION) on one
+ * worker thread, single-flight: an image that comes while one is decoded is closed unread. The engine runs with
+ * [ScannerSettings.repeatedPayloads] (a shelf of identical units) and [AR_REFRESH_AFTER_MS]. Every decoded image's
+ * reads ([readsOf]) and what it took go to the callback, empty ones too: the counter learns which frames were decoded.
  */
 class BarcodeProcessor(
     private val context: Context,
+    private val refreshAfterMs: Long = AR_REFRESH_AFTER_MS,
 ) {
-    private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "ArBarcodeDecode") }
+    private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "ArEngine") }
     private val busy = AtomicBoolean(false)
 
     @Volatile
     private var closed = false
 
     // Of the worker: loading the detector takes a moment, which the main thread does not have.
-    // Null until it is made, and for good if it cannot be (then AR reads no barcode).
+    // Null until it is made, and for good if it cannot be (then nothing is read).
     private var scanner: BarcodeScanner? = null
 
-    val isBusy: Boolean get() = busy.get()
-
-    // Fallback until configureRotation() runs; matches the old hardcoded
-    // value, verified 90 on the Datalogic Memor 35 via `dumpsys media.camera`
-    // (android.sensor.orientation). Devices vary, so this is replaced with
-    // the real SENSOR_ORIENTATION for ARCore's own camera once the session
-    // picks one.
+    /** Clockwise turn that makes the camera's image upright; 90 (the Memor 35's) until [configureRotation]. */
     @Volatile
     private var rotationDegrees = 90
+
+    val isBusy: Boolean get() = busy.get()
 
     init {
         worker.execute {
             try {
-                scanner = BarcodeScanner.create(context.applicationContext)
+                scanner = BarcodeScanner.create(context.applicationContext, ScannerSettings(repeatedPayloads = true))
+                    .also { it.refreshAfterMs = refreshAfterMs }
             } catch (t: Throwable) {
-                Log.e(TAG, "the barcode scanner could not be made; AR reads no barcodes", t)
+                Log.e(TAG, "the barcode scanner could not be made; AR Count reads no barcodes", t)
             }
         }
     }
 
-    /**
-     * Reads SENSOR_ORIENTATION for [cameraId] (ARCore's chosen camera) and
-     * uses it for both the scanner's rotation and [uprightCentreToRaw].
-     * Call once the session's camera config is known, after `Session.configure`.
-     */
+    /** Reads SENSOR_ORIENTATION of [cameraId], the camera ARCore runs on. */
     fun configureRotation(cameraId: String) {
         runCatching {
-            val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-            manager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.SENSOR_ORIENTATION)
+            (context.getSystemService(Context.CAMERA_SERVICE) as CameraManager).getCameraCharacteristics(cameraId).get(CameraCharacteristics.SENSOR_ORIENTATION)
         }.onSuccess { orientation ->
             if (orientation != null) rotationDegrees = orientation
         }.onFailure { t ->
@@ -94,54 +83,49 @@ class BarcodeProcessor(
         }
     }
 
-    /** Takes ownership of [image] and closes it when done. */
+    /** Takes ownership of [image] and closes it when done; [onReads] runs on the worker with the image's timestamp. */
     fun process(
         image: Image,
-        onResult: (List<Detection>) -> Unit,
+        onReads: (timestampNs: Long, reads: List<Read>, stats: EngineStats) -> Unit,
     ) {
         if (closed || !busy.compareAndSet(false, true)) {
             image.close()
             return
         }
-        worker.execute {
-            try {
-                val scanner = scanner ?: return@execute
-                val rawW = image.width
-                val rawH = image.height
-                val rotation = rotationDegrees
-                val p = image.planes
-                val frame =
-                    scanner.scanAll(
-                        p[0].buffer,
-                        p[1].buffer,
-                        p[2].buffer,
-                        rawW,
-                        rawH,
-                        p[0].rowStride,
-                        p[1].rowStride,
-                        p[1].pixelStride,
-                        Rect(0, 0, rawW, rawH),
-                        rotation,
-                        image.timestamp,
+        // close() may have shut the worker down after the closed check above.
+        try {
+            worker.execute {
+                try {
+                    val scanner = scanner ?: return@execute
+                    val w = image.width
+                    val h = image.height
+                    val ts = image.timestamp
+                    val rotation = rotationDegrees
+                    val p = image.planes
+                    val started = System.nanoTime()
+                    val frame = scanner.scanAll(
+                        p[0].buffer, p[1].buffer, p[2].buffer, w, h, p[0].rowStride, p[1].rowStride, p[1].pixelStride,
+                        Rect(0, 0, w, h), rotation, ts,
                     )
-                val detections = detectionsOf(frame, rotation, rawW, rawH)
-                if (detections.isNotEmpty()) {
-                    if (BuildConfig.DEBUG) Log.d("MarkerDiag", "BATCH dets=${detections.size}")
-                    onResult(detections)
+                    val scanMs = (System.nanoTime() - started) / 1e6f
+                    onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs))
+                } catch (t: Throwable) {
+                    Log.w(TAG, "decode failed", t)
+                } finally {
+                    image.close()
+                    busy.set(false)
                 }
-            } catch (t: Throwable) {
-                Log.w(TAG, "decode failed", t)
-            } finally {
-                image.close()
-                busy.set(false)
             }
+        } catch (e: RejectedExecutionException) {
+            image.close()
+            busy.set(false)
         }
     }
 
     /**
-     * Blocks until the decode in flight (if any) has finished, at most [timeoutMs]: its [Image] belongs to
-     * the ARCore session, so the session must not close under it. The single worker runs FIFO, so a no-op
-     * queued behind the decode completes once the decode has.
+     * Blocks until the decode in flight (if any) has finished, at most [timeoutMs]: its [Image] belongs to the app
+     * stream's ImageReader, which must not close under it. The single worker runs FIFO, so a no-op queued behind the
+     * decode completes once the decode has.
      */
     fun awaitIdle(timeoutMs: Long) {
         if (!awaitDrained(worker, timeoutMs)) Log.w(TAG, "decode still running after $timeoutMs ms")
@@ -159,48 +143,6 @@ class BarcodeProcessor(
     }
 
     private companion object {
-        const val TAG = "ArBarcodeProcessor"
-    }
-}
-
-/**
- * The barcodes of [frame] whose text shows, with their centres in pixels of the raw
- * [rawWidth] x [rawHeight] frame that [rotationDegrees] clockwise turned upright. A box the
- * engine has not read (or read as nothing) is left out; a read barcode whose symbology the
- * SDK has no name for is kept as "Barcode".
- */
-internal fun detectionsOf(
-    frame: ScanFrame,
-    rotationDegrees: Int,
-    rawWidth: Int,
-    rawHeight: Int,
-): List<Detection> =
-    frame.barcodes.mapNotNull { barcode ->
-        val payload = barcode.text
-        if (payload.isNullOrEmpty()) return@mapNotNull null
-        val (x, y) = uprightCentreToRaw(barcode.corners, frame.cropWidth, frame.cropHeight, rotationDegrees, rawWidth, rawHeight)
-        Detection(payload, barcode.symbology?.id ?: "Barcode", x, y)
-    }
-
-/**
- * The centre of a barcode whose [corners] are 0..1 of a [uprightWidth] x [uprightHeight] frame
- * turned upright by [rotationDegrees] clockwise, in pixels of the raw [rawWidth] x [rawHeight]
- * frame.
- */
-internal fun uprightCentreToRaw(
-    corners: FloatArray,
-    uprightWidth: Int,
-    uprightHeight: Int,
-    rotationDegrees: Int,
-    rawWidth: Int,
-    rawHeight: Int,
-): Pair<Float, Float> {
-    val u = (corners[0] + corners[2] + corners[4] + corners[6]) / 4f * uprightWidth
-    val v = (corners[1] + corners[3] + corners[5] + corners[7]) / 4f * uprightHeight
-    return when (rotationDegrees) {
-        90 -> Pair(v, rawHeight - u)
-        180 -> Pair(rawWidth - u, rawHeight - v)
-        270 -> Pair(rawWidth - v, u)
-        else -> Pair(u, v)
+        const val TAG = "ArEngine"
     }
 }

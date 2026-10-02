@@ -1,11 +1,17 @@
 package io.packagex.visiondemo.scanner
 
 import app.cash.turbine.test
-import io.packagex.visiondemo.ar.ArRow
-import io.packagex.visiondemo.ar.PayloadCount
+import io.packagex.arcount.Bracket
+import io.packagex.arcount.Command
+import io.packagex.arcount.CountView
+import io.packagex.arcount.Prompt
+import io.packagex.arcount.SectionResult
+import io.packagex.arcount.SectionState
+import io.packagex.arcount.SectionStatus
+import io.packagex.visiondemo.ar.AppStream
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.data.Secrets
-import io.packagex.visiondemo.fakes.FakeAr
+import io.packagex.visiondemo.fakes.FakeArCount
 import io.packagex.visiondemo.fakes.FakeCamera
 import io.packagex.visiondemo.fakes.FakeCatalog
 import io.packagex.visiondemo.fakes.FakeEntitlement
@@ -16,7 +22,6 @@ import io.packagex.visiondemo.fakes.FakeReport
 import io.packagex.visiondemo.fakes.MainDispatcherRule
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScanResult
-import io.packagex.visiondemo.model.SheetKind
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -30,7 +35,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/** AR Barcode in the ViewModel (iOS DemoModel's AR parts), against a fake AR controller. */
+/** AR Count in the ViewModel, against a fake session controller. */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -39,74 +44,82 @@ class ScannerViewModelArTest {
 
     private val cam = FakeCamera()
     private var ownerAtDetach: CameraOwner? = null
-    private val ar = FakeAr(onDetach = { ownerAtDetach = cam.owner })
-    private val catalog = FakeCatalog(initial = mapOf("A1" to "Apple"))
+    private val ar = FakeArCount(onDetach = { ownerAtDetach = cam.owner })
 
     private fun vm() = ScannerViewModel(
-        cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"), ar,
+        cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar,
     ).also { it.onAction(ScannerAction.PermissionResult(true)) }
 
-    private val twoCodes = listOf(PayloadCount("A1", "EAN-13", 1), PayloadCount("B2", "QR", 1))
+    private val section = SectionResult(
+        sectionId = "s1", labelPayload = "LBL-1", gtins = setOf("04006381333931"), status = SectionStatus.COMPLETE,
+        counted = 12, manualAdded = 1, manualRemoved = 0, tentative = 0, ambiguous = 0, countLow = 13, countHigh = 13,
+        breaks = emptyList(), durationMs = 42_000,
+    )
+    private val counting = CountView(
+        SectionState.COUNTING, Prompt.SLOW_DOWN, emptyList(), emptyList(),
+        Bracket(0.0, 0.0, true, "04006381333931", 13, 13, false), listOf(section),
+    )
 
-    @Test fun shutterShowsPayloadRowsWithCatalogNames() = runTest {
+    @Test fun theCountAndTheStreamFollowTheSession() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
-        ar.counts.value = twoCodes; advanceUntilIdle()
-        v.onAction(ScannerAction.Shutter); advanceUntilIdle()
-        assertEquals(ScanResult.Ar(listOf(ArRow("A1", "EAN-13", 1, "Apple"), ArRow("B2", "QR", 1, null))), v.state.value.result)
+        ar.count.value = counting; ar.stream.value = AppStream.UHD; advanceUntilIdle()
+        assertEquals(counting, v.state.value.arCount); assertEquals(AppStream.UHD, v.state.value.arStream)
     }
 
-    @Test fun shutterWithoutMarkersToasts() = runTest {
+    @Test fun shutterShowsTheClosedSectionsAsTheResult() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
+        ar.count.value = counting; advanceUntilIdle()
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle()
+        assertEquals(ScanResult.Ar(listOf(section)), v.state.value.result)
+    }
+
+    @Test fun shutterWithoutAClosedSectionToasts() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
+        ar.count.value = counting.copy(closed = emptyList()); advanceUntilIdle()
         v.effects.test {
             v.onAction(ScannerAction.Shutter)
-            assertEquals(ScannerEffect.Toast("No markers yet. Point at barcodes first."), awaitItem())
+            assertEquals(ScannerEffect.Toast("No section closed yet. Count a shelf section, then tap Finish."), awaitItem())
         }
         assertNull(v.state.value.result)
     }
 
-    @Test fun namingItemsWhileArRunsUnderTheItemsSheet() = runTest {
+    @Test fun commandsReachTheCounterOnlyFromTheLiveArCamera() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
-        ar.counts.value = twoCodes; advanceUntilIdle()
-        val clears = ar.clears
-        v.onAction(ScannerAction.OpenSheet(SheetKind.ArItems)); advanceUntilIdle()
-        v.onAction(ScannerAction.NameArItem(" B2 ", " Banana ")); advanceUntilIdle()
-        assertEquals(mapOf("B2" to "Banana", "A1" to "Apple"), v.state.value.itemNames)   // newest first (iOS)
-        assertEquals(v.state.value.itemNames, ar.catalog)                                  // the renderer sees it at once
-        assertEquals("Banana", catalog.names.value["B2"])
-        v.onAction(ScannerAction.NameArItem("C3", "  ")); advanceUntilIdle()             // blank name ignored
-        assertFalse("C3" in v.state.value.itemNames)
-        v.onAction(ScannerAction.RemoveArItem("A1")); advanceUntilIdle()
-        assertEquals(mapOf("B2" to "Banana"), ar.catalog)
-        assertFalse(ar.paused); assertEquals(clears, ar.clears); assertEquals(twoCodes, v.state.value.arCounts)
+        ar.count.value = counting; advanceUntilIdle()
+        v.onAction(ScannerAction.ArCommand(Command.AddUnit)); v.onAction(ScannerAction.ArCommand(Command.Finish))
+        assertEquals(listOf(Command.AddUnit, Command.Finish), ar.commands)
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle()   // the result covers the camera
+        v.onAction(ScannerAction.ArCommand(Command.Restart))
+        v.onAction(ScannerAction.CloseResult); v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
+        v.onAction(ScannerAction.ArCommand(Command.Restart))
+        assertEquals(listOf(Command.AddUnit, Command.Finish), ar.commands)
     }
 
-    @Test fun cameraPauseAndResumeKeepCounts() = runTest {
+    @Test fun cameraPauseAndResumeKeepTheCount() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
-        ar.counts.value = twoCodes; advanceUntilIdle()
-        val clears = ar.clears
+        ar.count.value = counting; advanceUntilIdle()
         cam.pausedFlow.value = true; advanceUntilIdle()   // heat / idle / background
         assertTrue(ar.paused); assertTrue(v.state.value.paused)
         v.onAction(ScannerAction.Resume); advanceUntilIdle()
         assertFalse(ar.paused)
-        assertEquals(clears, ar.clears); assertEquals(twoCodes, v.state.value.arCounts)
+        assertEquals(0, ar.resets); assertEquals(counting, v.state.value.arCount)
     }
 
-    @Test fun resultPausesArCloseResumesAndNewScanClears() = runTest {
+    @Test fun resultPausesArCloseResumesAndNewScanStartsAFreshCount() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
-        ar.counts.value = twoCodes; advanceUntilIdle()
-        val clears = ar.clears
+        ar.count.value = counting; advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
         assertTrue(ar.paused)
         v.onAction(ScannerAction.CloseResult); advanceUntilIdle()
-        assertFalse(ar.paused); assertEquals(clears, ar.clears); assertEquals(twoCodes, v.state.value.arCounts)
+        assertFalse(ar.paused); assertEquals(0, ar.resets); assertEquals(counting, v.state.value.arCount)
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
         v.onAction(ScannerAction.ScanNext); advanceUntilIdle()   // "New Scan"
-        assertFalse(ar.paused); assertEquals(clears + 1, ar.clears); assertEquals(emptyList<PayloadCount>(), v.state.value.arCounts)
+        assertFalse(ar.paused); assertEquals(1, ar.resets); assertEquals(CountView.EMPTY, v.state.value.arCount)
     }
 
     @Test fun pausedCameraKeepsArPausedWhenAResultCloses() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
-        ar.counts.value = twoCodes; advanceUntilIdle()
+        ar.count.value = counting; advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
         cam.pausedFlow.value = true; advanceUntilIdle()
         v.onAction(ScannerAction.CloseResult); advanceUntilIdle()
@@ -116,7 +129,7 @@ class ScannerViewModelArTest {
     @Test fun entryClaimsArAndLeavingDetachesBeforeTheScannerClaims() = runTest {
         val v = vm(); advanceUntilIdle()
         v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
-        assertEquals(CameraOwner.Ar, cam.owner); assertEquals(1, ar.clears); assertFalse(ar.paused)
+        assertEquals(CameraOwner.Ar, cam.owner); assertFalse(ar.paused)
         v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
         assertEquals(1, ar.detaches); assertEquals(CameraOwner.Ar, ownerAtDetach); assertEquals(CameraOwner.Scanner, cam.owner)
     }
@@ -139,9 +152,8 @@ class ScannerViewModelArTest {
         }
     }
 
-    @Test fun sessionErrorsToastAndTheCatalogReachesAr() = runTest {
+    @Test fun sessionErrorsToast() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
-        assertEquals(mapOf("A1" to "Apple"), ar.catalog)
         v.effects.test {
             ar.fail("Camera not available")
             assertEquals(ScannerEffect.Toast("Camera not available"), awaitItem())
@@ -151,7 +163,7 @@ class ScannerViewModelArTest {
     @Test fun newViewModelResetsSingletonCameraState() = runTest {
         val doc = io.packagex.visiondemo.fakes.FakeDocument()
         cam.front = true; doc.front = true; ar.paused = true   // left over from the previous ViewModel (Back, relaunch)
-        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"), ar, doc)
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar, doc)
         advanceUntilIdle()
         assertFalse(v.state.value.frontCamera); assertFalse(cam.front); assertFalse(doc.front); assertFalse(ar.paused)
     }

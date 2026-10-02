@@ -4,8 +4,6 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import io.packagex.visiondemo.ar.ArCamera
-import io.packagex.visiondemo.ar.ArController
 import io.packagex.visiondemo.camera.Camera
 import io.packagex.visiondemo.camera.CameraController
 import io.packagex.visiondemo.data.DataStoreItemCatalogRepository
@@ -41,9 +39,6 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindCamera(impl: CameraController): Camera
-
-    @Binds
-    abstract fun bindArCamera(impl: ArController): ArCamera
 
     @Binds
     abstract fun bindItemCatalogRepository(impl: DataStoreItemCatalogRepository): ItemCatalogRepository

@@ -56,7 +56,7 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     // A fresh SheetState per kind: detents differ per kind and can't change after creation.
     val sheetState = key(kind) { rememberModalBottomSheetState(skipPartiallyExpanded = kind !in PartialDetentKinds) }
 
-    // A half-height sheet keeps its lower half (where the Items / AR items text fields are) off screen, so the
+    // A half-height sheet keeps its lower half (where the Items text field is) off screen, so the
     // keyboard would cover a focused field: while the keyboard is up, the sheet never settles at half height
     // (opening the keyboard expands it, and so does dragging it back down to half with the keyboard still up).
     val ime = WindowInsets.ime
@@ -91,7 +91,6 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
                     SheetKind.DocType -> DocTypeSheet(state, onAction)
                     SheetKind.Items -> ItemsSheet(state, onAction)
                     SheetKind.Models -> ModelsSheet(state, onAction)
-                    SheetKind.ArItems -> ArItemsSheet(state, onAction)
                 }
             }
         }
@@ -99,12 +98,11 @@ fun SheetHost(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
 }
 
 /** iOS `.medium, .large` detents; everything else is `.large` only. */
-private val PartialDetentKinds = setOf(SheetKind.DocType, SheetKind.Items, SheetKind.ArItems)
+private val PartialDetentKinds = setOf(SheetKind.DocType, SheetKind.Items)
 
 private fun titleFor(kind: SheetKind): String = when (kind) {
     SheetKind.Settings -> "Settings"
     SheetKind.DocType -> "Document type"
     SheetKind.Items -> "Item list"
     SheetKind.Models -> "On-device models"
-    SheetKind.ArItems -> "Items"
 }

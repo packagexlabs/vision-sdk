@@ -1,7 +1,8 @@
 package io.packagex.visiondemo.scanner
 
 import androidx.compose.runtime.Immutable
-import io.packagex.visiondemo.ar.PayloadCount
+import io.packagex.arcount.CountView
+import io.packagex.visiondemo.ar.AppStream
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.designsystem.PXButtonKind
@@ -71,10 +72,11 @@ data class ScannerUiState(
     val frontCamera: Boolean = false,
     /** Last tap-to-focus point, for the focus ring; a new [FocusTap.id] restarts the ring. */
     val focus: FocusTap? = null,
-    /** AR Barcode: marked instances per payload, most first (the chip, hint, shutter and Items sheet). */
-    val arCounts: List<PayloadCount> = emptyList(),
-    /** AR item catalog, SKU -> name, newest first (iOS `ItemCatalog`). */
-    val itemNames: Map<String, String> = emptyMap(),
+    /** AR Count: what Compose shows of the counter's newest view (prompt, bracket, state, closed sections), without the
+     *  per-frame geometry the GL thread draws ([io.packagex.visiondemo.ar.forUi]). */
+    val arCount: CountView = CountView.EMPTY,
+    /** AR Count: the app stream of the running session, whose working distance the hint shows; null while none runs. */
+    val arStream: AppStream? = null,
 )
 
 /** Single-code Barcode/QR results show over the camera as a code card (v6), not on the result screen. */

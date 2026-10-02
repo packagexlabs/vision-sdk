@@ -91,7 +91,7 @@ enum class Processing {
 }
 
 enum class SheetKind {
-    Settings, DocType, Items, ArItems, Models
+    Settings, DocType, Items, Models
 }
 
 enum class Phase {

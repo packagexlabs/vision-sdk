@@ -250,10 +250,7 @@ class FakeDocument : DocumentCamera {
 }
 
 /** In-memory [ItemCatalogRepository]. */
-class FakeCatalog(initial: Map<String, String> = emptyMap(), items: List<String> = emptyList()) : ItemCatalogRepository {
-    override val names = MutableStateFlow(initial)
-    override suspend fun name(sku: String, name: String) { names.value = names.value + (sku to name) }
-    override suspend fun remove(sku: String) { names.value = names.value - sku }
+class FakeCatalog(items: List<String> = emptyList()) : ItemCatalogRepository {
     override val items = MutableStateFlow(items)
     override suspend fun setItems(items: List<String>) { this.items.value = items }
 }
