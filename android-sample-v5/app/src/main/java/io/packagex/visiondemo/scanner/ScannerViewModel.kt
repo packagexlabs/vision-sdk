@@ -105,6 +105,9 @@ class ScannerViewModel @Inject constructor(
     /** Viewfinder rect in camera-view px, from [ScannerAction.FrameChanged]. */
     private var frame: RectF? = null
 
+    /** Price tag: per SKU, the timer that ends "still in view" ([TAG_GONE_MS] with no report). */
+    private val tagInView = mutableMapOf<String, Job>()
+
     /** [ScannerAction.UpdatePrefs] writes not yet persisted. */
     private var prefWrites = 0
 
@@ -538,11 +541,19 @@ class ScannerViewModel @Inject constructor(
             is ScanEvent.PriceTag -> {   // iOS codeScannerViewDidCapturePrice: collect unique tags; the shutter shows them
                 if (s.mode != ScanMode.Price) return
                 val tag = PriceTag.from(e.data.productSKU, e.data.productPrice)
-                if (s.tags.any { it.sku == tag.sku }) return
-                _state.update { it.copy(tags = it.tags + tag) }
-                // Auto capture: a new tag opens the list, as Auto opens a code's result; Manual keeps collecting for the shutter.
+                // The SDK reports a tag again on every agreeing read while it stays in view: only a tag that
+                // comes back after [TAG_GONE_MS] out of view is a rescan.
+                val rescan = tag.sku !in tagInView
+                tagInView.remove(tag.sku)?.cancel()
+                tagInView[tag.sku] = viewModelScope.launch { delay(TAG_GONE_MS); tagInView.remove(tag.sku) }
+                val listed = s.tags.any { it.sku == tag.sku }
+                if (listed && !rescan) return
+                if (!listed) _state.update { it.copy(tags = it.tags + tag) }
+                // Auto capture: a new tag, or a listed one scanned again, opens the list, as Auto opens a code's result.
+                // Manual keeps collecting for the shutter; a listed tag scanned again says so (its count doesn't change).
                 if (s.prefs.autoCapture && s.result == null && pendingShow == null && s.sheet == null && s.alert == null &&
                     s.phase == Phase.Idle && !s.gated) show(ScanResult.Price)
+                else if (listed && !s.prefs.autoCapture) toast("${tag.name} already in list")
             }
             is ScanEvent.Failure -> onFailure(e.e)
             // Vision Scanner's hint text (iOS seesText/seesDocument); DocAcq gets the same fields from its
@@ -860,6 +871,7 @@ class ScannerViewModel @Inject constructor(
 
     private companion object {
         const val IN_VIEW_MS = 1_000L
+        const val TAG_GONE_MS = 2_000L
         /** Time for one camera pipeline to let the sensor go before the other binds (iOS handOffCamera's 300 ms). */
         const val HANDOFF_MS = 300L
     }

@@ -30,6 +30,7 @@ import android.graphics.Rect
 import io.packagex.visionsdk.core.pricetag.PriceTagData
 import io.packagex.visionsdk.exceptions.VisionSDKException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -250,13 +251,44 @@ class ScannerViewModelTest {
         v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
         v.onAction(ScannerAction.ToggleAuto); advanceUntilIdle()
         assertTrue(v.state.value.prefs.autoCapture)
-        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
         assertEquals(ScanResult.Price, v.state.value.result)
-        v.onAction(ScannerAction.CloseResult); advanceUntilIdle()
+        v.onAction(ScannerAction.CloseResult); runCurrent()
         cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
-        assertNull(v.state.value.result)   // a tag already listed doesn't reopen it
+        assertNull(v.state.value.result)   // a listed tag still in view doesn't reopen it
         cam.emit(ScanEvent.PriceTag(PriceTagData("999", "$1.00", Rect()))); advanceUntilIdle()
         assertEquals(ScanResult.Price, v.state.value.result)
+    }
+
+    @Test fun priceAutoCaptureReopensTheListWhenAListedTagIsScannedAgain() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        v.onAction(ScannerAction.ToggleAuto); advanceUntilIdle()
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
+        assertEquals(ScanResult.Price, v.state.value.result)
+        v.onAction(ScannerAction.CloseResult); runCurrent()
+        // Still in view (the SDK keeps reporting it): closing the list sticks.
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
+        assertNull(v.state.value.result)
+        // Out of view, then scanned again: the list opens on it.
+        advanceTimeBy(3_000); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
+        assertEquals(ScanResult.Price, v.state.value.result)
+        assertEquals(1, v.state.value.tags.size)
+    }
+
+    @Test fun priceManualSaysWhenAListedTagIsScannedAgain() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        assertFalse(v.state.value.prefs.autoCapture)
+        val toasts = mutableListOf<String>()
+        val collector = launch { v.effects.collect { if (it is ScannerEffect.Toast) toasts += it.text } }
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); runCurrent()
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); runCurrent()
+        assertTrue(toasts.isEmpty())   // the same scan, still in view
+        advanceTimeBy(3_000); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); runCurrent()
+        assertEquals(1, toasts.count { it.endsWith(" already in list") })
+        assertEquals(1, v.state.value.tags.size)
+        collector.cancel()
     }
 
     @Test fun priceShutterWithNoTagsShowsEmptyDrawer() = runTest {
