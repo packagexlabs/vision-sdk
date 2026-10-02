@@ -28,6 +28,7 @@ import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visiondemo.model.scannerConfig
 import android.graphics.Rect
 import io.packagex.visionsdk.core.pricetag.PriceTagData
+import io.packagex.visionsdk.core.DetectionMode
 import io.packagex.visionsdk.exceptions.VisionSDKException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -768,5 +769,48 @@ class ScannerViewModelTest {
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
         assertEquals(listOf(false, true), cam.busy)
         advanceUntilIdle(); assertEquals(listOf(false, true, false), cam.busy)
+    }
+
+    // --- VLM types capture with no text in view ---
+
+    @Test fun vlmTypeCapturesWithNoTextInView() = runTest {
+        for (t in listOf(DocType.VLM, DocType.Tire, DocType.IdCard, DocType.Plate, DocType.Meter)) {
+            val v = vm(); val cam = v.camera as FakeCamera
+            cam.textInView = false
+            v.onAction(ScannerAction.UpdatePrefs { it.copy(docType = t) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+            assertEquals(DetectionMode.Photo, cam.lastConfig!!.detection)
+            assertFalse(v.state.value.seesText); assertFalse(v.state.value.seesDocument)
+            assertEquals("Frame the subject · tap to capture", hintFor(v.state.value))
+            v.onAction(ScannerAction.Shutter); runCurrent()
+            assertEquals(1, cam.captures); assertNull(v.state.value.alert); assertEquals(Phase.Scanning, v.state.value.phase)
+        }
+    }
+
+    @Test fun nonVlmTypeStillNeedsTextInView() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.textInView = false
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+        assertEquals(DetectionMode.OCR, cam.lastConfig!!.detection)
+        assertEquals("Point camera to document", hintFor(v.state.value))
+        v.onAction(ScannerAction.Shutter); runCurrent()
+        assertEquals("No Text Found", v.state.value.alert?.title)
+        // Wild card picks its own type, so a VLM doc type behind it still needs text.
+        v.onAction(ScannerAction.DismissAlert)
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(docType = DocType.Plate, wildCard = true) }); advanceUntilIdle()
+        assertEquals(DetectionMode.OCR, cam.lastConfig!!.detection)
+    }
+
+    @Test fun vlmAutoCapturesWithoutWaitingForText() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(docType = DocType.Meter, autoCapture = true) })
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); runCurrent()
+        assertFalse(v.state.value.seesText); assertFalse(v.state.value.seesDocument)
+        advanceTimeBy(VLM_AUTO_MS - 100); assertEquals(0, cam.captures)
+        advanceTimeBy(200); assertEquals(1, cam.captures)
+
+        // A non-VLM type leaves Auto to the SDK's document detection.
+        val sl = vm(); val cam2 = sl.camera as FakeCamera
+        sl.onAction(ScannerAction.UpdatePrefs { it.copy(autoCapture = true) }); sl.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        advanceTimeBy(10_000); assertEquals(0, cam2.captures)
     }
 }

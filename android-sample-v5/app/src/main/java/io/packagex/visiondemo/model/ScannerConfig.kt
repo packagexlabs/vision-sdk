@@ -19,7 +19,9 @@ data class ScannerConfig(
     val sdkDrawsBoxes: Boolean get() = showBoxes && (detection == DetectionMode.Barcode || detection == DetectionMode.QRCode)
 }
 
-fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): ScannerConfig = when (mode) {
+/** [vlm]: Vision Scanner with a cloud VLM type, which captures in Photo mode: the SDK's OCR mode refuses a capture
+ *  with no text in view (NoTextDetected) and auto-captures only on a detected document. */
+fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean, vlm: Boolean = false): ScannerConfig = when (mode) {
     ScanMode.Barcode, ScanMode.QR -> ScannerConfig(
         detection = if (mode == ScanMode.Barcode) DetectionMode.Barcode else DetectionMode.QRCode,
         multiple = multi,
@@ -30,7 +32,7 @@ fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): Scann
     )
     // Text Templates One-Shot captures a still like Vision Scanner (iOS sdkMode .ocr); Stream runs its own camera.
     ScanMode.Ocr, ScanMode.TextTemplates -> ScannerConfig(
-        detection = DetectionMode.OCR,
+        detection = if (mode == ScanMode.Ocr && vlm) DetectionMode.Photo else DetectionMode.OCR,
         multiple = false,
         nthFrame = 7,
         restrictToFrame = false,

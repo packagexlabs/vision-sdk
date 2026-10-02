@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -165,6 +166,9 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch {
             state.map { it.phase != Phase.Idle || (it.arOn && !it.home && !it.paused && it.result == null) }
                 .distinctUntilChanged().collect(camera::setBusy)
+        }
+        viewModelScope.launch {
+            state.map(::vlmAutoArmed).distinctUntilChanged().collectLatest { if (it) { delay(VLM_AUTO_MS); shutter() } }
         }
         doc.start()
         viewModelScope.launch { state.collect(doc::sync) }
@@ -340,7 +344,7 @@ class ScannerViewModel @Inject constructor(
         if (!usesScanner) return
         val p = s.prefs
         val auto = p.autoCapture && (s.mode.isCode || s.mode.isDocument)
-        camera.apply(scannerConfig(s.mode, p.multi, p.showBoxes), frame, if (auto) ScanningMode.Auto else ScanningMode.Manual)
+        camera.apply(scannerConfig(s.mode, p.multi, p.showBoxes, p.vlm), frame, if (auto) ScanningMode.Auto else ScanningMode.Manual)
         if (!s.detectionEnabled) camera.pauseDetection()   // configuring may resume detection (iOS :259)
     }
 
@@ -384,7 +388,7 @@ class ScannerViewModel @Inject constructor(
         if (p == old) return
         _state.update { it.copy(prefs = p) }
         if (old.arTrace != p.arTrace) ar.tracing = p.arTrace
-        if (old.multi != p.multi || old.showBoxes != p.showBoxes || old.autoCapture != p.autoCapture) {
+        if (old.multi != p.multi || old.showBoxes != p.showBoxes || old.autoCapture != p.autoCapture || old.vlm != p.vlm) {
             applyConfig()
             if (old.multi != p.multi && usesScanner) camera.rescan()   // drops any half-finished single capture
         }
@@ -560,7 +564,7 @@ class ScannerViewModel @Inject constructor(
     }
 
     private fun onBoxes(codes: List<ScannedCodeResult>) {
-        val cfg = scannerConfig(s.mode, s.prefs.multi, s.prefs.showBoxes)
+        val cfg = scannerConfig(s.mode, s.prefs.multi, s.prefs.showBoxes, s.prefs.vlm)
         val detected = codes.map { it.toDetected() }
         val f = frame?.takeIf { cfg.restrictToFrame && !it.isEmpty }
         val inFrame = if (f != null) {
