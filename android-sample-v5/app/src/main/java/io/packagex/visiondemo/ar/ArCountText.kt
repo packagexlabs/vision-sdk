@@ -20,6 +20,7 @@ fun promptText(prompt: Prompt, bracket: Bracket?): String = when (prompt) {
     Prompt.MOVE_CLOSER -> "Move closer"
     Prompt.HOLD_WITHIN_30CM -> "Hold within 30 cm"
     Prompt.DEVICE_HOT -> "Device hot"
+    Prompt.REREAD_COUNTED_ITEMS -> "Point at items you counted to continue"
 }
 
 /** Whether the count is a range (spec 5.4: AMBIGUOUS or TENTATIVE units widen it) */
