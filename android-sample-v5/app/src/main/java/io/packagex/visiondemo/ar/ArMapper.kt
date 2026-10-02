@@ -84,6 +84,9 @@ class ArMapper(
     /** For the GL thread, in order */
     val anchorOps = ConcurrentLinkedQueue<AnchorOp>()
 
+    /** Every non-empty reads batch as posted, for the GL thread's pins ([ArPins]); the oldest go past [PIN_READS_CAP] */
+    val pinReads = ConcurrentLinkedQueue<ArEvent.Reads>()
+
     /** Reads batches dropped because [readsCapacity] were already waiting */
     val droppedReads: Long get() = dropped.get()
 
@@ -126,6 +129,10 @@ class ArMapper(
     fun post(event: ArEvent) {
         synchronized(lock) {
             if (stopped) return
+            if (event is ArEvent.Reads && event.reads.isNotEmpty()) {
+                pinReads.add(event)
+                while (pinReads.size > PIN_READS_CAP) pinReads.poll()
+            }
             if (event is ArEvent.Reads) {
                 if (queuedReads == readsCapacity) {
                     val it = queue.iterator()
@@ -277,5 +284,6 @@ class ArMapper(
 
     private companion object {
         const val THREAD = "ArMapper"
+        const val PIN_READS_CAP = 8
     }
 }

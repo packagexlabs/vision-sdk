@@ -205,6 +205,7 @@ class ArSessionController @Inject constructor(
 
     override fun reset() {
         mapper?.post(ArEvent.Reset(counters.create())) // the mapper gives the new counter the list
+        renderer?.clearPins()
     }
 
     override fun setItems(codes: Set<String>) {

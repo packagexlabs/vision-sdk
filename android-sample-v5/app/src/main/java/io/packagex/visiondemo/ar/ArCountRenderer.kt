@@ -12,19 +12,19 @@ import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
 import com.google.ar.core.exceptions.FatalException
 import com.google.ar.core.exceptions.SessionPausedException
+import io.packagex.arcount.BreakReason
 import io.packagex.arcount.CountView
-import io.packagex.arcount.Marker
 import io.packagex.arcount.PoseRecord
-import io.packagex.arcount.UnitState
+import io.packagex.arcount.SectionState
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.abs
-import kotlin.math.hypot
 
 /**
  * The GL thread of an AR Count session (spec 5.8): `Session.update()` (BLOCKING, paced by the camera), then the
  * anchor ops of the mapper (create or let go of the section anchor), the frame's [PoseRecord] to the mapper, the
- * camera background, and the newest view's markers, gaps and bracket point. Those come in normalized coordinates of the
+ * camera background, AR Item Count's pins ([ArPins], in place of the core's unit markers), and the newest view's gaps and
+ * bracket point. Those come in normalized coordinates of the
  * unrotated stream image; ARCore maps them to the view (`transformCoordinates2d`, IMAGE_NORMALIZED -> VIEW). The
  * bracket's and the gaps' view points go to [onScreen] for the Compose overlay. No counting here.
  */
@@ -52,6 +52,9 @@ class ArCountRenderer(
     private val background = BackgroundRenderer()
     private val marks = MarkerGlRenderer(density)
 
+    /** AR Item Count's persistent markers, one per physical barcode (GL thread) */
+    private val pins = ArPins(density)
+
     /** The section anchor while the mapper wants one (GL thread only) */
     private var anchor: Anchor? = null
 
@@ -65,11 +68,17 @@ class ArCountRenderer(
     private var lastTimestampNs = Long.MIN_VALUE
     private var lastScreen = ArScreen.NONE
     private var lastTracking: TrackingState? = null
+    private var lastState: SectionState? = null
+    private val loggedBreaks = HashSet<Pair<Long, BreakReason>>()
+    private var closedLogged = 0
 
     /** ARCore was resumed: the next frame tells the counter, with its timestamp (spec 5.1 start-up guard). */
     fun resumed() {
         resumePending = true
     }
+
+    /** New Scan: the pins go on the next frame. */
+    fun clearPins() = pins.clear()
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         GLES20.glClearColor(0f, 0f, 0f, 1f)
@@ -119,6 +128,7 @@ class ArCountRenderer(
             val rec = record(frame, ts)
             poses?.add(rec)
             mapper.post(ArEvent.Frame(rec))
+            geometry?.let { pins.onFrame(s, frame, rec, mapper.pinReads, it, viewportWidth, viewportHeight) }
         }
         draw(frame, mapper.latestView())
     }
@@ -180,15 +190,15 @@ class ArCountRenderer(
     }
 
     private fun draw(frame: Frame, view: CountView) {
-        val g = geometry ?: return
+        logView(view)
+        // AR Item Count: the pins replace the core's unit markers and the neutral rings on unlisted reads
+        val pinMarks = pins.marks(frame, view, mapper.items, viewportWidth, viewportHeight)
+        val g = geometry
         val bracket = view.bracket?.takeIf { it.inImage }
-        val markers = placeMarkers(frame, view, g)
-        // AR Item Count: a neutral ring on each code read lately that is not listed (spec 5.10)
-        val unlisted = unlistedReads(mapper.recentReads(), mapper.items, lastTimestampNs)
-        // Per marker its centre and a point sizeU to its right (its size on screen), then the unlisted reads' centres,
-        // then the gaps, then the bracket
-        val n = markers.size * 2 + unlisted.size + view.gaps.size + (if (bracket != null) 1 else 0)
-        if (n == 0) {
+        // The gaps' points, then the bracket's
+        val n = if (g == null) 0 else view.gaps.size + (if (bracket != null) 1 else 0)
+        if (n == 0 || g == null) {
+            marks.draw(pinMarks, viewportWidth, viewportHeight)
             publish(ArScreen.NONE)
             return
         }
@@ -198,27 +208,14 @@ class ArCountRenderer(
             image[i++] = g.cpuU(u).toFloat()
             image[i++] = g.cpuV(v).toFloat()
         }
-        markers.forEach { (_, p) -> put(p.u, p.v); put(p.u + p.sizeU, p.v) }
-        unlisted.forEach { put(it.centreU / g.streamWidth, it.centreV / g.streamHeight) }
         view.gaps.forEach { put(it.u, it.v) }
         bracket?.let { put(it.u, it.v) }
         val onView = FloatArray(n * 2)
         frame.transformCoordinates2d(Coordinates2d.IMAGE_NORMALIZED, image, Coordinates2d.VIEW, onView)
 
-        val out = ArrayList<ScreenMarker>(n)
+        val out = ArrayList<ScreenMarker>(pinMarks.size + n)
+        out += pinMarks
         var k = 0
-        for ((m, _) in markers) {
-            val x = onView[k]
-            val y = onView[k + 1]
-            val sizePx = hypot(onView[k + 2] - x, onView[k + 3] - y)
-            k += 4
-            val r = (sizePx * 0.25f).coerceIn(dp(5f), dp(16f))
-            out += ScreenMarker(x, y, r, colorOf(m.state), r + dp(3f), WHITE)
-        }
-        repeat(unlisted.size) {
-            out += ScreenMarker(onView[k], onView[k + 1], 0f, null, dp(10f), WHITE)
-            k += 2
-        }
         val gaps = ArrayList<ScreenGap>(view.gaps.size)
         for (gap in view.gaps) {
             val x = onView[k]
@@ -233,23 +230,19 @@ class ArCountRenderer(
         publish(ArScreen(bracketPoint, gaps))
     }
 
-    /**
-     * The markers of [view] where this frame shows them (spec 5.5, no frame of lag): one with an anchor point is
-     * projected with this frame's camera and anchor poses and the stream's intrinsics; the others stay where the
-     * counter put them. A point behind the camera is not drawn.
-     */
-    private fun placeMarkers(frame: Frame, view: CountView, g: StreamGeometry): List<Pair<Marker, MarkerPlace>> {
-        if (view.markers.isEmpty()) return emptyList()
-        val a = anchor?.takeIf { it.trackingState != TrackingState.STOPPED }
-        if (a == null || view.markers.none { it.anchorPoint != null }) return view.markers.map { it to MarkerPlace(it.u, it.v, it.sizeU) }
-        val camera = frame.camera
-        val i = camera.imageIntrinsics
-        val focal = i.focalLength
-        val principal = i.principalPoint
-        val intrinsics = g.intrinsics(focal[0].toDouble(), focal[1].toDouble(), principal[0].toDouble(), principal[1].toDouble())
-        val cameraPose = camera.pose.toPose()
-        val anchorPose = a.pose.toPose()
-        return view.markers.mapNotNull { m -> placeMarker(m, cameraPose, anchorPose, intrinsics)?.let { m to it } }
+    /** One line per core state change, per break (as it happens, or with its section once closed) and per closed section */
+    private fun logView(view: CountView) {
+        if (view.state != lastState) {
+            Log.i(TAG, "core state $lastState -> ${view.state}")
+            lastState = view.state
+        }
+        for (b in view.breaks) if (loggedBreaks.add(b)) Log.i(TAG, "core break ${b.second} at ${b.first}")
+        if (view.closed.size < closedLogged) closedLogged = 0 // New Scan: a new counter
+        for (r in view.closed.drop(closedLogged)) {
+            for (b in r.breaks) if (loggedBreaks.add(b)) Log.i(TAG, "core break ${b.second} at ${b.first}")
+            Log.i(TAG, "core section ${r.sectionId} ${r.status} ${r.countLow}..${r.countHigh} breaks=${r.breaks.map { it.second }}")
+        }
+        closedLogged = view.closed.size
     }
 
     /** To the overlay, when a point moved by a pixel or more, or one came or went. */
@@ -268,21 +261,10 @@ class ArCountRenderer(
 
     private fun dp(v: Float) = v * density
 
-    private fun colorOf(state: UnitState) = when (state) {
-        UnitState.COUNTED -> GREEN
-        UnitState.TENTATIVE -> GREY
-        UnitState.AMBIGUOUS -> AMBER
-        UnitState.MANUAL -> BLUE
-    }
-
     private companion object {
         const val TAG = "ArCountRenderer"
 
-        // Spec 5.5: COUNTED green, TENTATIVE grey, AMBIGUOUS amber, MANUAL blue; the bracket point is the brand neon
-        val GREEN = floatArrayOf(27 / 255f, 242 / 255f, 163 / 255f)
-        val GREY = floatArrayOf(0.62f, 0.62f, 0.66f)
-        val AMBER = floatArrayOf(1f, 176 / 255f, 32 / 255f)
-        val BLUE = floatArrayOf(0.25f, 0.55f, 1f)
+        // The bracket point is the brand neon
         val NEON = floatArrayOf(71 / 255f, 234 / 255f, 226 / 255f)
         val WHITE = floatArrayOf(1f, 1f, 1f)
     }
