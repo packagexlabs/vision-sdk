@@ -62,6 +62,7 @@ data class CountConfig(
     val markerSigmaPitchFraction: Double = 0.1,
     val markerMaxAgeNs: Long = 1_000_000_000L,
     val gapPitches: Double = 1.75,
+    val gapMinCounted: Int = 3,
     // Prompts (5.4, 5.5, 5.6)
     val blurMaxModules: Double = 1.0,
     val blurHoldNs: Long = 1_000_000_000L,
