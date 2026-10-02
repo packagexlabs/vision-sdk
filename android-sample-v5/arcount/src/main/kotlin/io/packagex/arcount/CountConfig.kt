@@ -43,6 +43,9 @@ data class CountConfig(
     val maxExtentFromAnchor: Double = 1.0,
     val labelMaxWidth: Double = 0.025,
     val labelAssumedDepth: Double = 0.40,
+    // Not in the spec: a label opens or switches a section only when aimed at, its centre in this middle fraction of
+    // the image width and nearer the centre than the open section's own label, so two labels in view cannot ping-pong
+    val labelAimFraction: Double = 1.0 / 3,
     val guardTrackingNs: Long = 2_000_000_000L,
     val guardSinceResumeNs: Long = 5_000_000_000L,
     val openTimeoutNs: Long = 10_000_000_000L,
