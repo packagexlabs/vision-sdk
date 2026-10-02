@@ -327,10 +327,15 @@ class ArSessionController @Inject constructor(
 
     /**
      * Lets the camera go, in the order of Google's shared-camera sample: the GL thread (onPause blocks until it has
-     * paused, so no update() runs), ARCore, then the capture session and the device. Waits for the device to close,
-     * at most [CLOSE_WAIT_MS], so the next owner of the sensor can open it.
+     * paused, so no update() runs), ARCore, then the capture session and the device. A capture session still being
+     * configured is waited for first, as the sample waits for onActive: ARCore's wrapped callbacks are at work on it,
+     * and closing it under them can throw on the camera thread. Then waits for the device to close, so the next owner
+     * of the sensor can open it. Each wait is at most [CLOSE_WAIT_MS].
      */
     private fun stopCamera() {
+        if (device != null && deviceCallback?.settled?.await(CLOSE_WAIT_MS, TimeUnit.MILLISECONDS) == false) {
+            Log.w(TAG, "capture session not active after $CLOSE_WAIT_MS ms, closing it anyway")
+        }
         generation++
         opening = false
         if (running) {
@@ -354,6 +359,10 @@ class ArSessionController @Inject constructor(
     private inner class DeviceCallback(private val gen: Int, private val retriesLeft: Int) : CameraDevice.StateCallback() {
         val closed = CountDownLatch(1)
 
+        /** Counted down once the capture session is active, or failed, or the device closed: until then, once the
+         *  device has opened, the capture session is being configured. */
+        val settled = CountDownLatch(1)
+
         override fun onOpened(d: CameraDevice) {
             val s = session
             val r = reader
@@ -376,14 +385,16 @@ class ArSessionController @Inject constructor(
                     set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF)
                 }.build()
                 @Suppress("DEPRECATION") // the session-configuration form takes no ARCore-wrapped callback
-                d.createCaptureSession(surfaces, s.sharedCamera.createARSessionStateCallback(SessionCallback(gen, request), cameraHandler), cameraHandler)
+                d.createCaptureSession(surfaces, s.sharedCamera.createARSessionStateCallback(SessionCallback(gen, request, settled), cameraHandler), cameraHandler)
             } catch (e: Exception) { // CameraAccessException, IllegalStateException (closed meanwhile)
                 Log.w(TAG, "capture session not made", e)
+                settled.countDown()
                 main.post { fail(gen, "AR Count could not start the camera") }
             }
         }
 
         override fun onClosed(d: CameraDevice) {
+            settled.countDown()
             closed.countDown()
         }
 
@@ -406,7 +417,11 @@ class ArSessionController @Inject constructor(
         }
     }
 
-    private inner class SessionCallback(private val gen: Int, private val request: CaptureRequest) : CameraCaptureSession.StateCallback() {
+    private inner class SessionCallback(
+        private val gen: Int,
+        private val request: CaptureRequest,
+        private val settled: CountDownLatch,
+    ) : CameraCaptureSession.StateCallback() {
         override fun onConfigured(cs: CameraCaptureSession) {
             if (gen != generation) {
                 cs.close()
@@ -421,10 +436,12 @@ class ArSessionController @Inject constructor(
         }
 
         override fun onConfigureFailed(cs: CameraCaptureSession) {
+            settled.countDown()
             main.post { nextStream(gen) }
         }
 
         override fun onActive(cs: CameraCaptureSession) {
+            settled.countDown()
             main.post { resumeArCore(gen) }
         }
     }
