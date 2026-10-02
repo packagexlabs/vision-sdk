@@ -78,6 +78,9 @@ android {
         jniLibs.pickFirsts += listOf("**/libtensorflowlite_jni.so", "**/libtensorflowlite_gpu_jni.so")
     }
     testOptions { unitTests.isIncludeAndroidResources = true }
+    // lintVitalAnalyzeRelease crashes in lint itself on this project's build scripts ("Cannot find a KaModule for the
+    // VirtualFile", LintDriver.checkBuildScripts), failing every assembleRelease; run lint on its own (./gradlew lint).
+    lint { checkReleaseBuilds = false }
 }
 kotlin { jvmToolchain(17) }
 
