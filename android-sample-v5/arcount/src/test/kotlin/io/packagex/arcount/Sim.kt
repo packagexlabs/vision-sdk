@@ -104,6 +104,9 @@ class Sim(
     var lastRecord: PoseRecord? = null
         private set
 
+    /** Called first in every frame with its timestamp and the true camera: the luma copy (LumaScene) */
+    var luma: ((Long, Pose) -> Unit)? = null
+
     fun ts(i: Int = frame) = t0 + i * FRAME_NS
 
     init {
@@ -125,6 +128,7 @@ class Sim(
     /** One frame with the true camera at [camera]; [after] runs once the frame has been fed */
     fun step(camera: Pose) {
         val ts = ts()
+        luma?.invoke(ts, camera)
         val reported = Pose(camera.t + cameraShift, camera.q)
         val a = anchor?.let { Pose(it.t + anchorShift, it.q) }
         val record = PoseRecord(ts, reported, a, tracking, a?.let { anchorTracking }, K4K, EXPOSURE_NS)
