@@ -117,12 +117,14 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
     private var droppedBefore = 0L
     private var imagesDroppedBefore = 0L
     private var lastFps = 0f
+    private var lastRefreshMs = -1L
+    private var pipeBefore = PipeCounters()
 
     /** Adds one image; the line of the window it closes, if it closes one. */
     fun add(timestampNs: Long, s: EngineStats, reads: Int, dropped: Long): String? {
-        if (startNs == Long.MIN_VALUE) start(timestampNs, dropped, s.droppedImages)
+        if (startNs == Long.MIN_VALUE) start(timestampNs, dropped, s.droppedImages, s.pipe)
         val line = if (timestampNs - startNs >= lengthNs && frames > 0) {
-            line(timestampNs, dropped, s.droppedImages).also { start(timestampNs, dropped, s.droppedImages) }
+            line(timestampNs, dropped, s.droppedImages, s.pipe).also { start(timestampNs, dropped, s.droppedImages, s.pipe) }
         } else {
             null
         }
@@ -136,10 +138,11 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
         decoded += s.decoded
         this.reads += reads
         lastFps = s.fps
+        lastRefreshMs = s.refreshAfterMs
         return line
     }
 
-    private fun start(timestampNs: Long, dropped: Long, imagesDropped: Long) {
+    private fun start(timestampNs: Long, dropped: Long, imagesDropped: Long, pipe: PipeCounters) {
         startNs = timestampNs
         frames = 0
         scanSum = 0.0
@@ -152,19 +155,29 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
         reads = 0
         droppedBefore = dropped
         imagesDroppedBefore = imagesDropped
+        pipeBefore = pipe
     }
 
-    private fun line(nowNs: Long, dropped: Long, imagesDropped: Long): String {
+    private fun line(nowNs: Long, dropped: Long, imagesDropped: Long, pipe: PipeCounters): String {
         val seconds = (nowNs - startNs) / 1e9
         val n = frames.toDouble()
+        val p = pipe
+        val b = pipeBefore
+        val copies = p.lumaFrames - b.lumaFrames
+        val scaled = copies - (p.lumaDropped - b.lumaDropped)
         return String.format(
             Locale.US,
             "engine: %d images in %.1f s (%.1f/s, engine fps %.1f), scan mean %.0f max %.0f ms, prepare %.0f, detect %.0f, decode %.0f ms, " +
+                "refresh %d ms, luma %d copies mean %.2f ms on the camera thread + %.2f ms downscale, %d replaced, %d images skipped for blur, " +
                 "per image %.1f boxes, %.1f shown, %.1f reads; %d images replaced by a newer one unread, %d reads batches dropped",
             frames, seconds, frames / seconds, lastFps, scanSum / n, scanMax, prepareSum / n, detectSum / n, decodeSum / n,
+            lastRefreshMs, copies, meanMs(p.lumaCopyNs - b.lumaCopyNs, copies), meanMs(p.lumaScaleNs - b.lumaScaleNs, scaled),
+            p.lumaDropped - b.lumaDropped, p.blurSkipped - b.blurSkipped,
             barcodes / n, decoded / n, reads / n, imagesDropped - imagesDroppedBefore, dropped - droppedBefore,
         )
     }
+
+    private fun meanMs(ns: Long, count: Long) = if (count > 0) ns / 1e6 / count else 0.0
 }
 
 private fun poseJson(p: io.packagex.arcount.Pose) = "[${p.t.x},${p.t.y},${p.t.z},${p.q.x},${p.q.y},${p.q.z},${p.q.w}]"
