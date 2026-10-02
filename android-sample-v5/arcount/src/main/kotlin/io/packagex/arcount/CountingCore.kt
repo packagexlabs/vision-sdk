@@ -27,6 +27,10 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
 
     internal val droppedReads get() = pairing.droppedReads
 
+    /** Reads dropped at the boundary because a corner was not a finite number */
+    internal var nonFiniteReads = 0
+        private set
+
     override fun onResume(timestampNs: Long) {
         machine.onResume(timestampNs)
         cached = null
@@ -42,8 +46,11 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
     }
 
     override fun onReads(timestampNs: Long, reads: List<Read>) {
-        machine.noteReads(timestampNs, reads)
-        pairing.addReads(timestampNs, reads)?.let { machine.onReads(it) }
+        // review M1: a corner that is not a finite number would throw in the ray, or place a NaN anchor: drop it here
+        val finite = reads.filter { r -> r.corners.all { it.isFinite() } }
+        nonFiniteReads += reads.size - finite.size
+        machine.noteReads(timestampNs, finite)
+        pairing.addReads(timestampNs, finite)?.let { machine.onReads(it) }
         cached = null
     }
 

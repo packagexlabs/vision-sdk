@@ -141,6 +141,34 @@ class CountingCoreTest {
     }
 
     @Test
+    fun aReadWithANonFiniteCornerIsDroppedAtTheBoundaryNotThrown() {
+        val (sim, core) = counting()
+        val ts = sim.lastRecord!!.timestampNs
+        val good = shoot(home, four, ts).first()
+        val nan = good.copy(corners = good.corners.toMutableList().also { it[0] = Double.NaN })
+        val inf = good.copy(corners = good.corners.toMutableList().also { it[3] = Double.POSITIVE_INFINITY })
+        core.onReads(ts, listOf(nan, inf))
+        assertEquals(2, core.nonFiniteReads)
+        assertEquals(4, core.units.size)
+        assertEquals(SectionState.COUNTING, core.view().state)
+    }
+
+    @Test
+    fun aReadWithAnInfiniteCornerCannotPlaceAnUnlabelledSectionsAnchor() {
+        val (sim, core) = session(four)
+        sim.run(Paths.hold(home, 5.5))
+        sim.command(Command.TriggerShort)
+        assertEquals(SectionState.OPEN, core.view().state)
+        val ts = sim.lastRecord!!.timestampNs
+        val good = shoot(home, four, ts).first()
+        core.onReads(ts, listOf(good.copy(corners = good.corners.toMutableList().also { it[2] = Double.POSITIVE_INFINITY })))
+        assertEquals(null, core.anchorRequest())
+        core.onReads(ts, listOf(good))
+        val t = core.anchorRequest()!!.world.t
+        assertTrue(t.x.isFinite() && t.y.isFinite() && t.z.isFinite())
+    }
+
+    @Test
     fun aFinishedSectionIsInTheViewAndTheNextLabelIsAskedFor() {
         val (sim, core) = counting()
         sim.command(Command.Finish)
