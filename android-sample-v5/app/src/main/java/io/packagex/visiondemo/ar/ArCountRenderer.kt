@@ -138,7 +138,10 @@ class ArCountRenderer(
         val cpu = intrinsics.imageDimensions
         val st = stream
         val g = geometry?.takeIf { it.streamWidth == st.width && it.cpuWidth == cpu[0] && it.cpuHeight == cpu[1] }
-            ?: StreamGeometry(st.width, st.height, cpu[0], cpu[1]).also { geometry = it }
+            ?: StreamGeometry(st.width, st.height, cpu[0], cpu[1]).also {
+                geometry = it
+                if (!it.sameAspect) Log.w(TAG, "the $st app stream is the middle band of the ${cpu[0]}x${cpu[1]} CPU image: a mapping not yet run on hardware")
+            }
         val a = anchor
         return poseRecordOf(
             timestampNs = ts,

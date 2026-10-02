@@ -32,6 +32,16 @@ enum class AppStream(val width: Int, val height: Int, val workingDistanceCm: Int
 }
 
 /**
+ * ARCore's CPU image (for tracking only, spec 5.2) of the [offered] sizes, width to height: 1280x720, else the smallest
+ * other 16:9 one, else the smallest. A 16:9 image keeps every app stream a plain scale of it; any other aspect ratio
+ * takes the middle-band path of [StreamGeometry].
+ */
+internal fun cpuImageSize(offered: Collection<Pair<Int, Int>>): Pair<Int, Int>? =
+    offered.firstOrNull { it == (1280 to 720) }
+        ?: offered.filter { (w, h) -> w * 9 == h * 16 }.minByOrNull { (w, h) -> w * h }
+        ?: offered.minByOrNull { (w, h) -> w * h }
+
+/**
  * How the app stream's pixels relate to ARCore's CPU image of the same capture. Both are of the whole sensor width;
  * a stream of another aspect ratio is cut from the middle of the frame (Camera2 crops the active array to an
  * output's aspect ratio about its centre). With the 1280x720 CPU image and a 16:9 stream it is a plain scale by the
@@ -40,6 +50,9 @@ enum class AppStream(val width: Int, val height: Int, val workingDistanceCm: Int
 data class StreamGeometry(val streamWidth: Int, val streamHeight: Int, val cpuWidth: Int, val cpuHeight: Int) {
     /** Stream pixels per CPU-image pixel */
     val scale: Double get() = streamWidth.toDouble() / cpuWidth
+
+    /** False when the stream is the middle band of a CPU image of another aspect ratio: a mapping not yet run on hardware */
+    val sameAspect: Boolean get() = streamWidth.toLong() * cpuHeight == streamHeight.toLong() * cpuWidth
 
     /** CPU-image rows above the stream's first row (0 for equal aspect ratios) */
     private val cpuTop: Double get() = (cpuHeight - streamHeight / scale) / 2

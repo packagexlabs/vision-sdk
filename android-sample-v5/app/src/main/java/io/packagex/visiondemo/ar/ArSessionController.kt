@@ -177,8 +177,8 @@ class ArSessionController @Inject constructor(
         // ARCore's CPU image is for tracking only: 1280x720 at 30 fps (spec 5.2); the engine reads the app stream.
         val configs = s.getSupportedCameraConfigs(CameraConfigFilter(s).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30)))
             .ifEmpty { s.getSupportedCameraConfigs(CameraConfigFilter(s)) }
-        (configs.firstOrNull { it.imageSize.width == 1280 && it.imageSize.height == 720 } ?: configs.minByOrNull { it.imageSize.width * it.imageSize.height })
-            ?.let { s.cameraConfig = it }
+        val size = cpuImageSize(configs.map { it.imageSize.width to it.imageSize.height })
+        configs.firstOrNull { (it.imageSize.width to it.imageSize.height) == size }?.let { s.cameraConfig = it }
         s.configure(
             Config(s).apply {
                 focusMode = Config.FocusMode.AUTO // FIXED left the feed soft at barcode range on the Memor 35

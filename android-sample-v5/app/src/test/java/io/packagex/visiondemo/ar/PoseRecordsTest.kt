@@ -7,7 +7,9 @@ import io.packagex.arcount.Tracking
 import io.packagex.arcount.Vec3
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import com.google.ar.core.Pose as ArPose
 import com.google.ar.core.TrackingState as ArTracking
@@ -19,6 +21,14 @@ class PoseRecordsTest {
         assertEquals(listOf(AppStream.HD), AppStream.offered(listOf(1280 to 720, 640 to 480)))   // the emulator's virtual scene
     }
 
+    @Test fun theCpuImageIs720pElseAnother16by9ElseTheSmallest() {
+        assertEquals(1280 to 720, cpuImageSize(listOf(640 to 480, 1920 to 1080, 1280 to 720)))
+        assertEquals(1920 to 1080, cpuImageSize(listOf(640 to 480, 1920 to 1080)))   // no 720p at 30 fps: not the 4:3 band
+        assertEquals(640 to 360, cpuImageSize(listOf(1920 to 1080, 640 to 480, 640 to 360)))
+        assertEquals(640 to 480, cpuImageSize(listOf(1600 to 1200, 640 to 480)))      // no 16:9 at all: the smallest
+        assertNull(cpuImageSize(emptyList()))
+    }
+
     @Test fun intrinsicsScaleByTheWidthRatio() {
         // ARCore's 1280x720 CPU image
         assertEquals(Intrinsics(3000.0, 3000.0, 1920.0, 1080.0, 3840, 2160), StreamGeometry(3840, 2160, 1280, 720).intrinsics(1000.0, 1000.0, 640.0, 360.0))
@@ -27,11 +37,13 @@ class PoseRecordsTest {
         assertEquals(Intrinsics(1000.0, 1000.0, 640.0, 360.0, 1280, 720), StreamGeometry(1280, 720, 1280, 720).intrinsics(1000.0, 1000.0, 640.0, 360.0))
         val g = StreamGeometry(3840, 2160, 1280, 720)
         assertEquals(0.25, g.cpuU(0.25), 1e-12); assertEquals(0.75, g.cpuV(0.75), 1e-12)
+        assertTrue(g.sameAspect); assertTrue(StreamGeometry(2560, 1440, 1920, 1080).sameAspect)
     }
 
     // A 4:3 CPU image (an emulator's) with a 16:9 stream: the stream is the middle band of the same width.
     @Test fun aStreamOfAnotherAspectIsTheMiddleBand() {
         val g = StreamGeometry(1280, 720, 640, 480)
+        assertFalse(g.sameAspect)
         val cpu = Intrinsics(500.0, 500.0, 320.0, 240.0, 640, 480)
         val stream = g.intrinsics(cpu.fx, cpu.fy, cpu.cx, cpu.cy)
         assertEquals(Intrinsics(1000.0, 1000.0, 640.0, 360.0, 1280, 720), stream)
