@@ -23,6 +23,7 @@ class ArCountTextTest {
             listOf(
                 "Hold still a moment", "Scan the shelf label", "Scan the shelf label to continue", "Range: 12–14. Rescan from the label?",
                 "Too dark: hold still and press the trigger", "Slow down", "Slide a little", "Move closer", "Hold within 30 cm", "Device hot",
+                "Point at items you counted to continue",
             ),
             Prompt.entries.map { promptText(it, range) },
         )
