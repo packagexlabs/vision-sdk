@@ -241,7 +241,14 @@ class ArSessionController @Inject constructor(
         val s = session ?: return
         if (reader == null || running || opening || pauseWanted) return
         opening = true
-        openCamera(s, ++generation, RETRIES)
+        val gen = ++generation
+        openCamera(s, gen, RETRIES)
+        // An open that never gets ARCore running (no onActive, a callback that never comes) fails rather than stay black
+        main.postDelayed({
+            if (gen != generation || !opening) return@postDelayed
+            Log.w(TAG, "ARCore not running $OPEN_TIMEOUT_MS ms after the camera open began")
+            fail(gen, "AR Count could not start the camera")
+        }, OPEN_TIMEOUT_MS)
     }
 
     private fun openCamera(s: Session, gen: Int, retriesLeft: Int) {
@@ -448,8 +455,10 @@ class ArSessionController @Inject constructor(
             captureSession = cs
             try {
                 cs.setRepeatingRequest(request, null, cameraHandler)
-            } catch (e: Exception) {
+            } catch (e: Exception) { // no onActive will come: this open failed (a stale one's fail is ignored)
                 Log.w(TAG, "capture session gone before it started", e)
+                settled.countDown()
+                main.post { fail(gen, "AR Count could not start the camera") }
             }
         }
 
@@ -485,6 +494,9 @@ class ArSessionController @Inject constructor(
         const val TAG = "ArSession"
         const val RETRIES = 3
         const val RETRY_MS = 400L
+
+        /** Longest an open may take to get ARCore running: the retries (3 x 400 ms) and a 4K configure fit with room. */
+        const val OPEN_TIMEOUT_MS = 5_000L
         const val MAX_REBUILDS = 3
 
         /** A run this long shows the camera works: a failure after it starts on a full rebuild budget again. */
