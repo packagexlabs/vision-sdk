@@ -15,7 +15,8 @@ import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 
 /**
- * The engine's refreshAfterMs while an AR Count session runs: 0 re-reads every shown barcode in every frame, as far as
+ * The engine's refreshAfterMs while an AR Count session runs, until the counter's first view says otherwise
+ * ([BarcodeProcessor.desiredRefresh], spec 5.3 schedule): 0 re-reads every shown barcode in every frame, as far as
  * the frame's decode budget goes. Spec 5.3 says 100 while counting, but at 30 fps 100 re-reads only one shown barcode
  * per frame (engine investigation, 2026-10-02). One constant, for the thermal fallback (spec 6) to raise later.
  */
@@ -36,8 +37,9 @@ internal fun runBehind(worker: ExecutorService, task: () -> Unit) {
  * worker thread, one at a time. An image that comes while one is decoded waits for the engine, the newest one only
  * ([LatestWins]), so a decode a little longer than a frame (4K: about 39 ms, frames every 33 ms) does not leave the
  * worker idle until the next frame. The engine runs with [ScannerSettings.repeatedPayloads] (a shelf of identical units)
- * and [AR_REFRESH_AFTER_MS]. Every decoded image's reads ([readsOf]) and what it took go to the callback, empty ones
- * too: the counter learns which frames were decoded.
+ * and the counter's refresh, set before every scan ([desiredRefresh]; [AR_REFRESH_AFTER_MS] until its first view).
+ * Every decoded image's reads ([readsOf]) and what it took go to the callback, empty ones too: the counter learns
+ * which frames were decoded.
  */
 class BarcodeProcessor(
     private val context: Context,
@@ -52,6 +54,13 @@ class BarcodeProcessor(
     // Of the worker: loading the detector takes a moment, which the main thread does not have.
     // Null until it is made, and for good if it cannot be (then nothing is read).
     private var scanner: BarcodeScanner? = null
+
+    /**
+     * The counter's refresh for the next frames ([io.packagex.arcount.CountView.desiredRefreshMs], spec 5.3), read on
+     * the worker before every scan; null (until the counter's first view) keeps [refreshAfterMs].
+     */
+    @Volatile
+    var desiredRefresh: () -> Int? = { null }
 
     /** Clockwise turn that makes the camera's image upright; 90 (the Memor 35's) until [configureRotation]. */
     @Volatile
@@ -136,7 +145,7 @@ class BarcodeProcessor(
         } finally {
             d.close()
         }
-        // Spec 5.8's blur pre-skip belongs at this hand-off too once it exists (wave 1 has none)
+        // The blur pre-skip (spec 5.6) runs before the intake, on the camera thread: ArSessionController.onImage
         intake.next()?.let(::submit)
     }
 
@@ -147,13 +156,15 @@ class BarcodeProcessor(
         val ts = image.timestamp
         val rotation = rotationDegrees
         val p = image.planes
+        val refresh = refreshFor(desiredRefresh(), refreshAfterMs)
+        scanner.refreshAfterMs = refresh
         val started = System.nanoTime()
         val frame = scanner.scanAll(
             p[0].buffer, p[1].buffer, p[2].buffer, w, h, p[0].rowStride, p[1].rowStride, p[1].pixelStride,
             Rect(0, 0, w, h), rotation, ts,
         )
         val scanMs = (System.nanoTime() - started) / 1e6f
-        d.onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs, intake.dropped))
+        d.onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs, intake.dropped, refresh))
     }
 
     /** An app-stream image for the engine, and where its reads go */
@@ -165,6 +176,9 @@ class BarcodeProcessor(
         const val TAG = "ArEngine"
     }
 }
+
+/** The engine's refresh for the next scan: the counter's [desired] one (none below 0), or [fallback] before it has one. */
+internal fun refreshFor(desired: Int?, fallback: Long): Long = desired?.toLong()?.coerceAtLeast(0L) ?: fallback
 
 /**
  * The engine's intake (spec 5.8 step 1): one item in work and at most one waiting, latest wins. An item that comes
