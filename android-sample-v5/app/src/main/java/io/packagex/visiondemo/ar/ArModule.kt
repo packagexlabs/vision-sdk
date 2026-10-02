@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.packagex.arcount.CountingCore
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -11,7 +12,7 @@ object ArModule {
     @Provides
     fun arCount(impl: ArSessionController): ArCount = impl
 
-    /** The counter of every AR Count session. Wave 1: [DebugCounter], until the counting core lands. */
+    /** The counter of every AR Count session: the counting core of `:arcount` (spec 5.1, 5.4) */
     @Provides
-    fun arCounterFactory(): ArCounterFactory = ArCounterFactory { DebugCounter() }
+    fun arCounterFactory(): ArCounterFactory = ArCounterFactory { CountingCore() }
 }
