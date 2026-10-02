@@ -83,12 +83,15 @@ fun ArTracking.toTracking() = when (this) {
     ArTracking.STOPPED -> Tracking.STOPPED
 }
 
+/** The pose of an anchor being replaced that the new anchor's first record carries as `previousAnchor`: only while it is TRACKING, else null (the core falls back to the old anchor's last pose). */
+internal fun handoverPose(old: Pair<Pose, Tracking>?): Pose? = old?.takeIf { it.second == Tracking.TRACKING }?.first
+
 /**
  * The [PoseRecord] of one ARCore frame (spec 5.2), written on the GL thread after `Session.update()`: [timestampNs] is
  * `Frame.getAndroidCameraTimestamp()`, the timestamp of the same capture's image on the app stream; [camera] is
  * `Camera.getPose()`; [anchor] the section anchor's pose and tracking state while one is held; the intrinsics are the
  * CPU image's ([focal], [principal], CPU pixels) scaled to the stream by [geometry]; [exposureNs] from the capture's
- * metadata, -1 when unknown.
+ * metadata, -1 when unknown; [previousAnchor] the replaced anchor's pose in this frame ([handoverPose]).
  */
 fun poseRecordOf(
     timestampNs: Long,
@@ -99,6 +102,7 @@ fun poseRecordOf(
     principal: FloatArray,
     geometry: StreamGeometry,
     exposureNs: Long,
+    previousAnchor: Pose? = null,
 ) = PoseRecord(
     timestampNs = timestampNs,
     camera = camera,
@@ -107,4 +111,5 @@ fun poseRecordOf(
     anchorTracking = anchor?.second,
     intrinsics = geometry.intrinsics(focal[0].toDouble(), focal[1].toDouble(), principal[0].toDouble(), principal[1].toDouble()),
     exposureNs = exposureNs,
+    previousAnchor = previousAnchor,
 )

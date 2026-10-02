@@ -70,6 +70,16 @@ class PoseRecordsTest {
         assertNull(none.anchor); assertNull(none.anchorTracking)
     }
 
+    @Test fun aReplacedAnchorHandsOverItsPoseOnlyWhileTracking() {
+        val pose = Pose(Vec3(1.0, 2.0, 3.0), Quat.IDENTITY)
+        assertEquals(pose, handoverPose(pose to Tracking.TRACKING))
+        assertNull(handoverPose(pose to Tracking.PAUSED))
+        assertNull(handoverPose(pose to Tracking.STOPPED))
+        assertNull(handoverPose(null))
+        val rec = poseRecordOf(1L, pose, Tracking.TRACKING, null, floatArrayOf(965f, 966f), floatArrayOf(641f, 359f), StreamGeometry(3840, 2160, 1280, 720), -1L, previousAnchor = pose)
+        assertEquals(pose, rec.previousAnchor)
+    }
+
     // ARCore's quaternion order is x, y, z, w, as the counter's: both turn a point the same way.
     @Test fun arCorePosesConvertBothWays() {
         val ar = ArPose(floatArrayOf(1f, 2f, 3f), floatArrayOf(0f, 0.38268343f, 0f, 0.9238795f))   // 45 degrees about +Y

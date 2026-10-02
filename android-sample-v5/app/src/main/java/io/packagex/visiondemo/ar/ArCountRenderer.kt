@@ -54,6 +54,9 @@ class ArCountRenderer(
 
     /** The section anchor while the mapper wants one (GL thread only) */
     private var anchor: Anchor? = null
+
+    /** The anchor a Create replaced, held until the first record with the new anchor is built (GL thread only) */
+    private var replaced: Anchor? = null
     private var geometry: StreamGeometry? = null
     private var viewportWidth = 1
     private var viewportHeight = 1
@@ -125,14 +128,19 @@ class ArCountRenderer(
         while (true) {
             when (val op = mapper.anchorOps.poll() ?: return) {
                 AnchorOp.Detach -> {
+                    replaced?.detach()
+                    replaced = null
                     anchor?.detach()
                     anchor = null
                 }
                 is AnchorOp.Create -> {
-                    anchor?.detach()
+                    replaced?.detach()
+                    replaced = null
+                    val old = anchor
                     anchor = runCatching { s.createAnchor(op.request.world.toArPose()) }
                         .onFailure { Log.w(TAG, "section anchor not created", it) }
                         .getOrNull()
+                    if (anchor != null) replaced = old else old?.detach()
                     mapper.post(ArEvent.AnchorCreated(anchor != null, op.id))
                 }
             }
@@ -154,6 +162,10 @@ class ArCountRenderer(
             Log.i(TAG, "ARCore tracking ${camera.trackingState} (${camera.trackingFailureReason})")
         }
         val a = anchor
+        val old = replaced
+        replaced = null
+        val previous = handoverPose(old?.let { it.pose.toPose() to it.trackingState.toTracking() })
+        old?.detach()
         return poseRecordOf(
             timestampNs = ts,
             camera = camera.pose.toPose(),
@@ -163,6 +175,7 @@ class ArCountRenderer(
             principal = intrinsics.principalPoint,
             geometry = g,
             exposureNs = metas.exposureAt(ts),
+            previousAnchor = previous,
         )
     }
 
