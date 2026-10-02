@@ -15,30 +15,56 @@ internal object ItemCode {
     fun key(read: Read) = key(read.text, read.symbology)
 }
 
-/** The item list in its order; a code whose key an earlier code already has is left out, so a key is listed once */
+/** One listed code and the keys its reads may carry: its own, and for 8 digits that are a valid UPC-E, the UPC-A one */
+internal class ItemEntry(val code: String, val keys: Set<String>)
+
+/**
+ * The item list in its order (ruling R4: an 8-digit code also matches its UPC-E reads, expanded to UPC-A then 14
+ * digits). A key belongs to the first code that has it; a code left with no key of its own is left out.
+ */
 internal class ItemList(codes: Collection<String>) {
-    /** (code as listed, its key) */
-    val entries: List<Pair<String, String>> = codes.map { it to ItemCode.key(it) }.distinctBy { it.second }
-    val keys: Set<String> = entries.mapTo(LinkedHashSet()) { it.second }
+    val entries: List<ItemEntry>
+    val keys: Set<String>
+
+    init {
+        val claimed = LinkedHashSet<String>()
+        entries = codes.mapNotNull { code ->
+            val own = aliases(code).filter { claimed.add(it) }.toSet()
+            if (own.isEmpty()) null else ItemEntry(code, own)
+        }
+        keys = claimed
+    }
 
     fun isEmpty() = entries.isEmpty()
+
+    private fun aliases(code: String): List<String> {
+        val upcE = if (code.length == 8 && code[0] in "01" && Gtin.isGtin(code)) Gtin.normalize(code, "UPC_E").takeIf { Gtin.isValid(it) } else null
+        return listOfNotNull(ItemCode.key(code), upcE)
+    }
 }
 
-/** Each code's count over the closed item sections, every section with its own range (spec 5.10) */
+/**
+ * Each key's count over the closed item sections, every section with its own range (spec 5.10); an ABANDONED one adds
+ * [0, its high] (ruling R3), so a failed resume can widen a range but never raise a definite count.
+ */
 internal class ItemTotals {
     private val low = HashMap<String, Int>()
     private val high = HashMap<String, Int>()
 
-    fun add(byCode: Map<String, Counts>) {
+    fun add(byCode: Map<String, Counts>, abandoned: Boolean = false) {
         for ((key, c) in byCode) {
-            low[key] = (low[key] ?: 0) + c.low
+            if (!abandoned) low[key] = (low[key] ?: 0) + c.low
             high[key] = (high[key] ?: 0) + c.high
         }
     }
 
-    /** One entry per listed code, in list order: the closed sections plus [open], the open section's counts */
-    fun view(list: ItemList, open: Map<String, Counts>, inView: (String) -> Boolean): List<ItemCount> = list.entries.map { (code, key) ->
-        val o = open[key]
-        ItemCount(code, (low[key] ?: 0) + (o?.low ?: 0), (high[key] ?: 0) + (o?.high ?: 0), inView(key))
+    /** One entry per listed code, in list order: the closed sections plus [open], the open section's counts, over its keys */
+    fun view(list: ItemList, open: Map<String, Counts>, inView: (String) -> Boolean): List<ItemCount> = list.entries.map { e ->
+        ItemCount(
+            e.code,
+            e.keys.sumOf { (low[it] ?: 0) + (open[it]?.low ?: 0) },
+            e.keys.sumOf { (high[it] ?: 0) + (open[it]?.high ?: 0) },
+            e.keys.any(inView),
+        )
     }
 }

@@ -137,7 +137,7 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         }
         val t = s?.table ?: return null
         val c = t.counts()
-        if (c.tentative + c.ambiguous > 0 && !s.rangeAccepted) return Prompt.RANGE_RESCAN
+        if (c.tentative + c.ambiguous > 0 && !s.rangeAccepted && !s.items) return Prompt.RANGE_RESCAN
         if (slowDown) return Prompt.SLOW_DOWN
         if (r.anchor != null && Blur.slideALittle(inView(t, r), r.timestampNs, config)) return Prompt.SLIDE_A_LITTLE
         val m = modulePx

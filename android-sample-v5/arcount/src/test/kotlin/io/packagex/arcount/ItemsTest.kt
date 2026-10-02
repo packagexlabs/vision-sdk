@@ -65,7 +65,7 @@ class ItemsTest {
     @Test
     fun aListKeepsItsOrderAndListsAKeyOnce() {
         val list = ItemList(linkedSetOf("TP6056F32", "4006381333931", "04006381333931", "X"))
-        assertEquals(listOf("TP6056F32", "4006381333931", "X"), list.entries.map { it.first })
+        assertEquals(listOf("TP6056F32", "4006381333931", "X"), list.entries.map { it.code })
         assertEquals(setOf("TP6056F32", GTIN14, "X"), list.keys)
     }
 
@@ -201,7 +201,7 @@ class ItemsTest {
         assertEquals(SectionStatus.ABANDONED, abandoned.status)
         assertEquals(3, abandoned.countLow)
         assertEquals(SectionState.COUNTING, core.view().state)
-        assertEquals(listOf(ItemCount(GTIN14, 3, 3, false), ItemCount("TP6056F32", 3, 3, true)), core.view().items)
+        assertEquals(listOf(ItemCount(GTIN14, 0, 3, false), ItemCount("TP6056F32", 3, 3, true)), core.view().items)
     }
 
     @Test
@@ -213,7 +213,8 @@ class ItemsTest {
         sim.run(Paths.move(Vec3.ZERO, Vec3(1.2, 0.0, 0.0), 0.3))
         assertEquals(SectionStatus.ABANDONED, core.view().closed.single().status)
         assertEquals(SectionState.CLOSED, core.view().state)
-        assertEquals(3, item(core, GTIN14).countLow)
+        // ruling R3: an abandoned section adds [0, its high]
+        assertEquals(ItemCount(GTIN14, 0, 3, false), item(core, GTIN14))
     }
 
     @Test
@@ -272,7 +273,8 @@ class ItemsTest {
         val b = listOf(sym("TP6056F32", 0.70, 21))
         val (sim, core) = counting(threeA + b, linkedSetOf(GTIN14, "TP6056F32", "NEVER"))
         assertEquals(listOf(true, false, false), core.view().items.map { it.inView })
-        sim.run(Paths.move(Vec3.ZERO, Vec3(0.7, 0.0, 0.0), 0.5))
+        // 0.3 m/s: 0.5 m/s is the world-jump detector's step at 30 fps
+        sim.run(Paths.move(Vec3.ZERO, Vec3(0.7, 0.0, 0.0), 0.3))
         sim.run(Paths.hold(cameraAt(0.7), 1.2))
         assertEquals(listOf(false, true, false), core.view().items.map { it.inView })
         assertEquals(listOf(3, 1, 0), core.view().items.map { it.countLow })
@@ -285,5 +287,48 @@ class ItemsTest {
         totals.add(mapOf(GTIN14 to Counts(1, 0, 0, 0)))
         val view = totals.view(ItemList(linkedSetOf("B", GTIN, "C")), mapOf(GTIN14 to Counts(1, 0, 0, 2))) { it == "B" }
         assertEquals(listOf(ItemCount("B", 1, 1, true), ItemCount(GTIN, 4, 7, false), ItemCount("C", 0, 0, false)), view)
+    }
+    @Test
+    fun anAbandonedSectionAddsNothingToTheLowEndOfItsCodes() {
+        val totals = ItemTotals()
+        totals.add(mapOf(GTIN14 to Counts(3, 0, 1, 0)), abandoned = true)
+        totals.add(mapOf(GTIN14 to Counts(2, 0, 0, 0)))
+        assertEquals(listOf(ItemCount(GTIN, 2, 6, false)), totals.view(ItemList(listOf(GTIN)), emptyMap()) { false })
+    }
+
+    @Test
+    fun anEightDigitListCodeAlsoMatchesItsUpcERead() {
+        val upcE = ItemCode.key("04252614", "UPC_E")
+        val list = ItemList(listOf("04252614"))
+        assertTrue(upcE in list.keys)
+        assertTrue(ItemCode.key("04252614") in list.keys)
+        // its UPC-A form is the same product
+        assertEquals(upcE, ItemCode.key("042100005264"))
+        val view = ItemTotals().view(list, mapOf(upcE to Counts(1, 0, 0, 0), "04252614" to Counts(1, 0, 0, 1))) { false }
+        assertEquals(listOf(ItemCount("04252614", 2, 3, false)), view)
+        // an EAN-8 that is no valid UPC-E keeps its one key
+        assertEquals(setOf(ItemCode.key("96385074")), ItemList(listOf("96385074")).keys)
+    }
+
+    @Test
+    fun aKeyIsListedOnceEvenThroughItsUpcEForm() {
+        val list = ItemList(listOf("042100005264", "04252614"))
+        assertEquals(listOf("042100005264", "04252614"), list.entries.map { it.code })
+        assertEquals(setOf(ItemCode.key("04252614")), list.entries[1].keys)
+    }
+
+    @Test
+    fun itemModeNeverAsksToRescanARange() {
+        val (sim, core) = session(threeA)
+        sim.run(Paths.hold(home, 5.0))
+        var tentative = false
+        repeat(60) {
+            sim.step(home)
+            if (core.units.any { it.state == UnitState.TENTATIVE }) {
+                tentative = true
+                assertNotEquals(Prompt.RANGE_RESCAN, core.view().prompt)
+            }
+        }
+        assertTrue(tentative)
     }
 }

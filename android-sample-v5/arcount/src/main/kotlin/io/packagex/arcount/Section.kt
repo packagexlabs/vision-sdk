@@ -656,7 +656,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
 
     private fun close(s: Section, ts: Long, status: SectionStatus) {
         val counts = s.table?.counts() ?: Counts(0, 0, 0, 0)
-        if (s.items) s.table?.let { itemTotals.add(it.countsByCode()) }
+        if (s.items) s.table?.let { itemTotals.add(it.countsByCode(), abandoned = status == SectionStatus.ABANDONED) }
         results += sectionResult(s.id, s.labelPayload, s.gtins, status, counts, s.manualAdded, s.manualRemoved, s.breaks.toList(), (ts - s.openedNs) / 1_000_000)
         section = null
         state = CLOSED
