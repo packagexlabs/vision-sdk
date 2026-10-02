@@ -265,6 +265,20 @@ class ScannerViewModelTest {
         assertEquals(2, v.state.value.tags.size)   // iOS setMode keeps them too; only ClearTags clears
     }
 
+    @Test fun priceAutoCaptureOpensTheListOnANewTag() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        v.onAction(ScannerAction.ToggleAuto); advanceUntilIdle()
+        assertTrue(v.state.value.prefs.autoCapture)
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
+        assertEquals(ScanResult.Price, v.state.value.result)
+        v.onAction(ScannerAction.CloseResult); advanceUntilIdle()
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
+        assertNull(v.state.value.result)   // a tag already listed doesn't reopen it
+        cam.emit(ScanEvent.PriceTag(PriceTagData("999", "$1.00", Rect()))); advanceUntilIdle()
+        assertEquals(ScanResult.Price, v.state.value.result)
+    }
+
     @Test fun priceShutterWithNoTagsShowsEmptyDrawer() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceUntilIdle()
