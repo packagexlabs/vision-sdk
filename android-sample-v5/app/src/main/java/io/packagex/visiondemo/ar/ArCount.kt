@@ -102,4 +102,4 @@ data class ScreenGap(val gapId: Int, val x: Float, val y: Float)
  * image), which the GL thread draws from the full view; so the UI state changes when the count, the prompt or the
  * state does, not on every frame.
  */
-fun CountView.forUi(): CountView = copy(markers = emptyList(), gaps = emptyList(), bracket = bracket?.copy(u = 0.0, v = 0.0))
+fun CountView.forUi(): CountView = copy(markers = emptyList(), gaps = emptyList(), bracket = bracket?.copy(u = 0.0, v = 0.0), unitPoints = emptyList())

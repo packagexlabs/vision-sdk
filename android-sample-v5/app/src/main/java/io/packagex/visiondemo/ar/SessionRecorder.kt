@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Read
+import io.packagex.arcount.TrackStats
 import java.io.Closeable
 import java.io.File
 import java.io.Writer
@@ -53,10 +54,13 @@ class SessionRecorder(
         if (rec == null) waiting.addLast(timestampNs to reads) else reads.forEach { emit(readLine(it, rec, metas.at(timestampNs), "exact")) }
     }
 
-    /** What the engine took for the image at [timestampNs], which gave [reads] reads; [dropped]: reads batches the mapper dropped so far. */
-    fun engine(timestampNs: Long, stats: EngineStats, reads: Int, dropped: Long) {
+    /**
+     * What the engine took for the image at [timestampNs], which gave [reads] reads; [dropped]: reads batches the mapper
+     * dropped so far; [track]: the counter's patch-tracker counters now, for the 2 s line.
+     */
+    fun engine(timestampNs: Long, stats: EngineStats, reads: Int, dropped: Long, track: TrackStats? = null) {
         emit(engineLine(timestampNs, stats, reads))
-        window.add(timestampNs, stats, reads, dropped)?.let(log)
+        window.add(timestampNs, stats, reads, dropped, track)?.let(log)
     }
 
     override fun close() {
@@ -119,12 +123,13 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
     private var lastFps = 0f
     private var lastRefreshMs = -1L
     private var pipeBefore = PipeCounters()
+    private var trackBefore: TrackStats? = null
 
     /** Adds one image; the line of the window it closes, if it closes one. */
-    fun add(timestampNs: Long, s: EngineStats, reads: Int, dropped: Long): String? {
-        if (startNs == Long.MIN_VALUE) start(timestampNs, dropped, s.droppedImages, s.pipe)
+    fun add(timestampNs: Long, s: EngineStats, reads: Int, dropped: Long, track: TrackStats? = null): String? {
+        if (startNs == Long.MIN_VALUE) start(timestampNs, dropped, s.droppedImages, s.pipe, track)
         val line = if (timestampNs - startNs >= lengthNs && frames > 0) {
-            line(timestampNs, dropped, s.droppedImages, s.pipe).also { start(timestampNs, dropped, s.droppedImages, s.pipe) }
+            (line(timestampNs, dropped, s.droppedImages, s.pipe) + trackerPart(track)).also { start(timestampNs, dropped, s.droppedImages, s.pipe, track) }
         } else {
             null
         }
@@ -142,7 +147,8 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
         return line
     }
 
-    private fun start(timestampNs: Long, dropped: Long, imagesDropped: Long, pipe: PipeCounters) {
+    private fun start(timestampNs: Long, dropped: Long, imagesDropped: Long, pipe: PipeCounters, track: TrackStats?) {
+        trackBefore = track
         startNs = timestampNs
         frames = 0
         scanSum = 0.0
@@ -174,6 +180,22 @@ internal class EngineWindow(private val lengthNs: Long = 2_000_000_000L) {
             lastRefreshMs, copies, meanMs(p.lumaCopyNs - b.lumaCopyNs, copies), meanMs(p.lumaScaleNs - b.lumaScaleNs, scaled),
             p.lumaDropped - b.lumaDropped, p.blurSkipped - b.blurSkipped,
             barcodes / n, decoded / n, reads / n, imagesDropped - imagesDroppedBefore, dropped - droppedBefore,
+        )
+    }
+
+    /** The patch tracker over the window (spec 5.9): whether it runs on the device at all, and how its tracks end */
+    private fun trackerPart(t: TrackStats?): String {
+        if (t == null) return ""
+        val b = trackBefore ?: TrackStats(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        val frames = t.trackingFrames - b.trackingFrames
+        val units = t.unitsTracked - b.unitsTracked
+        return String.format(
+            Locale.US,
+            "; tracker: %d frames, %.1f units tracked per frame, %d tracked rays, %d one-dimensional, dropped %d ncc %d prediction %d neighbour %d age; " +
+                "units %d with depth, %d plane prior only",
+            frames, if (frames > 0) units.toDouble() / frames else 0.0, t.trackedRays - b.trackedRays, t.oneDimensional - b.oneDimensional,
+            t.droppedNcc - b.droppedNcc, t.droppedPrediction - b.droppedPrediction, t.droppedNeighbour - b.droppedNeighbour, t.droppedAge - b.droppedAge,
+            t.unitsWithDepth, t.unitsPriorOnly,
         )
     }
 

@@ -5,6 +5,7 @@ import io.packagex.arcount.Pose
 import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Quat
 import io.packagex.arcount.Read
+import io.packagex.arcount.TrackStats
 import io.packagex.arcount.Tracking
 import io.packagex.arcount.Vec3
 import kotlinx.serialization.json.Json
@@ -85,6 +86,21 @@ class SessionRecorderTest {
         assertTrue(
             logged[0],
             logged[0].contains("decode 18 ms, refresh 300 ms, luma 60 copies mean 2.00 ms on the camera thread + 3.93 ms downscale, 4 replaced, 8 images skipped for blur, per image"),
+        )
+    }
+
+    @Test fun theTwoSecondLineSaysWhatThePatchTrackerDidInTheWindow() {
+        val logged = mutableListOf<String>()
+        val rec = SessionRecorder(StringWriter(), metas, log = { logged += it })
+        val s = EngineStats(7f, 5f, 20f, 18f, 3, 2, 45f, 0)
+        rec.engine(0, s, reads = 1, dropped = 0, track = TrackStats(10, 20, 5, 1, 2, 3, 4, 5, 1, 1))
+        rec.engine(2_000 * ms, s, reads = 1, dropped = 0, track = TrackStats(50, 140, 45, 7, 3, 5, 4, 9, 4, 2))
+        assertTrue(
+            logged[0],
+            logged[0].endsWith(
+                "; tracker: 40 frames, 3.0 units tracked per frame, 40 tracked rays, 6 one-dimensional, dropped 1 ncc 2 prediction 0 neighbour 4 age; " +
+                    "units 4 with depth, 2 plane prior only",
+            ),
         )
     }
 }

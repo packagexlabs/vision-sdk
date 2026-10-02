@@ -214,7 +214,7 @@ class ArMapper(
                 counter.onReads(e.timestampNs, e.reads)
                 recorder?.run {
                     reads(e.timestampNs, e.reads)
-                    e.stats?.let { engine(e.timestampNs, it, e.reads.size, droppedReads) }
+                    e.stats?.let { engine(e.timestampNs, it, e.reads.size, droppedReads, counter.trackStats()) }
                 }
             }
             is ArEvent.Luma -> counter.onLuma(e.timestampNs, e.img, LUMA_SCALE.toDouble())
