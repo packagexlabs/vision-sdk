@@ -12,7 +12,7 @@ object ArModule {
     @Provides
     fun arCount(impl: ArSessionController): ArCount = impl
 
-    /** The counter of every AR Count session: the counting core of `:arcount` (spec 5.1, 5.4) */
+    /** The counter of every AR session (AR Item Count): the counting core of `:arcount` (spec 5.1, 5.4) */
     @Provides
     fun arCounterFactory(): ArCounterFactory = ArCounterFactory { CountingCore() }
 }

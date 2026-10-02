@@ -71,7 +71,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.packagex.visiondemo.ar.arHint
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.RecomposeLog
@@ -181,8 +180,8 @@ private val WindowInsets.Companion.chromeInsets: WindowInsets
 /** The viewfinder brackets: the design's 390x844 artboard scaled to the screen, reported to the
  *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`.
  *  Single-code Barcode/QR only — [ScanMode.viewfinder] is already null for every other mode; the multi
- *  check here hides them for multi-code Barcode/QR. Vision Scanner, Price tag, Item retrieval, Document
- *  Acquisition and AR Count never show brackets. */
+ *  check here hides them for multi-code Barcode/QR. Vision Scanner, Price tag, AR Item Count and Document
+ *  Acquisition never show brackets. */
 @Composable
 fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Viewfinder")
@@ -443,7 +442,7 @@ private fun bottomReserveDp(state: ScannerUiState): Dp {
     return 56.dp + 80.dp + (if (pills) 56.dp else 0.dp) + (if (chip != null) 54.dp else 0.dp) + 14.dp
 }
 
-private fun hintFor(state: ScannerUiState): String {
+internal fun hintFor(state: ScannerUiState): String {
     if (state.gated) return "Authentication required"
     if (!state.detectionEnabled && ownerFor(state.mode) == CameraOwner.Scanner) return "Detection paused"
     when (state.phase) {
@@ -463,21 +462,12 @@ private fun hintFor(state: ScannerUiState): String {
         } else {
             "Point camera to document"
         }
-        ScanMode.Ar -> arHint(state.arCount, state.arStream)
         ScanMode.DocAcq -> if (state.seesDocument) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"
         } else {
             "Fit the whole page in view"
         }
-        ScanMode.Retrieval -> {
-            val n = state.codesInView.count { it in state.items }
-            when {
-                state.items.isEmpty() -> "Add item codes to find"
-                state.codesInView.isEmpty() -> "Pan across the shelf"
-                n == 0 -> "No listed items in view"
-                else -> "$n listed item${if (n == 1) "" else "s"} in view"
-            }
-        }
+        ScanMode.Retrieval -> return retrievalHint(state.items, state.codesInView, state.arCount)   // nothing to capture
         ScanMode.Price -> if (state.tags.isEmpty()) {
             "Point at a price tag"
         } else {

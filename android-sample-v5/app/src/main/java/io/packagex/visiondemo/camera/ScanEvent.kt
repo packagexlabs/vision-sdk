@@ -13,7 +13,6 @@ sealed interface ScanEvent {
     data class Indications(val barcode: Boolean, val qr: Boolean, val text: Boolean, val document: Boolean) : ScanEvent
     data class Captured(val bitmap: Bitmap, val codes: List<ScannedCodeResult>, val sharpness: Float) : ScanEvent
     data class PriceTag(val data: PriceTagData) : ScanEvent
-    data class Retrieved(val code: ScannedCodeResult) : ScanEvent
     data class Failure(val e: VisionSDKException) : ScanEvent
     data object Started : ScanEvent
 }

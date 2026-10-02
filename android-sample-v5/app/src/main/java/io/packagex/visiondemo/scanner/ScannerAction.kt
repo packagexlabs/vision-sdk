@@ -2,7 +2,6 @@ package io.packagex.visiondemo.scanner
 
 import android.graphics.Bitmap
 import android.graphics.RectF
-import io.packagex.arcount.Command
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.model.DocType
@@ -62,7 +61,7 @@ sealed interface ScannerAction {
     data object ClearItems : ScannerAction
 
     // Result screen
-    /** "Scan next" / "New Scan": closes the drawer (AR also resets its markers, Task 11). */
+    /** "Scan next" / "New Scan": closes the drawer (AR Item Count also starts a fresh count, keeping the list). */
     data object ScanNext : ScannerAction
     /** Copies [text] (ScannerEffect.Copy) and toasts "Copied <label>". */
     data class Copy(val label: String, val text: String) : ScannerAction
@@ -95,9 +94,7 @@ sealed interface ScannerAction {
     /** An image picked from Photos: extracted like a capture (Vision Scanner only). */
     data class ImportPhoto(val bitmap: Bitmap) : ScannerAction
 
-    // AR Count
-    /** The AR overlay: a button, a tap or long press on the section's count, a tap on a gap; for the counter. */
-    data class ArCommand(val command: Command) : ScannerAction
+    // AR Item Count
     /** Outcome of [ScannerEffect.InstallArCore]. */
     data class ArInstallResult(val result: ArInstall) : ScannerAction
 }

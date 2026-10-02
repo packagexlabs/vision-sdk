@@ -3,9 +3,9 @@ package io.packagex.visiondemo.model
 import io.packagex.visionsdk.core.DetectionMode
 
 data class ScannerConfig(
-    /** The SDK's own box detector to run; null when the mode doesn't use it at all -- Price tag and Item
-     *  retrieval read their own SDK callbacks (price/retrieval events, not box detection), and AR Count
-     *  and Document Acquisition run entirely their own camera pipeline (see `CameraOwner`). */
+    /** The SDK's own box detector to run; null when the mode doesn't use it at all -- Price tag reads its own
+     *  SDK callback (price events, not box detection), and AR Item Count and Document Acquisition run entirely
+     *  their own camera pipeline (see `CameraOwner`). */
     val detection: DetectionMode?,
     val multiple: Boolean,
     val nthFrame: Int,
@@ -44,20 +44,12 @@ fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): Scann
         showBoxes = false,
         needsEntitlement = true
     )
-    ScanMode.Retrieval -> ScannerConfig(
-        detection = null,
-        multiple = true,
-        nthFrame = 2,
-        restrictToFrame = false,
-        showBoxes = false,
-        needsEntitlement = true
-    )
-    ScanMode.Ar, ScanMode.DocAcq -> ScannerConfig(
+    ScanMode.Retrieval, ScanMode.DocAcq -> ScannerConfig(
         detection = null,
         multiple = false,
         nthFrame = 7,
         restrictToFrame = false,
         showBoxes = false,
-        needsEntitlement = false
+        needsEntitlement = mode.gated
     )
 }

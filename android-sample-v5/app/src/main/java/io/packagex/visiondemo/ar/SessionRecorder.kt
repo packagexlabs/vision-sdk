@@ -12,8 +12,8 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Diagnostics: an NDJSON trace of an AR Count session, for replay off the device (the spike's v2 schema). Written only
- * while Settings › Advanced › "AR Count traces" is on (spec 5.7: off by default). A `frame` line per ARCore frame (its
+ * Diagnostics: an NDJSON trace of an AR session, for replay off the device (the spike's v2 schema). Written only
+ * while Settings › Advanced › "AR traces" is on (spec 5.7: off by default). A `frame` line per ARCore frame (its
  * [PoseRecord], with the stream's intrinsics), a `read` line per decoded read (what was read where, the capture's
  * metadata, and its ray: `o` camera centre, `d` unit direction, world frame, from its frame's pose) and an `engine`
  * line per decoded image ([EngineStats]), which also go to logcat as a line every 2 s. A read whose frame has not come

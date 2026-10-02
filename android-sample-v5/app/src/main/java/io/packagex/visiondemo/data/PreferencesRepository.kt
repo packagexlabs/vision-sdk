@@ -30,7 +30,7 @@ data class Prefs(
     val parseSender: Boolean = true,
     // iOS DemoModel.swift:66.
     val wildCard: Boolean = false,
-    // AR Count diagnostics (Settings › Advanced): frame/read/engine traces in app storage; off by default (spec 5.7).
+    // AR diagnostics (Settings › Advanced › "AR traces"): frame/read/engine traces in app storage; off by default (spec 5.7).
     val arTrace: Boolean = false,
 )
 

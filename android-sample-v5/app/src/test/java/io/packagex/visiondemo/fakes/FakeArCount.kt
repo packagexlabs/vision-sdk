@@ -29,7 +29,6 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     var paused = false
     var resets = 0
     var detaches = 0
-    val commands = mutableListOf<Command>()
 
     /** Every list the ViewModel sent, and "reset" where it reset the counter, in order */
     val calls = mutableListOf<String>()
@@ -43,7 +42,7 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     override fun detach(view: GLSurfaceView?) { detaches++; onDetach() }
     override fun pause() { paused = true }
     override fun resume() { paused = false }
-    override fun command(command: Command) { commands += command }
+    override fun command(command: Command) {}
     override fun reset() { resets++; calls += "reset"; count.value = CountView.EMPTY; seen.value = emptyList() }
     override fun setItems(codes: Set<String>) { calls += codes.sorted().joinToString(",", "items ") }
 }

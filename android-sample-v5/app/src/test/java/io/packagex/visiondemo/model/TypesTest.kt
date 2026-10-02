@@ -6,16 +6,20 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TypesTest {
-    @Test fun isCodeMatchesBarcodeQrPriceAndRetrieval() {
-        val expected = setOf(ScanMode.Barcode, ScanMode.QR, ScanMode.Price, ScanMode.Retrieval)
+    // AR Item Count runs on the AR session: no capture, so no Manual/Auto pill (spec 5.10)
+    @Test fun isCodeMatchesBarcodeQrAndPrice() {
+        val expected = setOf(ScanMode.Barcode, ScanMode.QR, ScanMode.Price)
         assertEquals(expected, ScanMode.entries.filter { it.isCode }.toSet())
     }
 
-    // Two AR-sounding labels: Retrieval's "AR Item Count" is the SDK's item retrieval; "AR Count" is the ARCore shelf count.
-    @Test fun theTwoArModulesAreLabelledApart() {
-        assertEquals("AR Count", ScanMode.Ar.label)
+    // The AR Count test bed is gone; AR Item Count is the one AR module (spec 5.10)
+    @Test fun arItemCountIsTheOneArModule() {
         assertEquals("AR Item Count", ScanMode.Retrieval.label)
+        assertEquals(listOf(ScanMode.Retrieval), ScanMode.entries.filter { it.label.startsWith("AR") })
     }
+
+    // The shared camera has no zoom (spec 5.10)
+    @Test fun arItemCountHasNoZoomPresets() = assertEquals(emptyList<Float>(), ScanMode.Retrieval.zooms)
 
     @Test fun gatedMatchesPriceAndRetrieval() {
         val expected = setOf(ScanMode.Price, ScanMode.Retrieval)

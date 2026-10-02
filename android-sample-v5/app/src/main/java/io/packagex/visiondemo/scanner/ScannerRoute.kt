@@ -196,8 +196,9 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                         }
                     },
                 ) {
-                    if (state.mode == ScanMode.Ar) {
-                        if (!state.permissionDenied) ArSurface(controller = viewModel.ar, paused = state.paused)
+                    if (state.mode == ScanMode.Retrieval) {
+                        // AR Item Count: the AR session's view once past the gate and ARCore is installed (spec 5.10)
+                        if (state.arOn && !state.permissionDenied) ArSurface(controller = viewModel.ar, paused = state.paused)
                     } else if (cameraViewRaw != null) {
                         CameraSurface(view = cameraViewRaw, paused = state.paused)
                     } else {
@@ -212,14 +213,8 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
             },
             boxes = { boxes.value },
             overlay = {
-                if (state.mode == ScanMode.Ar && !state.permissionDenied && state.result == null && !state.paused) {
-                    // Where the GL thread drew the bracket and the gaps: read while placing the count and on taps only.
-                    val arScreen = viewModel.ar.screen.collectAsStateWithLifecycle()
-                    ArCountOverlay(
-                        state.arCount, arScreen,
-                        onCommand = { viewModel.onAction(ScannerAction.ArCommand(it)) },
-                        onTouch = { viewModel.onAction(ScannerAction.UserActive) },
-                    )
+                if (state.mode == ScanMode.Retrieval && state.arOn && !state.permissionDenied && state.result == null && !state.paused) {
+                    ArCountOverlay(onTouch = { viewModel.onAction(ScannerAction.UserActive) })
                 }
             },
             drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, viewModel::onAction) } },

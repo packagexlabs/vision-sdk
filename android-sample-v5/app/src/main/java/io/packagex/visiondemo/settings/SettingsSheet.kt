@@ -36,7 +36,7 @@ import io.packagex.visiondemo.scanner.onDevice
  * `parseSender` sit under "Vision Scanner" with auto capture (Sheets.swift:94-99); Processing is its own
  * group (the brief's explicit Settings row list; iOS itself only has this control in `DocTypeSheet`).
  * "Reset to defaults" is [ScannerAction.ResetSettings] (Sheets.swift:161-166). "Advanced" carries
- * "Detection enabled" and AR Count's trace switch. Rows not carried over: the static symbologies grid, the
+ * "Detection enabled" and the AR trace switch. Rows not carried over: the static symbologies grid, the
  * other AR-debug toggles and the environment row. "On-device
  * models" content moves to its own sheet here (the "Models" row below), including "Check for updates".
  */
@@ -137,8 +137,8 @@ fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             onCheckedChange = { onAction(ScannerAction.SetDetectionEnabled(it)) },
         )
         ToggleRow(
-            title = "AR Count traces",
-            desc = "Records AR Count's frames, reads and engine timings to app storage (files/ar-traces), for replay.",
+            title = "AR traces",
+            desc = "Records AR Item Count's frames, reads and engine timings to app storage (files/ar-traces), for replay.",
             checked = p.arTrace,
             onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arTrace = checked) }) },
         )

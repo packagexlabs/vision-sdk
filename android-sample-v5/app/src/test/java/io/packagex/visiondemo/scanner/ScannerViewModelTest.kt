@@ -171,7 +171,7 @@ class ScannerViewModelTest {
 
     @Test fun entitledModeClearsGate() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
-        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval))
+        v.onAction(ScannerAction.SetMode(ScanMode.Price))
         assertTrue(v.state.value.gated); assertTrue(v.state.value.entitlementChecking)  // default-deny
         advanceUntilIdle()
         assertFalse(v.state.value.gated); assertFalse(v.state.value.entitlementChecking); assertEquals(CameraOwner.Scanner, cam.owner)
@@ -179,7 +179,7 @@ class ScannerViewModelTest {
 
     @Test fun arAndDocumentClaimTheirOwner() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
-        v.onAction(ScannerAction.SetMode(ScanMode.Ar)); assertEquals(CameraOwner.Ar, cam.owner)
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); assertEquals(CameraOwner.Ar, cam.owner)
         v.onAction(ScannerAction.SetMode(ScanMode.DocAcq)); assertEquals(CameraOwner.Document, cam.owner)
         v.onAction(ScannerAction.SetMode(ScanMode.QR)); assertEquals(CameraOwner.Scanner, cam.owner)
     }
@@ -190,26 +190,6 @@ class ScannerViewModelTest {
         assertEquals("No items to find", v.state.value.alert?.title)
         v.onAction(v.state.value.alert!!.actions.first().action)
         assertNull(v.state.value.alert); assertEquals(SheetKind.Items, v.state.value.sheet)
-    }
-
-    @Test fun retrievalReportsCodesInViewFlaggedByList() = runTest {
-        val catalog = FakeCatalog(items = listOf("A", "B"))
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"))
-        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
-        val cam = v.camera as FakeCamera
-        cam.emit(ScanEvent.Retrieved(code("A"))); cam.emit(ScanEvent.Retrieved(code("Z"))); runCurrent()
-        assertEquals(listOf("A", "Z"), v.state.value.codesInView)
-        v.onAction(ScannerAction.Shutter); advanceTimeBy(400)
-        assertEquals(ScanResult.Retrieval(listOf("A" to true, "Z" to false)), v.state.value.result)
-    }
-
-    @Test fun codesLeaveViewAfterASecondWithoutReports() = runTest {
-        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
-        (v.camera as FakeCamera).emit(ScanEvent.Retrieved(code("A"))); runCurrent()
-        advanceTimeBy(900); assertEquals(listOf("A"), v.state.value.codesInView)
-        (v.camera as FakeCamera).emit(ScanEvent.Retrieved(code("A"))); runCurrent()
-        advanceTimeBy(900); assertEquals(listOf("A"), v.state.value.codesInView)   // refreshed
-        advanceTimeBy(200); assertEquals(emptyList<String>(), v.state.value.codesInView)
     }
 
     // --- fix round 1 ---
@@ -365,22 +345,6 @@ class ScannerViewModelTest {
         }
         v.onAction(ScannerAction.RemoveItem("A")); advanceUntilIdle(); assertEquals(listOf("B"), catalog.items.value)
         v.onAction(ScannerAction.ClearItems); advanceUntilIdle(); assertEquals(emptyList<String>(), catalog.items.value)
-    }
-
-    @Test fun addItemsInViewAddsNewCodesWithIosToasts() = runTest {
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"))
-        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
-        v.effects.test {
-            v.onAction(ScannerAction.AddItemsInView)
-            assertEquals(ScannerEffect.Toast("Point the camera at a code, then tap Add Item"), awaitItem())
-            val cam = v.camera as FakeCamera
-            cam.emit(ScanEvent.Retrieved(code("A"))); cam.emit(ScanEvent.Retrieved(code("B"))); runCurrent()
-            v.onAction(ScannerAction.AddItemsInView)
-            assertEquals(ScannerEffect.Toast("Scanned and added B"), awaitItem())
-            v.onAction(ScannerAction.AddItemsInView)
-            assertEquals(ScannerEffect.Toast("Code already in list"), awaitItem())
-        }
-        assertEquals(listOf("A", "B"), v.state.value.items)
     }
 
     // --- v6 module cards ---
@@ -574,11 +538,11 @@ class ScannerViewModelTest {
         val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceTimeBy(400)
-        assertTrue(v.state.value.result is ScanResult.Retrieval); assertTrue(cam.detectionPaused)
+        assertTrue(v.state.value.result is ScanResult.Retrieval)
         val rescans = cam.rescans
         v.onAction(ScannerAction.OpenItemList)
         assertNull(v.state.value.result); assertEquals(SheetKind.Items, v.state.value.sheet)
-        assertEquals(rescans, cam.rescans); assertFalse(cam.detectionPaused)   // the list reads codes in view
+        assertEquals(rescans, cam.rescans)
     }
 
     @Test fun ocrResultCarriesTheProcessingUsed() = runTest {
@@ -643,7 +607,7 @@ class ScannerViewModelTest {
         assertEquals(0.25f to 0.5f, cam.focusPoint); assertEquals(FocusTap(0.25f, 0.5f, 1), v.state.value.focus)
         v.onAction(ScannerAction.OpenSheet(SheetKind.Settings)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
         assertEquals(0.25f to 0.5f, cam.focusPoint); assertEquals(1, v.state.value.focus?.id)
-        v.onAction(ScannerAction.SetMode(ScanMode.Ar)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
         assertEquals(0.25f to 0.5f, cam.focusPoint)
     }
 
