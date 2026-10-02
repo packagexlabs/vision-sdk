@@ -169,6 +169,8 @@ data class CountView(
     val items: List<ItemCount> = emptyList(),
     /** The engine's refresh for its next frames (spec 5.3 schedule); 0 re-reads every shown code in every frame */
     val desiredRefreshMs: Int = 0,
+    /** The open section's breaks so far (capture time, reason), for the app's log; a closed section's are in [closed] */
+    val breaks: List<Pair<Long, BreakReason>> = emptyList(),
 ) {
     companion object {
         val EMPTY = CountView(SectionState.IDLE, null, emptyList(), emptyList(), null, emptyList())

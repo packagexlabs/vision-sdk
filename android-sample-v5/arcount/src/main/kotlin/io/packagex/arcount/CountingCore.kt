@@ -168,6 +168,7 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
             closed = machine.closed.toList(),
             desiredRefreshMs = schedule.desiredMs(lumas.fed && counting && t!!.units.isNotEmpty(), r.timestampNs),
             items = items(r, if (s?.items == true) t else null, shown),
+            breaks = s?.breaks?.toList() ?: emptyList(),
         )
     }
 
