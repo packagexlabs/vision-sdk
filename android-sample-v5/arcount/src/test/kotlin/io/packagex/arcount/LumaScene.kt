@@ -147,7 +147,15 @@ class LumaScene(
     }
 }
 
-/** Feeds [core] the luma copy of every frame [scene] renders, before the frame's reads and pose record */
-fun Sim.feedLuma(core: CountingCore, scene: LumaScene) {
-    luma = { ts, camera -> core.onLuma(ts, scene.render(ts, camera), scene.scale) }
+/**
+ * Feeds [core] the luma copy of every frame [scene] renders: with [framesLate] 0 before the frame's reads and pose
+ * record; else at the start of the frame [framesLate] later, after the pose records up to the one before it (the
+ * app's copy thread lagging the GL thread).
+ */
+fun Sim.feedLuma(core: CountingCore, scene: LumaScene, framesLate: Int = 0) {
+    val pending = ArrayDeque<Pair<Long, LumaImage>>()
+    luma = { ts, camera ->
+        pending.addLast(ts to scene.render(ts, camera))
+        while (pending.size > framesLate) pending.removeFirst().let { (t, img) -> core.onLuma(t, img, scene.scale) }
+    }
 }

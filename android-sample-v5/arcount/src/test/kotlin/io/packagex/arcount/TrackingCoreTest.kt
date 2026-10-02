@@ -102,6 +102,72 @@ class TrackingCoreTest {
         assertEquals(450, core.view().desiredRefreshMs)
     }
 
+    /**
+     * Counting four units, then 3 cm at 6 cm/s with no decode of them; each luma copy comes at the start of the frame
+     * [late] frames after its own, so after its own pose record and the next late − 1 ones
+     */
+    private fun walkWithLuma(late: Int): CountingCore {
+        val core = CountingCore(hostConfig)
+        val sim = Sim(four + label(), CoreCounter(core))
+        sim.feedLuma(core, LumaScene({ sim.symbols }), late)
+        sim.run(Paths.hold(home, 5.5))
+        assertEquals(4, core.view().bracket!!.countLow)
+        sim.hidden = { it.text == GTIN }
+        sim.run(Paths.move(Vec3.ZERO, Vec3(0.03, 0.0, 0.0), 0.06))
+        return core
+    }
+
+    @Test
+    fun aLumaCopyIsTrackedWhetherItComesBeforeOrAfterItsPoseRecord() {
+        val early = walkWithLuma(0)
+        for (late in listOf(1, 2, 4)) {
+            val core = walkWithLuma(late)
+            assertEquals(0, core.lateLumas)
+            // every frame of the walk is tracked for its four units, but the last [late]: their copies are on the way
+            assertEquals("$late late", early.patchTracks.trackCalls - 4 * late, core.patchTracks.trackCalls)
+            assertTrue(core.units.all { core.patchTracks.hasPatch(it.id) && it.hasDepth })
+            assertEquals(4, core.view().markers.size)
+        }
+    }
+
+    @Test
+    fun aLumaCopyMoreThanATenthOfASecondBehindTheNewestPoseRecordIsDropped() {
+        // each copy comes after the pose record 4 frames (133 ms) newer: every copy is dropped, nothing tracked or captured
+        val core = walkWithLuma(5)
+        assertTrue(core.lateLumas > 0)
+        assertEquals(0, core.trackFrames)
+        assertTrue(core.units.none { core.patchTracks.hasPatch(it.id) })
+        assertEquals(0, core.view().desiredRefreshMs)
+    }
+
+    @Test
+    fun aLumaCopyOlderThanAFrameAlreadyTrackedIsNotTracked() {
+        val core = CountingCore(hostConfig)
+        val sim = Sim(four + label(), CoreCounter(core))
+        val scene = LumaScene({ sim.symbols })
+        val held = ArrayList<Pair<Long, LumaImage>>()
+        var holdBack = false
+        sim.luma = { ts, camera ->
+            val img = scene.render(ts, camera)
+            if (holdBack) held += ts to img else core.onLuma(ts, img, scene.scale)
+        }
+        sim.run(Paths.hold(home, 5.5))
+        sim.hidden = { it.text == GTIN }
+        val walk = Paths.move(Vec3.ZERO, Vec3(0.03, 0.0, 0.0), 0.06)
+        sim.run(walk.take(3))
+        // frame A's copy is held back; frame B's comes first and is tracked; then A's comes, in time but out of order
+        holdBack = true
+        sim.step(walk[3])
+        holdBack = false
+        val before = core.trackFrames
+        sim.step(walk[4])
+        assertEquals(before + 1, core.trackFrames)
+        val (ts, img) = held.single()
+        core.onLuma(ts, img, scene.scale)
+        assertEquals(before + 1, core.trackFrames)
+        assertEquals(0, core.lateLumas)
+    }
+
     @Test
     fun meanTrackingTimePerFrameForTenTrackedUnits() {
         val ten = row(10, 0.035, x0 = -0.16)

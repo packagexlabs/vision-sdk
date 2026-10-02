@@ -29,6 +29,14 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         private set
     internal val patchTracks: PatchTracks get() = tracks
 
+    /** The last pose records with whether the camera moved into each: a luma copy may come after its record */
+    private val recent = ArrayDeque<Pair<PoseRecord, Boolean>>()
+    private var trackedThroughNs = Long.MIN_VALUE
+
+    /** Luma copies dropped for coming more than [CountConfig.lateLumaNs] after the newest pose record */
+    internal var lateLumas = 0
+        private set
+
     /** The open section's units */
     internal val units: List<CountUnit> get() = machine.section?.table?.units ?: emptyList()
 
@@ -53,8 +61,10 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         for (p in pairing.addRecord(frame)) machine.onReads(p)
         watchMotion(prev, frame)
         schedule.onFrame(frame)
+        recent.addLast(frame to schedule.motion.moving)
+        while (recent.size > config.lumaFrames) recent.removeFirst()
         afterReads(frame.timestampNs)
-        lumas.at(frame.timestampNs)?.let { trackFrame(frame, it) }
+        lumas.at(frame.timestampNs)?.let { trackFrame(frame, schedule.motion.moving, it) }
         cached = null
     }
 
@@ -69,11 +79,21 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         cached = null
     }
 
+    /**
+     * A luma copy may come before its frame's pose record (tracked in [onFrame]) or after it (tracked here, when the
+     * record is among the last ones and no newer frame was tracked); one more than [CountConfig.lateLumaNs] behind the
+     * newest record is dropped.
+     */
     override fun onLuma(timestampNs: Long, img: LumaImage, streamPxPerLumaPx: Double) {
+        val newest = latest?.timestampNs
+        if (newest != null && newest - timestampNs > config.lateLumaNs) {
+            lateLumas++
+            return
+        }
         val frame = LumaFrame(timestampNs, img, streamPxPerLumaPx)
         lumas.add(frame)
-        afterReads(latest?.timestampNs ?: timestampNs)
-        latest?.takeIf { it.timestampNs == timestampNs }?.let { trackFrame(it, frame) }
+        afterReads(newest ?: timestampNs)
+        recent.lastOrNull { it.first.timestampNs == timestampNs }?.let { (r, moving) -> trackFrame(r, moving, frame) }
         cached = null
     }
 
@@ -85,11 +105,14 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
     }
 
     /** Follows the units' patches into [r], whose luma copy is [luma] (spec 5.9) */
-    private fun trackFrame(r: PoseRecord, luma: LumaFrame) {
+    private fun trackFrame(r: PoseRecord, moving: Boolean, luma: LumaFrame) {
         val t = machine.section?.table ?: return
         if (machine.state != SectionState.COUNTING) return
+        // frames are tracked in timestamp order: a luma copy older than a frame already tracked comes too late
+        if (r.timestampNs <= trackedThroughNs) return
+        trackedThroughNs = r.timestampNs
         val start = System.nanoTime()
-        tracks.track(t, r, luma, schedule.motion.moving)
+        tracks.track(t, r, luma, moving)
         trackNanos += System.nanoTime() - start
         trackFrames++
     }

@@ -115,4 +115,6 @@ data class CountConfig(
     // Not in the spec: a track's rays count only once the camera has moved across the unit's ray far enough for a
     // parallax of this many σray since the capture; the rays before are held until then (decode error is shared)
     val trackMinParallaxSigmas: Double = 10.0,
+    // A luma copy coming more than this after the newest pose record is dropped (the app's copy thread lags the GL thread)
+    val lateLumaNs: Long = 100_000_000L,
 )
