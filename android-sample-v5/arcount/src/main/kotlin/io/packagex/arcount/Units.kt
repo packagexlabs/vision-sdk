@@ -133,12 +133,12 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
                 u.segmentFirstNs = record.timestampNs
             }
         }
-        for (u in matches.values) {
-            if (u.state == AMBIGUOUS && u.linkedTo in matchedIds) {
-                note("unit ${u.id}: COUNTED, read in one frame with unit ${u.linkedTo}")
-                u.state = COUNTED
-                u.linkedTo = null
-            }
+        val readOf = matches.entries.associate { (i, u) -> u.id to reads1[i] }
+        for (u in matches.values.filter { it.state == AMBIGUOUS }) {
+            val others = alongside(u, readOf, record, before) ?: continue
+            note("unit ${u.id}: COUNTED, read in one frame with units $others")
+            u.state = COUNTED
+            u.linkedTo = null
         }
         val free = before.filter { it.id !in matchedIds }
         val created = ArrayList<CountUnit>()
@@ -278,14 +278,38 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
     }
 
     /** The nearest unmatched COUNTED, TENTATIVE or MANUAL unit whose band 0.75 pitch_px + 2 σ_p̂ holds [c] */
-    private fun bandOf(c: Candidate, record: PoseRecord, free: List<CountUnit>): CountUnit? {
+    private fun bandOf(c: Candidate, record: PoseRecord, free: List<CountUnit>): CountUnit? =
+        free.filter { it.state != AMBIGUOUS }.mapNotNull { u -> inBand(c, u, record)?.let { u to it } }.minByOrNull { it.second }?.first
+
+    /** How far [c] lies from [u]'s prediction in pitches, when it lies inside [u]'s band (a unit added by hand bands every GTIN) */
+    private fun inBand(c: Candidate, u: CountUnit, record: PoseRecord): Double? {
+        if (u.gtin != c.gtin && u.state != MANUAL) return null
+        val p = predict(u, record) ?: return null
+        val px = pitchPx(record.intrinsics.fx, p.z)
+        val d = hypot(c.read.centreU - p.u, c.read.centreV - p.v)
+        return if (d <= config.ambiguityPitchFraction * px + config.ambiguitySigmas * p.sigmaPx) d / px else null
+    }
+
+    /**
+     * Ruling R2: AMBIGUOUS [u] counts when this frame also read its linked unit and every unit whose band holds
+     * [u]'s read, all those reads pairwise half a pitch_px apart or more. Returns those units' ids, or null.
+     */
+    private fun alongside(u: CountUnit, readOf: Map<Int, Candidate>, record: PoseRecord, units: List<CountUnit>): List<Int>? {
+        val own = readOf[u.id] ?: return null
+        val candidates = units.filter { it !== u && (it.id == u.linkedTo || inBand(own, it, record) != null) }
+        val reads = listOf(u to own) + candidates.map { it to (readOf[it.id] ?: return null) }
         val f = record.intrinsics.fx
-        return free.filter { (it.gtin == c.gtin || it.state == MANUAL) && it.state != AMBIGUOUS }.mapNotNull { u ->
-            val p = predict(u, record) ?: return@mapNotNull null
-            val px = pitchPx(f, p.z)
-            val d = hypot(c.read.centreU - p.u, c.read.centreV - p.v)
-            if (d <= config.ambiguityPitchFraction * px + config.ambiguitySigmas * p.sigmaPx) u to d / px else null
-        }.minByOrNull { it.second }?.first
+        for (a in reads.indices) {
+            for (b in a + 1 until reads.size) {
+                val za = predict(reads[a].first, record)?.z ?: return null
+                val zb = predict(reads[b].first, record)?.z ?: return null
+                val half = config.duplicateFraction * maxOf(pitchPx(f, za), pitchPx(f, zb))
+                val ra = reads[a].second.read
+                val rb = reads[b].second.read
+                if (hypot(ra.centreU - rb.centreU, ra.centreV - rb.centreV) < half) return null
+            }
+        }
+        return candidates.map { it.id }
     }
 
     /** A read updates the unit's quad, pose, observations, rays and point */

@@ -160,6 +160,19 @@ class UnitsTest {
         assertEquals(listOf(UnitState.COUNTED, UnitState.COUNTED), t.states())
     }
 
+    @Test
+    fun anAmbiguousUnitIsCountedOnlyOnAFrameThatReadsEveryUnitWhoseBandHoldsItsRead() {
+        val t = table()
+        t.see(0, 0.0, unit(0.0, id = 1), unit(0.08, id = 3))
+        // halfway between them: in both bands, in neither gate
+        t.see(1, 0.0, unit(0.04, id = 2))
+        assertEquals(listOf(UnitState.TENTATIVE, UnitState.TENTATIVE, UnitState.AMBIGUOUS), t.states())
+        t.see(2, 0.0, unit(0.0, id = 1), unit(0.04, id = 2))
+        assertEquals(UnitState.AMBIGUOUS, t.units[2].state)
+        t.see(3, 0.0, unit(0.0, id = 1), unit(0.04, id = 2), unit(0.08, id = 3))
+        assertEquals(listOf(UnitState.COUNTED, UnitState.COUNTED, UnitState.COUNTED), t.states())
+    }
+
     /** V at 0 and W at 8 cm read; then U, 0.3 pitch from V, read alone: AMBIGUOUS linked to V */
     private fun ambiguousNextToV(): UnitTable {
         val t = table()
