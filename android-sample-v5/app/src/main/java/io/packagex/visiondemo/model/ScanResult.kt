@@ -38,4 +38,4 @@ sealed interface ScanResult {
 }
 
 /** A row of the AR Item Count drawer: [countLow]..[countHigh] units counted of a listed code; null for an unlisted one. */
-data class RetrievalRow(val code: String, val inList: Boolean, val countLow: Int?, val countHigh: Int?)
+data class RetrievalRow(val code: String, val inList: Boolean, val countLow: Int?, val countHigh: Int?, val name: String? = null)

@@ -52,8 +52,8 @@ sealed interface ScannerAction {
     data object CheckUpdates : ScannerAction
 
     // Item retrieval list (Items sheet)
-    /** Adds one code (typed or picked) to the list. */
-    data class AddItem(val sku: String) : ScannerAction
+    /** Adds one code (typed or picked) to the list, with its item [name] when one is given (blank: unnamed). */
+    data class AddItem(val sku: String, val name: String = "") : ScannerAction
     /** The Items sheet's "Add Item": adds every code currently in view (iOS `addItemsInView`). */
     data object AddItemsInView : ScannerAction
     data class RemoveItem(val sku: String) : ScannerAction

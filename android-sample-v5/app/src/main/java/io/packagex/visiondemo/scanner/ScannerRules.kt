@@ -165,17 +165,21 @@ internal fun retrievalHint(items: List<String>, codesInView: List<String>, view:
  * AR Item Count's shutter (spec 5.10): a row per code in view, then one per listed code counted so far that is not in
  * view; a listed code carries its count ([counts], 0 while the counter has none for it), an unlisted one none.
  */
-internal fun retrievalRows(codesInView: List<String>, items: List<String>, counts: List<ItemCount>): List<RetrievalRow> {
+internal fun retrievalRows(codesInView: List<String>, items: List<String>, counts: List<ItemCount>, names: Map<String, String> = emptyMap()): List<RetrievalRow> {
     val byCode = counts.associateBy { codeKey(it.code) }
     fun row(code: String): RetrievalRow {
         val listed = items.lists(code)
         val c = byCode[codeKey(code)]
-        return RetrievalRow(code, listed, if (listed) c?.countLow ?: 0 else null, if (listed) c?.countHigh ?: 0 else null)
+        return RetrievalRow(code, listed, if (listed) c?.countLow ?: 0 else null, if (listed) c?.countHigh ?: 0 else null, nameOf(code, names))
     }
     val inView = codesInView.map(::codeKey).toSet()
     val counted = counts.filter { it.countHigh > 0 && items.lists(it.code) && codeKey(it.code) !in inView }.map { it.code }
     return (codesInView + counted).map(::row)
 }
+
+/** [code]'s item name: its own, else that of the listed SKU it matches (GTINs as 14 digits); null when unnamed */
+internal fun nameOf(code: String, names: Map<String, String>): String? =
+    names[code] ?: codeKey(code).let { k -> names.entries.firstOrNull { codeKey(it.key) == k }?.value }
 
 /** The item list's "Seen" rows (spec 5.10): each seen code, and whether it is listed ("In list") or can be added. */
 internal fun seenRows(seen: List<String>, items: List<String>): List<Pair<String, Boolean>> = seen.map { it to items.lists(it) }

@@ -201,6 +201,33 @@ class ScannerViewModelArTest {
         assertEquals(emptyList<String>(), v.state.value.seen)
     }
 
+    @Test fun addFromSeenWithANameStoresTheNameBesideTheList() = runTest {
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
+        v.onAction(ScannerAction.AddItem(" Z ", " Oat milk ")); advanceUntilIdle()
+        assertEquals(listOf("A", "B", "Z"), v.state.value.items)
+        assertEquals(mapOf("Z" to "Oat milk"), v.state.value.itemNames)
+        assertEquals(mapOf("Z" to "Oat milk"), catalog.names.value)   // persisted beside the list
+        v.onAction(ScannerAction.AddItem("Y", "  ")); advanceUntilIdle()   // an empty name: added unnamed
+        assertEquals(listOf("A", "B", "Z", "Y"), v.state.value.items)
+        assertEquals(mapOf("Z" to "Oat milk"), catalog.names.value)
+        v.onAction(ScannerAction.AddItem("Z", "Other")); advanceUntilIdle()   // already listed: the name stays
+        assertEquals(mapOf("Z" to "Oat milk"), catalog.names.value)
+        v.onAction(ScannerAction.RemoveItem("Z")); advanceUntilIdle()
+        assertEquals(emptyMap<String, String>(), catalog.names.value)
+        v.onAction(ScannerAction.AddItem("Z", "Oat milk")); v.onAction(ScannerAction.ClearItems); advanceUntilIdle()
+        assertEquals(emptyList<String>(), catalog.items.value); assertEquals(emptyMap<String, String>(), catalog.names.value)
+    }
+
+    @Test fun theDrawerRowsCarryTheItemNames() = runTest {
+        catalog.names.value = mapOf("A" to "Apple")
+        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
+        assertEquals(mapOf("A" to "Apple"), v.state.value.itemNames)
+        ar.codesInView.value = listOf("A", "Q"); advanceUntilIdle()
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle()
+        val rows = (v.state.value.result as ScanResult.Retrieval).rows
+        assertEquals(listOf("Apple", null), rows.map { it.name })
+    }
+
     // --- the AR plumbing, as AR Count had it ---
 
     // A worker panning the shelf touches nothing: the idle timeout must not pause the session under them.

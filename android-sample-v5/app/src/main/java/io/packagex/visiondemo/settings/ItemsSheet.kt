@@ -18,12 +18,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,6 +54,8 @@ import io.packagex.visiondemo.scanner.seenRows
 fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     var confirmDeleteAll by remember { mutableStateOf(false) }
     var draft by remember { mutableStateOf("") }
+    /** The Seen row whose Add was tapped: its code goes into the naming dialog */
+    var naming by remember { mutableStateOf<String?>(null) }
 
     Text("The scanner reports which of these codes are in view. ${state.items.size} in list.", style = inter(13.sp), color = PX.Muted)
 
@@ -90,7 +95,10 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(vertical = 4.dp),
             ) {
-                Text(code, style = mono(14.sp), color = PX.Ink, modifier = Modifier.weight(1f))
+                Column(Modifier.weight(1f)) {
+                    state.itemNames[code]?.let { Text(it, style = inter(14.sp), color = PX.Ink) }
+                    Text(code, style = mono(if (code in state.itemNames) 12.sp else 14.sp), color = if (code in state.itemNames) PX.Muted else PX.Ink)
+                }
                 Badge(text = if (seen) "In view" else "Not in view", tone = if (seen) BadgeTone.Success else BadgeTone.Neutral, dot = seen)
                 Box(
                     modifier = Modifier
@@ -122,12 +130,14 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
                 if (listed) {
                     Badge(text = "In list", tone = BadgeTone.Success, dot = true)
                 } else {
-                    LinkLabel("Add") { onAction(ScannerAction.AddItem(code)) }
+                    LinkLabel("Add") { naming = code }
                 }
             }
             HorizontalDivider(color = PX.Hairline)
         }
     }
+
+    naming?.let { code -> AddSeenDialog(code, onSave = { sku, name -> onAction(ScannerAction.AddItem(sku, name)); naming = null }, onDismiss = { naming = null }) }
 
     if (confirmDeleteAll) {
         AlertDialog(
@@ -140,6 +150,33 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             dismissButton = { TextButton(onClick = { confirmDeleteAll = false }) { Text("Cancel") } },
         )
     }
+}
+
+/** Add from the Seen list: the barcode (editable) and the item's name, which has the focus; a blank name adds it unnamed. */
+@Composable
+private fun AddSeenDialog(code: String, onSave: (sku: String, name: String) -> Unit, onDismiss: () -> Unit) {
+    var sku by remember { mutableStateOf(code) }
+    var name by remember { mutableStateOf("") }
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focus.requestFocus() }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add item") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = sku, onValueChange = { sku = it }, label = { Text("Barcode") }, textStyle = mono(14.sp), singleLine = true)
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Item name") },
+                    singleLine = true,
+                    modifier = Modifier.focusRequester(focus),
+                )
+            }
+        },
+        confirmButton = { TextButton(enabled = sku.isNotBlank(), onClick = { onSave(sku, name) }) { Text("Save") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+    )
 }
 
 @Preview(showBackground = true)

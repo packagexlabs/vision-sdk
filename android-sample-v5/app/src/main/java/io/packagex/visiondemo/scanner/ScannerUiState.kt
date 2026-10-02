@@ -63,6 +63,8 @@ data class ScannerUiState(
     val seen: List<String> = emptyList(),
     /** Item retrieval list: the codes to find (iOS `items`). */
     val items: List<String> = emptyList(),
+    /** The items' names, SKU to name (iOS `catalogLookup`); a code may have none. */
+    val itemNames: Map<String, String> = emptyMap(),
     /** Zoom preset in use (reset to 1 on mode switch). */
     val zoom: Float = 1f,
     /** Settings › Advanced "Detection enabled"; not persisted (iOS `detectionEnabled`). */

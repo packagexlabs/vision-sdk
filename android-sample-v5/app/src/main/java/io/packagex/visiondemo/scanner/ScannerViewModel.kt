@@ -149,6 +149,7 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { models.states.collect { m -> _state.update { it.copy(models = m) } } }
         viewModelScope.launch { models.versions.collect { v -> _state.update { it.copy(modelVersions = v) } } }
         viewModelScope.launch { catalog.items.collect { i -> _state.update { it.copy(items = i) } } }
+        viewModelScope.launch { catalog.names.collect { n -> _state.update { it.copy(itemNames = n) } } }
         viewModelScope.launch { ar.count.collect { v -> _state.update { it.copy(arCount = v) } } }
         viewModelScope.launch { ar.codesInView.collect { c -> _state.update { it.copy(codesInView = c) } } }
         viewModelScope.launch { ar.seen.collect { c -> _state.update { it.copy(seen = c) } } }
@@ -221,11 +222,19 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.CancelDownload -> { models.cancel(a.t, a.s); toast("Download cancelled") }
             ScannerAction.CheckUpdates -> viewModelScope.launch { toast(runCatching { models.checkUpdates() }.getOrElse { it.message ?: "Update check failed" }) }
             is ScannerAction.AddItem -> a.sku.trim().takeIf { it.isNotEmpty() }?.let { sku ->
-                if (s.items.lists(sku)) toast("Code already in list") else setItems(s.items + sku)
+                if (s.items.lists(sku)) {
+                    toast("Code already in list")
+                } else {
+                    setItems(s.items + sku)
+                    a.name.trim().takeIf { it.isNotEmpty() }?.let { setNames(s.itemNames + (sku to it)) }
+                }
             }
             ScannerAction.AddItemsInView -> addItemsInView()
-            is ScannerAction.RemoveItem -> setItems(s.items - a.sku)
-            ScannerAction.ClearItems -> setItems(emptyList())
+            is ScannerAction.RemoveItem -> {
+                setItems(s.items - a.sku)
+                if (a.sku in s.itemNames) setNames(s.itemNames - a.sku)
+            }
+            ScannerAction.ClearItems -> { setItems(emptyList()); setNames(emptyMap()) }
             ScannerAction.ScanNext -> { closeResult(); if (usesAr) newCount() }
             is ScannerAction.Copy -> { _effects.trySend(ScannerEffect.Copy(a.text)); toast("Copied ${a.label}") }
             is ScannerAction.SendFeedback -> sendFeedback(a.entries, a.comment)
@@ -474,7 +483,7 @@ class ScannerViewModel @Inject constructor(
             ScanMode.Retrieval -> {
                 if (s.items.isEmpty()) return _state.update { it.copy(alert = noItemsAlert) }
                 // The codes in view and the listed codes counted so far; the drawer's New Scan starts a fresh count.
-                show(ScanResult.Retrieval(retrievalRows(s.codesInView, s.items, s.arCount.items)))
+                show(ScanResult.Retrieval(retrievalRows(s.codesInView, s.items, s.arCount.items, s.itemNames)))
             }
             ScanMode.TextTemplates -> when {
                 !s.tt.hasEmail -> openSheet(SheetKind.TtSetup)
@@ -829,6 +838,11 @@ class ScannerViewModel @Inject constructor(
     private fun setItems(items: List<String>) {
         _state.update { it.copy(items = items) }   // at once; the repo echoes the same list
         viewModelScope.launch { catalog.setItems(items) }
+    }
+
+    private fun setNames(names: Map<String, String>) {
+        _state.update { it.copy(itemNames = names) }   // at once; the repo echoes the same map
+        viewModelScope.launch { catalog.setNames(names) }
     }
 
     /** iOS `addItemsInView`. */

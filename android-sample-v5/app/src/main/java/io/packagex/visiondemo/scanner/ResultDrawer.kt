@@ -350,7 +350,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
     }
     ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
     is ScanResult.Retrieval -> result.rows.joinToString("\n") { r ->
-        listOfNotNull(r.code, if (r.inList) "In list" else "Not in list", r.countText()).joinToString("\t")
+        listOfNotNull(r.code, r.name, if (r.inList) "In list" else "Not in list", r.countText()).joinToString("\t")
     }
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
     is ScanResult.TextTemplate -> result.fields.toSortedMap().entries.joinToString("\n") { (k, f) -> "$k: ${edits[k] ?: f.text}" }
@@ -411,7 +411,7 @@ private fun RetrievalContent(rows: List<RetrievalRow>, onAction: (ScannerAction)
     } else {
         Column {
             rows.forEach { r ->
-                RowLine(label = "Code", value = r.code) {
+                RowLine(label = r.name ?: "Code", value = r.code) {
                     r.countText()?.let { Text(it, style = mono(14.sp), color = PX.Text2) }
                     Badge(text = if (r.inList) "In list" else "Not in list", tone = if (r.inList) BadgeTone.Success else BadgeTone.Neutral, dot = r.inList)
                 }

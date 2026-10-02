@@ -15,13 +15,22 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** The item retrieval list of codes to find (iOS `DemoModel.items`, persisted as "v5.items"). */
+/**
+ * The item retrieval list of codes to find (iOS `DemoModel.items`, persisted as "v5.items"), and the items' names,
+ * SKU to name (iOS `catalogLookup`), persisted beside it as "v5.itemNames"; a code may have none.
+ */
 interface ItemCatalogRepository {
     val items: StateFlow<List<String>>
     suspend fun setItems(items: List<String>)
+    val names: StateFlow<Map<String, String>>
+    suspend fun setNames(names: Map<String, String>)
 }
 
 private val itemsKey = stringPreferencesKey("v5.items")
+private val namesKey = stringPreferencesKey("v5.itemNames")
+
+private fun decodeNames(raw: String?): Map<String, String> =
+    raw?.let { runCatching { Json.decodeFromString<Map<String, String>>(it) }.getOrNull() } ?: emptyMap()
 
 private fun decodeItems(raw: String?): List<String> =
     raw?.let { runCatching { Json.decodeFromString<List<String>>(it) }.getOrNull() } ?: emptyList()
@@ -38,5 +47,13 @@ class DataStoreItemCatalogRepository @Inject constructor(
 
     override suspend fun setItems(items: List<String>) {
         context.dataStore.edit { p -> p[itemsKey] = Json.encodeToString(items) }
+    }
+
+    override val names: StateFlow<Map<String, String>> = context.dataStore.data
+        .map { decodeNames(it[namesKey]) }
+        .stateIn(appScope, SharingStarted.Eagerly, emptyMap())
+
+    override suspend fun setNames(names: Map<String, String>) {
+        context.dataStore.edit { p -> p[namesKey] = Json.encodeToString(names) }
     }
 }

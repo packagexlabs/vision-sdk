@@ -259,9 +259,11 @@ class FakeDocument : DocumentCamera {
 }
 
 /** In-memory [ItemCatalogRepository]. */
-class FakeCatalog(items: List<String> = emptyList()) : ItemCatalogRepository {
+class FakeCatalog(items: List<String> = emptyList(), names: Map<String, String> = emptyMap()) : ItemCatalogRepository {
     override val items = MutableStateFlow(items)
     override suspend fun setItems(items: List<String>) { this.items.value = items }
+    override val names = MutableStateFlow(names)
+    override suspend fun setNames(names: Map<String, String>) { this.names.value = names }
 }
 
 /** Swaps Dispatchers.Main for a [StandardTestDispatcher] so viewModelScope runs on runTest's virtual clock. */

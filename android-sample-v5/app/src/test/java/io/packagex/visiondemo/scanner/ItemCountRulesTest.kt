@@ -66,4 +66,12 @@ class ItemCountRulesTest {
     @Test fun seenRowsCarryTheInListBadge() {
         assertEquals(listOf("C" to false, "A" to true), seenRows(listOf("C", "A"), listOf("A", "B")))
     }
+
+    @Test fun aCodeTakesTheNameOfTheListedSkuItMatches() {
+        val names = mapOf("012345678905" to "Oat milk", "TP1" to "Tape")
+        assertEquals("Oat milk", nameOf("012345678905", names))
+        assertEquals("Oat milk", nameOf("0012345678905", names)) // the same GTIN as 13 digits
+        assertEquals("Tape", nameOf("TP1", names))
+        assertEquals(null, nameOf("TP2", names))
+    }
 }
