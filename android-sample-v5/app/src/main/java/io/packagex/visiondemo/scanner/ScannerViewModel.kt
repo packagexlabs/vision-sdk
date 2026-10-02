@@ -393,7 +393,7 @@ class ScannerViewModel @Inject constructor(
         if (s.phase != Phase.Idle || s.result != null || pendingShow != null || s.gated || s.permissionDenied) return
         if (!s.detectionEnabled && usesScanner) return toast("Detection is paused. Resume it in Settings › Advanced.")
         when (s.mode) {
-            // The sections closed so far, as they were closed (spec 5.7); counting goes on behind the drawer's New Scan.
+            // The sections closed so far, one result each (spec 5.7); the drawer's New Scan starts a fresh count.
             ScanMode.Ar -> s.arCount.closed.takeIf { it.isNotEmpty() }?.let { show(ScanResult.Ar(it)) }
                 ?: toast("No section closed yet. Count a shelf section, then tap Finish.")
             ScanMode.Price -> show(ScanResult.Price)   // iOS shows the drawer even with no tags yet
