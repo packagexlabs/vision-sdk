@@ -227,9 +227,10 @@ class ArSessionController @Inject constructor(
                 Config(s).apply {
                     focusMode = Config.FocusMode.AUTO // FIXED left the feed soft at barcode range on the Memor 35
                     updateMode = Config.UpdateMode.BLOCKING // paces the GL thread to the camera
-                    planeFindingMode = Config.PlaneFindingMode.DISABLED
+                    // Pins hit-test planes and depth as last night's AR Barcode did (feature points alone miss on flat labels)
+                    planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
                     lightEstimationMode = Config.LightEstimationMode.DISABLED
-                    depthMode = Config.DepthMode.DISABLED
+                    depthMode = if (s.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) Config.DepthMode.AUTOMATIC else Config.DepthMode.DISABLED
                     instantPlacementMode = Config.InstantPlacementMode.DISABLED
                 },
             )
