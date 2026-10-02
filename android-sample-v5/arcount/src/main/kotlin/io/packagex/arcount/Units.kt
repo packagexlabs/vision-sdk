@@ -25,6 +25,8 @@ class SectionFrame(
     var labelRay: Ray? = null,
     /** The label point: the prior on its ray, or triangulated from its reads; the plane passes through it until a unit triangulates */
     var labelPoint: Vec3? = null,
+    /** A read's code as the GTIN set holds it: GTINs as 14 digits; in item mode a code's key (spec 5.10) */
+    val keyOf: (Read) -> String = { Gtin.normalize(it.text, it.symbology) },
 ) {
     /** The label's height on the plane, where its ray meets the plane: the centre of the rail band */
     val labelHeight: Double?
@@ -104,7 +106,13 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
     var pitch = config.defaultPitch
         private set
 
-    fun counts() = Counts(all.count { it.state == COUNTED }, all.count { it.state == MANUAL }, all.count { it.state == TENTATIVE }, all.count { it.state == AMBIGUOUS })
+    fun counts() = counts(all)
+
+    /** The count per code of the units, a removed code's included (spec 5.10) */
+    fun countsByCode(): Map<String, Counts> = all.groupBy { it.gtin }.mapValues { counts(it.value) }
+
+    private fun counts(units: List<CountUnit>) =
+        Counts(units.count { it.state == COUNTED }, units.count { it.state == MANUAL }, units.count { it.state == TENTATIVE }, units.count { it.state == AMBIGUOUS })
 
     /** The unit's prediction in [record]'s frame, whose anchor is the section's */
     fun predict(unit: CountUnit, record: PoseRecord): Predicted? =
@@ -232,7 +240,7 @@ class UnitTable(private val config: CountConfig, val frame: SectionFrame) {
         val labelHeight = frame.labelHeight
         val kept = ArrayList<Candidate>()
         for (r in reads) {
-            val gtin = Gtin.normalize(r.text, r.symbology)
+            val gtin = frame.keyOf(r)
             val ray = r.ray(record)
             val p = frame.plane.intersect(ray)
             val drop = when {

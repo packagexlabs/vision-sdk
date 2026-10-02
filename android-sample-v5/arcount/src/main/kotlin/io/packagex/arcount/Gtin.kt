@@ -17,6 +17,14 @@ object Gtin {
         return digits.padStart(14, '0')
     }
 
+    /** Whether [text] is a GTIN ending in its GS1 check digit (a 14-digit normalised one checks the same as its source) */
+    fun isValid(text: String): Boolean {
+        if (!isGtin(text)) return false
+        val body = text.dropLast(1)
+        val sum = body.reversed().withIndex().sumOf { (i, c) -> (c - '0') * if (i % 2 == 0) 3 else 1 }
+        return (10 - sum % 10) % 10 == text.last() - '0'
+    }
+
     private fun isUpcE(symbology: String?) = symbology?.lowercase()?.filter { it.isLetterOrDigit() } == "upce"
 
     /** UPC-E (number system, six digits, check digit) to its UPC-A */
