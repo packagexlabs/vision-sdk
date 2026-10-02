@@ -129,6 +129,7 @@ class ScannerViewModel @Inject constructor(
         camera.lens(false)
         document.lens(false)
         ar.resume()   // no result, not paused; entering AR re-syncs with the camera pause (syncAr)
+        ar.tracing = s.prefs.arTrace   // the stored setting follows through setPrefs
         // While a local write is in flight the repo can still emit the value from before it; skip those.
         viewModelScope.launch { prefs.prefs.collect { if (prefWrites == 0) setPrefs(it) } }
         viewModelScope.launch { models.states.collect { m -> _state.update { it.copy(models = m) } } }
@@ -331,6 +332,7 @@ class ScannerViewModel @Inject constructor(
         val old = s.prefs
         if (p == old) return
         _state.update { it.copy(prefs = p) }
+        if (old.arTrace != p.arTrace) ar.tracing = p.arTrace
         if (old.multi != p.multi || old.showBoxes != p.showBoxes || old.autoCapture != p.autoCapture) {
             applyConfig()
             if (old.multi != p.multi && usesScanner) camera.rescan()   // drops any half-finished single capture

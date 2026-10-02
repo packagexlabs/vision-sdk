@@ -10,6 +10,7 @@ import io.packagex.arcount.SectionState
 import io.packagex.arcount.SectionStatus
 import io.packagex.visiondemo.ar.AppStream
 import io.packagex.visiondemo.camera.CameraOwner
+import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.Secrets
 import io.packagex.visiondemo.fakes.FakeArCount
 import io.packagex.visiondemo.fakes.FakeCamera
@@ -158,6 +159,17 @@ class ScannerViewModelArTest {
             ar.fail("Camera not available")
             assertEquals(ScannerEffect.Toast("Camera not available"), awaitItem())
         }
+    }
+
+    @Test fun tracesFollowTheSetting() = runTest {
+        ar.tracing = true   // left over from the previous ViewModel
+        val prefs = FakePreferences()
+        val v = ScannerViewModel(cam, prefs, FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar)
+        advanceUntilIdle(); assertFalse(ar.tracing)
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(arTrace = true) }); advanceUntilIdle()
+        assertTrue(ar.tracing); assertTrue(v.state.value.prefs.arTrace)
+        val stored = ScannerViewModel(cam, FakePreferences(Prefs(arTrace = true)), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeArCount())
+        advanceUntilIdle(); assertTrue((stored.ar as FakeArCount).tracing)
     }
 
     @Test fun newViewModelResetsSingletonCameraState() = runTest {
