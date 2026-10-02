@@ -262,7 +262,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
         return moves.isNotEmpty() && moves.all { it >= config.jumpStillPx }
     }
 
-    /** Whether the label, or a COUNTED or TENTATIVE unit, is predicted inside the image */
+    /** Whether the label, or a COUNTED, TENTATIVE or AMBIGUOUS unit (ruling R4), is predicted inside the image */
     private fun elementInImage(s: Section, t: UnitTable, r: PoseRecord): Boolean {
         val k = r.intrinsics
         val label = t.frame.labelPoint
@@ -270,7 +270,7 @@ class SectionMachine(private val config: CountConfig = CountConfig()) {
             val p = Prediction.pixel(label, r.cameraInAnchor(), k)
             if (p != null && p.first >= 0 && p.second >= 0 && p.first < k.width && p.second < k.height) return true
         }
-        return t.units.any { (it.state == UnitState.COUNTED || it.state == UnitState.TENTATIVE) && t.predict(it, r)?.inImage(k) == true }
+        return t.units.any { it.state != UnitState.MANUAL && t.predict(it, r)?.inImage(k) == true }
     }
 
     private fun frozenFrame(s: Section, r: PoseRecord) {

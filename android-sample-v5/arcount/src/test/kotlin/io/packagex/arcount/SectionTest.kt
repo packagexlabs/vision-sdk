@@ -162,6 +162,23 @@ class SectionTest {
     }
 
     @Test
+    fun anAmbiguousUnitInViewKeepsTheSectionInView() {
+        val v = Symbol(GTIN, Vec3(0.0, 0.04, -0.30), 1)
+        val u = Symbol(GTIN, Vec3(0.036, 0.04, -0.30), 2)
+        val (sim, m) = sim(listOf(v, u, label()))
+        sim.hidden = { it == u }
+        sim.run(Paths.hold(home, 5.5))
+        sim.hidden = { it == v }
+        sim.run(Paths.hold(home, 0.2))
+        assertEquals(listOf(UnitState.COUNTED, UnitState.AMBIGUOUS), m.section!!.table!!.units.map { it.state })
+        // turned right: the label and the counted unit leave the image, the ambiguous one stays in it
+        val turned = Pose(Vec3.ZERO, Quat.axisAngle(y, -0.62))
+        assertNull(K4K.project(turned.inverse().apply(v.centre))?.takeIf { it.first >= 0 })
+        sim.run(Paths.hold(turned, 1.5))
+        assertEquals(COUNTING, m.state)
+    }
+
+    @Test
     fun tenSecondsWithoutAReadWhileUnitsAreInViewFreezes() {
         val (sim, m) = counting()
         sim.readsEnabled = false
