@@ -222,7 +222,7 @@ class ScannerViewModel @Inject constructor(
             is ScannerAction.ArCommand -> if (s.mode == ScanMode.Ar && !s.home && s.result == null) ar.command(a.command)
             is ScannerAction.ArInstallResult -> when (a.result) {
                 ArInstall.Installed -> { arInstalled = true; setMode(ScanMode.Ar) }
-                ArInstall.Declined -> toast("AR Barcode needs Google Play Services for AR")
+                ArInstall.Declined -> toast("AR Count needs Google Play Services for AR")
                 ArInstall.Unsupported -> toast("AR isn't supported on this device")
             }
         }

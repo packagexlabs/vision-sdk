@@ -11,6 +11,12 @@ class TypesTest {
         assertEquals(expected, ScanMode.entries.filter { it.isCode }.toSet())
     }
 
+    // Two AR-sounding labels: Retrieval's "AR Item Count" is the SDK's item retrieval; "AR Count" is the ARCore shelf count.
+    @Test fun theTwoArModulesAreLabelledApart() {
+        assertEquals("AR Count", ScanMode.Ar.label)
+        assertEquals("AR Item Count", ScanMode.Retrieval.label)
+    }
+
     @Test fun gatedMatchesPriceAndRetrieval() {
         val expected = setOf(ScanMode.Price, ScanMode.Retrieval)
         assertEquals(expected, ScanMode.entries.filter { it.gated }.toSet())

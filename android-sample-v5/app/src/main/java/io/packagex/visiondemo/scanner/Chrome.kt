@@ -182,7 +182,7 @@ private val WindowInsets.Companion.chromeInsets: WindowInsets
  *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`.
  *  Single-code Barcode/QR only — [ScanMode.viewfinder] is already null for every other mode; the multi
  *  check here hides them for multi-code Barcode/QR. Vision Scanner, Price tag, Item retrieval, Document
- *  Acquisition and AR Barcode never show brackets. */
+ *  Acquisition and AR Count never show brackets. */
 @Composable
 fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Viewfinder")

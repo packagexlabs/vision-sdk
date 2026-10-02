@@ -16,7 +16,9 @@ enum class ScanMode(val label: String) {
     Ocr("Vision Scanner"),
     Price("Price tag"),
     Retrieval("AR Item Count"),
-    Ar("AR Barcode"),
+    // ARCore shelf counting (spec 2026-10-02-ar-session-counting-design). Not to be confused with Retrieval's
+    // "AR Item Count" just above, which is the SDK's item retrieval and does not use ARCore.
+    Ar("AR Count"),
     DocAcq("Document Acquisition")
 }
 
@@ -46,7 +48,7 @@ val ScanMode.zooms: List<Float>
  * Design viewfinder frames, in the 390×844 artboard (from iOS Types.swift).
  * Brackets are single-code Barcode/QR only (Chrome.kt `Viewfinder` also
  * requires non-multi) — Vision Scanner, Price tag, AR Item Count, Document
- * Acquisition and AR Barcode never show them.
+ * Acquisition and AR Count never show them.
  */
 val ScanMode.viewfinder: DesignRect?
     get() = when (this) {
@@ -58,7 +60,7 @@ val ScanMode.viewfinder: DesignRect?
 /**
  * Whether the viewfinder brackets should be drawn (Chrome.kt `Viewfinder`):
  * single-code Barcode/QR scanning only. Vision Scanner, Price tag, AR Item
- * Count, Document Acquisition, AR Barcode, and multi-code Barcode/QR
+ * Count, Document Acquisition, AR Count, and multi-code Barcode/QR
  * never show them.
  */
 fun viewfinderBracketsVisible(

@@ -57,7 +57,7 @@ import io.packagex.visiondemo.model.gated
 
 /**
  * v6 entry point: one card per module, each opening its own camera ([ScannerAction.SetMode]).
- * Ported from the VisionSDK Demo v6 design's Home screen. AR Barcode, which the design has no card for,
+ * Ported from the VisionSDK Demo v6 design's Home screen. AR Count, which the design has no card for,
  * sits with the other code modes; Dimensioning and Text Templates are not in this sample.
  */
 @Composable
@@ -160,7 +160,7 @@ private fun cardDescription(mode: ScanMode): String = when (mode) {
     ScanMode.QR -> "QR and 2D codes."
     ScanMode.Price -> "Read shelf tags and check prices."
     ScanMode.Retrieval -> "Find items from a pick list."
-    ScanMode.Ar -> "Pin markers on every code in view."
+    ScanMode.Ar -> "Count a shelf's units, section by section."
     ScanMode.Ocr -> "Labels, BOLs, IDs, plates, tires."
     ScanMode.DocAcq -> "Scan pages to a searchable PDF."
 }
