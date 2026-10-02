@@ -106,6 +106,24 @@ class ScannerViewModelArTest {
         assertEquals(0, ar.resets); assertEquals(counting, v.state.value.arCount)
     }
 
+    // A worker counting with the trigger touches nothing: the idle timeout must not pause the session under them.
+    @Test fun noIdlePauseWhileArCountRuns() = runTest {
+        val v = vm(); advanceUntilIdle()
+        v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
+        assertEquals(true, cam.busy.last())
+        ar.count.value = counting; advanceUntilIdle()
+        v.onAction(ScannerAction.Shutter); advanceUntilIdle()   // the result pauses AR: the idle timeout runs again
+        assertEquals(false, cam.busy.last())
+        v.onAction(ScannerAction.CloseResult); advanceUntilIdle()
+        assertEquals(true, cam.busy.last())
+        cam.pausedFlow.value = true; advanceUntilIdle()   // heat or background still pause it
+        assertEquals(false, cam.busy.last())
+        v.onAction(ScannerAction.Resume); advanceUntilIdle()
+        assertEquals(true, cam.busy.last())
+        v.onAction(ScannerAction.GoHome); advanceUntilIdle()
+        assertEquals(false, cam.busy.last())
+    }
+
     @Test fun resultPausesArCloseResumesAndNewScanStartsAFreshCount() = runTest {
         val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
         ar.count.value = counting; advanceUntilIdle()

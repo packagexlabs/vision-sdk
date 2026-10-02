@@ -215,7 +215,11 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 if (state.mode == ScanMode.Ar && !state.permissionDenied && state.result == null && !state.paused) {
                     // Where the GL thread drew the bracket and the gaps: read while placing the count and on taps only.
                     val arScreen = viewModel.ar.screen.collectAsStateWithLifecycle()
-                    ArCountOverlay(state.arCount, arScreen, onCommand = { viewModel.onAction(ScannerAction.ArCommand(it)) })
+                    ArCountOverlay(
+                        state.arCount, arScreen,
+                        onCommand = { viewModel.onAction(ScannerAction.ArCommand(it)) },
+                        onTouch = { viewModel.onAction(ScannerAction.UserActive) },
+                    )
                 }
             },
             drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, viewModel::onAction) } },

@@ -3,6 +3,8 @@ package io.packagex.visiondemo.ar
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +27,7 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
@@ -47,16 +50,25 @@ import kotlin.math.roundToInt
  * while unresolved, a lock while frozen) where the GL thread drew the section anchor, docked above the shutter while
  * the anchor is not in view; a tap on the count adds a unit by hand, a long press takes the last one back. Finish,
  * Restart and Accept range show when the section's state offers them ([arButtons]); a tap near a gap marker fills it.
- * [view] is the UI copy of the counter's view ([forUi]); [screen] is read only while placing and on taps.
+ * [view] is the UI copy of the counter's view ([forUi]); [screen] is read only while placing and on taps. Every touch
+ * goes to [onTouch] as well: this overlay covers the camera layer, which reports them for the other modes.
  */
 @Composable
-fun ArCountOverlay(view: CountView, screen: State<ArScreen>, onCommand: (Command) -> Unit, modifier: Modifier = Modifier) {
+fun ArCountOverlay(view: CountView, screen: State<ArScreen>, onCommand: (Command) -> Unit, onTouch: () -> Unit, modifier: Modifier = Modifier) {
     val density = LocalDensity.current
     val tapRadiusPx = with(density) { 32.dp.toPx() }
     Box(
-        modifier.fillMaxSize().pointerInput(Unit) {
-            detectTapGestures { pos -> screen.value.gapAt(pos.x, pos.y, tapRadiusPx)?.let { onCommand(Command.FillGap(it)) } }
-        },
+        modifier.fillMaxSize()
+            .pointerInput(Unit) {
+                // Observed on the Initial pass without consuming, so the buttons, the count and the gap taps still get it
+                awaitEachGesture {
+                    awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                    onTouch()
+                }
+            }
+            .pointerInput(Unit) {
+                detectTapGestures { pos -> screen.value.gapAt(pos.x, pos.y, tapRadiusPx)?.let { onCommand(Command.FillGap(it)) } }
+            },
     ) {
         view.prompt?.let { p ->
             Text(

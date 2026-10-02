@@ -140,7 +140,12 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { ar.errors.collect(::toast) }
         viewModelScope.launch { camera.paused.collect(::onPaused) }
         viewModelScope.launch { camera.events.collect(::onEvent) }
-        viewModelScope.launch { state.map { it.phase != Phase.Idle }.distinctUntilChanged().collect(camera::setBusy) }
+        // No idle pause while a capture or extraction runs, nor while AR Count runs: a worker counting with the trigger
+        // touches nothing, and a pause breaks the open section.
+        viewModelScope.launch {
+            state.map { it.phase != Phase.Idle || (it.mode == ScanMode.Ar && !it.home && !it.paused && it.result == null) }
+                .distinctUntilChanged().collect(camera::setBusy)
+        }
         doc.start()
         viewModelScope.launch { state.collect(doc::sync) }
         // Repo states are in-memory; read what the SDK already has on disk / in memory.
