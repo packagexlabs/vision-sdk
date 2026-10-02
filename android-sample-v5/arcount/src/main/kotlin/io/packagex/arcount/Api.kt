@@ -139,6 +139,9 @@ data class SectionResult(
 )
 
 /** Everything the UI draws; immutable, a new one after every update */
+/** A listed code's count over every section of the session (spec 5.10); [inView] when one of its units is in view now */
+data class ItemCount(val code: String, val countLow: Int, val countHigh: Int, val inView: Boolean)
+
 data class CountView(
     val state: SectionState,
     val prompt: Prompt?,
@@ -146,6 +149,8 @@ data class CountView(
     val gaps: List<Gap>,
     val bracket: Bracket?,
     val closed: List<SectionResult>,
+    /** AR Item Count (spec 5.10): every listed code with its count over all sections, in list order */
+    val items: List<ItemCount> = emptyList(),
 ) {
     companion object {
         val EMPTY = CountView(SectionState.IDLE, null, emptyList(), emptyList(), null, emptyList())
@@ -179,4 +184,7 @@ interface ArCounter {
 
     /** The latest view */
     fun view(): CountView
+
+    /** AR Item Count (spec 5.10): the item list, the codes counted; called whenever it changes. Empty: nothing counted. */
+    fun setItems(codes: Set<String>) {}
 }
