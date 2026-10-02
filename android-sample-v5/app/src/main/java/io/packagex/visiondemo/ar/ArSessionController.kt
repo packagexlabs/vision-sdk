@@ -206,23 +206,19 @@ class ArSessionController @Inject constructor(
             _errors.tryEmit("AR Count can't read this camera: none of 4K, 1440p, 1080p or 720p is offered")
             return false
         }
-        return useStream(s, streams[0])
+        useStream(streams[0])
+        return true
     }
 
-    private fun useStream(s: Session, stream: AppStream): Boolean {
+    private fun useStream(stream: AppStream) {
         engine.awaitIdle(DECODE_DRAIN_MS)
         reader?.close()
-        val r = ImageReader.newInstance(stream.width, stream.height, ImageFormat.YUV_420_888, 3)
-        r.setOnImageAvailableListener(::onImage, cameraHandler)
-        reader = r
-        if (runCatching { s.sharedCamera.setAppSurfaces(cameraId, listOf(r.surface)) }.onFailure { Log.w(TAG, "setAppSurfaces", it) }.isFailure) {
-            _errors.tryEmit("AR Count could not start the camera")
-            return false
+        reader = ImageReader.newInstance(stream.width, stream.height, ImageFormat.YUV_420_888, 3).apply {
+            setOnImageAvailableListener(::onImage, cameraHandler)
         }
         renderer?.stream = stream
         _stream.value = stream
         Log.i(TAG, "app stream $stream")
-        return true
     }
 
     /** Camera thread: an app-stream image goes to the engine unless it is busy (spec 5.8, single-flight). */
@@ -238,7 +234,13 @@ class ArSessionController @Inject constructor(
 
     private fun start() {
         val s = session ?: return
-        if (running || opening || pauseWanted || reader == null) return
+        val r = reader ?: return
+        if (running || opening || pauseWanted) return
+        // Before every open, as Google's shared-camera sample does: ARCore then feeds the app stream too.
+        if (runCatching { s.sharedCamera.setAppSurfaces(cameraId, listOf(r.surface)) }.onFailure { Log.w(TAG, "setAppSurfaces", it) }.isFailure) {
+            _errors.tryEmit("AR Count could not start the camera")
+            return
+        }
         opening = true
         openCamera(s, ++generation, RETRIES)
     }
@@ -298,8 +300,7 @@ class ArSessionController @Inject constructor(
 
     /** Main thread, after a failed configure: the next smaller app stream (spec 5.2), on a camera opened again. */
     private fun nextStream(gen: Int) {
-        val s = session ?: return
-        if (gen != generation) return
+        if (session == null || gen != generation) return
         val failed = streams[streamIndex]
         stopCamera()
         if (++streamIndex >= streams.size) {
@@ -308,7 +309,8 @@ class ArSessionController @Inject constructor(
             return
         }
         Log.w(TAG, "configure failed with the app stream $failed; trying ${streams[streamIndex]}")
-        if (useStream(s, streams[streamIndex])) start()
+        useStream(streams[streamIndex])
+        start()
     }
 
     /** Main thread: the camera failed while ARCore ran (spec 6). The section freezes on the gap; the camera opens again. */
