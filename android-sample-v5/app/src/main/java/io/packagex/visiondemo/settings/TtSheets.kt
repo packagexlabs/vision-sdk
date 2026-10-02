@@ -91,14 +91,11 @@ fun TtSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
         tt.syncProgress?.let {
             LinearProgressIndicator(progress = { it }, color = PX.Purple, modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp))
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(vertical = 4.dp),
-        ) {
-            Text("Loaded into pool: ${tt.loadedIds.size}", style = inter(14.sp), color = PX.Ink, modifier = Modifier.weight(1f))
-            Box(Modifier.weight(0.9f)) { PXButton(title = "Load templates", height = 44.dp) { onAction(ScannerAction.TtLoad) } }
-            Box(Modifier.weight(0.6f)) { PXButton(title = "Unload", kind = PXButtonKind.Secondary, height = 44.dp) { onAction(ScannerAction.TtUnload) } }
+        Text("Loaded into pool: ${tt.loadedIds.size}", style = inter(14.sp), color = PX.Ink, modifier = Modifier.padding(top = 14.dp, bottom = 8.dp))
+        // Buttons on their own row: beside the label they wrap on a phone-width sheet.
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+            Box(Modifier.weight(1f)) { PXButton(title = "Load templates", height = 44.dp) { onAction(ScannerAction.TtLoad) } }
+            Box(Modifier.weight(1f)) { PXButton(title = "Unload", kind = PXButtonKind.Secondary, height = 44.dp) { onAction(ScannerAction.TtUnload) } }
         }
         HorizontalDivider(color = PX.Hairline)
     }
