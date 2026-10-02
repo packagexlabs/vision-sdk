@@ -5,6 +5,7 @@ import io.packagex.arcount.AnchorRequest
 import io.packagex.arcount.ArCounter
 import io.packagex.arcount.Command
 import io.packagex.arcount.CountView
+import io.packagex.arcount.LumaImage
 import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Read
 import io.packagex.arcount.SectionState
@@ -20,6 +21,9 @@ sealed interface ArEvent {
 
     /** The reads of the app-stream image taken at [timestampNs] (engine worker), empty when it had none, and what it took */
     data class Reads(val timestampNs: Long, val reads: List<Read>, val stats: EngineStats? = null) : ArEvent
+
+    /** The quarter-scale luma copy of the app-stream image taken at [timestampNs] (luma thread), before its reads */
+    class Luma(val timestampNs: Long, val img: LumaImage) : ArEvent
 
     /** A command of the worker (main thread); it takes the time of the newest frame */
     data class Cmd(val command: Command) : ArEvent
@@ -59,6 +63,8 @@ class ArMapper(
     counter: ArCounter,
     private val onView: (CountView) -> Unit = {},
     private val readsCapacity: Int = 4,
+    /** Luma copies waiting at most: the oldest is dropped (counted in [droppedLumas]), so a slow counter holds little memory */
+    private val lumaCapacity: Int = 2,
     private val log: (String, Throwable) -> Unit = { what, t -> Log.e(THREAD, what, t) },
 ) {
     private val lock = Object()
@@ -66,6 +72,7 @@ class ArMapper(
     private var queuedReads = 0
     private var stopped = false
     private val dropped = AtomicLong()
+    private val droppedLuma = AtomicLong()
     private val latest = AtomicReference(CountView.EMPTY)
     private var worker: Thread? = null
 
@@ -74,6 +81,14 @@ class ArMapper(
 
     /** Reads batches dropped because [readsCapacity] were already waiting */
     val droppedReads: Long get() = dropped.get()
+
+    /** Luma copies dropped because [lumaCapacity] were already waiting */
+    val droppedLumas: Long get() = droppedLuma.get()
+
+    /** The counter's refresh for the engine's next frames (spec 5.3), after each event; null until its first view */
+    @Volatile
+    var desiredRefreshMs: Int? = null
+        private set
 
     // The mapper thread's own
     private var counter = counter
@@ -108,6 +123,16 @@ class ArMapper(
                     dropped.incrementAndGet()
                 }
                 queuedReads++
+            }
+            if (event is ArEvent.Luma && queue.count { it is ArEvent.Luma } >= lumaCapacity) {
+                val it = queue.iterator()
+                while (it.hasNext()) {
+                    if (it.next() is ArEvent.Luma) {
+                        it.remove()
+                        break
+                    }
+                }
+                droppedLuma.incrementAndGet()
             }
             queue.addLast(event)
             lock.notifyAll()
@@ -168,6 +193,7 @@ class ArMapper(
                     e.stats?.let { engine(e.timestampNs, it, e.reads.size, droppedReads) }
                 }
             }
+            is ArEvent.Luma -> counter.onLuma(e.timestampNs, e.img, LUMA_SCALE.toDouble())
             is ArEvent.Cmd -> counter.onCommand(e.command, lastFrameNs)
             is ArEvent.Resumed -> counter.onResume(e.timestampNs)
             is ArEvent.AnchorCreated -> if (e.id >= counterFirstId) {
@@ -195,6 +221,7 @@ class ArMapper(
 
     private fun afterCall(): CountView {
         val view = counter.view()
+        desiredRefreshMs = view.desiredRefreshMs
         if (view.closed.size > closedSeen || view.state == SectionState.IDLE || view.state == SectionState.CLOSED) detach()
         closedSeen = view.closed.size
         val request = counter.anchorRequest()

@@ -5,6 +5,7 @@ import io.packagex.arcount.ArCounter
 import io.packagex.arcount.Command
 import io.packagex.arcount.CountView
 import io.packagex.arcount.Intrinsics
+import io.packagex.arcount.LumaImage
 import io.packagex.arcount.Pose
 import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Read
@@ -35,6 +36,7 @@ class ArMapperTest {
         override fun onFrame(frame: PoseRecord) = log("frame ${frame.timestampNs}")
         override fun onReads(timestampNs: Long, reads: List<Read>) = log("reads $timestampNs")
         override fun onCommand(command: Command, timestampNs: Long) = log("command $command $timestampNs")
+        override fun onLuma(timestampNs: Long, img: LumaImage, streamPxPerLumaPx: Double) = log("luma $timestampNs x$streamPxPerLumaPx")
         override fun onAnchorCreated(ok: Boolean) {
             log("anchor $ok")
             if (ok) request = null
@@ -105,6 +107,32 @@ class ArMapperTest {
         m.drain()
         assertEquals(listOf("frame 1", "reads 3", "reads 4", "reads 5", "reads 6", "frame 2"), c.calls)
         assertEquals(2L, m.droppedReads)
+    }
+
+    private fun luma(ts: Long) = ArEvent.Luma(ts, LumaImage(2, 2, ByteArray(4)))
+
+    @Test fun aLumaCopyReachesTheCounterInOrderAtFourStreamPixelsAPixelAndOnlyTwoWait() {
+        val c = RecordingCounter()
+        val m = ArMapper(c)
+        m.post(frame(1)); m.post(luma(1)); m.post(reads(1))
+        m.drain()
+        assertEquals(listOf("frame 1", "luma 1 x4.0", "reads 1"), c.calls)
+        c.calls.clear()
+        (2L..5L).forEach { m.post(luma(it)) }; m.post(reads(5))
+        m.drain()
+        assertEquals(listOf("luma 4 x4.0", "luma 5 x4.0", "reads 5"), c.calls)
+        assertEquals(2L, m.droppedLumas)
+    }
+
+    @Test fun theRefreshIsTheNewestViewsAfterEachEventAndNullBeforeAny() {
+        val c = RecordingCounter()
+        val m = ArMapper(c)
+        assertEquals(null, m.desiredRefreshMs)
+        m.post(frame(1)); m.drain()
+        assertEquals(0, m.desiredRefreshMs)
+        c.view = CountView.EMPTY.copy(desiredRefreshMs = 300)
+        m.post(reads(1)); m.drain()
+        assertEquals(300, m.desiredRefreshMs)
     }
 
     @Test fun anAnchorIsCreatedOncePerRequestAndLetGoWhenItsSectionCloses() {
