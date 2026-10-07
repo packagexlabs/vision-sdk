@@ -6,6 +6,8 @@ import io.packagex.arcount.CountView
 import io.packagex.visiondemo.ar.AppStream
 import io.packagex.visiondemo.ar.ArCount
 import io.packagex.visiondemo.ar.ArScreen
+import io.packagex.visiondemo.ar.OverlayRules
+import io.packagex.visiondemo.ar.PinRules
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +28,12 @@ class FakeArCount(var installed: Boolean = true, private val onDetach: () -> Uni
     private val exitChannel = Channel<String>(Channel.UNLIMITED)
     override val exits: Flow<String> = exitChannel.receiveAsFlow()
     override var tracing = false
+    override var blurSkip = true
+    override var overlayRules = OverlayRules.ANDROID
+    override var outlineFarSafe = false
+    override var pinRules = PinRules.ANDROID
+    override var pinRefine = true
+    override var readBoost = true
     var paused = false
     var resets = 0
     var detaches = 0

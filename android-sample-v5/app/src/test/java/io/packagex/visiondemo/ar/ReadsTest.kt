@@ -56,6 +56,12 @@ class ReadsTest {
         // Upright tl (0.4 * 2160, 0.4 * 3840) = (864, 1536) -> raw (v, rawHeight - u) = (1536, 1296)
         assertEquals(1536.0, r.corners[0], 1e-3); assertEquals(1296.0, r.corners[1], 1e-3)
         assertFalse(r.touchesBorder)
+        // The boxes this frame did not decode are tracked boxes, at the same pixels: the detector box with no text, the track with its own
+        val tracked = trackedOf(frame, rotationDegrees = 90, rawWidth = 3840, rawHeight = 2160, timestampNs = 77L)
+        assertEquals(2, tracked.size)
+        val (d, t) = tracked
+        assertEquals("", d.text); assertEquals(1, d.engineId); assertEquals(r.corners, d.corners)
+        assertEquals("TRACK", t.text); assertEquals(2, t.engineId); assertEquals(r.corners, t.corners)
     }
 
     @Test fun aQuadAtTheBorderIsFlagged() {

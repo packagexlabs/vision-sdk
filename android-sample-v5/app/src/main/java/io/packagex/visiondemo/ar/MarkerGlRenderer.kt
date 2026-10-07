@@ -180,12 +180,16 @@ class OutlineGlRenderer {
         colorUniform = GLES20.glGetUniformLocation(program, "u_Color")
     }
 
-    /** [quads]: 8 numbers a quad (x0, y0 .. x3, y3, view pixels), each drawn as a closed outline of [color] (RGB 0..1) */
-    fun draw(quads: FloatArray, color: FloatArray, viewportWidth: Int, viewportHeight: Int) {
-        if (quads.isEmpty() || viewportWidth <= 0 || viewportHeight <= 0) return
-        if (buffer.capacity() < quads.size) buffer = ByteBuffer.allocateDirect(quads.size * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
+    /**
+     * The first [count] quads of [quads], 8 numbers a quad (x0, y0 .. x3, y3, view pixels), each drawn as a closed
+     * outline of [color] (RGB 0..1)
+     */
+    fun draw(quads: FloatArray, color: FloatArray, viewportWidth: Int, viewportHeight: Int, count: Int = quads.size / 8) {
+        if (count <= 0 || viewportWidth <= 0 || viewportHeight <= 0) return
+        val n = count * 8
+        if (buffer.capacity() < n) buffer = ByteBuffer.allocateDirect(n * 4).order(ByteOrder.nativeOrder()).asFloatBuffer()
         buffer.clear()
-        for (i in quads.indices step 2) {
+        for (i in 0 until n step 2) {
             buffer.put(quads[i] / viewportWidth * 2f - 1f)
             buffer.put(1f - quads[i + 1] / viewportHeight * 2f)
         }
@@ -196,7 +200,7 @@ class OutlineGlRenderer {
         GLES20.glUniform3fv(colorUniform, 1, color, 0)
         GLES20.glVertexAttribPointer(posAttrib, 2, GLES20.GL_FLOAT, false, 0, buffer)
         GLES20.glEnableVertexAttribArray(posAttrib)
-        for (q in 0 until quads.size / 8) GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, q * 4, 4)
+        for (q in 0 until count) GLES20.glDrawArrays(GLES20.GL_LINE_LOOP, q * 4, 4)
         GLES20.glDisableVertexAttribArray(posAttrib)
     }
 

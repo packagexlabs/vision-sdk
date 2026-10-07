@@ -53,15 +53,19 @@ class RecentReadsTest {
         assertEquals(listOf("A"), r.seen)
     }
 
-    @Test fun neutralMarkersAreForUnlistedCodesReadInTheLastHalfSecond() {
+    @Test fun neutralMarkersAreForUnlistedCodesReadInTheLastHalfSecondByTrackNewestFirst() {
         val reads = listOf(
             read("OLD", 0), read("L", 900), read("U", 600), read("U", 900, u = 300.0),
             read("U", 950, engineId = 2, u = 900.0), read("V", 1_000),
         )
-        val marks = unlistedReads(reads, listed = setOf("L"), nowNs = 1_000 * ms)
-        // OLD is 1 s old; L is listed (the counter marks it); U's track 1 is marked once, where it was read last
-        assertEquals(listOf("U" to 300.0, "U" to 900.0, "V" to 100.0), marks.map { it.text to it.corners[0] })
-        assertEquals(emptyList<Read>(), unlistedReads(reads, setOf("U", "V"), nowNs = 1_600 * ms))
+        val tracks = unlistedTracks(reads, listed = setOf("L"), nowNs = 1_000 * ms)
+        // OLD is 1 s old; L is listed (the counter marks it); U's track 1 has both its reads, the last read first (drift
+        // plan Phase 1: an outline falls back to an older read when the newest one's frame can't be carried)
+        assertEquals(
+            listOf(listOf("U" to 300.0, "U" to 100.0), listOf("U" to 900.0), listOf("V" to 100.0)),
+            tracks.map { t -> t.map { it.text to it.corners[0] } },
+        )
+        assertEquals(emptyList<List<Read>>(), unlistedTracks(reads, setOf("U", "V"), nowNs = 1_600 * ms))
     }
 
     @Test fun theMapperSendsTheListToEveryCounterAndPublishesTheCodesAtMostEvery250Ms() {

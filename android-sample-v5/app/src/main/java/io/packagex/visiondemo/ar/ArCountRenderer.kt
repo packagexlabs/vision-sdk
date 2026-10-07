@@ -2,9 +2,12 @@ package io.packagex.visiondemo.ar
 
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
+import android.os.Debug
+import android.os.SystemClock
 import android.util.Log
 import android.view.Surface
 import com.google.ar.core.Anchor
+import com.google.ar.core.Camera
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import com.google.ar.core.Session
@@ -15,24 +18,32 @@ import com.google.ar.core.exceptions.SessionPausedException
 import io.packagex.arcount.BreakReason
 import io.packagex.arcount.CountView
 import io.packagex.arcount.PoseRecord
+import io.packagex.arcount.Read
 import io.packagex.arcount.SectionState
+import io.packagex.arcount.Tracking
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
-import kotlin.math.abs
 
 /**
  * The GL thread of an AR Count session (spec 5.8): `Session.update()` (BLOCKING, paced by the camera), then the
  * anchor ops of the mapper (create or let go of the section anchor), the frame's [PoseRecord] to the mapper, the
- * camera background, AR Item Count's pins ([ArPins], in place of the core's unit markers), and the newest view's gaps and
- * bracket point. Those come in normalized coordinates of the
- * unrotated stream image; ARCore maps them to the view (`transformCoordinates2d`, IMAGE_NORMALIZED -> VIEW). The
- * bracket's and the gaps' view points go to [onScreen] for the Compose overlay. No counting here.
+ * camera background, AR Item Count's pins ([ArPins], in place of the core's unit markers) and the outlines of the
+ * unlisted codes read. No section bracket and no gap markers (spec 5.10). No counting here. Under
+ * [OverlayRules.ANDROID] (drift plan Phase 1) each outline is carried from the frame it was read in to the frame drawn
+ * ([chooseOutline], [transfer]), so it stays on its code while the phone moves; a world anchor of its own (the map
+ * probe, [watchMap]) shows when ARCore corrects its map, even while no pin or section holds an anchor.
+ *
+ * Measured (drift plan Phase 0): the thread CPU of each new frame after `update()` and the pins' share of it, capture
+ * to `update()`, the GCs, once a second whether ARCore's CPU image can be had, and the measuring's own cost after the
+ * frame ([FrameCosts], a line every 3 s, with every frame since the start pooled and the window's slowest pin frame's
+ * work beside it); and M3, each new unlisted read against the outline for its track on its own frame, drawn or not, by
+ * the rules it was drawn under ([DrawnOutlines]). Each frame takes ARCore's camera once ([Frame.getCamera] makes a
+ * finalizable wrapper per call) and hands it to every step.
  */
 class ArCountRenderer(
     private val mapper: ArMapper,
     private val metas: CaptureMetaRing,
     private val density: Float,
-    private val onScreen: (ArScreen) -> Unit,
     /** `update()` threw [FatalException]: the session is to be rebuilt (spec 6). Nothing is updated until it resumes. */
     private val onFatal: (FatalException) -> Unit,
     /** Every frame's [PoseRecord] goes here too, for the camera thread's blur pre-skip (spec 5.6) */
@@ -46,15 +57,82 @@ class ArCountRenderer(
     @Volatile
     var stream: AppStream = AppStream.UHD
 
+    /** How the unlisted outlines are drawn (Settings › Advanced) */
+    @Volatile
+    var overlayRules: OverlayRules = OverlayRules.ANDROID
+
+    /** Codes with no nominal width are carried at [FAR_SAFE_DEPTH_M] rather than rotation only (Settings › Advanced) */
+    @Volatile
+    var outlineFarSafe: Boolean = false
+
     @Volatile
     private var resumePending = false
 
     private val background = BackgroundRenderer()
     private val marks = MarkerGlRenderer(density)
     private val outlines = OutlineGlRenderer()
+    private val planes = PlaneGlRenderer()
+
+    /** The reads' code keys, made once per text (GL thread: the pins' reads, the unlisted outlines' every frame) */
+    private val readKeys = ReadKeys()
 
     /** AR Item Count's persistent markers, one per physical barcode (GL thread) */
-    private val pins = ArPins(density)
+    private val pins = ArPins(density, mapper, readKeys)
+
+    /** The item list the unlisted outlines were last keyed against, and its keys ([listedKeys]) */
+    private var listedItems: Set<String>? = null
+    private var listedKeySet: Set<String> = emptySet()
+
+    /** [drawnWhereRead]'s image and view points, one pair of arrays per read count (ARCore maps whole arrays) */
+    private val flatImage = arrayOfNulls<FloatArray>(FLAT_SIZES)
+    private val flatView = arrayOfNulls<FloatArray>(FLAT_SIZES)
+
+    /** Which hit seeds a pin, which identity rules place and retire pins, and how an unverified pin is drawn (Settings › Advanced) */
+    var pinRules: PinRules
+        get() = pins.rules
+        set(value) {
+            pins.rules = value
+        }
+
+    /** Whether claims refine the pins under the Android pin rules (drift plan Phase 4, Settings › Advanced) */
+    var pinRefine: Boolean
+        get() = pins.refine
+        set(value) {
+            pins.refine = value
+        }
+
+    /** The read-rate boost under the Android pin rules, refining their pins (drift plan P2c, Settings › Advanced) */
+    var readBoost: Boolean
+        get() = pins.readBoost
+        set(value) {
+            pins.readBoost = value
+        }
+
+    /** P2c, read on the engine worker before every scan: the pins want every shown code read in every frame (refresh 0) */
+    val pinsWantFullRate: Boolean get() = pins.wantFullRate
+
+    // Phase 0's measurements (GL thread)
+    private val costs = FrameCosts()
+    private val outlinesDrawn = DrawnOutlines()
+    private val outlineErrors = OutlineErrors()
+
+    /** The newest unlisted read measured for M3 */
+    private var outlinesMeasuredNs = Long.MIN_VALUE
+
+    // The unlisted outlines of one frame (GL thread): the frame's view and projection, the quads drawn (view pixels,
+    // grown as needed), a carried centre, and how many were carried, drawn flat, dropped or behind since the last 3 s line
+    private val viewMatrix = FloatArray(16)
+    private val projMatrix = FloatArray(16)
+    private var quads = FloatArray(8 * 8)
+    private val centre = DoubleArray(2)
+    private val outlineCounts = IntArray(4)
+
+    /** The section anchor's step between the frames it tracked, for [ArPins.anchorMoved] */
+    private val sectionStep = AnchorStep()
+
+    /** The map probe ([watchMap]) and its step (GL thread only); the session's close lets it go */
+    private var probe: Anchor? = null
+    private val probeStep = AnchorStep()
 
     /** The section anchor while the mapper wants one (GL thread only) */
     private var anchor: Anchor? = null
@@ -67,7 +145,6 @@ class ArCountRenderer(
     private var viewportChanged = false
     private var textureSet = false
     private var lastTimestampNs = Long.MIN_VALUE
-    private var lastScreen = ArScreen.NONE
     /** ARCore's tracking on the last frame (GL thread writes; read for the tap-to-focus log) */
     @Volatile
     var lastTracking: TrackingState? = null
@@ -89,6 +166,7 @@ class ArCountRenderer(
         background.createOnGlThread()
         marks.createOnGlThread()
         outlines.createOnGlThread()
+        planes.createOnGlThread()
         textureSet = false
     }
 
@@ -121,21 +199,75 @@ class ArCountRenderer(
             onFatal(e)
             return
         }
-        background.draw(frame)
         val ts = frame.androidCameraTimestamp
-        if (ts != 0L && ts != lastTimestampNs) {
+        val fresh = ts != 0L && ts != lastTimestampNs
+        // M5: capture to update(), on the camera's clock (REALTIME, as the session's camera line says)
+        val updateNs = SystemClock.elapsedRealtimeNanos() - ts
+        val cpu0 = Debug.threadCpuTimeNanos()
+        background.draw(frame)
+        val camera = frame.camera // once a frame, for every step below
+        planes.draw(s, camera) // under the outlines and the pins
+        var pinNs = 0L
+        var rec: PoseRecord? = null
+        if (fresh) {
             lastTimestampNs = ts
+            pins.work.clear()
             if (resumePending) {
                 resumePending = false
                 mapper.post(ArEvent.Resumed(ts))
             }
             applyAnchorOps(s)
-            val rec = record(frame, ts)
-            poses?.add(rec)
-            mapper.post(ArEvent.Frame(rec))
-            geometry?.let { pins.onFrame(s, frame, rec, mapper.pinReads, mapper.items, it, viewportWidth, viewportHeight) }
+            rec = record(camera, ts).also {
+                poses?.add(it)
+                mapper.post(ArEvent.Frame(it))
+            }
+            watchMap(s, rec)
+            geometry?.let {
+                val p0 = Debug.threadCpuTimeNanos()
+                pins.onFrame(s, frame, rec, mapper.pinReads, mapper.items, it, viewportWidth, viewportHeight)
+                pinNs = Debug.threadCpuTimeNanos() - p0
+            }
         }
-        draw(frame, mapper.latestView())
+        pinNs += draw(frame, camera, mapper.latestView())
+        if (rec != null) {
+            val d0 = Debug.threadCpuTimeNanos()
+            costs.frame(ts, d0 - cpu0, pinNs, updateNs, pins.work)
+            // After the frame's clock stops: the measuring's own cost, timed apart (a closing window's lands in the next)
+            if (costs.probeDue(ts)) probeCameraImage(frame, ts)
+            geometry?.let { pins.logIfDue(frame, camera, rec, it, viewportWidth, viewportHeight) }
+            if (costs.due(ts)) logCosts(ts)
+            costs.diag(Debug.threadCpuTimeNanos() - d0)
+        }
+    }
+
+    /**
+     * Plan Phase 0: whether ARCore's CPU image can be had under SHARED_CAMERA, and how long it takes (once a second);
+     * its note is made only when the 3 s line is
+     */
+    private fun probeCameraImage(frame: Frame, ts: Long) {
+        val t0 = System.nanoTime()
+        try {
+            frame.acquireCameraImage().use { img -> costs.probeImage(ts, System.nanoTime() - t0, img.width, img.height, img.format) }
+        } catch (e: Exception) { // NotYetAvailableException, ResourceExhaustedException, or none under SHARED_CAMERA
+            costs.probeFailed(ts, System.nanoTime() - t0, e)
+        }
+    }
+
+    /**
+     * The 3 s lines: the GL thread's cost (and, while a trace is open, its `gl` line, the only reader of every frame's
+     * numbers), M6 pooled since the start with the window's slowest pin frame, and M3 so far
+     */
+    private fun logCosts(ts: Long) {
+        val tracing = mapper.tracing
+        val w = costs.close(ts, Debug.getRuntimeStat("art.gc.gc-count")?.toLongOrNull() ?: -1L, frames = tracing)
+        Log.i(TAG, w.logLine())
+        Log.i(TAG, w.sessionLine())
+        Log.i(TAG, "unlisted outlines ($overlayRules${if (outlineFarSafe) ", far-safe" else ""}) on the frames drawn since the last line: " +
+            "${outlineCounts[CARRIED]} carried, ${outlineCounts[FLAT]} where read, ${outlineCounts[DROPPED]} dropped (map moved since), " +
+            "${outlineCounts[BEHIND]} behind the camera")
+        outlineCounts.fill(0)
+        outlineErrors.summary()?.let { Log.i(TAG, it) }
+        if (tracing) mapper.diag { glLine(w) } // a trace opened since the window closed gets the next one's
     }
 
     /** In the mapper's order; every Create is answered, before the frame whose record carries the new anchor. */
@@ -162,8 +294,7 @@ class ArCountRenderer(
         }
     }
 
-    private fun record(frame: Frame, ts: Long): PoseRecord {
-        val camera = frame.camera
+    private fun record(camera: Camera, ts: Long): PoseRecord {
         val intrinsics = camera.imageIntrinsics
         val cpu = intrinsics.imageDimensions
         val st = stream
@@ -172,20 +303,23 @@ class ArCountRenderer(
                 geometry = it
                 if (!it.sameAspect) Log.w(TAG, "the $st app stream is the middle band of the ${cpu[0]}x${cpu[1]} CPU image: a mapping not yet run on hardware")
             }
-        if (camera.trackingState != lastTracking) { // one line per change: device and emulator runs read tracking from the log
-            lastTracking = camera.trackingState
-            Log.i(TAG, "ARCore tracking ${camera.trackingState} (${camera.trackingFailureReason})")
+        val tracking = camera.trackingState // the frame's: one JNI call, not three
+        if (tracking != lastTracking) { // one line per change: device and emulator runs read tracking from the log
+            lastTracking = tracking
+            Log.i(TAG, "ARCore tracking $tracking (${camera.trackingFailureReason})")
         }
         val a = anchor
         val old = replaced
         replaced = null
         val previous = handoverPose(old?.let { it.pose.toPose() to it.trackingState.toTracking() })
         old?.detach()
+        val held = a?.let { it.pose.toPose() to it.trackingState.toTracking() }
+        if (a != null && held?.second == Tracking.TRACKING) held.first.t.let { pins.anchorMoved(ts, sectionStep.at(a, it.x, it.y, it.z)) }
         return poseRecordOf(
             timestampNs = ts,
             camera = camera.pose.toPose(),
-            frameTracking = camera.trackingState.toTracking(),
-            anchor = a?.let { it.pose.toPose() to it.trackingState.toTracking() },
+            frameTracking = tracking.toTracking(),
+            anchor = held,
             focal = intrinsics.focalLength,
             principal = intrinsics.principalPoint,
             geometry = g,
@@ -194,63 +328,141 @@ class ArCountRenderer(
         )
     }
 
-    private fun draw(frame: Frame, view: CountView) {
-        logView(view)
-        // AR Item Count: pins on listed codes replace the core's unit markers; unlisted reads get their quad outlined
-        val pinMarks = pins.marks(frame, view, viewportWidth, viewportHeight)
-        val g = geometry
-        g?.let { drawUnlisted(frame, it) }
-        val bracket = view.bracket?.takeIf { it.inImage }
-        // The gaps' points, then the bracket's
-        val n = if (g == null) 0 else view.gaps.size + (if (bracket != null) 1 else 0)
-        if (n == 0 || g == null) {
-            marks.draw(pinMarks, viewportWidth, viewportHeight)
-            publish(ArScreen.NONE)
-            return
+    /**
+     * The map probe on the frame [rec] (§3.5.4): a world anchor [PROBE_DEPTH_M] along the view, made on a frame whose
+     * camera tracks, made again once STOPPED or out of reach ([probeAction]); its step between the frames it tracked
+     * goes to the outlines' map breaks, as the pins' and the section's do. In item mode the core holds no anchor until a
+     * listed code is read, and none with an empty list, when the unlisted outlines are the only overlay.
+     */
+    private fun watchMap(s: Session, rec: PoseRecord) {
+        if (rec.frameTracking != Tracking.TRACKING) return
+        val p = probe
+        val tracking = p?.trackingState?.toTracking()
+        val at = if (tracking == Tracking.TRACKING) p?.pose else null
+        val c = rec.camera.t
+        val away = at?.let { distance(it.tx().toDouble(), it.ty().toDouble(), it.tz().toDouble(), c.x, c.y, c.z) } ?: 0.0
+        when (probeAction(tracking, away)) {
+            ProbeAction.KEEP -> if (p != null && at != null) {
+                pins.anchorMoved(rec.timestampNs, probeStep.at(p, at.tx().toDouble(), at.ty().toDouble(), at.tz().toDouble()))
+            }
+            ProbeAction.WAIT -> Unit
+            ProbeAction.MAKE -> {
+                p?.detach()
+                probe = runCatching { s.createAnchor(probePose(rec.camera).toArPose()) }
+                    .onFailure { Log.w(TAG, "map probe not made", it) }
+                    .getOrNull()
+                if (probe != null) Log.i(TAG, if (p == null) "map probe made" else "map probe made again ($tracking, %.2f m away)".format(away))
+            }
         }
-        val image = FloatArray(n * 2)
-        var i = 0
-        fun put(u: Double, v: Double) {
-            image[i++] = g.cpuU(u).toFloat()
-            image[i++] = g.cpuV(v).toFloat()
-        }
-        view.gaps.forEach { put(it.u, it.v) }
-        bracket?.let { put(it.u, it.v) }
-        val onView = FloatArray(n * 2)
-        frame.transformCoordinates2d(Coordinates2d.IMAGE_NORMALIZED, image, Coordinates2d.VIEW, onView)
-
-        val out = ArrayList<ScreenMarker>(pinMarks.size + n)
-        out += pinMarks
-        var k = 0
-        val gaps = ArrayList<ScreenGap>(view.gaps.size)
-        for (gap in view.gaps) {
-            val x = onView[k]
-            val y = onView[k + 1]
-            k += 2
-            out += ScreenMarker(x, y, 0f, null, dp(12f), WHITE)
-            gaps += ScreenGap(gap.gapId, x, y)
-        }
-        val bracketPoint = bracket?.let { ScreenPoint(onView[k], onView[k + 1]) }
-        bracketPoint?.let { out += ScreenMarker(it.x, it.y, dp(7f), NEON, dp(11f), WHITE) }
-        marks.draw(out, viewportWidth, viewportHeight)
-        publish(ArScreen(bracketPoint, gaps))
     }
 
-    /** The decoded quad of each unlisted code read in the last 0.5 s (its newest read per engine track), white and thin */
-    private fun drawUnlisted(frame: Frame, g: StreamGeometry) {
-        val reads = unlistedReads(mapper.recentReads(), mapper.items, lastTimestampNs)
-        if (reads.isEmpty()) return
-        val image = FloatArray(reads.size * 8)
+    /** The pins and the unlisted outlines (spec 5.10: no bracket, no gaps); the pins' thread CPU goes back */
+    private fun draw(frame: Frame, camera: Camera, view: CountView): Long {
+        logView(view)
+        // AR Item Count: pins on listed codes replace the core's unit markers; unlisted reads get their quad outlined
+        val p0 = Debug.threadCpuTimeNanos()
+        val pinMarks = pins.marks(camera, lastTimestampNs, view, viewportWidth, viewportHeight)
+        val pinNs = Debug.threadCpuTimeNanos() - p0
+        pins.work.marksNs = pinNs
+        geometry?.let { drawUnlisted(frame, camera, it) }
+        marks.draw(pinMarks, viewportWidth, viewportHeight)
+        return pinNs
+    }
+
+    /**
+     * The decoded quad of each unlisted code read in the last 0.5 s (one per engine track), white and thin. Under
+     * [OverlayRules.ANDROID], on a frame that tracks: carried from its newest read whose frame tracked, at the depth its
+     * symbology gives ([outlineDepthM]), and not drawn when the map moved since that read ([chooseOutline]); else (and
+     * for a track with no such read) the newest read's quad where it was read, as before. M3 keeps the outlines not
+     * drawn too, with the rules of the frame.
+     */
+    private fun drawUnlisted(frame: Frame, camera: Camera, g: StreamGeometry) {
+        val items = mapper.items
+        if (items !== listedItems) { // the list's keys once per list, not every frame
+            listedItems = items
+            listedKeySet = listedKeys(items)
+        }
+        val tracks = unlistedTracksOf(mapper.recentReads(), listedKeySet, lastTimestampNs, readKeys = readKeys)
+        measureOutlines(tracks)
+        val rules = overlayRules
+        val farSafe = outlineFarSafe
+        outlinesDrawn.begin(lastTimestampNs, rules, farSafe)
+        if (tracks.isEmpty()) return
+        val now = pins.recordAt(lastTimestampNs)
+        val carry = rules == OverlayRules.ANDROID && now?.frameTracking == Tracking.TRACKING &&
+            camera.trackingState == TrackingState.TRACKING
+        if (carry) {
+            camera.getViewMatrix(viewMatrix, 0)
+            camera.getProjectionMatrix(projMatrix, 0, NEAR_M, FAR_M)
+        }
+        if (quads.size < tracks.size * 8) quads = FloatArray(tracks.size * 8)
+        var n = 0
+        var flat: ArrayList<Read>? = null
+        for (track in tracks) {
+            val pick = chooseOutline(track, carry, pins) ?: continue // a track has a read
+            val r = pick.read
+            val capture = pick.capture
+            when {
+                capture == null -> (flat ?: ArrayList<Read>().also { flat = it }).add(r)
+                pick.mapMoved -> {
+                    outlinesDrawn.add(r, OutlineShown.MAP_MOVED)
+                    outlineCounts[DROPPED]++
+                }
+                else -> {
+                    val z = outlineDepthM(r, capture.intrinsics.fx, farSafe)
+                    if (transfer(r.corners, capture, viewMatrix, projMatrix, z, viewportWidth, viewportHeight, quads, 8 * n) &&
+                        transferredCentre(r.corners, capture, z, now!!, centre)
+                    ) {
+                        outlinesDrawn.add(r, OutlineShown.CARRIED, centre[0], centre[1], z)
+                        outlineCounts[CARRIED]++
+                        n++
+                    } else {
+                        outlinesDrawn.add(r, OutlineShown.BEHIND, depthM = z)
+                        outlineCounts[BEHIND]++
+                    }
+                }
+            }
+        }
+        flat?.let { n = drawnWhereRead(frame, g, it, n) }
+        outlines.draw(quads, WHITE, viewportWidth, viewportHeight, n)
+    }
+
+    /** [reads]' quads where they were read (the outline before Phase 1), into [quads] after the first [from]; the count after */
+    private fun drawnWhereRead(frame: Frame, g: StreamGeometry, reads: List<Read>, from: Int): Int {
+        val image = floatsFor(flatImage, reads.size)
         var i = 0
         for (r in reads) {
+            outlinesDrawn.add(r, OutlineShown.WHERE_READ, r.centreU, r.centreV)
+            outlineCounts[FLAT]++
             for (c in 0 until 4) {
                 image[i++] = g.cpuU(r.corners[2 * c] / g.streamWidth).toFloat()
                 image[i++] = g.cpuV(r.corners[2 * c + 1] / g.streamHeight).toFloat()
             }
         }
-        val onView = FloatArray(image.size)
+        val onView = floatsFor(flatView, reads.size)
         frame.transformCoordinates2d(Coordinates2d.IMAGE_NORMALIZED, image, Coordinates2d.VIEW, onView)
-        outlines.draw(onView, WHITE, viewportWidth, viewportHeight)
+        System.arraycopy(onView, 0, quads, from * 8, onView.size)
+        return from + reads.size
+    }
+
+    /** [cache]'s array of 8 floats per read for [reads] reads, made once per count */
+    private fun floatsFor(cache: Array<FloatArray?>, reads: Int): FloatArray {
+        if (reads >= cache.size) return FloatArray(reads * 8)
+        return cache[reads] ?: FloatArray(reads * 8).also { cache[reads] = it }
+    }
+
+    /** M3: each unlisted track's newest read new since the last call, against the outline for its track on its own frame (drawn or not) */
+    private fun measureOutlines(tracks: List<List<Read>>) {
+        var newest = outlinesMeasuredNs
+        for (t in tracks) {
+            val r = t.first()
+            if (r.timestampNs <= outlinesMeasuredNs) continue
+            if (r.timestampNs > newest) newest = r.timestampNs
+            val sample = outlinesDrawn.sample(r) ?: continue
+            outlineErrors.add(r.symbology, sample)
+            mapper.diag { outLine(r, sample) }
+        }
+        outlinesMeasuredNs = newest
     }
 
     /** One line per core state change, per break (as it happens, or with its section once closed) and per closed section */
@@ -268,27 +480,21 @@ class ArCountRenderer(
         closedLogged = view.closed.size
     }
 
-    /** To the overlay, when a point moved by a pixel or more, or one came or went. */
-    private fun publish(screen: ArScreen) {
-        val last = lastScreen
-        val same = (screen.bracket == null) == (last.bracket == null) &&
-            (screen.bracket == null || near(screen.bracket.x, screen.bracket.y, last.bracket!!.x, last.bracket.y)) &&
-            screen.gaps.size == last.gaps.size &&
-            screen.gaps.indices.all { screen.gaps[it].gapId == last.gaps[it].gapId && near(screen.gaps[it].x, screen.gaps[it].y, last.gaps[it].x, last.gaps[it].y) }
-        if (same) return
-        lastScreen = screen
-        onScreen(screen)
-    }
-
-    private fun near(x0: Float, y0: Float, x1: Float, y1: Float) = abs(x0 - x1) < 1f && abs(y0 - y1) < 1f
-
-    private fun dp(v: Float) = v * density
-
     private companion object {
         const val TAG = "ArCountRenderer"
-
-        // The bracket point is the brand neon
-        val NEON = floatArrayOf(71 / 255f, 234 / 255f, 226 / 255f)
         val WHITE = floatArrayOf(1f, 1f, 1f)
+
+        /** The projection's clip planes, as the pins' */
+        const val NEAR_M = 0.05f
+        const val FAR_M = 100f
+
+        /** Read counts whose [drawnWhereRead] arrays are kept */
+        const val FLAT_SIZES = 9
+
+        // outlineCounts
+        const val CARRIED = 0
+        const val FLAT = 1
+        const val DROPPED = 2
+        const val BEHIND = 3
     }
 }

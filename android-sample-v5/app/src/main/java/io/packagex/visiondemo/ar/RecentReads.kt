@@ -48,13 +48,36 @@ class RecentReads(private val windowNs: Long = IN_VIEW_NS, private val seenCap: 
 
 /**
  * The reads whose quad is outlined (white, thin; no pin, no anchor) in the frame taken at [nowNs]: codes not in [listed]
- * (listed ones have pins), read [windowNs] before it or later; per code and engine track the newest
- * read only, so a code read in every frame of a pan has one marker, where it was read last.
+ * (listed ones have pins), read [windowNs] before it or later; by code and engine track, each track's reads newest
+ * first. A code read in every frame of a pan has one outline, from its newest read whose frame can be carried to the
+ * frame shown ([chooseOutline]).
  */
-fun unlistedReads(reads: List<Read>, listed: Set<String>, nowNs: Long, windowNs: Long = NEUTRAL_WINDOW_NS): List<Read> =
-    listedKeys(listed).let { keys ->
-        reads.filter { ItemCode.key(it) !in keys && it.timestampNs >= nowNs - windowNs } // codes keyed as the counter (and the pins) key them
-    }.groupBy { it.text to it.engineId }
-        .map { (_, same) -> same.maxBy { it.timestampNs } }
+fun unlistedTracks(reads: List<Read>, listed: Set<String>, nowNs: Long, windowNs: Long = NEUTRAL_WINDOW_NS): List<List<Read>> =
+    unlistedTracksOf(reads, listedKeys(listed), nowNs, windowNs)
+
+/**
+ * [unlistedTracks] against the item list's [keys] ([listedKeys]), each read's key from [readKeys] when given (the GL
+ * thread, every frame): the window's test first, so no key is made for a read too old, and none of it when no read is
+ * left; the newest first by a comparator that boxes nothing, stable as sortedByDescending, so the same tracks.
+ */
+internal fun unlistedTracksOf(
+    reads: List<Read>,
+    keys: Set<String>,
+    nowNs: Long,
+    windowNs: Long = NEUTRAL_WINDOW_NS,
+    readKeys: ReadKeys? = null,
+): List<List<Read>> {
+    var shown: ArrayList<Read>? = null
+    for (i in reads.indices) {
+        val r = reads[i]
+        if (r.timestampNs < nowNs - windowNs) continue
+        // Codes keyed as the counter (and the pins) key them
+        if ((readKeys?.key(r) ?: ItemCode.key(r)) in keys) continue
+        (shown ?: ArrayList<Read>().also { shown = it }).add(r)
+    }
+    return shown?.groupBy { it.text to it.engineId }?.map { (_, same) -> same.sortedWith(NEWEST_FIRST) } ?: emptyList()
+}
+
+private val NEWEST_FIRST = Comparator<Read> { a, b -> b.timestampNs.compareTo(a.timestampNs) }
 
 const val NEUTRAL_WINDOW_NS = 500_000_000L

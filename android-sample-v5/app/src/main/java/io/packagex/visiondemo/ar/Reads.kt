@@ -101,3 +101,16 @@ internal fun readsOf(frame: ScanFrame, rotationDegrees: Int, rawWidth: Int, rawH
             touchesBorder = touchesBorder(corners, rawWidth, rawHeight),
         )
     }
+
+/**
+ * The boxes of one engine frame it did not decode in it (no `raw`): tracked with a text (a known code it skipped or ran
+ * out of time for) or not read at all (a detector or localizer box, text ""), with the smoothed corners in the same
+ * pixels as [readsOf]'s. For rule 7 only: a pin in one is seen, not missed (a batch reads 1 of 4 identical units, the
+ * other 3 are still there; small tight codes are boxed before they are read).
+ */
+internal fun trackedOf(frame: ScanFrame, rotationDegrees: Int, rawWidth: Int, rawHeight: Int, timestampNs: Long): List<Read> =
+    frame.barcodes.mapNotNull { b ->
+        if (b.raw != null) return@mapNotNull null
+        val corners = uprightQuadToRaw(b.corners, frame.cropWidth, frame.cropHeight, rotationDegrees, rawWidth, rawHeight).toList()
+        Read(timestampNs, b.text.orEmpty(), corners, b.id, b.symbology?.id)
+    }

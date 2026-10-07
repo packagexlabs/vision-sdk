@@ -15,6 +15,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.packagex.visiondemo.ar.OverlayRules
+import io.packagex.visiondemo.ar.PinRules
 import io.packagex.visiondemo.designsystem.LinkLabel
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.SectionLabel
@@ -138,9 +140,53 @@ fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
         )
         ToggleRow(
             title = "AR traces",
-            desc = "Records AR Item Count's frames, reads and engine timings to app storage (files/ar-traces), for replay.",
+            desc = "Records AR Item Count's frames, reads, pins and timings to Android/data/<app>/files/ar-traces, for replay.",
             checked = p.arTrace,
             onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arTrace = checked) }) },
+        )
+        ToggleRow(
+            title = "AR blur pre-skip",
+            desc = "Keeps images predicted too blurred from AR Item Count's decoder. Turn off for measurement runs.",
+            checked = p.arBlurSkip,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arBlurSkip = checked) }) },
+        )
+        ToggleRow(
+            title = "AR outlines fixed to the world",
+            desc = "Moves each unlisted code's outline with the phone, by ARCore's pose. Off draws it where it was read.",
+            checked = p.arOverlayRules == OverlayRules.ANDROID,
+            onCheckedChange = { checked ->
+                onAction(ScannerAction.UpdatePrefs { it.copy(arOverlayRules = if (checked) OverlayRules.ANDROID else OverlayRules.IOS) })
+            },
+        )
+        ToggleRow(
+            title = "AR far-safe outline depth",
+            desc = "Carries outlines of codes other than EAN/UPC as if 0.8 m away, not by rotation only.",
+            checked = p.arOutlineFarSafe,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arOutlineFarSafe = checked) }) },
+        )
+        ToggleRow(
+            title = "AR pins: Android rules",
+            desc = "Places each pin on the nearest surface its label can be on, keeps one pin per identical unit, retires pins " +
+                "whose code is read beside them, and rings a pin while its depth is unsure. Off: the iOS rules.",
+            checked = p.arPinRules == PinRules.ANDROID,
+            onCheckedChange = { checked ->
+                onAction(ScannerAction.UpdatePrefs { it.copy(arPinRules = if (checked) PinRules.ANDROID else PinRules.IOS) })
+            },
+        )
+        ToggleRow(
+            title = "AR pins refined by every read",
+            desc = "With the Android pin rules, moves each pin onto its label with every read and rings it until its depth is " +
+                "verified. Off: pins stay where they were born, ringed only when born on a plane or with no hit, and a counted " +
+                "pin can be removed (re-born on its label is then its only way back).",
+            checked = p.arPinRefine,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arPinRefine = checked) }) },
+        )
+        ToggleRow(
+            title = "AR read-rate boost",
+            desc = "With refined Android pins, reads every code in every frame while a ringed pin is in view (2 s at most per " +
+                "pin) or a listed code has no pin yet. Off keeps the counter's slower schedule.",
+            checked = p.arReadBoost,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arReadBoost = checked) }) },
         )
     }
 

@@ -41,11 +41,16 @@ import javax.inject.Singleton
  * The ARCore session of AR Count on the shared camera (spec 5.2), owning Camera2 while [io.packagex.visiondemo.camera.CameraOwner.Ar]
  * holds the sensor; driven by [ArSurface] (attach/detach) and the ViewModel (pause/resume, commands). The spike's
  * session, measured on the Memor 35: `Session(SHARED_CAMERA)` with a 1280x720 CPU image for tracking, BLOCKING
- * updates, AUTO focus, no depth, planes or light estimation; the app's own YUV stream for the engine (the largest the
+ * updates, AUTO focus, horizontal and vertical planes and AUTOMATIC depth where supported (the pins hit-test them), no
+ * light estimation; the app's own YUV stream for the engine (the largest the
  * camera offers of [AppStream], the next one after a failed configure) through `SharedCamera.setAppSurfaces`;
  * `openCamera` with ARCore's wrapped callbacks; TEMPLATE_RECORD with continuous AF and EIS/OIS off, no AE settings
  * (ARCore replaces them, spec 3); `Session.resume()` once the capture session is active; per-frame metadata from
  * `SharedCamera.setCaptureCallback` into [CaptureMetaRing].
+ *
+ * Measured (drift plan Phase 0): the camera's timestamp clock and lens model once per session (logged, and the head of
+ * every trace), each app-stream image's capture-to-arrival time ([ArrivalWindow], and the trace's `arr` lines), and
+ * LENS_FOCUS_DISTANCE per capture.
  *
  * Threads (spec 5.8): main (this API), camera (Camera2 callbacks, app-stream images, metadata), GL ([ArCountRenderer]),
  * engine ([BarcodeProcessor]) and mapper ([ArMapper], the single caller of the counter from [ArCounterFactory]).
@@ -83,8 +88,73 @@ class ArSessionController @Inject constructor(
         set(value) {
             if (field == value) return
             field = value
-            if (running) mapper?.post(ArEvent.Trace(if (value) SessionRecorder.open(ctx, metas) else null))
+            if (running) mapper?.post(ArEvent.Trace(if (value) SessionRecorder.open(ctx, metas, cameraLine, flags()) else null))
         }
+
+    /** Read on the camera thread for every image */
+    @Volatile
+    override var blurSkip = true
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "blur pre-skip ${if (value) "on" else "off"}")
+            field = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var overlayRules = OverlayRules.ANDROID
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "unlisted outlines $value")
+            field = value
+            renderer?.overlayRules = value
+            mapper?.diag(::flags)
+        }
+
+    override var outlineFarSafe = false
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "far-safe outline depth ${if (value) "on" else "off"}")
+            field = value
+            renderer?.outlineFarSafe = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var pinRules = PinRules.ANDROID
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "pin rules $value")
+            field = value
+            renderer?.pinRules = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var pinRefine = true
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "pin refinement ${if (value) "on" else "off"}")
+            field = value
+            renderer?.pinRefine = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var readBoost = true
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "read-rate boost ${if (value) "on" else "off"}")
+            field = value
+            renderer?.readBoost = value
+            mapper?.diag(::flags)
+        }
+
+    /** The trace's `flags` line: at its head, and again when one of them changes, so each arm's runs can be told apart */
+    private fun flags() = flagsLine(overlayRules, outlineFarSafe, blurSkip, pinRules, pinRefine, readBoost)
+
+    /** The camera's clock and lens model ([camLine]), written at the head of every trace; null before a session runs */
+    @Volatile private var cameraLine: String? = null
 
     private val main = Handler(Looper.getMainLooper())
     private val cameraManager = ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -102,11 +172,14 @@ class ArSessionController @Inject constructor(
     /** Images kept from the engine for predicted blur, all so far (camera thread) */
     @Volatile private var blurSkipped = 0L
 
+    /** Capture to arrival of the app stream's images (camera thread) */
+    private val arrivals = ArrivalWindow()
+
     private val haptics by lazy { Haptics(ctx) }
 
     // One attached view's session (main thread; the camera thread reads the @Volatile ones)
     private var view: GLSurfaceView? = null
-    private var renderer: ArCountRenderer? = null
+    @Volatile private var renderer: ArCountRenderer? = null
     @Volatile private var session: Session? = null
     @Volatile private var mapper: ArMapper? = null
     @Volatile private var reader: ImageReader? = null
@@ -143,7 +216,12 @@ class ArSessionController @Inject constructor(
             onCodes = { inView, seen -> _codesInView.value = inView; _seen.value = seen },
         )
         m.post(ArEvent.Items(items))
-        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onScreen = { _screen.value = it }, onFatal = ::onUpdateFailed, poses = poses)
+        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onFatal = ::onUpdateFailed, poses = poses)
+        r.overlayRules = overlayRules
+        r.outlineFarSafe = outlineFarSafe
+        r.pinRules = pinRules
+        r.pinRefine = pinRefine
+        r.readBoost = readBoost
         luma = LumaCopier { ts, img -> m.post(ArEvent.Luma(ts, img)) }
         // The renderer must be set before the surface exists; the GL thread waits paused until ARCore runs.
         view.preserveEGLContextOnPause = true
@@ -161,8 +239,9 @@ class ArSessionController @Inject constructor(
         _seen.value = emptyList()
         val s = createSession() ?: return
         session = s
-        // Read on the engine worker before every scan: the attached mapper's, the constant once none is attached
-        engine.desiredRefresh = { mapper?.desiredRefreshMs }
+        // Read on the engine worker before every scan: 0 while the pins want every read (drift plan P2c), else the attached
+        // mapper's, the constant once none is attached
+        engine.desiredRefresh = { if (renderer?.pinsWantFullRate == true) 0 else mapper?.desiredRefreshMs }
         m.start()
         if (setUpStreams(s)) start()
     }
@@ -290,8 +369,10 @@ class ArSessionController @Inject constructor(
     private fun setUpStreams(s: Session): Boolean {
         cameraId = s.cameraConfig.cameraId
         engine.configureRotation(cameraId)
+        val chars = runCatching { cameraManager.getCameraCharacteristics(cameraId) }.getOrNull()
+        cameraLine = chars?.let { describeCamera(cameraId, it) }
         val offered = runCatching {
-            cameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+            chars?.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
                 ?.getOutputSizes(ImageFormat.YUV_420_888).orEmpty().map { it.width to it.height }
         }.getOrNull().orEmpty()
         streams = AppStream.offered(offered)
@@ -303,6 +384,27 @@ class ArSessionController @Inject constructor(
         }
         useStream(streams[0])
         return true
+    }
+
+    /**
+     * Plan Phase 0: the clock of the capture timestamps (REALTIME, or the capture-to-arrival and read ages are not
+     * times) and the lens model the rays leave out (distortion; the calibrated intrinsics, in active-array pixels),
+     * logged; the trace's `cam` line.
+     */
+    private fun describeCamera(id: String, c: CameraCharacteristics): String {
+        val source = when (val v = c.get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE)) {
+            CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME -> "REALTIME"
+            CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN -> "UNKNOWN"
+            else -> v.toString()
+        }
+        val distortion = c.get(CameraCharacteristics.LENS_DISTORTION)
+        val intrinsic = c.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION)
+        val active = c.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)?.let { intArrayOf(it.left, it.top, it.right, it.bottom) }
+        val pre = c.get(CameraCharacteristics.SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE)?.let { intArrayOf(it.left, it.top, it.right, it.bottom) }
+        val line = "camera $id timestamps $source, lens distortion ${distortion?.contentToString()}, intrinsic calibration ${intrinsic?.contentToString()}, " +
+            "active array ${active?.contentToString()}, pre-correction ${pre?.contentToString()}"
+        if (source == "REALTIME") Log.i(TAG, line) else Log.w(TAG, "$line: not REALTIME, so capture-to-arrival times are not times")
+        return camLine(id, source, distortion, intrinsic, active, pre)
     }
 
     private fun useStream(stream: AppStream) {
@@ -329,6 +431,8 @@ class ArSessionController @Inject constructor(
             return
         }
         val ts = image.timestamp
+        // M5: capture to arrival here, on the camera's clock (REALTIME, setUpStreams says: then it is elapsedRealtime's)
+        val arrivalNs = SystemClock.elapsedRealtimeNanos() - ts
         // The luma copy (spec 5.8 step 1): one bulk copy of the Y plane here, the downscale on its own thread; every
         // image, blurred ones too (the patch tracker works while the camera moves)
         val l = luma
@@ -336,14 +440,19 @@ class ArSessionController @Inject constructor(
             runCatching { image.planes[0].let { y -> l.offer(ts, y.buffer, image.width, image.height, y.rowStride) } }
                 .onFailure { Log.w(TAG, "no luma copy", it) }
         }
-        // The blur pre-skip (spec 5.6): an image predicted too blurred for a decode is not handed to the engine
-        if (skipForBlur(poses.blurPx(ts, metas.exposureAt(ts)), image.width)) {
+        // The blur pre-skip (spec 5.6): an image predicted too blurred for a decode is not handed to the engine, unless
+        // it is turned off (measurement runs, so fast pans still give reads)
+        val blur = poses.blurPx(ts, metas.exposureAt(ts))
+        val skip = blurSkip && skipForBlur(blur, image.width)
+        arrivals.add(ts, arrivalNs, skip)?.let { Log.i(TAG, it) }
+        m.diag { arrLine(ts, arrivalNs, blur, skip) }
+        if (skip) {
             image.close()
             blurSkipped++
             return
         }
-        engine.process(image) { t, reads, stats ->
-            val event = ArEvent.Reads(t, reads, stats.copy(pipe = pipeCounters(l)))
+        engine.process(image) { t, reads, stats, tracked ->
+            val event = ArEvent.Reads(t, reads, stats.copy(pipe = pipeCounters(l)), tracked)
             // After the luma copy of the same image, so the counter has the frame's pixels when its reads come
             if (l == null) m.post(event) else l.afterLuma(t) { m.post(event) }
         }
@@ -421,7 +530,7 @@ class ArSessionController @Inject constructor(
         opening = false
         r.session = s
         r.resumed()
-        if (tracing) mapper?.post(ArEvent.Trace(SessionRecorder.open(ctx, metas)))
+        if (tracing) mapper?.post(ArEvent.Trace(SessionRecorder.open(ctx, metas, cameraLine, flags())))
         v.onResume()
         Log.i(TAG, "ARCore resumed on the shared camera, app stream ${streams.getOrNull(streamIndex)}")
     }
@@ -607,6 +716,7 @@ class ArSessionController @Inject constructor(
                     aeCompensation = result.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION) ?: Int.MIN_VALUE,
                     fpsRange = result.get(CaptureResult.CONTROL_AE_TARGET_FPS_RANGE)?.toString().orEmpty(),
                     afState = result.get(CaptureResult.CONTROL_AF_STATE) ?: -1,
+                    focusDiopters = result.get(CaptureResult.LENS_FOCUS_DISTANCE) ?: -1f,
                 ),
             )
         }

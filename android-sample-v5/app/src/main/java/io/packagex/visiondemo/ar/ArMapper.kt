@@ -20,7 +20,7 @@ sealed interface ArEvent {
     data class Frame(val record: PoseRecord) : ArEvent
 
     /** The reads of the app-stream image taken at [timestampNs] (engine worker), empty when it had none, and what it took */
-    data class Reads(val timestampNs: Long, val reads: List<Read>, val stats: EngineStats? = null) : ArEvent
+    data class Reads(val timestampNs: Long, val reads: List<Read>, val stats: EngineStats? = null, val tracked: List<Read> = emptyList()) : ArEvent
 
     /** The quarter-scale luma copy of the app-stream image taken at [timestampNs] (luma thread), before its reads */
     class Luma(val timestampNs: Long, val img: LumaImage) : ArEvent
@@ -42,6 +42,9 @@ sealed interface ArEvent {
 
     /** AR Item Count's list: the codes the counter counts, this one and every later one (main thread) */
     data class Items(val codes: Set<String>) : ArEvent
+
+    /** One line for the open trace, from the GL or camera thread ([ArMapper.diag]); the counter never sees it */
+    class Diag(val line: String) : ArEvent
 }
 
 /** What the GL thread does with the section anchor, in order. It holds one anchor at most. */
@@ -115,6 +118,16 @@ class ArMapper(
     private var codesPublishedNs: Long? = null
     private val latestReads = AtomicReference<List<Read>>(emptyList())
 
+    /** A trace is open: the mapper thread writes it, the GL and camera threads read it before building a line */
+    @Volatile
+    var tracing = false
+        private set
+
+    /** A diagnostic line for the open trace, built only while one is open, written after what was posted before it */
+    inline fun diag(line: () -> String) {
+        if (tracing) post(ArEvent.Diag(line()))
+    }
+
     /** The item list (GL thread: listed codes get no neutral marker) */
     @Volatile
     var items: Set<String> = emptySet()
@@ -178,6 +191,7 @@ class ArMapper(
         worker?.join(timeoutMs)
         recorder?.close()
         recorder = null
+        tracing = false
     }
 
     /** For tests that run the mapper without its thread: handles what is queued, on the caller's thread. */
@@ -194,7 +208,7 @@ class ArMapper(
         for (e in batch) {
             // A counter bug must not take the app down: this thread has no other handler
             try {
-                view = handle(e)
+                handle(e)?.let { view = it }
             } catch (t: Throwable) {
                 log("the counter failed on ${e::class.simpleName}", t)
             }
@@ -202,7 +216,8 @@ class ArMapper(
         view?.let { latest.set(it); onView(it) }
     }
 
-    private fun handle(e: ArEvent): CountView {
+    /** The view after [e]; null for a trace line, which the counter never sees */
+    private fun handle(e: ArEvent): CountView? {
         when (e) {
             is ArEvent.Frame -> {
                 lastFrameNs = e.record.timestampNs
@@ -241,10 +256,15 @@ class ArMapper(
             is ArEvent.Trace -> {
                 recorder?.close()
                 recorder = e.recorder
+                tracing = e.recorder != null
             }
             is ArEvent.Items -> {
                 items = e.codes
                 counter.setItems(e.codes)
+            }
+            is ArEvent.Diag -> {
+                recorder?.diag(e.line)
+                return null
             }
         }
         return afterCall()

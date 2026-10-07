@@ -9,13 +9,21 @@ import io.packagex.arcount.Quat
 import io.packagex.arcount.Ray
 import io.packagex.arcount.Read
 import io.packagex.arcount.Vec3
+import java.util.Arrays
 import kotlin.math.acos
 import kotlin.math.hypot
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sqrt
 
 /*
- * AR Item Count's pins: one persistent marker per physical barcode of a listed code, placed and removed exactly as the
- * iOS demo's AR scanner does (vision-sdk-ios main cabf9d9c, `Ported/ARBarcode/ScannerController.swift`), with its
- * constants. Pure: the GL thread's [ArPins] feeds it ARCore's hits and holds the anchors.
+ * AR Item Count's pins: one persistent marker per physical barcode of a listed code. [PinRules.IOS] places and removes
+ * them exactly as the iOS demo's AR scanner does (vision-sdk-ios main cabf9d9c, `Ported/ARBarcode/ScannerController.swift`),
+ * with its constants, and never moves them. [PinRules.ANDROID] runs the drift plan's §3.4: the identity rules (2, 3, 5, 6
+ * and 7, Phase 3), identity coming from geometry, as labels cannot overlap and identical units sit a label apart (I5),
+ * never from recency; and, with [PinBook.refine], each pin refined from the ray of every read that claims it,
+ * re-initialised after three bad claims in a row (rules 1, 4 and 9, Phase 4, [PinEstimator]). Pure: the GL thread's
+ * [ArPins] feeds it ARCore's hits and anchor poses, and holds the anchors.
  */
 
 /** A new pin needs this many agreeing sightings (iOS candidateConfirmCount) */
@@ -55,6 +63,64 @@ internal const val PIN_BOX_INFLATE = 0.3
 /** The match radius never drops below this many points / dp on screen (iOS matchRadius floor, 40) */
 internal const val PIN_MATCH_FLOOR_DP = 40f
 
+// [PinRules.ANDROID] (drift plan §3.4)
+
+/** Rule 2: a code's pitch, learned from two of its reads in one image, is never below this */
+internal const val PIN_MIN_PITCH_M = 0.02
+
+/** Rule 3: a claim farther than this many pixels of a 4K stream image (or half its quad's width) off its pin is bad */
+internal const val PIN_BAD_PX = 60.0
+
+/** Rule 3: a bad claim this soon after the pin's last good one, with no map correction since, is voided */
+internal const val PIN_VOID_NS = 1_000_000_000L
+
+/** Rule 4: this many counted bad claims in a row re-initialise a pin from their rays ([PinEstimator.bad]) */
+internal const val PIN_REINIT_BAD = 3
+
+/** Rule 5: a sighting joins a candidate whose median lies within half the label's width of its ray, and never less than this */
+internal const val PIN_CANDIDATE_MIN_M = 0.01
+
+/** Rule 6: same-code pins this close (or within half their label's width, if less) are one label */
+internal const val PIN_MERGE_M = 0.015
+
+/** Rule 7: a pin younger than this is never retired */
+internal const val PIN_RETIRE_AGE_NS = 1_000_000_000L
+
+/** Rule 7: a pin misses a batch only where it lies at least this fraction of the image inside its border ... */
+internal const val PIN_RETIRE_MARGIN = 0.1
+
+/** ... and within this camera depth */
+internal const val PIN_RETIRE_MAX_M = 1.5
+
+/** Rule 7: a pin that missed this many batches over [PIN_RETIRE_NS], with no claim between, is retired */
+internal const val PIN_RETIRE_BATCHES = 6
+internal const val PIN_RETIRE_NS = 2_000_000_000L
+
+/**
+ * Rule 7: a miss this long after its run's first restarts the run, so misses left from an earlier look at the pin
+ * (UNIT-A's pin 3 on 2026-10-07, retired on re-entering the view 62 s after its last claim) no longer add up with new
+ * ones. Three times [PIN_RETIRE_NS]: twice is enough for a ghost in plain view (a miss per batch reading its code, 3 or
+ * more a second on the Memor), but a pin left by a 20 cm map shift is in view only part of each sweep and must still
+ * go within 6 s (PinTwinTest; at 4 s it took 8.4 s)
+ */
+internal const val PIN_RETIRE_WINDOW_NS = 3 * PIN_RETIRE_NS
+
+/**
+ * Rule 7: with refinement on ([PinBook.refine], what the app runs), a pin with this many good claims or more is counted
+ * (the counter counts a unit on its second read, Units.kt: TENTATIVE -> COUNTED) and is not retired as a ghost: a
+ * counted item that vanished would leave the count and the pins disagreeing. Only after a map correction, once a newer
+ * pin of its code has taken over its label ([PinBook] rule 7), does a counted pin go; a pin read fewer times, never
+ * counted, can go as a ghost. With refinement off (frozen pins, the legacy setting) every pin keeps the old retirement:
+ * a frozen pin cannot re-initialise, so its re-birth and retirement are its only way back onto its label
+ */
+internal const val PIN_COUNTED_CLAIMS = 2
+
+/** Rule 7: an engine box the batch's image did not decode, inflated by this fraction a side, shields at most one pin */
+internal const val PIN_SHIELD_INFLATE = 0.1
+
+/** A pin or candidate never counts as nearer than this to the camera, metres (the label width and pitch at its range, a re-init's depth) */
+internal const val PIN_MIN_RANGE_M = 0.1
+
 /**
  * iOS updateMotionEstimate and the map warm-up, on the GL thread, in the reads' clock (the frames'
  * `androidCameraTimestamp`). Every frame: speed and the forward vector's turn rate (over 0.1 ms to 0.5 s), and
@@ -80,9 +146,12 @@ class PinMotion {
         val p = prev
         val dtS = (timestampNs - prevNs) / 1e9
         if (p != null && dtS > 1e-4 && dtS < 0.5) {
-            speedMps = (camera.t - p.t).norm() / dtS
-            // The camera looks down -Z of its own frame
-            val dot = (camera.rotate(FORWARD) dot p.rotate(FORWARD)).coerceIn(-1.0, 1.0)
+            speedMps = norm(camera.t.x - p.t.x, camera.t.y - p.t.y, camera.t.z - p.t.z) / dtS
+            // The camera looks down -Z of its own frame (every frame: as scalars, the same arithmetic as rotate and dot)
+            val f = FORWARD
+            val dot = rotated(camera.q, f.x, f.y, f.z) { ax, ay, az ->
+                rotated(p.q, f.x, f.y, f.z) { bx, by, bz -> ax * bx + ay * by + az * bz }
+            }.coerceIn(-1.0, 1.0)
             rotationDps = Math.toDegrees(acos(dot)) / dtS
         }
         if (!cameraModerate) lastImmoderateNs = timestampNs
@@ -104,8 +173,10 @@ class PinMotion {
 /**
  * One read of a listed code, hit-tested (iOS place()'s `Placed`): its [code] key ([ItemCode.key]), the world [hit]
  * (with the hit's [rotation]) of its centre [ray]; in pixels of its own (capture-time) stream image its [centreU],
- * [centreV], its corners' box inflated by [PIN_BOX_INFLATE] ([minU] .. [maxV]) and [matchRadiusPx]; and that image's
- * [camera] and [intrinsics], to project pins into it.
+ * [centreV], its corners' box inflated by [PIN_BOX_INFLATE] ([minU] .. [maxV]) and [matchRadiusPx]; that image's
+ * [camera] and [intrinsics], to project pins into it; whether the hit lies on a plane ([onPlane]) and where its point
+ * came from ([source]: a valid hit, the nominal width, the nearest hit, or no hit at all, [guessed]); its quad's width
+ * ([Read.widthPx]) and its symbology's nominal width ([nominalWidthM], metres; 0 none).
  */
 data class Sighting(
     val code: String,
@@ -121,24 +192,58 @@ data class Sighting(
     val matchRadiusPx: Double,
     val camera: Pose,
     val intrinsics: Intrinsics,
-)
+    val onPlane: Boolean = false,
+    val source: HitSource = HitSource.HIT,
+    val widthPx: Double = 0.0,
+    val nominalM: Double = 0.0,
+) {
+    /** No hit at all: [defaultPick]'s point */
+    val guessed: Boolean get() = source == HitSource.DEFAULT
+}
 
 /**
- * The [Sighting] of [read] in its frame [capture], hit at [hit]: the box of its corners, inflated by [PIN_BOX_INFLATE]
- * of its size on each side, and a match radius of the inflated box's larger side, at least [floorPx] (iOS's 40 points,
- * in pixels of the stream image).
+ * The [Sighting] of [read] in its frame [capture], hit at [hit] ([onPlane]: on a plane; [source]: where the point came
+ * from): the box of its corners, inflated by [PIN_BOX_INFLATE] of its size on each side, and a match radius of the
+ * inflated box's larger side, at least [floorPx] (iOS's 40 points, in pixels of the stream image). [code] and
+ * [nominalM] are the read's key and its symbology's nominal width, for a caller that has them already.
  */
-fun sightingOf(read: Read, capture: PoseRecord, hit: Vec3, rotation: Quat, ray: Ray, floorPx: Double): Sighting {
-    val xs = (0 until 4).map { read.corners[2 * it] }
-    val ys = (0 until 4).map { read.corners[2 * it + 1] }
-    val w = xs.max() - xs.min()
-    val h = ys.max() - ys.min()
-    val minU = xs.min() - w * PIN_BOX_INFLATE
-    val maxU = xs.max() + w * PIN_BOX_INFLATE
-    val minV = ys.min() - h * PIN_BOX_INFLATE
-    val maxV = ys.max() + h * PIN_BOX_INFLATE
+fun sightingOf(
+    read: Read,
+    capture: PoseRecord,
+    hit: Vec3,
+    rotation: Quat,
+    ray: Ray,
+    floorPx: Double,
+    onPlane: Boolean = false,
+    source: HitSource = HitSource.HIT,
+    code: String = ItemCode.key(read),
+    nominalM: Double = nominalWidthM(read.symbology) ?: 0.0,
+): Sighting {
+    // Each axis's min and max folded from the first corner, as Iterable<Double>.min()/max() fold them (Math.min/max)
+    val c = read.corners
+    var minX = c[0]
+    var maxX = minX
+    var minY = c[1]
+    var maxY = minY
+    for (i in 1 until 4) {
+        val x = c[2 * i]
+        val y = c[2 * i + 1]
+        minX = min(minX, x)
+        maxX = max(maxX, x)
+        minY = min(minY, y)
+        maxY = max(maxY, y)
+    }
+    val w = maxX - minX
+    val h = maxY - minY
+    val minU = minX - w * PIN_BOX_INFLATE
+    val maxU = maxX + w * PIN_BOX_INFLATE
+    val minV = minY - h * PIN_BOX_INFLATE
+    val maxV = maxY + h * PIN_BOX_INFLATE
     val radius = maxOf(maxU - minU, maxV - minV, floorPx)
-    return Sighting(ItemCode.key(read), hit, rotation, ray, read.centreU, read.centreV, minU, minV, maxU, maxV, radius, capture.camera, capture.intrinsics)
+    return Sighting(
+        code, hit, rotation, ray, read.centreU, read.centreV, minU, minV, maxU, maxV, radius, capture.camera, capture.intrinsics,
+        onPlane, source, read.widthPx, nominalM,
+    )
 }
 
 /** A depth point hit needs at least this raw depth confidence (0-255) where it lies: depth-from-motion is noisy on plain, flat or dim surfaces */
@@ -146,10 +251,13 @@ internal const val MIN_DEPTH_CONFIDENCE = 128
 
 /**
  * Where [hit] (world) lies in the image of the frame [camera] and [intrinsics] are of, normalized 0..1 of that image
- * (ARCore's IMAGE_NORMALIZED once mapped to the CPU image); null when it is behind the camera.
+ * (ARCore's IMAGE_NORMALIZED once mapped to the CPU image); null when it is behind the camera. [toCamera] is
+ * [camera]'s inverse, for a caller that has it.
  */
-fun imageNormalized(hit: Vec3, camera: Pose, intrinsics: Intrinsics): Pair<Double, Double>? =
-    intrinsics.project(camera.inverse().apply(hit))?.let { (u, v) -> u / intrinsics.width to v / intrinsics.height }
+fun imageNormalized(hit: Vec3, camera: Pose, intrinsics: Intrinsics, toCamera: Pose = camera.inverse()): Pair<Double, Double>? =
+    applied(toCamera, hit.x, hit.y, hit.z) { x, y, z ->
+        projected(intrinsics, x, y, z, { null }) { u, v -> u / intrinsics.width to v / intrinsics.height }
+    }
 
 /** The pixel of a [width] x [height] depth image at texture-normalized ([texU], [texV]); null outside it */
 fun depthPixel(texU: Float, texV: Float, width: Int, height: Int): Pair<Int, Int>? {
@@ -157,23 +265,120 @@ fun depthPixel(texU: Float, texV: Float, width: Int, height: Int): Pair<Int, Int
     return (texU * width).toInt().coerceIn(0, width - 1) to (texV * height).toInt().coerceIn(0, height - 1)
 }
 
-/** Whether a depth point hit passes the gate: no confidence known (no depth image, outside it) passes, as no gate */
-fun depthConfident(confidence: Int?): Boolean = confidence == null || confidence >= MIN_DEPTH_CONFIDENCE
+/**
+ * Whether a depth point hit passes the gate (drift plan Phase 2): no confidence known (no depth image, outside it) fails,
+ * as a depth from motion nothing vouches for. [PinRules.IOS] still lets an unknown one pass.
+ */
+fun depthConfident(confidence: Int?): Boolean = confidence != null && confidence >= MIN_DEPTH_CONFIDENCE
 
 /** How far a hit lies from its read once reprojected into the read's own frame, in pixels, and its depth there (diagnostics) */
 data class HitCheck(val errorPx: Double, val depthM: Double)
 
-fun checkHit(hit: Vec3, read: Read, capture: PoseRecord): HitCheck {
-    val inCamera = capture.camera.inverse().apply(hit)
-    val px = capture.intrinsics.project(inCamera)
-    val error = px?.let { (u, v) -> hypot(u - read.centreU, v - read.centreV) } ?: Double.POSITIVE_INFINITY
-    return HitCheck(error, -inCamera.z)
-}
+/** [toCamera]: the inverse of [capture]'s camera, for a caller that has it */
+fun checkHit(hit: Vec3, read: Read, capture: PoseRecord, toCamera: Pose = capture.camera.inverse()): HitCheck =
+    applied(toCamera, hit.x, hit.y, hit.z) { x, y, z ->
+        val error = projected(capture.intrinsics, x, y, z, { Double.POSITIVE_INFINITY }) { u, v -> hypot(u - read.centreU, v - read.centreV) }
+        HitCheck(error, -z)
+    }
 
-/** A pin of [code]: its anchor's birth [pose], its world [position] (the anchor's last tracked one), and when a sighting last claimed it */
-class Pin(val id: Int, val code: String, val pose: Pose) {
-    var position: Vec3 = pose.t
+/**
+ * A pin of [code]: its anchor's birth [pose]; whether most of the sightings it was born from hit a plane ([bornOnPlane])
+ * or hit nothing ([bornGuessed]: its depth is a guess); the capture time of its birth ([bornNs]) and its label's width
+ * there ([widthM], metres; 0 unknown); its anchor's poses since ([anchors], rule 9) and its point in the anchor's frame
+ * ([est], refined under [PinRules.ANDROID] with [PinBook.refine]; the anchor itself until then), so its world
+ * [position] is the newest anchor pose applied to that point;
+ * when a sighting last claimed it, how many claims it took ([claims]), the capture time of its last good one
+ * ([lastGoodNs], its birth at first) and the bad ones since ([badInRow], rule 4); for rule 7, the batches since its last
+ * good claim that read its code in view but not by it ([misses], the first at [firstMissNs]), its good claims so far
+ * ([goodClaims]), the ray of its newest claim that missed it ([landedRay], at [landedNs]: where its label's reads land
+ * once it left them) and the last batch that
+ * read its code at all ([lastSightedNs]); and the frame time the
+ * read-rate boost ran for it ([boostNs], P2c).
+ */
+class Pin(
+    val id: Int,
+    val code: String,
+    val pose: Pose,
+    val bornOnPlane: Boolean = false,
+    val bornGuessed: Boolean = false,
+    val bornNs: Long = 0L,
+    val widthM: Double = 0.0,
+) {
+    val anchors = AnchorRing().also { it.add(bornNs, pose) }
+    val est = PinEstimator()
     var lastSeenNs = 0L
+    var claims = 0
+    var lastGoodNs = bornNs
+    var misses = 0
+    var firstMissNs = 0L
+    var goodClaims = 0
+    var landedRay: Ray? = null
+    var landedNs = Long.MIN_VALUE
+    var lastSightedNs = 0L
+    var boostNs = 0L
+
+    /**
+     * Rule 4's count while pins are frozen ([PinBook.refine] off, Phase 3), where no estimator runs, and the run's reads
+     * before its [PIN_REINIT_BAD]th, with their capture times
+     */
+    internal var frozenBadInRow = 0
+    internal val frozenRun = ArrayList<Pair<Sighting, Long>>(PIN_REINIT_BAD)
+
+    /** Rule 4: its counted bad claims in a row, its estimator's or, frozen, [frozenBadInRow] (the other is 0) */
+    val badInRow: Int get() = est.badInRow + frozenBadInRow
+
+    /** A data-only fit passed the core's gate (rule 1): with refined pins a dot, else a ring ([drawnAsRing]) */
+    val verified: Boolean get() = est.verified
+
+    private val scratch = DoubleArray(3)
+    private var cached: Vec3? = null
+    private var cachedAnchors = -1
+    private var cachedEst = -1
+
+    /** Its newest anchor pose applied to its point */
+    val position: Vec3
+        get() {
+            val c = cached
+            if (c != null && cachedAnchors == anchors.version && cachedEst == est.version) return c
+            return at(anchors.newest).also {
+                cached = it
+                cachedAnchors = anchors.version
+                cachedEst = est.version
+            }
+        }
+
+    /** Where it stood at a capture at [captureNs]: its anchor's pose then (rule 9) applied to its point now (§3.3 step 2.1) */
+    fun positionAt(captureNs: Long): Vec3 = at(anchors.slotAt(captureNs))
+
+    /** Its point's distance from its anchor, metres (rule 8) */
+    val localNorm: Double get() = sqrt(est.x * est.x + est.y * est.y + est.z * est.z)
+
+    /** [ArPins], each frame its anchor tracks: the anchor's pose then; how far it moved since the last pose kept, metres */
+    fun anchored(timestampNs: Long, tx: Double, ty: Double, tz: Double, qx: Double, qy: Double, qz: Double, qw: Double): Double {
+        anchors.add(timestampNs, tx, ty, tz, qx, qy, qz, qw)
+        return anchors.lastStep()
+    }
+
+    /**
+     * Rule 8: its anchor is now [to] (world, made where the old one put its point): the rays, the prior and the point
+     * move into the new anchor's frame by A_new⁻¹·A_old, and every pose kept becomes the new anchor's on its frame
+     */
+    fun reanchor(to: Pose) {
+        val old = anchors.pose(anchors.newest)
+        est.moveBy(to.inverse() * old)
+        anchors.compose(old.inverse() * to)
+    }
+
+    /** Rule 6: [other]'s newest rays, carried from its anchor's frame into this one's (their newest poses), refine this point */
+    fun absorb(other: Pin) {
+        if (!est.started || !other.est.started) return
+        est.absorbNewest(other.est, PIN_ABSORB_RAYS, anchors.pose(anchors.newest).inverse() * other.anchors.pose(other.anchors.newest))
+    }
+
+    private fun at(slot: Int): Vec3 {
+        anchors.apply(slot, est.x, est.y, est.z, scratch)
+        return Vec3(scratch[0], scratch[1], scratch[2])
+    }
 }
 
 /**
@@ -188,22 +393,159 @@ fun lateral(ray: Ray, p: Vec3): Double {
 }
 
 /**
- * The pins and the candidates of one session (iOS ScannerController's markers and candidates). A pin is never moved by a
- * sighting (only ARCore moves its anchor) and is removed only by [mergeSiblings] and [clear], as on iOS.
+ * Whether world point [p] lies in front of [camera], within [PIN_RETIRE_MAX_M], and [PIN_RETIRE_MARGIN] of its image
+ * ([k]) inside the border; [toCamera] is [camera]'s inverse, for a caller that has it
+ */
+fun wellInside(p: Vec3, camera: Pose, k: Intrinsics, toCamera: Pose = camera.inverse()): Boolean =
+    applied(toCamera, p.x, p.y, p.z) { x, y, z ->
+        if (-z > PIN_RETIRE_MAX_M) {
+            false
+        } else {
+            projected(k, x, y, z, { false }) { u, v ->
+                val mu = PIN_RETIRE_MARGIN * k.width
+                val mv = PIN_RETIRE_MARGIN * k.height
+                u >= mu && u <= k.width - mu && v >= mv && v <= k.height - mv
+            }
+        }
+    }
+
+/**
+ * A box the engine has in a batch's image but did not decode there, its corners' box inflated by [PIN_SHIELD_INFLATE]
+ * a side, in that image's pixels: tracked with the text of [code] (a key), or, [code] null, not read at all (a detector
+ * or localizer box, any code). Rule 7 counts the one pin in it nearest its centre ([centreU], [centreV]) as seen.
+ */
+class TrackedBox(val code: String?, val minU: Double, val minV: Double, val maxU: Double, val maxV: Double) {
+    val centreU get() = (minU + maxU) / 2
+    val centreV get() = (minV + maxV) / 2
+}
+
+/** The [TrackedBox] of [read] (one of [trackedOf]'s), whose key is [code] (null: no text) */
+fun trackedBoxOf(read: Read, code: String?): TrackedBox {
+    val c = read.corners
+    val minU = minOf(c[0], c[2], c[4], c[6])
+    val maxU = maxOf(c[0], c[2], c[4], c[6])
+    val minV = minOf(c[1], c[3], c[5], c[7])
+    val maxV = maxOf(c[1], c[3], c[5], c[7])
+    val w = (maxU - minU) * PIN_SHIELD_INFLATE
+    val h = (maxV - minV) * PIN_SHIELD_INFLATE
+    return TrackedBox(code, minU - w, minV - h, maxU + w, maxV + h)
+}
+
+/** [sighting] re-sighted [pin] (a claim) */
+class Claim(val sighting: Sighting, val pin: Pin)
+
+/**
+ * What one [PinBook.place] did: the pins its merges [removed] and the ones it [retired] (their anchors go), the [claims]
+ * it applied, for the metrics, the ones it [voided] (rule 3: their reads went to the candidates instead), and the pins
+ * their third bad claim in a row re-initialised ([reinits], rule 4)
+ */
+class Placed(
+    val removed: List<Pin>,
+    val claims: List<Claim>,
+    val retired: List<Pin> = emptyList(),
+    val voided: List<Claim> = emptyList(),
+    val reinits: List<Pin> = emptyList(),
+) {
+    companion object {
+        val NONE = Placed(emptyList(), emptyList())
+    }
+}
+
+/**
+ * The pins and the candidates of one session (iOS ScannerController's markers and candidates). Under [PinRules.IOS] a
+ * pin is never moved by a sighting (only ARCore moves its anchor) and is removed only by [mergeSiblings] and [clear], as
+ * on iOS; under [PinRules.ANDROID] it also goes by retirement (rule 7), and with [refine] every claim refines it
+ * ([PinEstimator]). [rules] and [refine] may change between batches; the rule 4 and 7 counters then start again.
  */
 class PinBook {
     private class Candidate(val code: String) {
         val positions = ArrayList<Vec3>()
+
+        /** Whether each of [positions] was a plane hit, whether it was no hit at all, and whether a valid hit */
+        val onPlane = ArrayList<Boolean>()
+        val guessed = ArrayList<Boolean>()
+        val valid = ArrayList<Boolean>()
+
+        /** Each sighting's world ray, for the pin's estimator (rule 9) */
+        val rays = ArrayList<Ray>()
         var lastRotation = Quat.IDENTITY
         var lastSeenNs = 0L
+
+        /** The per-axis median of [positions] (rule 5), kept until they change */
+        var median: Vec3? = null
     }
 
     private val list = ArrayList<Pin>()
     private val candidates = ArrayList<Candidate>()
+
+    /** Each code's pitch between identical units, metres, from the newest image that read it twice (rule 2) */
+    private val pitches = HashMap<String, Double>()
     private var nextId = 1
+
+    /** A claim's ray in its pin's anchor frame (scratch) */
+    private val ray6 = DoubleArray(6)
+
+    /** Frozen pins' bad runs' earlier reads, with their capture times, to seed the candidates before the batch's own ([frozenBad]) */
+    private val reseed = ArrayList<Pair<Sighting, Long>>()
+
+    // Scratch of one place() (one thread; nothing is kept between batches): each capture camera's inverse, the pins
+    // where they stood, the pairings (sighting index, pin index, lateral distance, pixels off) in the order found, the
+    // pins claimed, the sightings owned and the pins well claimed; one axis of a median
+    private val inverses = Inverses()
+    private val at = ArrayList<Vec3>()
+    private var pairSighting = IntArray(8)
+    private var pairPin = IntArray(8)
+    private var pairLateral = DoubleArray(8)
+    private var pairOff = DoubleArray(8)
+    private var pairs = 0
+    private val claimed = IntSet()
+    private val owned = IntSet()
+    private val good = IntSet()
+    private val shielded = IntSet()
+    private var shieldU = DoubleArray(8)
+    private var shieldV = DoubleArray(8)
+    private val axis = DoubleArray(PIN_MAX_SAMPLES + 1)
+
+    /** Which rules place and remove the pins ([ArPins] sets it each frame) */
+    var rules = PinRules.ANDROID
+        set(value) {
+            if (value != field) restartRuns()
+            field = value
+        }
+
+    /**
+     * Under [PinRules.ANDROID], whether claims refine the pins (drift plan Phase 4, its own switch so it can be A/B tested
+     * against Phase 3 in one session; [ArPins] sets it each frame). Off, the pins are frozen as in Phase 3: each stays
+     * where it was born, judged where it is now, and from its [PIN_REINIT_BAD]th bad claim in a row its claims are voided
+     * and their reads seed a candidate, standing in for the re-init a frozen pin cannot do.
+     */
+    var refine = true
+        set(value) {
+            if (value != field) restartRuns()
+            field = value
+        }
+
+    /** The rules changed: the rule 4 and 7 counters start again, as the other rules did not keep them */
+    private fun restartRuns() {
+        for (pin in list) {
+            pin.est.clearBad()
+            pin.frozenBadInRow = 0
+            pin.frozenRun.clear()
+            pin.misses = 0
+        }
+    }
+
+    /**
+     * The newest frame on which the map moved (an anchor stepped, or tracking was lost; [ArPins] sets it each frame):
+     * a claim voids only while there has been no such frame since its pin's last good claim (rule 3)
+     */
+    var mapMovedNs = Long.MIN_VALUE
 
     val pins: List<Pin> get() = list
     val candidateCount: Int get() = candidates.size
+
+    /** [code]'s pitch (rule 2), metres; null until one image read it twice under [PinRules.ANDROID] */
+    fun pitchOf(code: String): Double? = pitches[code]
 
     /**
      * One batch captured at [captureNs], placed at the frame [nowNs] (iOS place()): every (sighting, pin) pairing of
@@ -211,84 +553,364 @@ class PinBook {
      * of its centre, and within [PIN_ASSIGN_RADIUS_M] of its ray; claimed greedily, smallest lateral distance first,
      * each pin and each sighting at most once; a claimed pin was seen at [nowNs], and the siblings merge. Each unclaimed
      * sighting feeds the candidates when [mayCreate]; a confirmed one becomes a pin once [anchor] made its anchor, and
-     * the siblings merge. The pins removed by the merges go back, for their anchors.
+     * the siblings merge. The pins removed go back, for their anchors, and the claims, for the metrics.
+     *
+     * [PinRules.ANDROID] adds (§3.4): each pin is judged where it stood at the capture, its anchor then ([Pin.positionAt]);
+     * once a code's pitch is known, a pin is claimed only within half of it, in the image and laterally, the box no
+     * longer enough (rule 2); a claim more than [PIN_BAD_PX] (or half the quad's width) off a pin that had a good one
+     * under [PIN_VOID_NS] ago, with no map correction since ([mapMovedNs]), is voided and its read feeds the candidates,
+     * as most likely a pinless identical neighbour's (rule 3); a good claim refines its pin (rule 1), and the
+     * [PIN_REINIT_BAD]th counted bad claim in a row re-initialises it on their rays, which counts as good (rule 4);
+     * candidates join on their median, and a newborn pin starts from rule 1's prior and its sightings' rays (rule 5);
+     * the merge is the physical one (rule 6); and pins that keep missing reads of their code in view, a bad claim being
+     * no claim, retire (rule 7), unless the engine still tracks their code's box where they stand ([tracked]). With [refine] off (Phase 3) nothing is refined: a pin is judged where it is now, and
+     * from its [PIN_REINIT_BAD]th counted bad claim in a row each one is voided; that run's reads seed a candidate, and
+     * the stale pin retires.
      */
-    fun place(sightings: List<Sighting>, captureNs: Long, nowNs: Long, mayCreate: Boolean, anchor: (Pin) -> Boolean): List<Pin> {
-        if (sightings.isEmpty()) return emptyList()
+    fun place(
+        sightings: List<Sighting>,
+        captureNs: Long,
+        nowNs: Long,
+        mayCreate: Boolean,
+        tracked: List<TrackedBox> = emptyList(),
+        anchor: (Pin) -> Boolean,
+    ): Placed {
+        if (sightings.isEmpty()) return Placed.NONE
+        val android = rules == PinRules.ANDROID
+        val refining = android && refine
+        if (android) learnPitches(sightings)
         val removed = ArrayList<Pin>()
-        data class Pairing(val s: Int, val pin: Pin, val lateral: Double)
-        val pairings = ArrayList<Pairing>()
-        sightings.forEachIndexed { i, s ->
-            for (pin in list) {
-                if (pin.code != s.code) continue
-                val (u, v) = s.intrinsics.project(s.camera.inverse().apply(pin.position)) ?: continue
-                val inBox = u in s.minU..s.maxU && v in s.minV..s.maxV
-                if (!inBox && hypot(u - s.centreU, v - s.centreV) > s.matchRadiusPx) continue
-                val d = lateral(s.ray, pin.position)
-                if (d <= PIN_ASSIGN_RADIUS_M) pairings += Pairing(i, pin, d)
+        val claims = ArrayList<Claim>()
+        val voided = ArrayList<Claim>(0)
+        var reinits: ArrayList<Pin>? = null
+        at.clear()
+        for (j in list.indices) at += if (refining) list[j].positionAt(captureNs) else list[j].position
+        pairs = 0
+        for (i in sightings.indices) {
+            val s = sightings[i]
+            val pitch = if (android) pitches[s.code] else null
+            val toCamera = inverses[s.camera]
+            for (j in list.indices) {
+                if (list[j].code != s.code) continue
+                val p = at[j]
+                applied(toCamera, p.x, p.y, p.z) { cx, cy, cz ->
+                    projected(s.intrinsics, cx, cy, cz, {}) { u, v ->
+                        val off = hypot(u - s.centreU, v - s.centreV)
+                        val d = lateral(s.ray, p.x, p.y, p.z)
+                        val near = if (pitch == null) {
+                            val inBox = u in s.minU..s.maxU && v in s.minV..s.maxV
+                            (inBox || off <= s.matchRadiusPx) && d <= PIN_ASSIGN_RADIUS_M
+                        } else {
+                            val o = s.ray.origin
+                            val range = maxOf(norm(p.x - o.x, p.y - o.y, p.z - o.z), PIN_MIN_RANGE_M)
+                            off <= minOf(s.matchRadiusPx, pitch / 2 * s.intrinsics.fx / range) && d <= minOf(PIN_ASSIGN_RADIUS_M, pitch / 2)
+                        }
+                        if (near) addPairing(i, j, d, off)
+                    }
+                }
             }
         }
-        pairings.sortBy { it.lateral }
-        val claimed = HashSet<Int>()
-        val owned = HashSet<Int>()
-        for (p in pairings) {
-            if (p.pin.id in claimed || p.s in owned) continue
-            claimed += p.pin.id
-            owned += p.s
-            p.pin.lastSeenNs = nowNs
+        sortPairings()
+        claimed.clear()
+        owned.clear()
+        good.clear()
+        for (k in 0 until pairs) {
+            val pin = list[pairPin[k]] // no pin goes before the claims are applied
+            val si = pairSighting[k]
+            if (pin.id in claimed || si in owned) continue
+            claimed.add(pin.id)
+            val s = sightings[si]
+            var ok = pairOff[k] <= badPx(s)
+            if (!ok) {
+                pin.landedRay = s.ray
+                pin.landedNs = captureNs
+            }
+            if (android) {
+                if (!ok && captureNs - pin.lastGoodNs < PIN_VOID_NS && mapMovedNs <= pin.lastGoodNs) { // rule 3
+                    voided += Claim(s, pin)
+                    continue
+                }
+                if (!refining && !ok && frozenBad(pin, s, captureNs)) { // rule 4's stand-in: it left its label
+                    voided += Claim(s, pin)
+                    continue
+                }
+                if (refining && refine(pin, s, captureNs, ok)) { // rule 4: it now lies on this read
+                    ok = true
+                    (reinits ?: ArrayList<Pin>(1).also { reinits = it }) += pin
+                }
+            }
+            owned.add(si)
+            pin.lastSeenNs = nowNs
+            pin.claims++
+            if (ok) {
+                pin.goodClaims++
+                pin.lastGoodNs = captureNs
+                pin.frozenBadInRow = 0
+                pin.frozenRun.clear()
+                good.add(pin.id)
+            }
+            claims += Claim(s, pin)
         }
         if (claimed.isNotEmpty()) removed += mergeSiblings()
-        sightings.forEachIndexed { i, s ->
-            if (i in owned) return@forEachIndexed
-            if (accumulate(s, captureNs, nowNs, mayCreate, anchor)) removed += mergeSiblings()
+        // Frozen: a run's earlier reads, applied as claims, seed the candidates with its voided third, so the label's
+        // new pin is born on it
+        for (r in reseed.indices) {
+            val (run, runNs) = reseed[r]
+            if (accumulate(run, runNs, nowNs, mayCreate, android, anchor)) removed += mergeSiblings()
         }
-        return removed
+        reseed.clear()
+        for (i in sightings.indices) {
+            if (i in owned) continue
+            if (accumulate(sightings[i], captureNs, nowNs, mayCreate, android, anchor)) removed += mergeSiblings()
+        }
+        val retired = if (android) retire(sightings, good, captureNs, tracked) else emptyList()
+        return Placed(removed, claims, retired, voided, reinits ?: emptyList())
+    }
+
+    private fun addPairing(sighting: Int, pin: Int, lateral: Double, offPx: Double) {
+        if (pairs == pairPin.size) {
+            pairSighting = pairSighting.copyOf(pairs * 2)
+            pairPin = pairPin.copyOf(pairs * 2)
+            pairLateral = pairLateral.copyOf(pairs * 2)
+            pairOff = pairOff.copyOf(pairs * 2)
+        }
+        pairSighting[pairs] = sighting
+        pairPin[pairs] = pin
+        pairLateral[pairs] = lateral
+        pairOff[pairs] = offPx
+        pairs++
+    }
+
+    /** The pairings by lateral distance, ties in the order found: a stable sort, as sortBy's, so the same order */
+    private fun sortPairings() {
+        for (i in 1 until pairs) {
+            val s = pairSighting[i]
+            val p = pairPin[i]
+            val d = pairLateral[i]
+            val off = pairOff[i]
+            var j = i - 1
+            while (j >= 0 && pairLateral[j].compareTo(d) > 0) {
+                pairSighting[j + 1] = pairSighting[j]
+                pairPin[j + 1] = pairPin[j]
+                pairLateral[j + 1] = pairLateral[j]
+                pairOff[j + 1] = pairOff[j]
+                j--
+            }
+            pairSighting[j + 1] = s
+            pairPin[j + 1] = p
+            pairLateral[j + 1] = d
+            pairOff[j + 1] = off
+        }
+    }
+
+    /**
+     * Rule 4's stand-in while pins are frozen: [s], captured at [captureNs], is [pin]'s next counted bad claim in a row.
+     * Before the [PIN_REINIT_BAD]th it is applied and kept with the run; from it on the pin no longer lies on its label
+     * and the claim is voided (true), the run's earlier reads joining [reseed] at the [PIN_REINIT_BAD]th.
+     */
+    private fun frozenBad(pin: Pin, s: Sighting, captureNs: Long): Boolean {
+        val n = ++pin.frozenBadInRow
+        if (n < PIN_REINIT_BAD) {
+            pin.frozenRun += s to captureNs
+            return false
+        }
+        if (n == PIN_REINIT_BAD) reseed += pin.frozenRun
+        pin.frozenRun.clear()
+        return true
+    }
+
+    /**
+     * [s] captured at [captureNs] claimed [pin] ([good] or a counted bad claim): its ray, taken into the pin's anchor
+     * frame as at the capture (rule 9), refines the pin (rule 1) or joins its bad run (rule 4). A pin never refined
+     * (born under [PinRules.IOS] or frozen) first takes its point as its prior, at the default σ. True when it re-initialised.
+     */
+    private fun refine(pin: Pin, s: Sighting, captureNs: Long, good: Boolean): Boolean {
+        val e = pin.est
+        pin.anchors.toFrame(pin.anchors.slotAt(captureNs), s.ray, ray6)
+        if (!e.started) {
+            val range = sqrt(sq(e.x - ray6[0]) + sq(e.y - ray6[1]) + sq(e.z - ray6[2]))
+            e.start(e.x, e.y, e.z, ray6[3], ray6[4], ray6[5], range, PIN_PRIOR_DEFAULT_M, s.intrinsics.fx, PriorSource.DEFAULT)
+        }
+        if (good) {
+            e.add(ray6[0], ray6[1], ray6[2], ray6[3], ray6[4], ray6[5], s.widthPx)
+            return false
+        }
+        return e.bad(ray6[0], ray6[1], ray6[2], ray6[3], ray6[4], ray6[5], s.widthPx)
+    }
+
+    /**
+     * Rule 1's prior for [pin], newborn from candidate [c] ([s] its newest sighting), then its sightings' rays, all in
+     * the anchor's frame at its birth (rule 9). A depth on the newest ray, so it never pulls the point off that ray:
+     * the median of at least two valid hits' ([PIN_PRIOR_HITS_M] along it), else the EAN/UPC nominal width's
+     * ([PIN_PRIOR_WIDTH] of it), else [PIN_DEFAULT_DEPTH_M] ([PIN_PRIOR_DEFAULT_M]).
+     */
+    private fun startEstimate(pin: Pin, c: Candidate, s: Sighting) {
+        val hits = c.valid.count { it }
+        val widthDepth = if (s.nominalM > 0.0 && s.widthPx > 0.0) (s.intrinsics.fx * s.nominalM / s.widthPx).coerceIn(PIN_MIN_DEPTH_M, PIN_MAX_DEPTH_M) else Double.NaN
+        val prior: Vec3
+        val sigma: Double
+        val source: PriorSource
+        when {
+            hits >= 2 -> {
+                prior = s.ray.at(maxOf((median(c.positions, c.valid) - s.ray.origin) dot s.ray.dir, PIN_MIN_RANGE_M))
+                sigma = PIN_PRIOR_HITS_M
+                source = PriorSource.HITS
+            }
+            widthDepth.isFinite() -> {
+                prior = atDepth(s, widthDepth)
+                sigma = PIN_PRIOR_WIDTH * widthDepth
+                source = PriorSource.WIDTH
+            }
+            else -> {
+                prior = atDepth(s, PIN_DEFAULT_DEPTH_M)
+                sigma = PIN_PRIOR_DEFAULT_M
+                source = PriorSource.DEFAULT
+            }
+        }
+        val toAnchor = pin.pose.inverse()
+        val p = toAnchor.apply(prior)
+        val o = toAnchor.apply(s.ray.origin)
+        val d = toAnchor.rotate(s.ray.dir)
+        pin.est.start(p.x, p.y, p.z, d.x, d.y, d.z, maxOf((p - o) dot d, PIN_MIN_RANGE_M), sigma, s.intrinsics.fx, source)
+        val birth = pin.anchors.newest
+        for (r in c.rays) {
+            pin.anchors.toFrame(birth, r, ray6)
+            pin.est.add(ray6[0], ray6[1], ray6[2], ray6[3], ray6[4], ray6[5])
+        }
+    }
+
+    /** The world point on [s]'s centre ray at camera depth [z] in its image */
+    private fun atDepth(s: Sighting, z: Double): Vec3 {
+        val k = s.intrinsics
+        return s.camera.apply(Vec3((s.centreU - k.cx) / k.fx * z, -(s.centreV - k.cy) / k.fy * z, -z))
+    }
+
+    private fun sq(v: Double) = v * v
+
+    /** Rule 3: how far off its pin, in pixels of [s]'s image, a claim may be and still be good */
+    private fun badPx(s: Sighting) = maxOf(PIN_BAD_PX * s.intrinsics.width / 3840.0, s.widthPx / 2)
+
+    /**
+     * Rule 2: each code read twice or more in one image learns its pitch, the smallest angle between two of its rays
+     * times their range (the mean of its reads' points, within [PIN_MIN_DEPTH_M]..[PIN_MAX_DEPTH_M]), at least
+     * [PIN_MIN_PITCH_M]
+     */
+    private fun learnPitches(sightings: List<Sighting>) {
+        if (sightings.size < 2) return
+        // Each code once, at its first sighting, its sightings in batch order (as grouping them would give them)
+        for (first in sightings.indices) {
+            val code = sightings[first].code
+            var seen = false
+            for (i in 0 until first) if (sightings[i].code == code) seen = true
+            if (seen) continue
+            var count = 0
+            for (i in first until sightings.size) if (sightings[i].code == code) count++
+            if (count < 2) continue
+            var angle = Double.MAX_VALUE
+            var sum = 0.0
+            for (i in first until sightings.size) {
+                val a = sightings[i]
+                if (a.code != code) continue
+                for (j in i + 1 until sightings.size) {
+                    val b = sightings[j]
+                    if (b.code == code) angle = minOf(angle, acos((a.ray.dir dot b.ray.dir).coerceIn(-1.0, 1.0)))
+                }
+                sum += norm(a.hit.x - a.ray.origin.x, a.hit.y - a.ray.origin.y, a.hit.z - a.ray.origin.z)
+            }
+            val range = (sum / count).coerceIn(PIN_MIN_DEPTH_M, PIN_MAX_DEPTH_M)
+            pitches[code] = maxOf(angle * range, PIN_MIN_PITCH_M)
+        }
     }
 
     /** iOS accumulateCandidate; true when a pin was born */
-    private fun accumulate(s: Sighting, captureNs: Long, nowNs: Long, mayCreate: Boolean, anchor: (Pin) -> Boolean): Boolean {
+    private fun accumulate(s: Sighting, captureNs: Long, nowNs: Long, mayCreate: Boolean, android: Boolean, anchor: (Pin) -> Boolean): Boolean {
         if (!mayCreate) return false
-        candidates.removeAll { captureNs - it.lastSeenNs > PIN_CANDIDATE_TIMEOUT_NS }
-        val cand = candidates.firstOrNull { it.code == s.code && lateral(s.ray, it.positions.last()) < PIN_CANDIDATE_RADIUS_M }
-        if (cand == null) {
-            candidates += Candidate(s.code).also {
-                it.positions += s.hit
-                it.lastRotation = s.rotation
-                it.lastSeenNs = captureNs
-            }
-            return false
+        // The stale go, the others keeping their order (no predicate lambda per read)
+        var stale = candidates.size - 1
+        while (stale >= 0) {
+            if (captureNs - candidates[stale].lastSeenNs > PIN_CANDIDATE_TIMEOUT_NS) candidates.removeAt(stale)
+            stale--
         }
+        val cand = candidates.firstOrNull { it.code == s.code && joins(s, it, android) }
+            ?: Candidate(s.code).also { candidates += it }
         cand.positions += s.hit
-        if (cand.positions.size > PIN_MAX_SAMPLES) cand.positions.removeAt(0)
+        cand.onPlane += s.onPlane
+        cand.guessed += s.guessed
+        cand.valid += s.source == HitSource.HIT || s.source == HitSource.PIN
+        cand.rays += s.ray
+        if (cand.positions.size > PIN_MAX_SAMPLES) {
+            cand.positions.removeAt(0)
+            cand.onPlane.removeAt(0)
+            cand.guessed.removeAt(0)
+            cand.valid.removeAt(0)
+            cand.rays.removeAt(0)
+        }
+        cand.median = null
         cand.lastRotation = s.rotation
         cand.lastSeenNs = captureNs
         if (cand.positions.size < PIN_CONFIRM_COUNT) return false
         candidates.remove(cand)
-        // Born at the per-axis median of the agreeing sightings, turned as the last hit (iOS birthTransform)
-        val pin = Pin(nextId++, s.code, Pose(median(cand.positions), cand.lastRotation)).also { it.lastSeenNs = nowNs }
+        // Born at the per-axis median of the agreeing sightings, turned as the last hit (iOS birthTransform); on a
+        // plane when most of them were, as the median then lies on it, and a guess when most of them hit nothing
+        val at = medianOf(cand)
+        val n = cand.positions.size
+        val pin = Pin(
+            nextId++, s.code, Pose(at, cand.lastRotation),
+            bornOnPlane = 2 * cand.onPlane.count { it } > n,
+            bornGuessed = 2 * cand.guessed.count { it } > n,
+            bornNs = captureNs,
+            widthM = labelWidthM(s, at),
+        ).also { it.lastSeenNs = nowNs }
+        if (android && refine) startEstimate(pin, cand, s)
         if (!anchor(pin)) return false
         list += pin
         return true
     }
 
     /**
-     * iOS mergeSiblingMarkers: same-code pins within [PIN_SIBLING_MERGE_M] of each other are a birth race; the most
-     * recently seen stays (a tie keeps the later one). Copies farther apart each keep their own pin.
+     * Whether [s] joins candidate [c]. iOS: [c]'s last position lies within [PIN_CANDIDATE_RADIUS_M] of its ray. Android
+     * (rule 5): [c]'s median does, within half the label's width there and at least [PIN_CANDIDATE_MIN_M], so one
+     * noisy point cannot chain a candidate across to a neighbour.
+     */
+    private fun joins(s: Sighting, c: Candidate, android: Boolean): Boolean {
+        if (!android) return lateral(s.ray, c.positions.last()) < PIN_CANDIDATE_RADIUS_M
+        val m = medianOf(c)
+        return lateral(s.ray, m) < maxOf(PIN_CANDIDATE_MIN_M, labelWidthM(s, m) / 2)
+    }
+
+    /** [c]'s per-axis median, made once per change of its positions */
+    private fun medianOf(c: Candidate): Vec3 = c.median ?: median(c.positions).also { c.median = it }
+
+    /** [s]'s label width in metres were it at [p]: its quad's width at [p]'s range along its ray */
+    private fun labelWidthM(s: Sighting, p: Vec3) = s.widthPx * maxOf((p - s.ray.origin) dot s.ray.dir, PIN_MIN_RANGE_M) / s.intrinsics.fx
+
+    /**
+     * Same-code pins that are one barcode merge. iOS (mergeSiblingMarkers): within [PIN_SIBLING_MERGE_M] of each other
+     * they are a birth race, and the most recently seen stays (a tie keeps the later one); copies farther apart each
+     * keep their own pin. Android (rule 6): only pins within [PIN_MERGE_M], or half their label's width if less, are one
+     * label, since identical units sit a label apart; the one with more claims stays (a tie keeps the older) and, with
+     * [refine], takes the other's newest rays ([PIN_ABSORB_RAYS]).
      */
     fun mergeSiblings(): List<Pin> {
         if (list.size < 2) return emptyList()
-        val removed = ArrayList<Pin>()
+        val android = rules == PinRules.ANDROID
+        val absorb = android && refine
+        var removed: ArrayList<Pin>? = null
         var i = 0
         while (i < list.size) {
             var j = i + 1
             while (j < list.size) {
                 val a = list[i]
                 val b = list[j]
-                if (a.code == b.code && (a.position - b.position).norm() <= PIN_SIBLING_MERGE_M) {
-                    if (a.lastSeenNs > b.lastSeenNs) {
+                val radius = if (android) mergeRadius(a, b) else PIN_SIBLING_MERGE_M
+                if (a.code == b.code && apart(a.position, b.position) <= radius) {
+                    if (removed == null) removed = ArrayList()
+                    if (if (android) a.claims >= b.claims else a.lastSeenNs > b.lastSeenNs) {
+                        if (absorb) a.absorb(b)
                         removed += b
                         list.removeAt(j)
                     } else {
+                        if (absorb) b.absorb(a)
                         removed += a
                         list.removeAt(i)
                         j = i + 1
@@ -299,22 +921,169 @@ class PinBook {
             }
             i++
         }
-        return removed
+        return removed ?: emptyList()
+    }
+
+    /** (a - b).norm(), as scalars */
+    private fun apart(a: Vec3, b: Vec3) = norm(a.x - b.x, a.y - b.y, a.z - b.z)
+
+    /** Rule 6's radius for [a] and [b]: [PIN_MERGE_M], or half the narrower known label width if less */
+    private fun mergeRadius(a: Pin, b: Pin): Double {
+        val w = if (a.widthM <= 0.0) b.widthM else if (b.widthM <= 0.0) a.widthM else minOf(a.widthM, b.widthM)
+        return if (w > 0.0) minOf(PIN_MERGE_M, w / 2) else PIN_MERGE_M
+    }
+
+    /**
+     * Rule 7: a pin at least [PIN_RETIRE_AGE_NS] old that lies [wellInside] the image of a batch reading its code
+     * ([sightings]), where it stood at the capture (where it is now, with pins frozen), but took no good claim from any
+     * of them ([good]) missed it; one that missed [PIN_RETIRE_BATCHES] batches over [PIN_RETIRE_NS] with no good claim
+     * between is a ghost, and goes. A bad or voided claim is no claim: it is either a neighbour's read or a sign the pin
+     * left its label, which the third bad claim in a row corrects (rule 4) or, frozen, leaves to a re-birth. A pin an
+     * engine box undecoded in that image shields ([shield]) is seen: the engine re-reads only some of the known codes
+     * per image, and boxes small tight codes it cannot read yet, so a batch reading 1 of 4 identical units says nothing
+     * against the other 3. Misses count within [PIN_RETIRE_WINDOW_NS] of their run's first, and a run restarts once its
+     * code went unread for over [PIN_RETIRE_NS] (the camera looked away). A counted pin ([PIN_COUNTED_CLAIMS] good
+     * claims) misses only after a map correction since its last good claim, and retires only once a newer pin of its
+     * code covers its label ([takenOver]), so the item keeps one pin and none vanishes in normal use: on 2026-10-07
+     * (14:23) four counted units retired after the camera came back and the engine boxed 14 of 17 units. With
+     * refinement off every pin keeps the old retirement (counted ones too, and no restart after the code went unread):
+     * frozen, it is their only way back onto their label.
+     */
+    private fun retire(sightings: List<Sighting>, good: IntSet, captureNs: Long, tracked: List<TrackedBox>): List<Pin> {
+        shield(sightings[0], captureNs, tracked)
+        var out: ArrayList<Pin>? = null
+        var i = 0
+        while (i < list.size) {
+            val pin = list[i]
+            val counted = refine && pin.goodClaims >= PIN_COUNTED_CLAIMS
+            if (pin.id in good || captureNs - pin.bornNs < PIN_RETIRE_AGE_NS || (counted && mapMovedNs <= pin.lastGoodNs)) {
+                pin.misses = 0
+                i++
+                continue
+            }
+            val s = firstOfCode(sightings, pin.code)
+            if (s != null) {
+                if (refine && captureNs - pin.lastSightedNs > PIN_RETIRE_NS) pin.misses = 0
+                pin.lastSightedNs = captureNs
+            }
+            val p = if (refine) pin.positionAt(captureNs) else pin.position
+            if (s == null || !wellInside(p, s.camera, s.intrinsics, inverses[s.camera])) {
+                i++
+                continue
+            }
+            if (pin.id in shielded) {
+                pin.misses = 0
+                i++
+                continue
+            }
+            if (pin.misses == 0 || captureNs - pin.firstMissNs > PIN_RETIRE_WINDOW_NS) {
+                pin.misses = 0
+                pin.firstMissNs = captureNs
+            }
+            pin.misses++
+            if (pin.misses >= PIN_RETIRE_BATCHES && captureNs - pin.firstMissNs >= PIN_RETIRE_NS && (!counted || takenOver(pin, captureNs))) {
+                list.removeAt(i)
+                (out ?: ArrayList<Pin>().also { out = it }) += pin
+                continue
+            }
+            i++
+        }
+        return out ?: emptyList()
+    }
+
+    /**
+     * Rule 7 for a counted [pin]: whether a newer pin of its code lies within the merge radius ([PIN_MERGE_M]) or one
+     * pitch of [Pin.landedRay], a claim that missed it since its last good one: its label's reads land there now, and
+     * that pin is on them
+     */
+    private fun takenOver(pin: Pin, captureNs: Long): Boolean {
+        val ray = pin.landedRay ?: return false
+        if (pin.landedNs <= pin.lastGoodNs) return false
+        val radius = maxOf(PIN_MERGE_M, pitches[pin.code] ?: 0.0)
+        for (q in list) {
+            if (q === pin || q.code != pin.code || q.bornNs <= pin.bornNs) continue
+            val p = if (refine) q.positionAt(captureNs) else q.position
+            if (lateral(ray, p.x, p.y, p.z) <= radius) return true
+        }
+        return false
+    }
+
+    /**
+     * The pins the [tracked] boxes shield into [shielded]: each box the one pin of its code (any code, for a box with
+     * none) that lies in it at the capture, in [s]'s image (a batch's sightings share their image), nearest its centre.
+     * One box, one pin: a ghost between two tight identical units is not shielded by its neighbours' boxes.
+     */
+    private fun shield(s: Sighting, captureNs: Long, tracked: List<TrackedBox>) {
+        shielded.clear()
+        if (tracked.isEmpty()) return
+        if (shieldU.size < list.size) {
+            shieldU = DoubleArray(list.size * 2)
+            shieldV = DoubleArray(list.size * 2)
+        }
+        val toCamera = inverses[s.camera]
+        for (j in list.indices) {
+            val p = if (refine) list[j].positionAt(captureNs) else list[j].position
+            shieldU[j] = applied(toCamera, p.x, p.y, p.z) { x, y, z ->
+                projected(s.intrinsics, x, y, z, { Double.NaN }) { u, v ->
+                    shieldV[j] = v
+                    u
+                }
+            }
+        }
+        for (b in tracked.indices) {
+            val box = tracked[b]
+            var best = -1
+            var bestPx = Double.POSITIVE_INFINITY
+            for (j in list.indices) {
+                if (box.code != null && list[j].code != box.code) continue
+                val u = shieldU[j]
+                val v = shieldV[j]
+                if (u.isNaN() || u !in box.minU..box.maxU || v !in box.minV..box.maxV) continue
+                val off = hypot(u - box.centreU, v - box.centreV)
+                if (off < bestPx) {
+                    best = j
+                    bestPx = off
+                }
+            }
+            if (best >= 0) shielded.add(list[best].id)
+        }
+    }
+
+    /** The first of [sightings] of [code], as firstOrNull finds it, without an iterator per pin and batch */
+    private fun firstOfCode(sightings: List<Sighting>, code: String): Sighting? {
+        for (i in sightings.indices) if (sightings[i].code == code) return sightings[i]
+        return null
     }
 
     /** New Scan, or leaving the mode */
     fun clear() {
         list.clear()
         candidates.clear()
+        pitches.clear()
     }
 
-    private fun median(ps: List<Vec3>): Vec3 {
-        fun m(v: List<Double>): Double {
-            val s = v.sorted()
-            val n = s.size
-            return if (n % 2 == 1) s[n / 2] else (s[n / 2 - 1] + s[n / 2]) / 2
+    /** The per-axis median of [ps], or of those [valid] marks */
+    private fun median(ps: List<Vec3>, valid: List<Boolean>? = null): Vec3 =
+        Vec3(axisMedian(ps, valid, 0), axisMedian(ps, valid, 1), axisMedian(ps, valid, 2))
+
+    /**
+     * One axis's median, sorted in a primitive array: Arrays.sort(double[]) orders as Double.compareTo, which
+     * List<Double>.sorted() sorts by, so the same values in the same places
+     */
+    private fun axisMedian(ps: List<Vec3>, valid: List<Boolean>?, which: Int): Double {
+        val a = if (ps.size <= axis.size) axis else DoubleArray(ps.size)
+        var n = 0
+        for (i in ps.indices) {
+            if (valid != null && !valid[i]) continue
+            val p = ps[i]
+            a[n++] = when (which) {
+                0 -> p.x
+                1 -> p.y
+                else -> p.z
+            }
         }
-        return Vec3(m(ps.map { it.x }), m(ps.map { it.y }), m(ps.map { it.z }))
+        Arrays.sort(a, 0, n)
+        return if (n % 2 == 1) a[n / 2] else (a[n / 2 - 1] + a[n / 2]) / 2
     }
 }
 
@@ -331,4 +1100,13 @@ fun listedKeys(listed: Set<String>): Set<String> = listed.mapTo(HashSet()) { Ite
 fun pinColour(code: String, keys: Set<String>, items: List<ItemCount>): PinColour? {
     if (code !in keys) return null
     return if (items.any { it.countLow > 0 && ItemCode.key(it.code) == code }) PinColour.COUNTED else PinColour.LISTED
+}
+
+/** The keys of the [items] counted so far ([ItemCount.countLow] above 0): [pinColour] against them needs no key per frame */
+fun countedKeys(items: List<ItemCount>): Set<String> = items.filter { it.countLow > 0 }.mapTo(HashSet()) { ItemCode.key(it.code) }
+
+/** [pinColour] with the item list's [counted] keys ([countedKeys]): the same colour, as a code is counted exactly when its key is among them */
+fun pinColour(code: String, keys: Set<String>, counted: Set<String>): PinColour? {
+    if (code !in keys) return null
+    return if (code in counted) PinColour.COUNTED else PinColour.LISTED
 }

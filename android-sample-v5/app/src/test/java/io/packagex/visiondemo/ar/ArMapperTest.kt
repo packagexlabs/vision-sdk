@@ -16,8 +16,10 @@ import io.packagex.arcount.Tracking
 import io.packagex.arcount.Vec3
 import io.packagex.arcount.Quat
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.StringWriter
 import java.util.Collections
 import kotlin.concurrent.thread
 
@@ -197,5 +199,26 @@ class ArMapperTest {
         m.post(frame(1)); m.post(reads(1)); m.post(frame(2)); m.drain()
         assertEquals(listOf(open), seen)
         assertEquals(open, m.latestView())
+    }
+
+    @Test fun diagnosticLinesGoToTheOpenTraceInOrderAndNeverToTheCounter() {
+        val c = RecordingCounter(view = open)
+        val seen = mutableListOf<CountView>()
+        val out = StringWriter()
+        val m = ArMapper(c, onView = { seen += it })
+        var built = 0
+        m.diag { built++; "no trace yet" }
+        assertEquals(0, built)   // not even built while no trace is open
+        m.post(ArEvent.Trace(SessionRecorder(out, CaptureMetaRing(), log = {})))
+        m.drain()
+        assertTrue(m.tracing)
+        seen.clear()
+        m.post(frame(1)); m.diag { """{"t":"gl"}""" }; m.post(frame(2)); m.drain()
+        m.diag { """{"t":"arr"}""" }; m.drain()
+        assertEquals(listOf("frame 1", "frame 2"), c.calls)
+        assertEquals(listOf("frame", "gl", "frame", "arr"), out.toString().lines().filter { it.isNotBlank() }.map { it.substringAfter("\"t\":\"").substringBefore('"') })
+        assertEquals(1, seen.size)   // the batch with frames; one of lines only publishes no view
+        m.post(ArEvent.Trace(null)); m.drain()
+        assertFalse(m.tracing)
     }
 }
