@@ -157,9 +157,10 @@ internal fun noCodeCopy(mode: ScanMode, torchOn: Boolean): Triple<String, String
 
 /**
  * AR Item Count's hint line (spec 5.10): with an empty list, what to do about it; else the counter's prompt while it
- * shows one; else what is in view of the list, and the units counted so far ([CountView.items]' lower bounds).
+ * shows one; else, while the pins wait for a surface ([findingSurface]), to move slowly so ARCore finds it; else what is
+ * in view of the list, and the units counted so far ([CountView.items]' lower bounds).
  */
-internal fun retrievalHint(items: List<String>, codesInView: List<String>, view: CountView): String {
+internal fun retrievalHint(items: List<String>, codesInView: List<String>, view: CountView, findingSurface: Boolean = false): String {
     if (items.isEmpty()) {
         val n = codesInView.size
         return when (n) {
@@ -169,6 +170,7 @@ internal fun retrievalHint(items: List<String>, codesInView: List<String>, view:
         }
     }
     view.prompt?.let { return promptText(it, view.bracket) }
+    if (findingSurface) return "Move slowly to find the surface"
     if (codesInView.isEmpty()) return "Pan across the shelf"
     val n = codesInView.count { items.lists(it) }
     val counted = view.items.sumOf { it.countLow }

@@ -22,6 +22,22 @@ import java.util.concurrent.RejectedExecutionException
  */
 internal const val AR_REFRESH_AFTER_MS = 0L
 
+/**
+ * The engine's settings for AR Count: a shelf of identical units ([ScannerSettings.repeatedPayloads]) and the decoder
+ * speed settings of 0.2.20-ar (scan/study/31, steps 2a to 5), off by default in the engine: a box last read as 1D is
+ * re-read without the as-is 2D read, a never-read box over 0.5 Mpx (a whole label) takes no frame time, a begun place
+ * stops at the frame's budget (25 ms; 5x for a thorough one, the cap the host replay chose), one place a frame is kept
+ * for a new barcode of the localizer, and the detector runs every 250 ms in place of 60 while the picture stands still.
+ */
+internal fun arScannerSettings() = ScannerSettings(
+    repeatedPayloads = true,
+    skipAsItIsForKnown1D = true,
+    limitLargeUnreadBoxes = true,
+    stopPlacesAtBudget = true,
+    reserveSlotForNew = true,
+    detectLessWhenStill = true,
+)
+
 /** Runs [task] on single-thread [worker] after every task queued so far; on the caller's thread when it is shut down. */
 internal fun runBehind(worker: ExecutorService, task: () -> Unit) {
     try {
@@ -35,8 +51,8 @@ internal fun runBehind(worker: ExecutorService, task: () -> Unit) {
  * The engine worker (spec 5.8), the spike's: images of the app stream go to BarcodeScannerApp's engine
  * ([BarcodeScanner.scanAll] of the planes, the whole frame, turned upright by the camera's SENSOR_ORIENTATION) on one
  * worker thread, one at a time. An image that comes while one is decoded waits for the engine, the newest one only
- * ([LatestWins]), so a decode a little longer than a frame (4K: about 39 ms, frames every 33 ms) does not leave the
- * worker idle until the next frame. The engine runs with [ScannerSettings.repeatedPayloads] (a shelf of identical units)
+ * ([LatestWins]), so a decode longer than a frame (4K on the Memor 35, trace of 2026-10-02: 47 ms at p50, 193 at p90;
+ * frames every 33 ms) does not leave the worker idle until the next frame. The engine runs with [arScannerSettings]
  * and the counter's refresh, set before every scan ([desiredRefresh]; [AR_REFRESH_AFTER_MS] until its first view).
  * Every decoded image's reads ([readsOf]) and what it took go to the callback, empty ones too: the counter learns
  * which frames were decoded.
@@ -69,7 +85,7 @@ class BarcodeProcessor(
     init {
         worker.execute {
             try {
-                scanner = BarcodeScanner.create(context.applicationContext, ScannerSettings(repeatedPayloads = true))
+                scanner = BarcodeScanner.create(context.applicationContext, arScannerSettings())
                     .also { it.refreshAfterMs = refreshAfterMs }
             } catch (t: Throwable) {
                 Log.e(TAG, "the barcode scanner could not be made; AR Count reads no barcodes", t)
@@ -94,7 +110,7 @@ class BarcodeProcessor(
      */
     fun process(
         image: Image,
-        onReads: (timestampNs: Long, reads: List<Read>, stats: EngineStats) -> Unit,
+        onReads: (timestampNs: Long, reads: List<Read>, stats: EngineStats, tracked: List<Read>) -> Unit,
     ) {
         val d = Decode(image, onReads)
         if (closed) return d.close()
@@ -164,11 +180,11 @@ class BarcodeProcessor(
             Rect(0, 0, w, h), rotation, ts,
         )
         val scanMs = (System.nanoTime() - started) / 1e6f
-        d.onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs, intake.dropped, refresh))
+        d.onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs, intake.dropped, refresh), trackedOf(frame, rotation, w, h, ts))
     }
 
     /** An app-stream image for the engine, and where its reads go */
-    private class Decode(val image: Image, val onReads: (Long, List<Read>, EngineStats) -> Unit) : AutoCloseable {
+    private class Decode(val image: Image, val onReads: (Long, List<Read>, EngineStats, List<Read>) -> Unit) : AutoCloseable {
         override fun close() = image.close()
     }
 

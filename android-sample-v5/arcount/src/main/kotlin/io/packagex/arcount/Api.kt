@@ -237,7 +237,10 @@ interface ArCounter {
     /** AR Item Count (spec 5.10): the item list, the codes counted; called whenever it changes. Empty: nothing counted. */
     fun setItems(codes: Set<String>) {}
 
-    /** A downscaled luma copy of the app-stream frame with this timestamp, for the patch tracker (spec 5.9) */
+    /**
+     * A downscaled luma copy of the app-stream frame with this timestamp, for the patch tracker (spec 5.9); freed
+     * ([LumaImage.free]) once the counter lets it go, or left to the GC by a counter that does not
+     */
     fun onLuma(timestampNs: Long, img: LumaImage, streamPxPerLumaPx: Double) {}
 
     /** The patch tracker's counters, for the log; null when this counter has none */

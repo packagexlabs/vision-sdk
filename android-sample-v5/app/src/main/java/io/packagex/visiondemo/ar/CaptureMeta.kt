@@ -4,7 +4,8 @@ package io.packagex.visiondemo.ar
  * One capture's Camera2 result while ARCore owns the capture request, from `SharedCamera.setCaptureCallback` (spec 5.2):
  * the app's own repeating-request callback stops once ARCore resumes. [sensorTimestampNs] is the capture's
  * SENSOR_TIMESTAMP, the same number as its app-stream image's timestamp and its frame's Android camera timestamp. The
- * AE keys show whether ARCore kept the app's settings (risk R9).
+ * AE keys show whether ARCore kept the app's settings (risk R9). [focusDiopters] is LENS_FOCUS_DISTANCE (-1: not
+ * given), for focus breathing (the focal length moves with it).
  */
 data class CaptureMeta(
     val sensorTimestampNs: Long,
@@ -14,6 +15,7 @@ data class CaptureMeta(
     val aeCompensation: Int,
     val fpsRange: String,
     val afState: Int,
+    val focusDiopters: Float = -1f,
 )
 
 /** The last [capacity] captures' [CaptureMeta] (2 s at 30 fps): written on the camera thread, read on the GL and mapper threads. */

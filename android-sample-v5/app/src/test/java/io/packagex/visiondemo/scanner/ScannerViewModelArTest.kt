@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import io.packagex.arcount.CountView
 import io.packagex.arcount.ItemCount
 import io.packagex.arcount.Prompt
+import io.packagex.visiondemo.ar.OverlayRules
+import io.packagex.visiondemo.ar.PinRules
 import io.packagex.visiondemo.camera.CameraOwner
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.Secrets
@@ -312,6 +314,55 @@ class ScannerViewModelArTest {
         assertTrue(ar.tracing); assertTrue(v.state.value.prefs.arTrace)
         val stored = ScannerViewModel(cam, FakePreferences(Prefs(arTrace = true)), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeArCount())
         advanceUntilIdle(); assertTrue((stored.ar as FakeArCount).tracing)
+    }
+
+    @Test fun theBlurPreSkipFollowsTheSetting() = runTest {
+        ar.blurSkip = false   // left over from the previous ViewModel
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar)
+        advanceUntilIdle(); assertTrue(ar.blurSkip)   // on by default
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(arBlurSkip = false) }); advanceUntilIdle()
+        assertFalse(ar.blurSkip); assertFalse(v.state.value.prefs.arBlurSkip)
+        val stored = ScannerViewModel(cam, FakePreferences(Prefs(arBlurSkip = false)), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeArCount())
+        advanceUntilIdle(); assertFalse((stored.ar as FakeArCount).blurSkip)
+    }
+
+    @Test fun theOutlineRulesFollowTheSettings() = runTest {
+        ar.overlayRules = OverlayRules.IOS; ar.outlineFarSafe = true   // left over from the previous ViewModel
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar)
+        advanceUntilIdle()
+        assertEquals(OverlayRules.ANDROID, ar.overlayRules); assertFalse(ar.outlineFarSafe)   // carried, rotation only for non-EAN, by default
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(arOverlayRules = OverlayRules.IOS, arOutlineFarSafe = true) }); advanceUntilIdle()
+        assertEquals(OverlayRules.IOS, ar.overlayRules); assertTrue(ar.outlineFarSafe)
+        val stored = ScannerViewModel(cam, FakePreferences(Prefs(arOverlayRules = OverlayRules.IOS)), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeArCount())
+        advanceUntilIdle(); assertEquals(OverlayRules.IOS, (stored.ar as FakeArCount).overlayRules)
+    }
+
+    @Test fun thePinRulesFollowTheSetting() = runTest {
+        ar.pinRules = PinRules.IOS   // left over from the previous ViewModel
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar)
+        advanceUntilIdle(); assertEquals(PinRules.ANDROID, ar.pinRules)   // the nearest valid hit by default
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(arPinRules = PinRules.IOS) }); advanceUntilIdle()
+        assertEquals(PinRules.IOS, ar.pinRules); assertEquals(PinRules.IOS, v.state.value.prefs.arPinRules)
+        val stored = ScannerViewModel(cam, FakePreferences(Prefs(arPinRules = PinRules.IOS)), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeArCount())
+        advanceUntilIdle(); assertEquals(PinRules.IOS, (stored.ar as FakeArCount).pinRules)
+    }
+
+    @Test fun thePinRefinementFollowsTheSetting() = runTest {
+        ar.pinRefine = false   // left over from the previous ViewModel
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar)
+        advanceUntilIdle(); assertTrue(ar.pinRefine)   // on by default (drift plan Phase 4)
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(arPinRefine = false) }); advanceUntilIdle()
+        assertFalse(ar.pinRefine); assertFalse(v.state.value.prefs.arPinRefine)
+        val stored = ScannerViewModel(cam, FakePreferences(Prefs(arPinRefine = false)), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), FakeArCount())
+        advanceUntilIdle(); assertFalse((stored.ar as FakeArCount).pinRefine)
+    }
+
+    @Test fun theReadBoostFollowsTheSetting() = runTest {
+        ar.readBoost = false   // left over from the previous ViewModel
+        val v = ScannerViewModel(cam, FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"), ar)
+        advanceUntilIdle(); assertTrue(ar.readBoost)   // on by default (drift plan P2c)
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(arReadBoost = false) }); advanceUntilIdle()
+        assertFalse(ar.readBoost); assertFalse(v.state.value.prefs.arReadBoost)
     }
 
     @Test fun newViewModelResetsSingletonCameraState() = runTest {

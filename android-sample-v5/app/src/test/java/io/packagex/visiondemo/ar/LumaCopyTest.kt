@@ -3,6 +3,8 @@ package io.packagex.visiondemo.ar
 import io.packagex.arcount.LumaImage
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotSame
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.nio.ByteBuffer
@@ -109,6 +111,19 @@ class LumaCopyTest {
         copier.close()
         assertEquals(listOf("reads 2", "luma 1", "reads 1", "luma 3", "reads 3"), events.toList())
         assertEquals(1L, copier.dropped); assertEquals(3L, copier.frames)
+    }
+
+    /** 2026-10-08: a new 960x540 array a frame was 14 MB/s of large objects for the GC */
+    @Test fun aFreedCopysPixelsGoToTheNextCopyOnceAndAHeldOnesNever() {
+        val pool = LumaPool()
+        val src = ByteArray(64) { 40 }
+        val a = pool.downscale(src, 8, 8, 8)
+        assertNotSame(a.data, pool.downscale(src, 8, 8, 8).data) // a is held
+        a.free(); a.free()
+        val c = pool.downscale(src, 8, 8, 8)
+        assertSame(a.data, c.data)
+        assertArrayEquals(ByteArray(16) { 40 }, c.data)
+        assertNotSame(a.data, pool.downscale(src, 8, 8, 8).data) // freed twice, reused once
     }
 
     @Test fun afterCloseWaitingReadsRunAndOffersAreIgnored() {

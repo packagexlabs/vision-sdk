@@ -18,13 +18,14 @@ internal const val LUMA_ROW = 2
 
 /**
  * The 4x1 average of [rows] luma rows of [width] in [src] ([rowStride] bytes a row), the rows [LumaCopier] kept, one in
- * four: a (width / 4) x [rows] image whose every pixel is the rounded mean of 4 neighbours in its row.
+ * four: a (width / 4) x [rows] image whose every pixel is the rounded mean of 4 neighbours in its row. Written into
+ * [into] when it is that size; [onFree] gets the pixels back when the image is freed ([LumaImage.free]).
  */
-fun downscaleRows4(src: ByteArray, width: Int, rows: Int, rowStride: Int): LumaImage {
+fun downscaleRows4(src: ByteArray, width: Int, rows: Int, rowStride: Int, into: ByteArray? = null, onFree: ((ByteArray) -> Unit)? = null): LumaImage {
     val ow = width / LUMA_SCALE
     require(ow > 0 && rows > 0) { "$rows rows of $width have no 4x1 block" }
     require(rowStride >= width && src.size >= (rows - 1).toLong() * rowStride + width) { "too few bytes for $rows rows of $width, row stride $rowStride" }
-    val out = ByteArray(ow * rows)
+    val out = into?.takeIf { it.size == ow * rows } ?: ByteArray(ow * rows)
     for (oy in 0 until rows) {
         var i = oy * rowStride
         val base = oy * ow
@@ -34,7 +35,18 @@ fun downscaleRows4(src: ByteArray, width: Int, rows: Int, rowStride: Int): LumaI
             i += LUMA_SCALE
         }
     }
-    return LumaImage(ow, rows, out)
+    return LumaImage(ow, rows, out, ow, onFree)
+}
+
+/**
+ * The luma copies' pixels: [downscale] writes into a freed copy's array ([LumaImage.free]) before it makes a new one.
+ * 2026-10-08: a new 960x540 array a frame was 14 MB/s of large objects for the GC, a collection every second or two.
+ */
+internal class LumaPool {
+    private val spare = ArrayList<ByteArray>()
+
+    fun downscale(src: ByteArray, width: Int, rows: Int, rowStride: Int): LumaImage =
+        downscaleRows4(src, width, rows, rowStride, synchronized(spare) { spare.removeLastOrNull() }) { synchronized(spare) { spare.add(it) } }
 }
 
 /**
@@ -74,13 +86,14 @@ fun downscaleLuma4(src: ByteArray, width: Int, height: Int, rowStride: Int): Lum
  * [afterLuma] (engine worker) runs what it is given at once, unless the copy of that timestamp still waits or is in
  * work: then right after that copy is posted (or dropped). So the counter gets a frame's luma before its reads.
  *
- * Two buffers of a quarter of the plane's size at most (one in work, one waiting or being filled).
+ * Two buffers of a quarter of the plane's size at most (one in work, one waiting or being filled); the copies' pixels
+ * are reused once freed ([LumaPool]).
  */
 class LumaCopier internal constructor(
     private val post: (timestampNs: Long, img: LumaImage) -> Unit,
     private val downscale: (src: ByteArray, width: Int, height: Int, rowStride: Int) -> LumaImage,
 ) {
-    constructor(post: (timestampNs: Long, img: LumaImage) -> Unit) : this(post, ::downscaleRows4)
+    constructor(post: (timestampNs: Long, img: LumaImage) -> Unit) : this(post, LumaPool()::downscale)
 
     private class Slot(var bytes: ByteArray) {
         var timestampNs = 0L

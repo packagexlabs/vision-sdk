@@ -11,6 +11,7 @@ import android.hardware.camera2.CaptureResult
 import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.MeteringRectangle
 import android.media.ImageReader
+import android.net.Uri
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.HandlerThread
@@ -21,7 +22,10 @@ import com.google.ar.core.ArCoreApk
 import com.google.ar.core.CameraConfig
 import com.google.ar.core.CameraConfigFilter
 import com.google.ar.core.Config
+import com.google.ar.core.RecordingConfig
+import com.google.ar.core.RecordingStatus
 import com.google.ar.core.Session
+import com.google.ar.core.Track
 import com.google.ar.core.exceptions.FatalException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.packagex.arcount.Command
@@ -31,21 +35,37 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.EnumSet
+import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// ponytail: 3 s, from 2026-10-08: ARCore's recorder crashed (SIGSEGV, memcpy of a 640x480 frame) on the first frame of a
+// recording started 2.6 s after the last one stopped; gaps of 3.1 s and more (5 that day) did not. Raise it if one crashes
+internal const val RECORD_GAP_MS = 3_000L
+
+/** How much longer a new recording waits at [nowMs] after the last one stopped at [stoppedMs] (null: none yet); 0: it may start */
+internal fun recordWaitMs(stoppedMs: Long?, nowMs: Long): Long = if (stoppedMs == null) 0L else maxOf(0L, stoppedMs + RECORD_GAP_MS - nowMs)
+
 /**
  * The ARCore session of AR Count on the shared camera (spec 5.2), owning Camera2 while [io.packagex.visiondemo.camera.CameraOwner.Ar]
  * holds the sensor; driven by [ArSurface] (attach/detach) and the ViewModel (pause/resume, commands). The spike's
  * session, measured on the Memor 35: `Session(SHARED_CAMERA)` with a 1280x720 CPU image for tracking, BLOCKING
- * updates, AUTO focus, no depth, planes or light estimation; the app's own YUV stream for the engine (the largest the
+ * updates, AUTO focus, horizontal and vertical planes and AUTOMATIC depth where supported (the pins hit-test them), no
+ * light estimation; the app's own YUV stream for the engine (the largest the
  * camera offers of [AppStream], the next one after a failed configure) through `SharedCamera.setAppSurfaces`;
  * `openCamera` with ARCore's wrapped callbacks; TEMPLATE_RECORD with continuous AF and EIS/OIS off, no AE settings
  * (ARCore replaces them, spec 3); `Session.resume()` once the capture session is active; per-frame metadata from
  * `SharedCamera.setCaptureCallback` into [CaptureMetaRing].
+ *
+ * Measured (drift plan Phase 0): the camera's timestamp clock and lens model once per session (logged, and the head of
+ * every trace), each app-stream image's capture-to-arrival time ([ArrivalWindow], and the trace's `arr` lines), and
+ * LENS_FOCUS_DISTANCE per capture.
  *
  * Threads (spec 5.8): main (this API), camera (Camera2 callbacks, app-stream images, metadata), GL ([ArCountRenderer]),
  * engine ([BarcodeProcessor]) and mapper ([ArMapper], the single caller of the counter from [ArCounterFactory]).
@@ -70,6 +90,9 @@ class ArSessionController @Inject constructor(
     private val _seen = MutableStateFlow(emptyList<String>())
     override val seen: StateFlow<List<String>> = _seen.asStateFlow()
 
+    private val _findingSurface = MutableStateFlow(false)
+    override val findingSurface: StateFlow<Boolean> = _findingSurface.asStateFlow()
+
     /** AR Item Count's list: sent to every new counter (attach, New Scan) */
     private var items: Set<String> = emptySet()
 
@@ -83,8 +106,86 @@ class ArSessionController @Inject constructor(
         set(value) {
             if (field == value) return
             field = value
-            if (running) mapper?.post(ArEvent.Trace(if (value) SessionRecorder.open(ctx, metas) else null))
+            if (running) mapper?.post(ArEvent.Trace(if (value) SessionRecorder.open(ctx, metas, cameraLine, flags()) else null))
         }
+
+    /** Read on the camera thread for every image */
+    @Volatile
+    override var blurSkip = true
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "blur pre-skip ${if (value) "on" else "off"}")
+            field = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var overlayRules = OverlayRules.ANDROID
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "unlisted outlines $value")
+            field = value
+            renderer?.overlayRules = value
+            mapper?.diag(::flags)
+        }
+
+    override var outlineFarSafe = false
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "far-safe outline depth ${if (value) "on" else "off"}")
+            field = value
+            renderer?.outlineFarSafe = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var pinRules = PinRules.ANDROID
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "pin rules $value")
+            field = value
+            renderer?.pinRules = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var pinRefine = true
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "pin refinement ${if (value) "on" else "off"}")
+            field = value
+            renderer?.pinRefine = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read on the GL thread for every frame, through the renderer */
+    override var readBoost = true
+        set(value) {
+            if (field == value) return
+            Log.i(TAG, "read-rate boost ${if (value) "on" else "off"}")
+            field = value
+            renderer?.readBoost = value
+            mapper?.diag(::flags)
+        }
+
+    /** Read when the session resumes: from then on each run (to the next pause) is recorded ([startRecording]) */
+    override var record = false
+
+    /** When the last recording was stopped ([stopRecording]), elapsed realtime ms; null: none in this process */
+    private var recordingStoppedMs: Long? = null
+
+    /** The trace's `flags` line: at its head, and again when one of them changes, so each arm's runs can be told apart */
+    private fun flags() = flagsLine(overlayRules, outlineFarSafe, blurSkip, pinRules, pinRefine, readBoost, replaying?.name)
+
+    /** A recording to replay on the next [attach] ([replay]), and the one the attached session replays (main thread) */
+    private var pendingReplay: File? = null
+    private var replaying: File? = null
+
+    /** While the session records: the engine's batches and the list's changes for the reads track (any thread offers) */
+    @Volatile private var trackOut: TrackQueue? = null
+
+    /** The camera's clock and lens model ([camLine]), written at the head of every trace; null before a session runs */
+    @Volatile private var cameraLine: String? = null
 
     private val main = Handler(Looper.getMainLooper())
     private val cameraManager = ctx.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -102,11 +203,14 @@ class ArSessionController @Inject constructor(
     /** Images kept from the engine for predicted blur, all so far (camera thread) */
     @Volatile private var blurSkipped = 0L
 
+    /** Capture to arrival of the app stream's images (camera thread) */
+    private val arrivals = ArrivalWindow()
+
     private val haptics by lazy { Haptics(ctx) }
 
     // One attached view's session (main thread; the camera thread reads the @Volatile ones)
     private var view: GLSurfaceView? = null
-    private var renderer: ArCountRenderer? = null
+    @Volatile private var renderer: ArCountRenderer? = null
     @Volatile private var session: Session? = null
     @Volatile private var mapper: ArMapper? = null
     @Volatile private var reader: ImageReader? = null
@@ -131,19 +235,42 @@ class ArSessionController @Inject constructor(
     override fun installed(): Boolean =
         runCatching { ArCoreApk.getInstance().checkAvailability(ctx) == ArCoreApk.Availability.SUPPORTED_INSTALLED }.getOrDefault(false)
 
+    /**
+     * The next [attach] replays [path], an AR Item Count recording ([startRecording]): a session on its MP4 in place of
+     * the camera, with no app stream and no engine; the recording's reads track feeds the counter and the pins as the
+     * engine did ([ArCountRenderer.replay]), and the mode is left with a summary line (tag ArReplay) when it ends
+     */
+    fun replay(path: String) {
+        pendingReplay = File(path)
+    }
+
     override fun attach(view: GLSurfaceView) {
         detach(null)
+        val replay = pendingReplay?.also { pendingReplay = null }
+        val info = replay?.let { f ->
+            runCatching { RecordingInfo.decode(RecordingInfo.sidecarOf(f).readText()) }
+                .onFailure { Log.w(TAG, "replay of $f: no sidecar", it) }.getOrNull() ?: run {
+                main.post { _exits.tryEmit("${f.name} is not an AR Item Count recording") }
+                return
+            }
+        }
         val tick = CountTick()
         val m = ArMapper(
             counters.create(),
             onView = {
                 _count.value = it.forUi()
+                _findingSurface.value = renderer?.holdingBirths == true // on every view: it also turns off without a code read
                 if (tick.onView(it, SystemClock.uptimeMillis())) haptics.tick() // spec 5.5 Feedback
             },
             onCodes = { inView, seen -> _codesInView.value = inView; _seen.value = seen },
         )
-        m.post(ArEvent.Items(items))
-        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onScreen = { _screen.value = it }, onFatal = ::onUpdateFailed, poses = poses)
+        m.post(ArEvent.Items(info?.items ?: items))
+        val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onFatal = ::onUpdateFailed, poses = poses)
+        r.overlayRules = overlayRules
+        r.outlineFarSafe = outlineFarSafe
+        r.pinRules = pinRules
+        r.pinRefine = pinRefine
+        r.readBoost = readBoost
         luma = LumaCopier { ts, img -> m.post(ArEvent.Luma(ts, img)) }
         // The renderer must be set before the surface exists; the GL thread waits paused until ARCore runs.
         view.preserveEGLContextOnPause = true
@@ -159,10 +286,24 @@ class ArSessionController @Inject constructor(
         _screen.value = ArScreen.NONE
         _codesInView.value = emptyList()
         _seen.value = emptyList()
+        _findingSurface.value = false
+        if (replay != null && info != null) {
+            val s = createSession(replay) ?: return
+            session = s
+            replaying = replay
+            cameraLine = info.cameraLine
+            r.stream = info.stream
+            _stream.value = info.stream
+            r.replay = { summary -> main.post { replayEnded(replay, summary) } }
+            m.start()
+            start()
+            return
+        }
         val s = createSession() ?: return
         session = s
-        // Read on the engine worker before every scan: the attached mapper's, the constant once none is attached
-        engine.desiredRefresh = { mapper?.desiredRefreshMs }
+        // Read on the engine worker before every scan: 0 while the pins want every read (drift plan P2c), else the attached
+        // mapper's, the constant once none is attached
+        engine.desiredRefresh = { if (renderer?.pinsWantFullRate == true) 0 else mapper?.desiredRefreshMs }
         m.start()
         if (setUpStreams(s)) start()
     }
@@ -182,12 +323,14 @@ class ArSessionController @Inject constructor(
         poses.clear()
         renderer = null
         this.view = null
+        replaying = null
         metas.clear()
         _count.value = CountView.EMPTY
         _stream.value = null
         _screen.value = ArScreen.NONE
         _codesInView.value = emptyList()
         _seen.value = emptyList()
+        _findingSurface.value = false
     }
 
     override fun pause() {
@@ -211,6 +354,8 @@ class ArSessionController @Inject constructor(
 
     override fun setItems(codes: Set<String>) {
         items = codes
+        if (replaying != null) return // a replay counts the recording's list
+        trackOut?.offer(TrackEntry.Items(codes))
         mapper?.post(ArEvent.Items(codes))
     }
 
@@ -254,16 +399,23 @@ class ArSessionController @Inject constructor(
         }
     }
 
-    /** The configured session; null when ARCore can't make or configure one here, after saying so (the mode exits). */
-    private fun createSession(): Session? {
+    /**
+     * The configured session; null when ARCore can't make or configure one here, after saying so (the mode exits). With
+     * [playback], a session on that recording's MP4 (playback runs on no shared camera, and takes the recording's camera)
+     */
+    private fun createSession(playback: File? = null): Session? {
         var made: Session? = null
         return try {
-            val s = Session(ctx, EnumSet.of(Session.Feature.SHARED_CAMERA)).also { made = it }
-            // ARCore's CPU image is for tracking only: 1280x720 at 30 fps (spec 5.2); the engine reads the app stream.
-            val configs = s.getSupportedCameraConfigs(CameraConfigFilter(s).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30)))
-                .ifEmpty { s.getSupportedCameraConfigs(CameraConfigFilter(s)) }
-            val size = cpuImageSize(configs.map { it.imageSize.width to it.imageSize.height })
-            configs.firstOrNull { (it.imageSize.width to it.imageSize.height) == size }?.let { s.cameraConfig = it }
+            val s = (if (playback == null) Session(ctx, EnumSet.of(Session.Feature.SHARED_CAMERA)) else Session(ctx)).also { made = it }
+            if (playback != null) {
+                s.setPlaybackDatasetUri(Uri.fromFile(playback))
+            } else {
+                // ARCore's CPU image is for tracking only: 1280x720 at 30 fps (spec 5.2); the engine reads the app stream.
+                val configs = s.getSupportedCameraConfigs(CameraConfigFilter(s).setTargetFps(EnumSet.of(CameraConfig.TargetFps.TARGET_FPS_30)))
+                    .ifEmpty { s.getSupportedCameraConfigs(CameraConfigFilter(s)) }
+                val size = cpuImageSize(configs.map { it.imageSize.width to it.imageSize.height })
+                configs.firstOrNull { (it.imageSize.width to it.imageSize.height) == size }?.let { s.cameraConfig = it }
+            }
             s.configure(
                 Config(s).apply {
                     focusMode = Config.FocusMode.AUTO // FIXED left the feed soft at barcode range on the Memor 35
@@ -290,8 +442,10 @@ class ArSessionController @Inject constructor(
     private fun setUpStreams(s: Session): Boolean {
         cameraId = s.cameraConfig.cameraId
         engine.configureRotation(cameraId)
+        val chars = runCatching { cameraManager.getCameraCharacteristics(cameraId) }.getOrNull()
+        cameraLine = chars?.let { describeCamera(cameraId, it) }
         val offered = runCatching {
-            cameraManager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+            chars?.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
                 ?.getOutputSizes(ImageFormat.YUV_420_888).orEmpty().map { it.width to it.height }
         }.getOrNull().orEmpty()
         streams = AppStream.offered(offered)
@@ -303,6 +457,27 @@ class ArSessionController @Inject constructor(
         }
         useStream(streams[0])
         return true
+    }
+
+    /**
+     * Plan Phase 0: the clock of the capture timestamps (REALTIME, or the capture-to-arrival and read ages are not
+     * times) and the lens model the rays leave out (distortion; the calibrated intrinsics, in active-array pixels),
+     * logged; the trace's `cam` line.
+     */
+    private fun describeCamera(id: String, c: CameraCharacteristics): String {
+        val source = when (val v = c.get(CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE)) {
+            CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE_REALTIME -> "REALTIME"
+            CameraCharacteristics.SENSOR_INFO_TIMESTAMP_SOURCE_UNKNOWN -> "UNKNOWN"
+            else -> v.toString()
+        }
+        val distortion = c.get(CameraCharacteristics.LENS_DISTORTION)
+        val intrinsic = c.get(CameraCharacteristics.LENS_INTRINSIC_CALIBRATION)
+        val active = c.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)?.let { intArrayOf(it.left, it.top, it.right, it.bottom) }
+        val pre = c.get(CameraCharacteristics.SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE)?.let { intArrayOf(it.left, it.top, it.right, it.bottom) }
+        val line = "camera $id timestamps $source, lens distortion ${distortion?.contentToString()}, intrinsic calibration ${intrinsic?.contentToString()}, " +
+            "active array ${active?.contentToString()}, pre-correction ${pre?.contentToString()}"
+        if (source == "REALTIME") Log.i(TAG, line) else Log.w(TAG, "$line: not REALTIME, so capture-to-arrival times are not times")
+        return camLine(id, source, distortion, intrinsic, active, pre)
     }
 
     private fun useStream(stream: AppStream) {
@@ -329,6 +504,8 @@ class ArSessionController @Inject constructor(
             return
         }
         val ts = image.timestamp
+        // M5: capture to arrival here, on the camera's clock (REALTIME, setUpStreams says: then it is elapsedRealtime's)
+        val arrivalNs = SystemClock.elapsedRealtimeNanos() - ts
         // The luma copy (spec 5.8 step 1): one bulk copy of the Y plane here, the downscale on its own thread; every
         // image, blurred ones too (the patch tracker works while the camera moves)
         val l = luma
@@ -336,14 +513,20 @@ class ArSessionController @Inject constructor(
             runCatching { image.planes[0].let { y -> l.offer(ts, y.buffer, image.width, image.height, y.rowStride) } }
                 .onFailure { Log.w(TAG, "no luma copy", it) }
         }
-        // The blur pre-skip (spec 5.6): an image predicted too blurred for a decode is not handed to the engine
-        if (skipForBlur(poses.blurPx(ts, metas.exposureAt(ts)), image.width)) {
+        // The blur pre-skip (spec 5.6): an image predicted too blurred for a decode is not handed to the engine, unless
+        // it is turned off (measurement runs, so fast pans still give reads)
+        val blur = poses.blurPx(ts, metas.exposureAt(ts))
+        val skip = blurSkip && skipForBlur(blur, image.width)
+        arrivals.add(ts, arrivalNs, skip)?.let { Log.i(TAG, it) }
+        m.diag { arrLine(ts, arrivalNs, blur, skip) }
+        if (skip) {
             image.close()
             blurSkipped++
             return
         }
-        engine.process(image) { t, reads, stats ->
-            val event = ArEvent.Reads(t, reads, stats.copy(pipe = pipeCounters(l)))
+        engine.process(image) { t, reads, stats, tracked ->
+            val event = ArEvent.Reads(t, reads, stats.copy(pipe = pipeCounters(l)), tracked)
+            trackOut?.offer(TrackEntry.Reads(event, metas.at(t)))
             // After the luma copy of the same image, so the counter has the frame's pixels when its reads come
             if (l == null) m.post(event) else l.afterLuma(t) { m.post(event) }
         }
@@ -354,6 +537,10 @@ class ArSessionController @Inject constructor(
 
     private fun start() {
         val s = session ?: return
+        if (replaying != null) {
+            if (!running && !pauseWanted) resumeReplay(s)
+            return
+        }
         if (reader == null || running || opening || pauseWanted) return
         opening = true
         val gen = ++generation
@@ -416,14 +603,86 @@ class ArSessionController @Inject constructor(
         }
         // Per-frame metadata while ARCore owns the request: the app's own repeating-request callback stops after resume().
         s.sharedCamera.setCaptureCallback(metaCallback, cameraHandler)
+        if (record) startRecording(s)
         running = true
         runningSinceMs = SystemClock.elapsedRealtime()
         opening = false
         r.session = s
         r.resumed()
-        if (tracing) mapper?.post(ArEvent.Trace(SessionRecorder.open(ctx, metas)))
+        if (tracing) mapper?.post(ArEvent.Trace(SessionRecorder.open(ctx, metas, cameraLine, flags())))
         v.onResume()
         Log.i(TAG, "ARCore resumed on the shared camera, app stream ${streams.getOrNull(streamIndex)}")
+    }
+
+    /**
+     * Main thread, Settings › "AR record session": this run of the session (to the next pause, [stopRecording]) into an MP4
+     * in Android/data/<app>/files/ar-recordings, with the reads track ([READS_TRACK]) and the sidecar a replay needs
+     * ([RecordingInfo]). Shared-camera sessions record; their MP4s replay on a plain session ([replay]). A run that starts
+     * under [RECORD_GAP_MS] after the last recording stopped is not recorded.
+     */
+    private fun startRecording(s: Session) {
+        val now = SystemClock.elapsedRealtime()
+        if (recordWaitMs(recordingStoppedMs, now) > 0) {
+            Log.w(TAG, "this run is not recorded: the last recording stopped ${now - recordingStoppedMs!!} ms ago, under $RECORD_GAP_MS ms")
+            _errors.tryEmit("This run is not recorded: the last recording stopped under 3 s ago")
+            return
+        }
+        val dir = ctx.getExternalFilesDir("ar-recordings") ?: return
+        val file = File(dir, "rec-" + SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date()) + ".mp4")
+        try {
+            val track = Track(s).setId(READS_TRACK).setMimeType(READS_TRACK_MIME)
+            s.startRecording(RecordingConfig(s).setMp4DatasetFilePath(file.absolutePath).setAutoStopOnPause(true).addTrack(track))
+            RecordingInfo.sidecarOf(file).writeText(RecordingInfo(streams[streamIndex], items, cameraLine).encode())
+            val q = TrackQueue()
+            trackOut = q
+            renderer?.trackOut = q
+            Log.i(TAG, "recording the session to $file")
+        } catch (e: Exception) { // RecordingFailedException, IllegalStateException, IOException
+            Log.w(TAG, "the session is not recorded", e)
+            _errors.tryEmit("AR Item Count could not record this session")
+        }
+    }
+
+    /**
+     * Main thread: ends the run's recording, flushed to its MP4, before the session pauses or closes, rather than in
+     * ARCore's auto-stop inside the pause; the next one waits [RECORD_GAP_MS] after this ([startRecording]).
+     */
+    private fun stopRecording(s: Session) {
+        if (s.recordingStatus == RecordingStatus.NONE) return
+        try {
+            s.stopRecording()
+            Log.i(TAG, "recording stopped")
+        } catch (e: Exception) { // RecordingFailedException: an IO error ended it
+            Log.w(TAG, "the recording ended with an error", e)
+        }
+        recordingStoppedMs = SystemClock.elapsedRealtime()
+    }
+
+    /** Main thread: a replay's session runs (no camera to open); the trace is written whatever the setting */
+    private fun resumeReplay(s: Session) {
+        val v = view ?: return
+        val r = renderer ?: return
+        try {
+            s.resume()
+        } catch (e: Exception) { // PlaybackFailedException, CameraNotAvailableException
+            Log.w(TAG, "replay could not start", e)
+            main.post { _exits.tryEmit("The replay could not start") }
+            return
+        }
+        running = true
+        runningSinceMs = SystemClock.elapsedRealtime()
+        r.session = s
+        r.resumed()
+        mapper?.post(ArEvent.Trace(SessionRecorder.open(ctx, metas, cameraLine, flags())))
+        v.onResume()
+        Log.i(TAG, "ARCore replays ${replaying?.name}, its reads on the app stream ${r.stream}")
+    }
+
+    /** Main thread: ARCore played the recording to its end; its summary is logged and the mode is left (the trace flushed) */
+    private fun replayEnded(recording: File, summary: String) {
+        if (replaying != recording) return
+        Log.i(REPLAY_TAG, "${recording.name} replayed: $summary")
+        _exits.tryEmit("Replay of ${recording.name} finished")
     }
 
     /** Main thread, after a failed configure: the next smaller app stream (spec 5.2), on a camera opened again. */
@@ -477,9 +736,12 @@ class ArSessionController @Inject constructor(
         if (running) {
             running = false
             view?.onPause()
+            session?.let(::stopRecording)
             session?.pause()
             mapper?.post(ArEvent.Trace(null)) // a trace ends with every pause, flushed
         }
+        trackOut = null
+        renderer?.trackOut = null
         captureSession?.close()
         captureSession = null
         val d = device
@@ -607,6 +869,7 @@ class ArSessionController @Inject constructor(
                     aeCompensation = result.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION) ?: Int.MIN_VALUE,
                     fpsRange = result.get(CaptureResult.CONTROL_AE_TARGET_FPS_RANGE)?.toString().orEmpty(),
                     afState = result.get(CaptureResult.CONTROL_AF_STATE) ?: -1,
+                    focusDiopters = result.get(CaptureResult.LENS_FOCUS_DISTANCE) ?: -1f,
                 ),
             )
         }
@@ -614,6 +877,7 @@ class ArSessionController @Inject constructor(
 
     private companion object {
         const val TAG = "ArSession"
+        const val REPLAY_TAG = "ArReplay"
         const val RETRIES = 3
         const val RETRY_MS = 400L
 

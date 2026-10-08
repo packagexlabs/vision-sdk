@@ -140,6 +140,39 @@ class TrackingCoreTest {
         assertEquals(0, core.view().desiredRefreshMs)
     }
 
+    /** 2026-10-08: the app reuses a copy's pixels once it is freed; a new 518 KB array a frame kept the GC busy */
+    @Test
+    fun everyLumaCopyTheCoreLetsGoOfIsFreedAndNoOther() {
+        for (late in listOf(0, 5)) {
+            val core = CountingCore(hostConfig)
+            val sim = Sim(four + label(), CoreCounter(core))
+            val scene = LumaScene({ sim.symbols })
+            val pending = ArrayDeque<Pair<Long, LumaImage>>()
+            var fed = 0
+            var freed = 0
+            sim.luma = { ts, camera ->
+                val img = scene.render(ts, camera)
+                pending.addLast(ts to LumaImage(img.width, img.height, img.data, img.rowStride) { freed++ })
+                while (pending.size > late) pending.removeFirst().let { (t, i) -> fed++; core.onLuma(t, i, scene.scale) }
+            }
+            sim.run(Paths.hold(home, 2.0))
+            // in time, the ring keeps the last 8 and lets the older go; 5 frames late, every copy is dropped
+            val kept = if (late == 0) hostConfig.lumaFrames else 0
+            assertTrue(fed > 50)
+            assertEquals("$late late", fed - kept, freed)
+        }
+    }
+
+    @Test
+    fun theRingFreesTheCopyItPushesOutAndASecondCopyOfATimestamp() {
+        val freed = ArrayList<Long>()
+        fun frame(ts: Long, tag: Long = ts) = LumaFrame(ts, LumaImage(4, 4, ByteArray(16)) { freed += tag }, 4.0)
+        val ring = LumaRing(2)
+        for (f in listOf(frame(1), frame(2), frame(2, tag = -2), frame(3))) ring.add(f)
+        assertEquals(listOf(-2L, 1L), freed)
+        assertTrue(ring.at(1) == null && ring.at(2) != null && ring.at(3) != null)
+    }
+
     @Test
     fun aLumaCopyOlderThanAFrameAlreadyTrackedIsNotTracked() {
         val core = CountingCore(hostConfig)

@@ -58,6 +58,8 @@ data class ScannerUiState(
     val tags: List<PriceTag> = emptyList(),
     /** AR Item Count: the codes the AR session read within the last second ([io.packagex.visiondemo.ar.ArCount.codesInView]). */
     val codesInView: List<String> = emptyList(),
+    /** AR Item Count: listed reads wait for ARCore to find a surface ([io.packagex.visiondemo.ar.ArCount.findingSurface]). */
+    val findingSurface: Boolean = false,
     /** AR Item Count: every code the AR session read since it started or New Scan, the most recently first read first,
      *  at most 30 (the item list's "Seen" section). */
     val seen: List<String> = emptyList(),

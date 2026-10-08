@@ -29,6 +29,27 @@ class GtinTest {
     }
 
     @Test
+    fun theCheckDigitTestIsAsWithTheReversedBody() {
+        // isValid without copies (it runs per read on the GL thread) against the form it replaced
+        fun before(text: String): Boolean {
+            if (!Gtin.isGtin(text)) return false
+            val body = text.dropLast(1)
+            val sum = body.reversed().withIndex().sumOf { (i, c) -> (c - '0') * if (i % 2 == 0) 3 else 1 }
+            return (10 - sum % 10) % 10 == text.last() - '0'
+        }
+        val rnd = java.util.Random(14)
+        var valid = 0
+        repeat(40_000) {
+            val n = intArrayOf(7, 8, 11, 12, 13, 14, 15)[rnd.nextInt(7)]
+            val text = String(CharArray(n) { '0' + rnd.nextInt(10) })
+            assertEquals(text, before(text), Gtin.isValid(text))
+            if (Gtin.isValid(text)) valid++
+        }
+        assertTrue(valid > 1_000) // about a tenth of the GTIN lengths' draws
+        for (text in listOf("", "0", "4006381333931", "4006381333932", "ABCDEFGH", "1234567a", "12345670")) assertEquals(text, before(text), Gtin.isValid(text))
+    }
+
+    @Test
     fun otherPayloadsStayAsTheyAre() {
         assertEquals("LABEL-1", Gtin.normalize("LABEL-1"))
         assertEquals("1234567890", Gtin.normalize("1234567890"))
