@@ -4,6 +4,7 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import com.google.ar.core.Camera
 import com.google.ar.core.Plane
+import com.google.ar.core.Pose
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import java.nio.ByteBuffer
@@ -11,10 +12,10 @@ import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
 /**
- * ARCore's planes over the camera picture, to see whether ARCore has found the surface the labels lie on (a pin born
- * before it takes a default depth): a clear white veil and a white outline, whatever the plane's orientation, so it reads
- * apart from the green pins. The polygons are read every [REFRESH_FRAMES] frames, as world points: Plane.getPolygon and getCenterPose
- * allocate, and a plane changes slowly. GL thread only.
+ * The surface ARCore found under the view, over the camera picture, to see whether ARCore has found the surface the
+ * labels lie on (a pin born before it takes a default depth): one plane ([refresh]), a clear white veil and a white
+ * outline, so it reads apart from the green pins. It is chosen and its polygon read every [REFRESH_FRAMES] frames, as
+ * world points: Plane.getPolygon and getCenterPose allocate, and a plane changes slowly. GL thread only.
  */
 class PlaneGlRenderer {
     private var program = 0
@@ -66,7 +67,7 @@ class PlaneGlRenderer {
             colors.clear()
             frames = 0
         }
-        if (frames++ % REFRESH_FRAMES == 0) refresh(session)
+        if (frames++ % REFRESH_FRAMES == 0 && camera.trackingState == TrackingState.TRACKING) refresh(session, camera)
         if (planes.isEmpty() || camera.trackingState != TrackingState.TRACKING) return
         camera.getViewMatrix(view, 0)
         camera.getProjectionMatrix(proj, 0, NEAR_M, FAR_M)
@@ -97,29 +98,63 @@ class PlaneGlRenderer {
         GLES20.glDisable(GLES20.GL_BLEND)
     }
 
-    /** The tracked planes no other plane took over, and their polygons turned to world points */
-    private fun refresh(session: Session) {
+    /**
+     * The one plane worth showing, its polygon turned to world points: the upward-facing plane the centre of the view
+     * looks at (the nearest, when the ray meets several), else the largest upward-facing one. Drawing every plane ARCore
+     * keeps stacked their veils into a fog (a table found at a few heights, the sheet, the floor).
+     */
+    private fun refresh(session: Session, camera: Camera) {
         planes.clear()
         polygons.clear()
         colors.clear()
+        val eye = camera.pose
+        val back = eye.zAxis // the camera looks along -z
+        val dx = -back[0]
+        val dy = -back[1]
+        val dz = -back[2]
+        var aimed: Plane? = null
+        var aimedAt = Float.MAX_VALUE
+        var largest: Plane? = null
+        var largestArea = 0f
         for (plane in session.getAllTrackables(Plane::class.java)) {
             if (plane.trackingState != TrackingState.TRACKING || plane.subsumedBy != null) continue
-            val local = plane.polygon // x, z pairs in the plane's frame
-            val n = local.limit() / 2
-            if (n < 3) continue
-            plane.centerPose.toMatrix(centre, 0)
-            val world = FloatArray(n * 3)
-            for (k in 0 until n) {
-                val x = local.get(2 * k)
-                val z = local.get(2 * k + 1)
-                world[3 * k] = centre[0] * x + centre[8] * z + centre[12]
-                world[3 * k + 1] = centre[1] * x + centre[9] * z + centre[13]
-                world[3 * k + 2] = centre[2] * x + centre[10] * z + centre[14]
+            if (plane.type != Plane.Type.HORIZONTAL_UPWARD_FACING) continue
+            val area = plane.extentX * plane.extentZ
+            if (area > largestArea) {
+                largestArea = area
+                largest = plane
             }
-            planes += plane
-            polygons += world
-            colors += WHITE
+            // Where the view's centre ray meets the plane: eye + s * d, with n . (eye + s * d - centre) = 0
+            val c = plane.centerPose
+            val n = c.yAxis
+            val nd = n[0] * dx + n[1] * dy + n[2] * dz
+            if (nd > -1e-3f) continue // the view runs along the plane, or meets it from below
+            val s = (n[0] * (c.tx() - eye.tx()) + n[1] * (c.ty() - eye.ty()) + n[2] * (c.tz() - eye.tz())) / nd
+            if (s <= 0f || s >= aimedAt) continue
+            if (!plane.isPoseInPolygon(Pose.makeTranslation(eye.tx() + s * dx, eye.ty() + s * dy, eye.tz() + s * dz))) continue
+            aimedAt = s
+            aimed = plane
         }
+        (aimed ?: largest)?.let { show(it) }
+    }
+
+    /** [plane]'s polygon as world points, drawn until the next refresh */
+    private fun show(plane: Plane) {
+        val local = plane.polygon // x, z pairs in the plane's frame
+        val n = local.limit() / 2
+        if (n < 3) return
+        plane.centerPose.toMatrix(centre, 0)
+        val world = FloatArray(n * 3)
+        for (k in 0 until n) {
+            val x = local.get(2 * k)
+            val z = local.get(2 * k + 1)
+            world[3 * k] = centre[0] * x + centre[8] * z + centre[12]
+            world[3 * k + 1] = centre[1] * x + centre[9] * z + centre[13]
+            world[3 * k + 2] = centre[2] * x + centre[10] * z + centre[14]
+        }
+        planes += plane
+        polygons += world
+        colors += WHITE
     }
 
     private fun compile(type: Int, source: String): Int {

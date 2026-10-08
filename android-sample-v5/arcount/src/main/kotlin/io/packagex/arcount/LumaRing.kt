@@ -10,7 +10,10 @@ class LumaFrame(val timestampNs: Long, val img: LumaImage, val scale: Double) {
     fun toStream(lumaPx: Double) = lumaPx * scale + (scale - 1) / 2
 }
 
-/** The last [capacity] luma frames, by timestamp: a read's patch is captured from the frame of its own capture */
+/**
+ * The last [capacity] luma frames, by timestamp: a read's patch is captured from the frame of its own capture. A frame
+ * it lets go of (pushed out, or a second one of a timestamp) is freed ([LumaImage.free]).
+ */
 class LumaRing(private val capacity: Int = 8) {
     private val frames = ArrayDeque<LumaFrame>()
 
@@ -20,10 +23,10 @@ class LumaRing(private val capacity: Int = 8) {
 
     fun add(frame: LumaFrame) {
         fed = true
-        if (frames.any { it.timestampNs == frame.timestampNs }) return
+        if (frames.any { it.timestampNs == frame.timestampNs }) return frame.img.free()
         val at = frames.indexOfFirst { it.timestampNs > frame.timestampNs }
         if (at < 0) frames.addLast(frame) else frames.add(at, frame)
-        while (frames.size > capacity) frames.removeFirst()
+        while (frames.size > capacity) frames.removeFirst().img.free()
     }
 
     /** The frame captured at [timestampNs]; null when it never came or is gone */

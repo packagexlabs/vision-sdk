@@ -111,7 +111,8 @@ class ArMapperTest {
         assertEquals(2L, m.droppedReads)
     }
 
-    private fun luma(ts: Long) = ArEvent.Luma(ts, LumaImage(2, 2, ByteArray(4)))
+    private val freedLumas = ArrayList<Long>()
+    private fun luma(ts: Long) = ArEvent.Luma(ts, LumaImage(2, 2, ByteArray(4)) { freedLumas += ts })
 
     @Test fun aLumaCopyReachesTheCounterInOrderAtFourStreamPixelsAPixelAndOnlyTwoWait() {
         val c = RecordingCounter()
@@ -124,6 +125,7 @@ class ArMapperTest {
         m.drain()
         assertEquals(listOf("luma 4 x4.0", "luma 5 x4.0", "reads 5"), c.calls)
         assertEquals(2L, m.droppedLumas)
+        assertEquals(listOf(2L, 3L), freedLumas) // the dropped ones go back to the copier's pool; the counter frees the rest
     }
 
     @Test fun theRefreshIsTheNewestViewsAfterEachEventAndNullBeforeAny() {

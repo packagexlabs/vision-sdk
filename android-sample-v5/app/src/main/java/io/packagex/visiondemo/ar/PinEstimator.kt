@@ -141,6 +141,16 @@ class PinEstimator {
     var sigmaZ = Double.NaN
         private set
 
+    /**
+     * The plane the pin was born on ([lockToPlane]): a point and its unit normal, in this frame, as a ray's six numbers
+     * so [moveBy] carries it as one. While on, every solve is put back on it. Kept through a re-init.
+     */
+    private val plane = DoubleArray(6)
+
+    /** Whether the point is held on [plane] */
+    var onPlane = false
+        private set
+
     /** Whether a prior was set ([start]): until then nothing is solved */
     val started: Boolean get() = priorSource != PriorSource.NONE
 
@@ -153,8 +163,9 @@ class PinEstimator {
     private var baseline = 0.0
     private var baselineAtGate = 0.0
 
-    // Scratch: every ray kept, the normal equations and their inverse, the rotation of a move
+    // Scratch: every ray kept, the normal equations and their inverse, the rotation of a move, a solve put on the plane
     private val all = DoubleArray((PIN_NEW_RAYS + PIN_KEY_RAYS) * 6)
+    private val onPlaneScratch = DoubleArray(3)
     private val a = DoubleArray(9)
     private val b = DoubleArray(3)
     private val inv = DoubleArray(9)
@@ -202,6 +213,22 @@ class PinEstimator {
         version++
     }
 
+    /**
+     * Holds the point on the plane through ([px], [py], [pz]) with normal ([nx], [ny], [nz]) from now on: a solve may move
+     * it within the plane, not off it ([putOnPlane]). On 2026-10-07 (15:03) two pins born on the table slid 10-17 cm
+     * below it within 0.5 s, unverified, and stayed as counted ghosts, where their rays met the table 2.6 and 2.8 cm from
+     * their labels.
+     */
+    fun lockToPlane(px: Double, py: Double, pz: Double, nx: Double, ny: Double, nz: Double) {
+        val n = sqrt(nx * nx + ny * ny + nz * nz)
+        if (!(n > 0.0)) return
+        write(plane, 0, px, py, pz, nx / n, ny / n, nz / n)
+        onPlane = true
+        val m = gather()
+        putOnPlane(m)
+        version++
+    }
+
     /** A good claim's ray (rule 1), its read [widthPx] wide (0 unknown): kept, and the point solved again; a bad run ends */
     fun add(ox: Double, oy: Double, oz: Double, dx: Double, dy: Double, dz: Double, widthPx: Double = 0.0) {
         newestWidthPx = widthPx
@@ -245,6 +272,7 @@ class PinEstimator {
         for (i in 0 until rayCount) moveRay(rays, 6 * ((first + i) % PIN_NEW_RAYS), tx, ty, tz)
         for (i in 0 until keyCount) moveRay(keys, 6 * i, tx, ty, tz)
         for (i in 0 until badInRow) moveRay(bad, 6 * i, tx, ty, tz)
+        if (onPlane) moveRay(plane, 0, tx, ty, tz)
         movePoint(prior, 0, tx, ty, tz)
         movePoint(point, 0, tx, ty, tz)
         // The prior's information turns with the frame: R · info · Rᵀ
@@ -366,11 +394,56 @@ class PinEstimator {
                 if (widthM == 0.0 && newestWidthPx > 0.0) widthM = newestWidthPx * rangeOnNewest(m, x0, x1, x2) * sigma / PIN_SIGMA_PX
             }
         }
+        if (onPlane) {
+            onPlaneScratch[0] = x0
+            onPlaneScratch[1] = x1
+            onPlaneScratch[2] = x2
+            toPlane(m, onPlaneScratch)
+            x0 = onPlaneScratch[0]
+            x1 = onPlaneScratch[1]
+            x2 = onPlaneScratch[2]
+        }
         if (m > 0 && !acceptable(m, x0, x1, x2)) return
         point[0] = x0
         point[1] = x1
         point[2] = x2
         version++
+    }
+
+    /** [lockToPlane]'s first step: the current point onto the plane, as a solve would put it */
+    private fun putOnPlane(m: Int) {
+        toPlane(m, point)
+    }
+
+    /**
+     * [p] (x, y, z at 0) onto [plane]: along the line from the newest of [m] gathered rays' origin through it, so it keeps
+     * its place in that image and takes the plane's depth there; straight down onto it when that line runs along the
+     * plane, meets it behind the origin, or there is no ray yet
+     */
+    private fun toPlane(m: Int, p: DoubleArray) {
+        val nx = plane[3]
+        val ny = plane[4]
+        val nz = plane[5]
+        val off = (p[0] - plane[0]) * nx + (p[1] - plane[1]) * ny + (p[2] - plane[2]) * nz
+        if (m > 0) {
+            val o = 6 * (m - 1)
+            val vx = p[0] - all[o]
+            val vy = p[1] - all[o + 1]
+            val vz = p[2] - all[o + 2]
+            val along = vx * nx + vy * ny + vz * nz
+            if (abs(along) > 1e-9) {
+                val s = ((plane[0] - all[o]) * nx + (plane[1] - all[o + 1]) * ny + (plane[2] - all[o + 2]) * nz) / along
+                if (s > 0.0 && s.isFinite()) {
+                    p[0] = all[o] + s * vx
+                    p[1] = all[o + 1] + s * vy
+                    p[2] = all[o + 2] + s * vz
+                    return
+                }
+            }
+        }
+        p[0] -= off * nx
+        p[1] -= off * ny
+        p[2] -= off * nz
     }
 
     /** Rule 1's guard: [m] rays' mean range from (x0, x1, x2) within [PIN_SOLVE_MIN_M]..[PIN_SOLVE_MAX_M], and in front of each */

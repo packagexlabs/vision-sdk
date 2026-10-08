@@ -374,6 +374,23 @@ class PinBookTest {
         }
     }
 
+    @Test fun aReadOnTheTableJoinsNoCandidateOnTheFloorBehindIt() {
+        // 2026-10-08 12:17: two reads of a UNIT-T got points on the floor 1.07 m away (a weak depth point agreed with it),
+        // then a read of it on the table at 0.24 m joined them on the same line of sight, and the median bore the pin on the
+        // floor. Rule 5 now joins only points within PIN_SIZE_RATIO of each other's depth along the ray
+        val table = Vec3(0.02, -0.03, -0.24)
+        val floor = table * (1.07 / table.norm())
+        val b = PinBook()
+        b.see(seen("T", table, from = Vec3.ZERO, hit = floor), 0)
+        b.see(seen("T", table, from = Vec3.ZERO, hit = floor), 33 * ms)
+        b.see(seen("T", table, from = Vec3.ZERO, hit = table), 66 * ms)
+        assertTrue(b.pins.isEmpty())
+        assertEquals(2, b.candidateCount)
+        b.see(seen("T", table, from = Vec3.ZERO, hit = table), 99 * ms)
+        b.see(seen("T", table, from = Vec3.ZERO, hit = table), 132 * ms)
+        assertEquals(table.norm(), b.pins.single().pose.t.norm(), 1e-9) // on the table, from its own three reads
+    }
+
     @Test fun aPinBornMostlyOnGuessesIsMarkedAndKnowsItsLabelsWidth() {
         val at = Vec3(0.0, 0.0, -0.4)
         val b = PinBook()
@@ -452,6 +469,228 @@ class PinBookTest {
         assertEquals(listOf(0.112), retiredWith(units, ghost, camera, units.drop(1).map { boxAt(it, camera) }))
     }
 
+    @Test fun aCountedPinTakesTheBoxBeforeAGhostNearerItsCentre() {
+        // 15:03: a never-claimed UNIT-T ghost beside a counted unit's pin outlived the run, kept by the unit's box. Here a
+        // label and a ghost 1.8 cm aside, born together; the label is then read every batch (counted from its second
+        // claim) and the engine's box over it lies 1.2 cm toward the ghost, so the ghost is nearer its centre: the box
+        // now goes to the counted pin, and the ghost retires
+        val label = Vec3(0.0, 0.0, -0.4)
+        val ghost = Vec3(0.018, 0.0, -0.4)
+        val camera = Vec3(0.009, 0.0, 0.0)
+        assertEquals(listOf(ghost.x), retiredWith(listOf(label), ghost, camera, listOf(boxAt(Vec3(0.012, 0.0, -0.4), camera))))
+    }
+
+    @Test fun aLongLabelsFlatReadsAreItsOwnButAScanLineAmongWideReadsClaimsNothing() {
+        // 11:53: PX-0001-2026-ARCOUNT reads 0.15-0.20 as tall as wide every time, and a fixed 0.2 called each one thin: no
+        // pin all run. Thin is now against its own code's reads
+        val at = Vec3(0.0, 0.0, -0.4)
+        val origin = Vec3(0.0, 0.0, 0.0)
+        val long = PinBook()
+        repeat(PIN_CONFIRM_COUNT) { long.see(seenSized("PX", at, origin, 500.0, 90.0), it * 33 * ms) }
+        assertEquals(1, long.pins.size)
+        // 12:34: UNIT-T reads 0.37 tall; three scan-line ones (0.10) landing 1.7 cm aside re-initialised its pin there, between
+        // two units. A read 0.15 tall (over the 0.12 floor, under half its code's 0.37) now claims nothing and moves nothing
+        val b = PinBook()
+        repeat(6) { b.see(seenSized("T", at, origin, 200.0, 74.0), it * 33 * ms) }
+        val pin = b.pins.single()
+        val claims = pin.claims
+        val aside = Vec3(0.017, 0.0, -0.4)
+        repeat(PIN_REINIT_BAD + 2) { b.see(seenSized("T", aside, Vec3(0.017, 0.0, 0.0), 200.0, 30.0), (300 + it * 33) * ms) }
+        assertEquals(claims, pin.claims)
+        assertEquals(0.0, pin.position.x, 0.002)
+        assertEquals(listOf(pin), b.pins)
+    }
+
+    @Test fun aSingleUnitsPinAMapCorrectionLeftBehindGoesForItsNewPin() {
+        // 11:53: tracking was lost for 1.1 s and ARCore came back 16 cm off; PX-0001's counted pin stayed 22 cm from its
+        // label, out of view, and its new pin was born on the label. Here a counted pin, a map correction after its last
+        // good claim, then its label read 28 cm off it, the old pin out of view: the new pin is born and the old one goes.
+        // With no map correction both stay (in view and unread, it stays too: aCountedPinStaysAfterAMapCorrection...)
+        for (corrected in listOf(true, false)) {
+            val old = Vec3(0.0, 0.0, -0.4)
+            val (b, pin) = bookWithPin("A", old)
+            for (n in 1..PIN_COUNTED_CLAIMS) b.see(seen("A", old), (100L + 33 * n) * ms)
+            assertTrue(pin.goodClaims >= PIN_COUNTED_CLAIMS)
+            if (corrected) b.mapMovedNs = 500 * ms
+            val label = Vec3(0.28, 0.0, -0.4)
+            repeat(PIN_CONFIRM_COUNT) { b.see(seen("A", label), (1_200 + it * 33) * ms) }
+            val xs = b.pins.map { it.position.x }.sorted()
+            if (corrected) assertEquals(1, xs.size) else assertEquals(2, xs.size)
+            assertEquals(0.28, xs.last(), 0.002)
+        }
+    }
+
+    /** [seen], its quad [w] x [h] px */
+    private fun seenSized(code: String, target: Vec3, from: Vec3, w: Double, h: Double): Sighting {
+        val camera = Pose(from, Quat.IDENTITY)
+        val (u, v) = k.project(camera.inverse().apply(target))!!
+        val corners = listOf(u - w / 2, v - h / 2, u + w / 2, v - h / 2, u + w / 2, v + h / 2, u - w / 2, v + h / 2)
+        val capture = PoseRecord(0, camera, null, Tracking.TRACKING, null, k)
+        return sightingOf(Read(0, code, corners, 1), capture, target, Quat.IDENTITY, Ray(from, (target - from).unit()), 104.0).copy(code = code)
+    }
+
+    @Test fun thinReadsBirthNoPinAndTeachNoPitch() {
+        // 15:03: UNIT-T scan-line decodes (quads 172 x 3-35 px) landed 1.1-1.6 cm off every unit and bore two ghosts
+        val at = Vec3(0.0, 0.0, -0.4)
+        val from = Vec3(0.0, 0.0, 0.0)
+        val thin = PinBook()
+        repeat(PIN_CONFIRM_COUNT) { thin.see(seenSized("A", at, from, 200.0, 20.0), it * 33 * ms) }
+        assertTrue(thin.pins.isEmpty())
+        assertEquals(0, thin.candidateCount)
+        val wide = PinBook()
+        repeat(PIN_CONFIRM_COUNT) { wide.see(seenSized("A", at, from, 200.0, 50.0), it * 33 * ms) }
+        assertEquals(1, wide.pins.size)
+        // One image reading a unit and, 1.4 cm aside, a thin read of it: no pitch; two wide reads 8 cm apart: 8 cm
+        val mid = Vec3(0.04, 0.0, 0.0)
+        val p = PinBook()
+        p.place(listOf(seenSized("A", at, mid, 200.0, 100.0), seenSized("A", Vec3(0.014, 0.0, -0.4), mid, 200.0, 20.0)), 0, 0, true, anchor = yes)
+        assertNull(p.pitchOf("A"))
+        p.place(listOf(seenSized("A", at, mid, 200.0, 100.0), seenSized("A", Vec3(0.08, 0.0, -0.4), mid, 200.0, 100.0)), 33 * ms, 33 * ms, true, anchor = yes)
+        assertEquals(0.08, p.pitchOf("A")!!, 0.001)
+    }
+
+    @Test fun onceThePitchIsKnownNoPinIsBornWithinHalfOfItOfOneOfItsCode() {
+        // 15:03, UNIT-C (12 cm pitch): reads 1.9 cm off a unit's pin were voided as a neighbour's (rule 3) and bore a
+        // ghost. Here: the pitch learned at 12 cm, then reads 2 cm off the pin within a second of its last good claim,
+        // each voided and fed to the candidates: no pin is born there. Reads of the next unit, 12 cm on, bear its pin.
+        val unit = Vec3(0.0, 0.0, -0.4)
+        val (b, pin) = bookWithPin("A", unit)
+        val mid = Vec3(0.06, 0.0, 0.0)
+        b.place(listOf(seen("A", unit, mid), seen("A", Vec3(0.12, 0.0, -0.4), mid)), 100 * ms, 100 * ms, true, anchor = yes)
+        assertEquals(0.12, b.pitchOf("A")!!, 0.001)
+        val off = Vec3(0.02, 0.0, -0.4)
+        var t = 133L
+        repeat(PIN_CONFIRM_COUNT + 2) {
+            b.see(seen("A", unit), t * ms) // a good claim, so the next read is voided
+            b.see(seen("A", off, Vec3(0.02, 0.0, 0.0)), (t + 16) * ms)
+            t += 33
+        }
+        assertEquals(listOf(pin), b.pins)
+        repeat(PIN_CONFIRM_COUNT) { b.see(seen("A", Vec3(0.12, 0.0, -0.4)), (t + it * 33) * ms) }
+        assertEquals(1, b.pins.count { (it.position - Vec3(0.12, 0.0, -0.4)).norm() < 0.01 })
+    }
+
+    @Test fun aReadNearAPinInItsImageBearsNoPinWhateverItsDepth() {
+        // Device replays of 15:54's recording: ARCore put the table at 2-4 heights in one replay, and reads of labelled
+        // units, voided off their pins, bore second pins on the lower table, 6 cm from them in the world. Here the pitch
+        // learned at 4.5 cm, then reads 2 cm off the pin in the image (voided, within a second of its last good claim)
+        // whose hits lie 6 cm farther along their rays: no pin is born there. The next unit, one pitch on, read with
+        // the same 6 cm deeper hits, bears its pin.
+        val unit = Vec3(0.0, 0.0, -0.4)
+        val (b, pin) = bookWithPin("A", unit)
+        val mid = Vec3(0.0225, 0.0, 0.0)
+        b.place(listOf(seen("A", unit, mid), seen("A", Vec3(0.045, 0.0, -0.4), mid)), 100 * ms, 100 * ms, true, anchor = yes)
+        assertEquals(0.045, b.pitchOf("A")!!, 0.001)
+        val from = Vec3(0.0, 0.0, 0.0)
+        fun deeper(target: Vec3) = seen("A", target, from, hit = target + (target - from).unit() * 0.06)
+        var t = 133L
+        repeat(PIN_CONFIRM_COUNT + 2) {
+            b.see(seen("A", unit, from), t * ms) // a good claim, so the next read is voided
+            b.see(deeper(Vec3(0.02, 0.0, -0.4)), (t + 16) * ms)
+            t += 33
+        }
+        assertEquals(listOf(pin), b.pins)
+        val next = Vec3(0.045, 0.0, -0.4)
+        repeat(PIN_CONFIRM_COUNT) { b.see(deeper(next), (t + it * 33) * ms) }
+        assertEquals(2, b.pins.size)
+    }
+
+    @Test fun aPinBornOnAPlaneStaysOnItWhileItsReadsPullItBelow() {
+        // 15:03: two UNIT-C pins born on the table slid 10-17 cm below it within 0.5 s and stayed as counted ghosts. Here
+        // a label on a table 0.1 m below the camera's height, its pin born from plane hits (normal up), then reads from a
+        // 2 cm wander whose rays meet 15 cm farther along, below the table: the pin stays on the table; born off a plane,
+        // the same reads take it down
+        val label = Vec3(0.0, -0.1, -0.4)
+        val below = label + label.unit() * 0.15
+        for (plane in listOf(true, false)) {
+            val b = PinBook()
+            repeat(PIN_CONFIRM_COUNT) { b.see(seen("A", label, Vec3(0.0, 0.0, 0.0)).copy(onPlane = plane), it * 33 * ms) }
+            val pin = b.pins.single()
+            assertEquals(plane, pin.bornOnPlane)
+            for (i in 0..40) {
+                val from = Vec3(0.02 * sin(i * 0.4), 0.0, 0.0)
+                b.see(seen("A", below, from), (200L + 100 * i) * ms)
+            }
+            if (plane) assertEquals(label.y, pin.position.y, 1e-6) else assertTrue("${pin.position}", pin.position.y < label.y - 0.03)
+        }
+    }
+
+    @Test fun aPinOnAPlaneFollowsTheHeightARCoreReEstimatesForIt() {
+        // The replays of 15:54's recording: ARCore moved the table from y -0.19 to -0.117 and the pins held at -0.19 landed
+        // 172-359 px off their units, where new pins were born at the new height. A pin born on a table 0.1 m below the
+        // camera at the origin; the table re-estimated 6 cm higher: the pin moves onto it along its newest ray (keeping its
+        // place in that image) and is held there; under PIN_PLANE_FOLLOW_M it stays; a pin born off a plane never follows
+        val label = Vec3(0.0, -0.1, -0.4)
+        val up = Vec3(0.0, 1.0, 0.0)
+        val b = PinBook()
+        repeat(PIN_CONFIRM_COUNT) { b.see(seen("A", label, Vec3(0.0, 0.0, 0.0)).copy(onPlane = true), it * 33 * ms) }
+        val pin = b.pins.single()
+        assertFalse(pin.followPlane(Vec3(0.3, -0.095, -0.2), up))
+        assertEquals(label.y, pin.position.y, 1e-9)
+        assertTrue(pin.followPlane(Vec3(0.3, -0.04, -0.2), up))
+        val p = pin.position
+        assertEquals(-0.04, p.y, 1e-9)
+        val was = label.unit()
+        val now = p.unit()
+        assertEquals(was.x, now.x, 1e-9); assertEquals(was.y, now.y, 1e-9); assertEquals(was.z, now.z, 1e-9)
+        // Held on the new plane: reads whose rays run below it keep it there
+        val below = p + p.unit() * 0.15
+        for (i in 0..20) b.see(seen("A", below, Vec3(0.02 * sin(i * 0.4), 0.0, 0.0)), (200L + 100 * i) * ms)
+        assertEquals(-0.04, pin.position.y, 1e-6)
+        val off = PinBook()
+        repeat(PIN_CONFIRM_COUNT) { off.see(seen("A", label, Vec3(0.0, 0.0, 0.0)), it * 33 * ms) }
+        assertFalse(off.pins.single().followPlane(Vec3(0.3, -0.04, -0.2), up))
+    }
+
+    @Test fun birthsWaitForARealSurfaceUntilAPlaneOrTheTimeout() {
+        // 14:07 and 14:10: no plane, and every pin born 2-4 s after tracking began at the default depth or the nominal
+        // width. Held while there is no surface; born on the first real (plane) hits; with no plane at all, the old
+        // births return GATE_TIMEOUT_NS after the first tracked frame
+        val at = Vec3(0.0, 0.0, -0.4)
+        val b = PinBook()
+        val g = BirthGate()
+        var t = 0L
+        fun frame(plane: Boolean = false) {
+            g.frame(t * ms, true, plane)
+            b.birthsNeedSurface = g.needsSurface
+        }
+        repeat(PIN_CONFIRM_COUNT + 2) {
+            frame()
+            b.see(seen("A", at).copy(source = HitSource.DEFAULT), t * ms)
+            t += 100
+        }
+        assertTrue(b.pins.isEmpty())
+        assertEquals(PIN_CONFIRM_COUNT + 2, b.held)
+        assertEquals(0, b.candidateCount)
+        frame(plane = true)
+        assertEquals(BirthGate.State.SURFACE, g.state)
+        frame()
+        b.see(seen("A", at).copy(source = HitSource.WIDTH), t * ms) // still no surface's: held
+        assertEquals(PIN_CONFIRM_COUNT + 3, b.held)
+        repeat(PIN_CONFIRM_COUNT) {
+            t += 33
+            frame()
+            b.see(seen("A", at).copy(onPlane = true), t * ms)
+        }
+        assertEquals(1, b.pins.size)
+        // No plane ever: held until the timeout, then the default-depth reads make a pin
+        val c = PinBook()
+        val h = BirthGate()
+        val timeoutMs = GATE_TIMEOUT_NS / 1_000_000
+        for (s in listOf(0L, timeoutMs - 100, timeoutMs, timeoutMs + 33, timeoutMs + 66)) {
+            h.frame(s * ms, true, false)
+            c.birthsNeedSurface = h.needsSurface
+            c.see(seen("A", at).copy(source = HitSource.DEFAULT), s * ms)
+        }
+        assertEquals(BirthGate.State.FALLBACK, h.state)
+        assertEquals(2, c.held)
+        assertEquals(1, c.pins.size)
+        // The gate is the Android rules': iOS births are as they were
+        val ios = PinBook().also { it.rules = PinRules.IOS; it.birthsNeedSurface = true }
+        repeat(PIN_CONFIRM_COUNT) { ios.see(seen("A", at).copy(source = HitSource.DEFAULT), it * 33 * ms) }
+        assertEquals(1, ios.pins.size)
+    }
+
     @Test fun missesSpreadBeyondTheWindowDoNotAddUp() {
         // As aPinThatKeepsMissingReadsOfItsCodeInViewRetires (6 misses within 2.1 s: retired), but the twin is read every
         // 1.3 s: 6 misses take 6.5 s, beyond PIN_RETIRE_WINDOW_NS, so the run keeps restarting and the pin stays
@@ -490,6 +729,27 @@ class PinBookTest {
         for (t in 1_100L..3_500L step 300) assertTrue("at $t", b.see(seen("A", Vec3(0.10, 0.0, -0.4), camera), t * ms).retired.isEmpty())
         assertTrue(pin in b.pins)
         assertTrue(pin.misses >= PIN_RETIRE_BATCHES)
+    }
+
+    @Test fun aCountedPinIsNotTakenOverByItsNeighbouringUnitsOlderPin() {
+        // 15:39: EAN pin 6 (86 claims) retired at 28.5 s for pin 7, its neighbour one pitch (6 cm) away, born 0.2 s after
+        // it and long before its last good claim; no EAN pin was born after it and EAN ended 2 of 3. Only a pin born
+        // since the last good claim, within half a pitch of where its label's reads now land, takes its place (UNIT-T
+        // pins 9, 10 and 15 went for pins born at 26.3 s, 1.0-1.3 cm off, after their last claims at 25.6-26.2 s)
+        val pitch = 0.06
+        val counted = Pin(6, "02000000000107", Pose.IDENTITY, bornNs = 10_200 * ms).also { it.lastGoodNs = 26_000 * ms }
+        val neighbour = Pin(7, "02000000000107", Pose.IDENTITY, bornNs = 10_400 * ms)
+        val radius = takeOverRadius(pitch, widthM = 0.0)
+        assertEquals(0.03, radius, 1e-12)
+        assertFalse(takesOver(neighbour, counted, lateralM = 0.058, radius = radius))
+        assertFalse(takesOver(neighbour, counted, lateralM = 0.005, radius = radius)) // born before its last claim: a neighbour
+        val replacement = Pin(20, "02000000000107", Pose.IDENTITY, bornNs = 26_300 * ms)
+        assertTrue(takesOver(replacement, counted, lateralM = 0.013, radius = radius))
+        assertFalse(takesOver(replacement, counted, lateralM = 0.058, radius = radius)) // one pitch off: the next unit
+        assertFalse(takesOver(Pin(21, "UNIT-T", Pose.IDENTITY, bornNs = 26_300 * ms), counted, lateralM = 0.0, radius = radius))
+        // No pitch learned yet: the label's width, else the merge radius
+        assertEquals(0.035, takeOverRadius(null, widthM = 0.035), 1e-12)
+        assertEquals(PIN_MERGE_M, takeOverRadius(null, widthM = 0.0), 1e-12)
     }
 
     @Test fun aMissRunRestartsAfterItsCodeWentUnreadLongerThanTheRetireTime() {

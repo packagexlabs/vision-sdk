@@ -30,6 +30,9 @@ class ItemCountRulesTest {
         assertEquals("Slow down", retrievalHint(items, listOf("A"), counts.copy(prompt = Prompt.SLOW_DOWN)))
         assertEquals("Hold still a moment", retrievalHint(items, emptyList(), counts.copy(prompt = Prompt.HOLD_STILL_A_MOMENT)))
         assertEquals("Point at items you counted to continue", retrievalHint(items, listOf("A"), counts.copy(prompt = Prompt.REREAD_COUNTED_ITEMS)))
+        // Pins waiting for a surface: under the counter's prompt, over what is in view
+        assertEquals("Hold still a moment", retrievalHint(items, listOf("A"), counts.copy(prompt = Prompt.HOLD_STILL_A_MOMENT), findingSurface = true))
+        assertEquals("Move slowly to find the surface", retrievalHint(items, listOf("A"), counts, findingSurface = true))
         // With no list there is nothing to count: the hint asks for codes, whatever the counter says
         assertEquals("Add item codes to find", retrievalHint(emptyList(), emptyList(), counts.copy(prompt = Prompt.SLOW_DOWN)))
     }

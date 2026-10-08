@@ -6,13 +6,30 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sqrt
 
-/** An 8-bit luma plane; pixel (x, y) is data[y * rowStride + x], read as unsigned */
-class LumaImage(val width: Int, val height: Int, val data: ByteArray, val rowStride: Int = width) {
+/**
+ * An 8-bit luma plane; pixel (x, y) is data[y * rowStride + x], read as unsigned. [free] hands [data] to [onFree] (its
+ * maker's pool) once, when the last holder lets the image go: nothing reads it after.
+ */
+class LumaImage(
+    val width: Int,
+    val height: Int,
+    val data: ByteArray,
+    val rowStride: Int = width,
+    private val onFree: ((ByteArray) -> Unit)? = null,
+) {
+    private var freed = false
+
     init {
         require(width > 0 && height > 0 && rowStride >= width) { "bad plane: ${width}x$height, row stride $rowStride" }
         require(data.size >= (height - 1).toLong() * rowStride + width) {
             "${data.size} bytes are too few for a ${width}x$height plane of row stride $rowStride"
         }
+    }
+
+    fun free() {
+        if (freed) return
+        freed = true
+        onFree?.invoke(data)
     }
 }
 

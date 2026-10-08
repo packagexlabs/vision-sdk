@@ -152,6 +152,7 @@ class ScannerViewModel @Inject constructor(
         ar.pinRules = s.prefs.arPinRules
         ar.pinRefine = s.prefs.arPinRefine
         ar.readBoost = s.prefs.arReadBoost
+        ar.record = s.prefs.arRecord
         // While a local write is in flight the repo can still emit the value from before it; skip those.
         viewModelScope.launch { prefs.prefs.collect { if (prefWrites == 0) setPrefs(it) } }
         viewModelScope.launch { models.states.collect { m -> _state.update { it.copy(models = m) } } }
@@ -160,6 +161,7 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { catalog.names.collect { n -> _state.update { it.copy(itemNames = n) } } }
         viewModelScope.launch { ar.count.collect { v -> _state.update { it.copy(arCount = v) } } }
         viewModelScope.launch { ar.codesInView.collect { c -> _state.update { it.copy(codesInView = c) } } }
+        viewModelScope.launch { ar.findingSurface.collect { f -> _state.update { it.copy(findingSurface = f) } } }
         viewModelScope.launch { ar.seen.collect { c -> _state.update { it.copy(seen = c) } } }
         // The counter counts the list's codes (spec 5.10); the session keeps the list for its next counters.
         viewModelScope.launch { state.map { it.items }.distinctUntilChanged().collect { ar.setItems(it.toSet()) } }
@@ -418,6 +420,7 @@ class ScannerViewModel @Inject constructor(
         if (old.arPinRules != p.arPinRules) ar.pinRules = p.arPinRules
         if (old.arPinRefine != p.arPinRefine) ar.pinRefine = p.arPinRefine
         if (old.arReadBoost != p.arReadBoost) ar.readBoost = p.arReadBoost
+        if (old.arRecord != p.arRecord) ar.record = p.arRecord
         if (old.multi != p.multi || old.showBoxes != p.showBoxes || old.autoCapture != p.autoCapture || old.vlm != p.vlm) {
             applyConfig()
             if (old.multi != p.multi && usesScanner) camera.rescan()   // drops any half-finished single capture

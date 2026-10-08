@@ -163,8 +163,10 @@ class ArMapper(
             if (event is ArEvent.Luma && queue.count { it is ArEvent.Luma } >= lumaCapacity) {
                 val it = queue.iterator()
                 while (it.hasNext()) {
-                    if (it.next() is ArEvent.Luma) {
+                    val e = it.next()
+                    if (e is ArEvent.Luma) {
                         it.remove()
+                        e.img.free()
                         break
                     }
                 }

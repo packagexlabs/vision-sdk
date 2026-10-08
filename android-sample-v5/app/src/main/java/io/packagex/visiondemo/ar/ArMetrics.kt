@@ -595,6 +595,9 @@ internal class PinMetrics {
         while (tracks.size > 0) removed(tracks.keyAt(tracks.size - 1))
     }
 
+    /** M1 since the start: the median and p90 of the claims' registration error in 4K px, and how many claims */
+    fun m1(): DoubleArray = all.quantiles(0.5, 0.9).let { doubleArrayOf(it[0], it[1], all.size.toDouble()) }
+
     /** M1 and M2 so far, one line; null before any listed read */
     fun summary(): String? {
         if (listedReads == 0 && unmeasured == 0 && all.size == 0 && notDrawn == 0) return null

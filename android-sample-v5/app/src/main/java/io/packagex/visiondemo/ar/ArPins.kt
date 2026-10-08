@@ -28,6 +28,7 @@ import io.packagex.arcount.Vec3
 import java.nio.ByteBuffer
 import java.util.Arrays
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.min
 import com.google.ar.core.Pose as ArPose
@@ -192,6 +193,11 @@ class ArPins internal constructor(
     private var births = 0
     private var merges = 0
     private var retirements = 0
+
+    // The session's totals, for a replay's summary ([replaySummary]); the ones above restart with every 3 s line
+    private var bornInAll = 0
+    private var mergedInAll = 0
+    private var retiredInAll = 0
     private var voids = 0
     private var reinits = 0
     private var reanchors = 0
@@ -203,9 +209,132 @@ class ArPins internal constructor(
     private val checkView = FloatArray(CHECK_POINTS.size)
     private val checkErrs = DoubleArray(CHECK_POINTS.size / 2)
 
+    // Rule 5's surface gate (GL thread): the session it is for, its plane poll and last state, the held reads at the last 3 s line
+    private val gate = BirthGate()
+    private var gateSession: Session? = null
+    private var gatePoll = 0
+
+    /** ARCore's tracked upward planes, refreshed every [PLANE_POLL_FRAMES] tracked frames, for [pickHit]'s depth-agreed plane */
+    private val upward = ArrayList<PlaneRef>()
+
+    /** The [Plane]s of [upward], in its order */
+    private val upwardPlanes = ArrayList<Plane>()
+
+    /** The plane each pin held on a plane was born on, its height followed ([followPlanes]); GL thread */
+    private val pinPlanes = HashMap<Int, Plane>()
+    private var follows = 0
+
+    /** The verified pins' world points at the batch's capture (GL thread, refilled per batch): [pickHit]'s vouchers */
+    private val vouchers = ArrayList<Vec3>()
+
+    /** Per code with no nominal width, its verified pins' label width ([learnedLabelWidthM]; NaN none), per batch */
+    private val labelWidths = HashMap<String, Double>()
+    private val planeAxis = FloatArray(3)
+    private var gateLogged: BirthGate.State? = null
+    private var heldLogged = 0
+
+    /**
+     * Whether the surface gate held a listed read's birth within the last second (any thread): the hint asks the user
+     * to move slowly so ARCore finds the surface
+     */
+    @Volatile
+    var holdingBirths = false
+        private set
+
     /** New Scan (main thread): every pin and candidate goes on the next frame. */
     fun clear() {
         clearWanted = true
+    }
+
+    /**
+     * Rule 5's gate on the frame at [ts]: a new session starts it again; until a plane tracks, ARCore's planes are looked
+     * at every [PLANE_POLL_FRAMES] frames (getAllTrackables allocates), and the upward ones kept ([upward])
+     */
+    private fun gateFrame(session: Session, ts: Long, tracking: Boolean) {
+        if (session !== gateSession) {
+            gateSession = session
+            gate.reset()
+            gatePoll = 0
+        }
+        val planeNow = tracking && gatePoll++ % PLANE_POLL_FRAMES == 0 && refreshPlanes(session)
+        gate.frame(ts, tracking, planeNow)
+        book.birthsNeedSurface = gate.needsSurface
+        holdingBirths = book.lastHeldNs != Long.MIN_VALUE && ts - book.lastHeldNs < HOLDING_NS
+        if (gate.state != gateLogged) {
+            gateLogged = gate.state
+            Log.i(TAG, "birth gate ${gate.state.trace}: " + when (gate.state) {
+                BirthGate.State.HOLDING -> "births wait for a real surface"
+                BirthGate.State.SURFACE -> "a plane tracks, births need a real surface"
+                BirthGate.State.FALLBACK -> "no plane after ${GATE_TIMEOUT_NS / 1_000_000_000} s of tracking, births take any point"
+            })
+        }
+    }
+
+    /** Whether any plane tracks; the upward ones into [upward] */
+    private fun refreshPlanes(session: Session): Boolean {
+        upward.clear()
+        upwardPlanes.clear()
+        var any = false
+        for (p in session.getAllTrackables(Plane::class.java)) {
+            if (p.trackingState != TrackingState.TRACKING || p.subsumedBy != null) continue
+            any = true
+            if (p.type != Plane.Type.HORIZONTAL_UPWARD_FACING) continue
+            val c = p.centerPose
+            c.getTransformedAxis(1, 1f, planeAxis, 0)
+            upward += PlaneRef(Vec3(c.tx().toDouble(), c.ty().toDouble(), c.tz().toDouble()), Vec3(planeAxis[0].toDouble(), planeAxis[1].toDouble(), planeAxis[2].toDouble()))
+            upwardPlanes += p
+        }
+        return any
+    }
+
+    /**
+     * Every [PLANE_POLL_FRAMES] frames: each pin held on a plane follows that plane's height ([Pin.followPlane]) as ARCore
+     * re-estimates it, or the plane that took it over. The pin's anchor stays a world anchor, so a plane's new height is
+     * no map step ([breaks]): rule 3 and rule 7's cover go on as before.
+     */
+    private fun followPlanes(nowNs: Long) {
+        if (pinPlanes.isEmpty() || frameRules != PinRules.ANDROID || !frameRefine) return
+        val pins = book.pins
+        for (i in pins.indices) {
+            val pin = pins[i]
+            val born = pinPlanes[pin.id] ?: continue
+            var plane = born
+            while (true) plane = plane.subsumedBy ?: break
+            if (plane !== born) {
+                pinPlanes[pin.id] = plane
+                Log.i(TAG, "pin ${pin.id}'s plane was taken over by another")
+            }
+            if (plane.trackingState != TrackingState.TRACKING) continue
+            val c = plane.centerPose
+            c.getTransformedAxis(1, 1f, planeAxis, 0)
+            val was = pin.position
+            if (!pin.followPlane(
+                    Vec3(c.tx().toDouble(), c.ty().toDouble(), c.tz().toDouble()),
+                    Vec3(planeAxis[0].toDouble(), planeAxis[1].toDouble(), planeAxis[2].toDouble()),
+                )
+            ) {
+                continue
+            }
+            follows++
+            val now = pin.position
+            trace.diag { pinMovedLine(nowNs, pin, "planeFollow", now) }
+            Log.i(TAG, "pin ${pin.id} follows its plane " + lines.format("%.1f cm, to %.3f,%.3f,%.3f", (now - was).norm() * 100, now.x, now.y, now.z))
+        }
+    }
+
+    /** The upward plane [p] lies on (within [PIN_CORROBORATE_M] along its normal), the nearest; null: none */
+    private fun planeUnder(p: Vec3): Plane? {
+        var best: Plane? = null
+        var bestOff = PIN_CORROBORATE_M
+        for (k in upward.indices) {
+            val r = upward[k]
+            val off = abs((p.x - r.point.x) * r.normal.x + (p.y - r.point.y) * r.normal.y + (p.z - r.point.z) * r.normal.z)
+            if (off <= bestOff) {
+                bestOff = off
+                best = upwardPlanes[k]
+            }
+        }
+        return best
     }
 
     /** GL thread, once per new frame, with its record ([PoseRecord.timestampNs] is the reads' clock). */
@@ -224,6 +353,7 @@ class ArPins internal constructor(
             clearWanted = false
             for (i in 0 until anchors.size) anchors.valueAt(i).detach()
             anchors.clear()
+            pinPlanes.clear()
             for (pin in book.pins) trace.diag { pinGoneLine(rec.timestampNs, pin, "clear", pin.position) }
             book.clear()
             boost.clear()
@@ -238,6 +368,7 @@ class ArPins internal constructor(
         book.refine = frameRefine
         val ts = rec.timestampNs
         val tracking = rec.frameTracking == Tracking.TRACKING
+        gateFrame(session, ts, tracking)
         motion.onFrame(ts, rec.camera, tracking)
         breaks.frame(ts, tracking)
         records.addLast(rec)
@@ -249,6 +380,7 @@ class ArPins internal constructor(
         }
         val r0 = Debug.threadCpuTimeNanos()
         refreshPositions(session, ts)
+        if (gatePoll % PLANE_POLL_FRAMES == 1) followPlanes(ts) // on the frame after the planes were polled
         work.refreshNs += Debug.threadCpuTimeNanos() - r0
         book.mapMovedNs = breaks.newestNs // after this frame's anchor steps: the void rule holds only while the map is still (§3.4 rule 3)
         depth.begin(frame)
@@ -567,12 +699,24 @@ class ArPins internal constructor(
         val toCamera = inverses[capture.camera]
         // Measured against the pins only where its frame was drawn here ([nearestDrawnPx]'s null)
         val measured = drawn.has(capture.timestampNs)
+        // The verified pins where they stood at the capture: they vouch for a plane met off its polygon ([vouched])
+        vouchers.clear()
+        labelWidths.clear()
+        if (frameRules == PinRules.ANDROID && refine) {
+            val pins = book.pins
+            for (k in pins.indices) if (pins[k].verified) vouchers += pins[k].positionAt(capture.timestampNs)
+        }
         for (i in 0 until n) {
             val r = usableReads[i]
             val code = usableCodes[i]
             val near = if (measured) nearestDrawnPx(code, r, capture) else Double.NaN
             if (!measured) metrics.unmeasured() else metrics.nearest(near)
             val width = readKeys.nominalWidth(r.symbology)
+            val label = if (width == null && frameRules == PinRules.ANDROID && refine) {
+                labelWidths.getOrPut(code) { learnedLabelWidthM(book.pins, code) ?: Double.NaN }.takeIf { it.isFinite() }
+            } else {
+                null
+            }
             val vx = onView[2 * i]
             val vy = onView[2 * i + 1]
             val ray = centreRay(r, capture) // world ray of the capture-time camera
@@ -599,9 +743,17 @@ class ArPins internal constructor(
                 for (k in hitResults.indices) rayHits += rayHit(k, now, g)
                 val all = rayHits
                 judged = all
-                val pick = pickHit(all, r, capture, ray, hitRejects, toCamera, width)
+                val pick = pickHit(all, r, capture, ray, hitRejects, toCamera, width, upward, vouchers, label)
                 hit = if (pick != null && pick.index >= 0 && pick.index < hitResults.size) pick.index else -1
-                hitKinds.merge(if (hit >= 0) simpleName(hitTrackables[hit]) else if (pick != null) "NominalWidth" else "NONE", 1, Int::plus)
+                hitKinds.merge(
+                    when {
+                        pick?.vouched == true -> "PlaneByPins"
+                        hit >= 0 -> simpleName(hitTrackables[hit])
+                        pick != null -> if (pick.source == HitSource.HIT) "PlaneByDepth" else "NominalWidth"
+                        else -> "NONE"
+                    },
+                    1, Int::plus,
+                )
                 if (pick == null) {
                     if (!anyHit(all, SEEDS)) {
                         noHit++
@@ -618,7 +770,7 @@ class ArPins internal constructor(
                     out += sightingOf(r, capture, guess.point, Quat.IDENTITY, ray, floorPx, source = guess.source, code = code, nominalM = width ?: 0.0)
                 } else {
                     hitSources[pick.source.ordinal]++
-                    outcome = pick.source.trace
+                    outcome = if (pick.vouched) VOUCHED_OUTCOME else pick.source.trace
                     at = pick.point
                     conf = all.getOrNull(pick.index)?.confidence
                     val c = checkHit(pick.point, r, capture, toCamera)
@@ -662,7 +814,7 @@ class ArPins internal constructor(
                 // nearer valid hit)
                 val traced = min(hitResults.size, TRACED_HITS)
                 val j = judged ?: List(traced) { rayHit(it, now, g) }
-                val verdicts = List(traced) { hitReject(j[it], r, capture, ray)?.trace ?: "ok" }
+                val verdicts = List(traced) { hitReject(j[it], r, capture, ray, labelM = label)?.trace ?: "ok" }
                 hitLine(
                     r, code, now.timestampNs, now.timestampNs - capture.timestampNs, outcome, if (hit >= 0) simpleName(hitTrackables[hit]) else null,
                     at?.let { (it - ray.origin).norm() }, check?.depthM ?: at?.let { depthM(it, capture.camera) }, check?.errorPx, conf,
@@ -839,7 +991,8 @@ class ArPins internal constructor(
             "hits=$hitKinds ($frameRules: ${hitSourceText()}; hits skipped ${hitRejectText()}) " +
                 "reprojection $reproj, rejected $farHits beyond ${PIN_MAX_HIT_M} m, $lowConfidence depth points below confidence $MIN_DEPTH_CONFIDENCE, " +
                 "$offView off the view, $noHit with no hit, $cut cut by the border; not used ${unusedText()}, $unmeasuredReads unmeasured; " +
-                "births $births merges $merges retirements $retirements voided $voids re-inits $reinits re-anchored $reanchors; " +
+                "births $births (gate ${gate.state.trace}, ${book.held - heldLogged} reads held for a surface) merges $merges " +
+                "retirements $retirements voided $voids re-inits $reinits re-anchored $reanchors plane follows $follows; " +
                 "read age when used $age; ${rayCheck(frame, camera, rec, g, viewportWidth, viewportHeight)}; candidates=${book.candidateCount} " +
                 "live=${book.pins.size} verified=${book.pins.count { it.verified }} warm=${motion.mapReady}; ${boostText()}",
         )
@@ -854,11 +1007,13 @@ class ArPins internal constructor(
         noHit = 0
         cut = 0
         births = 0
+        heldLogged = book.held
         merges = 0
         retirements = 0
         voids = 0
         reinits = 0
         reanchors = 0
+        follows = 0
         boost.resetCounts()
         unusedReads.fill(0)
         unmeasuredReads = 0
@@ -979,11 +1134,13 @@ class ArPins internal constructor(
         work.anchorCall(Debug.threadCpuTimeNanos() - c0)
         val a = made.onFailure { Log.w(TAG, "pin ${pin.id} anchor not created", it) }.getOrNull() ?: return false
         anchors[pin.id] = a
+        if (pin.est.onPlane) planeUnder(pin.position)?.let { pinPlanes[pin.id] = it }
         val t = pin.pose.t
         births++
+        bornInAll++
         work.births++
         metrics.born(pin.id, capture.timestampNs, capture.camera.t)
-        trace.diag { pinBirthLine(nowNs, capture.timestampNs, pin, t, capture.camera.t) }
+        trace.diag { pinBirthLine(nowNs, capture.timestampNs, pin, t, capture.camera.t, gate.state.trace) }
         val on = if (pin.bornOnPlane) " on a plane" else if (pin.bornGuessed) " at the default depth" else ""
         val prior = if (pin.est.started) lines.format(", its point %.3f,%.3f,%.3f (prior ${pin.est.priorSource})", pin.position.x, pin.position.y, pin.position.z) else ""
         // The code is not part of the pattern: a listed Code 128 / Code 39 text may hold a '%'
@@ -991,13 +1148,31 @@ class ArPins internal constructor(
         return true
     }
 
+    /**
+     * One line for the end of a replay: the live pins per code, the session's births, retirements and merges, and M1
+     * (the claims' registration error, 4K px) since the start
+     */
+    fun replaySummary(): String {
+        val perCode = book.pins.groupingBy { it.code }.eachCount().toSortedMap()
+        val m1 = metrics.m1()
+        return "pins ${book.pins.size} $perCode, births $bornInAll, retirements $retiredInAll, merges $mergedInAll, " +
+            lines.format("M1 median/p90 %.0f/%.0f px over %d claims", m1[0], m1[1], m1[2].toInt())
+    }
+
     /** [pin] went ([event] "merge" or "retire", [why] for the log; a retirement's batch captured at [captureNs]): its anchor is detached */
     private fun removed(pin: Pin, why: String, event: String, nowNs: Long, captureNs: Long = -1L) {
         val d0 = Debug.threadCpuTimeNanos()
         anchors.remove(pin.id)?.detach()
+        pinPlanes.remove(pin.id)
         work.anchorCall(Debug.threadCpuTimeNanos() - d0)
         work.removals++
-        if (event == "retire") retirements++ else merges++
+        if (event == "retire") {
+            retirements++
+            retiredInAll++
+        } else {
+            merges++
+            mergedInAll++
+        }
         metrics.removed(pin.id)
         trace.diag { pinGoneLine(nowNs, pin, event, pin.position, captureNs) }
         Log.i(TAG, "pin ${pin.id} removed ($why) ${pin.code}, live=${book.pins.size}")
@@ -1090,6 +1265,15 @@ class ArPins internal constructor(
         const val TAG = "ArPins"
         const val RECORDS = 32
         const val STAT_NS = 3_000_000_000L
+
+        /** Rule 5's gate looks for a tracked plane every this many frames until it finds one (about 3 times a second) */
+        const val PLANE_POLL_FRAMES = 10
+
+        /** The `hit` line's outcome of a plane taken off its polygon on verified pins' word ([HitPick.vouched]) */
+        const val VOUCHED_OUTCOME = "vouched"
+
+        /** [holdingBirths] stays on this long after the last held read */
+        const val HOLDING_NS = 1_000_000_000L
 
         /** Sizes of [imageBySize]'s arrays kept: up to 8 listed reads in one image */
         const val SIZES = 11

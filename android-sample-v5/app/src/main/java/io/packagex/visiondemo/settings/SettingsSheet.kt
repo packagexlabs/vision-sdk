@@ -188,6 +188,13 @@ fun SettingsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             checked = p.arReadBoost,
             onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arReadBoost = checked) }) },
         )
+        ToggleRow(
+            title = "AR record session",
+            desc = "From the next start of AR Item Count, records each run (ARCore's video and motion with every read) to " +
+                "Android/data/<app>/files/ar-recordings, to replay pin rules on it. About 170 MB a minute.",
+            checked = p.arRecord,
+            onCheckedChange = { checked -> onAction(ScannerAction.UpdatePrefs { it.copy(arRecord = checked) }) },
+        )
     }
 
     ModelsRow(onAction)

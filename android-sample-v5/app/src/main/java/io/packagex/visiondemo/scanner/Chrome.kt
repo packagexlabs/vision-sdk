@@ -470,7 +470,7 @@ internal fun hintFor(state: ScannerUiState): String {
         } else {
             "Fit the whole page in view"
         }
-        ScanMode.Retrieval -> return retrievalHint(state.items, state.codesInView, state.arCount)   // nothing to capture
+        ScanMode.Retrieval -> return retrievalHint(state.items, state.codesInView, state.arCount, state.findingSurface)   // nothing to capture
         ScanMode.Price -> if (state.tags.isEmpty()) {
             "Point at a price tag"
         } else {

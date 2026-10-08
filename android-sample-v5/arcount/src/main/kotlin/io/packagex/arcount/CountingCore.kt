@@ -97,6 +97,7 @@ class CountingCore(private val config: CountConfig = CountConfig()) : ArCounter 
         val newest = latest?.timestampNs
         if (newest != null && newest - timestampNs > config.lateLumaNs) {
             lateLumas++
+            img.free()
             return
         }
         val frame = LumaFrame(timestampNs, img, streamPxPerLumaPx)

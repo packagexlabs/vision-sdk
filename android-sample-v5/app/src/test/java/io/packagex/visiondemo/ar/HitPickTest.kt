@@ -44,6 +44,120 @@ class HitPickTest {
 
     private fun rejects() = IntArray(HitReject.entries.size)
 
+    @Test fun withNoValidHitAnUpwardPlaneAWeakDepthPointAgreesWithIsTaken() {
+        // 12:34: UNIT-Q's rays met no plane's polygon and only depth points under confidence 128, half of them within 2 cm of
+        // the table; the surface gate held two of its three units' births for a minute. Here a read low in the image, its
+        // ray down to a table 0.12 m below the camera: a weak depth point 1.5 cm short of the table gives the table's point
+        val r = read(0.40, symbology = "qrcode", v = 2000.0)
+        val ray = r.centreRay()
+        val table = PlaneRef(Vec3(0.0, -0.12, 0.0), Vec3(0.0, 1.0, 0.0))
+        val along = 0.12 / -ray.dir.y
+        val near = RayHit(HitKind.DEPTH_POINT, ray.at(along - 0.015), confidence = 40)
+        val p = pickHit(listOf(near), r, capture, ray, planes = listOf(table))!!
+        assertEquals(HitSource.HIT, p.source); assertTrue(p.onPlane)
+        assertEquals(-0.12, p.point.y, 1e-9)
+        // The depth point 8 cm short (2.5 cm above the table): nothing
+        assertNull(pickHit(listOf(RayHit(HitKind.DEPTH_POINT, ray.at(along - 0.08), confidence = 40)), r, capture, ray, planes = listOf(table)))
+        // A plane the ray met off its polygon does as a tracked one
+        val off = RayHit(HitKind.PLANE, ray.at(along), Vec3(0.0, 1.0, 0.0), inPolygon = false)
+        val q = pickHit(listOf(off, near), r, capture, ray)!!
+        assertTrue(q.onPlane); assertEquals(-0.12, q.point.y, 1e-9)
+        // A plane alone, off its polygon, is not enough
+        assertNull(pickHit(listOf(off), r, capture, ray))
+    }
+
+    @Test fun aPlaneOffItsPolygonCountsWhereVerifiedPinsOnItVouchForIt() {
+        // 16:31 (the second replay of 15:54): the table's polygon never reached UNIT-T's row; its reads met the table off
+        // the polygon, 9-11 cm from verified pins of the rows above, and the floor 72 cm below in its polygon. A Code 128
+        // low in the image, its ray down to a table 0.12 m below the camera, the floor 0.84 m below
+        val r = read(0.40, symbology = "code128", v = 2000.0)
+        val ray = r.centreRay()
+        val along = 0.12 / -ray.dir.y
+        val table = RayHit(HitKind.PLANE, ray.at(along), Vec3(0.0, 1.0, 0.0), inPolygon = false)
+        val floor = RayHit(HitKind.PLANE, ray.at(0.84 / -ray.dir.y), Vec3(0.0, 1.0, 0.0), inPolygon = true)
+        val at = table.point
+        val onTable = listOf(Vec3(at.x + 0.06, -0.12, at.z - 0.05), Vec3(at.x - 0.03, -0.12, at.z - 0.08))
+        // Two verified pins on the table within 25 cm: the table, not the floor behind it
+        val p = pickHit(listOf(table, floor), r, capture, ray, vouchers = onTable)!!
+        assertTrue(p.vouched); assertTrue(p.onPlane); assertEquals(HitSource.HIT, p.source)
+        assertEquals(-0.12, p.point.y, 1e-9)
+        // With none, the floor in its polygon is the valid hit, as before; with the floor not met, nothing (the gate holds)
+        assertEquals(-0.84, pickHit(listOf(table, floor), r, capture, ray)!!.point.y, 1e-9)
+        assertNull(pickHit(listOf(table), r, capture, ray))
+        // One verified pin 7.8 cm away is enough (within PIN_VOUCH_ONE_M), one 20 cm away is not; two 30 cm away are not either
+        assertTrue(pickHit(listOf(table), r, capture, ray, vouchers = onTable.take(1))!!.vouched)
+        assertNull(pickHit(listOf(table), r, capture, ray, vouchers = listOf(Vec3(at.x + 0.20, -0.12, at.z))))
+        assertNull(pickHit(listOf(table), r, capture, ray, vouchers = onTable.map { Vec3(it.x + 0.30, it.y, it.z) }))
+        // Pins on another plane do not vouch: on the floor, or on a table 2 cm higher
+        assertNull(pickHit(listOf(table), r, capture, ray, vouchers = onTable.map { Vec3(it.x, -0.84, it.z) }))
+        assertNull(pickHit(listOf(table), r, capture, ray, vouchers = onTable.map { Vec3(it.x, -0.10, it.z) }))
+        // A plane ARCore tracks that the ray met no hit on: its point, on the same pins' word
+        val tracked = PlaneRef(Vec3(0.0, -0.12, 0.0), Vec3(0.0, 1.0, 0.0))
+        val q = pickHit(emptyList(), r, capture, ray, planes = listOf(tracked), vouchers = onTable)!!
+        assertTrue(q.vouched); assertEquals(-0.12, q.point.y, 1e-9)
+        assertNull(pickHit(emptyList(), r, capture, ray, planes = listOf(tracked)))
+    }
+
+    @Test fun oneVerifiedPinOnTheTrackedTableNearTheRayVouchesForIt() {
+        // 2026-10-08 12:19: two QR units 5.7 and 11.3 cm from the third's verified pin had no hit but the tracked table,
+        // and stayed unborn for good (two verified pins were needed)
+        val r = read(0.40, symbology = "qrcode", v = 2000.0)
+        val ray = r.centreRay()
+        val table = PlaneRef(Vec3(0.0, -0.12, 0.0), Vec3(0.0, 1.0, 0.0))
+        val at = ray.at(0.12 / -ray.dir.y)
+        val p = pickHit(emptyList(), r, capture, ray, planes = listOf(table), vouchers = listOf(Vec3(at.x + 0.113, -0.12, at.z)))!!
+        assertTrue(p.vouched); assertEquals(HitSource.HIT, p.source); assertEquals(-0.12, p.point.y, 1e-9)
+        assertNull(pickHit(emptyList(), r, capture, ray, planes = listOf(table), vouchers = listOf(Vec3(at.x + 0.17, -0.12, at.z))))
+    }
+
+    @Test fun aHitOffTheDepthOfTheVerifiedLabelsBesideItIsNoHit() {
+        // 2026-10-08 12:17: no UNIT-T pin was verified yet, so no learned width; the verified EAN pins 19-25 cm aside put the
+        // table at 0.24 m and the floor hits lay at 1.06-1.08 m (4.5 times). Here the table 0.10 m below the camera, the
+        // floor 0.40 m below in its polygon (4 times as deep), one verified pin on the table 20 cm from the ray's point
+        val r = read(0.40, symbology = "code128", v = 2000.0)
+        val ray = r.centreRay()
+        val table = PlaneRef(Vec3(0.0, -0.10, 0.0), Vec3(0.0, 1.0, 0.0))
+        val floor = RayHit(HitKind.PLANE, ray.at(0.40 / -ray.dir.y), Vec3(0.0, 1.0, 0.0), inPolygon = true)
+        val at = ray.at(0.10 / -ray.dir.y)
+        val beside = listOf(Vec3(at.x + 0.20, -0.10, at.z))
+        val skipped = rejects()
+        assertNull(pickHit(listOf(floor), r, capture, ray, skipped, planes = listOf(table), vouchers = beside))
+        assertEquals(1, skipped[HitReject.NEIGHBOUR.ordinal])
+        // Without a verified label within 25 cm, or with none on a tracked plane, the floor is the valid hit, as before
+        assertEquals(-0.40, pickHit(listOf(floor), r, capture, ray, planes = listOf(table))!!.point.y, 1e-9)
+        assertEquals(-0.40, pickHit(listOf(floor), r, capture, ray, planes = listOf(table), vouchers = listOf(Vec3(at.x + 0.30, -0.10, at.z)))!!.point.y, 1e-9)
+        assertEquals(-0.40, pickHit(listOf(floor), r, capture, ray, vouchers = beside)!!.point.y, 1e-9)
+        // A surface 1.8 times as deep as the neighbours' is still a hit (within PIN_SIZE_RATIO); 2.5 times is none
+        val deeper = RayHit(HitKind.PLANE, ray.at(0.18 / -ray.dir.y), Vec3(0.0, 1.0, 0.0), inPolygon = true)
+        assertEquals(-0.18, pickHit(listOf(deeper), r, capture, ray, planes = listOf(table), vouchers = beside)!!.point.y, 1e-9)
+        val farther = RayHit(HitKind.PLANE, ray.at(0.25 / -ray.dir.y), Vec3(0.0, 1.0, 0.0), inPolygon = true)
+        assertNull(pickHit(listOf(farther), r, capture, ray, planes = listOf(table), vouchers = beside))
+    }
+
+    @Test fun aCodeWithNoNominalWidthRejectsAHitItsVerifiedPinsLabelWidthDisagreesWith() {
+        // The third replay of 15:54's recording: UNIT-Q and UNIT-T pins were born on floor hits 75-85 cm below the sheet.
+        // A Code 128 seen at 0.40 m whose verified pins measured its label 25 mm wide; its ray meets the floor at 1.2 m
+        val label = 0.025
+        val w = k.fx * label / 0.40
+        val r = Read(0, "UNIT-T", listOf(1920.0 - w / 2, 1000.0, 1920.0 + w / 2, 1000.0, 1920.0 + w / 2, 1160.0, 1920.0 - w / 2, 1160.0), 1, "code128")
+        val ray = r.centreRay()
+        val facing = Vec3(0.0, 0.0, 1.0)
+        val floor = RayHit(HitKind.PLANE, ray.at(1.2), facing, inPolygon = true)
+        // Without the learned width the floor is the valid hit, as the replay took it
+        val taken = pickHit(listOf(floor), r, capture, ray)!!
+        assertEquals(HitSource.HIT, taken.source); assertEquals(1.2, (taken.point - ray.origin).norm(), 1e-9)
+        // With it: three times the label's width at that depth, no valid hit (the surface gate holds anything else)
+        val skipped = rejects()
+        assertTrue(pickHit(listOf(floor), r, capture, ray, skipped, labelM = label)?.source != HitSource.HIT)
+        assertEquals(1, skipped[HitReject.WIDTH.ordinal])
+        // The table in front of the floor at 0.42 m (1.05 times): taken
+        val table = RayHit(HitKind.PLANE, ray.at(0.42), facing, inPolygon = true)
+        assertEquals(0.42, (pickHit(listOf(table, floor), r, capture, ray, labelM = label)!!.point - ray.origin).norm(), 1e-9)
+        // Half the width and under is out too: a point at 0.19 m
+        assertEquals(HitReject.WIDTH, hitReject(RayHit(HitKind.POINT, ray.at(0.19)), r, capture, ray, labelM = label))
+        assertNull(hitReject(RayHit(HitKind.POINT, ray.at(0.21)), r, capture, ray, labelM = label))
+    }
+
     @Test fun theNearestValidHitWinsOverAFartherPlaneInItsPolygon() {
         // The label at 0.40 m, the table 0.30 m behind it: the iOS rule took the plane
         val r = read(0.40)

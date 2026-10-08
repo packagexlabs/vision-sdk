@@ -134,7 +134,8 @@ internal fun arrLine(timestampNs: Long, arrivalNs: Long, blurPx: Double?, skippe
 
 /**
  * One listed read at the pins (ArPins), on the frame [nowNs], [ageNs] after its capture by the clock: [outcome] is
- * "ok" (a sighting on a valid hit), "width" or "nearest" (a sighting with no valid hit, [HitSource]), "offView",
+ * "ok" (a sighting on a valid hit), "vouched" (on a plane met off its polygon, where verified pins lie on it), "width"
+ * or "nearest" (a sighting with no valid hit, [HitSource]), "offView",
  * "noHit", "far" or "lowConfidence"; or, for a read the pins did not use, "notTracking", "stale" or
  * "captureNotTracking" ([Unused]), or "unmeasured" (its frame was never drawn here); the hit chosen ([kind], [distM]
  * along the ray, its [depthM] and [reprojPx] in the read's frame, the depth [confidence] where it lies; null: none, and
@@ -170,13 +171,14 @@ data class HitSeen(val kind: String, val distM: Double, val inPolygon: Boolean?,
 /**
  * A pin born on the frame [nowNs] from the read captured at [captureNs], its anchor at [at] (world), with the camera at
  * [camera]; `onPlane` when most of its sightings hit a plane ([Pin.bornOnPlane]), `guessed` when most hit nothing
- * ([Pin.bornGuessed]), its label's `widthM` there, and under the Android rules its `prior` ([PriorSource]) and the
- * point its birth rays gave (`est`, world; null: not refined)
+ * ([Pin.bornGuessed]), its label's `widthM` there, under the Android rules its `prior` ([PriorSource]) and the point its
+ * birth rays gave (`est`, world; null: not refined), and the surface gate's state then (`gate`: "holding", "surface" or
+ * "fallback", [BirthGate.State])
  */
-internal fun pinBirthLine(nowNs: Long, captureNs: Long, pin: Pin, at: Vec3, camera: Vec3): String =
+internal fun pinBirthLine(nowNs: Long, captureNs: Long, pin: Pin, at: Vec3, camera: Vec3, gate: String): String =
     """{"t":"pin","ev":"birth","ts":$captureNs,"now":$nowNs,"pin":${pin.id},"code":${quote(pin.code)},"at":${vec(at)},"cam":${vec(camera)},""" +
         """"onPlane":${pin.bornOnPlane},"guessed":${pin.bornGuessed},"widthM":${num(pin.widthM)},"prior":"${pin.est.priorSource}",""" +
-        """"est":${if (pin.est.started) vec(pin.position) else "null"},"verified":${pin.verified}}"""
+        """"est":${if (pin.est.started) vec(pin.position) else "null"},"verified":${pin.verified},"gate":"$gate"}"""
 
 /**
  * A pin moved on the frame [nowNs] other than by a claim ([why]: "reinit", rule 4's restart on its bad claims;
@@ -225,10 +227,20 @@ internal fun outLine(read: Read, s: OutlineSample): String =
 /**
  * The switches of Settings › Advanced that change what a run measures, after the `cam` line at the head of a trace and
  * again whenever one changes: the unlisted outlines' [rules] and [farSafe] depth, the blur pre-skip ([blurSkip]), the
- * pins' rules ([pinRules]), whether claims refine them ([pinRefine], Phase 4) and the read-rate boost ([readBoost], P2c)
+ * pins' rules ([pinRules]), whether claims refine them ([pinRefine], Phase 4) and the read-rate boost ([readBoost], P2c);
+ * in a replay, the recording replayed ([replayOf], its file name)
  */
-internal fun flagsLine(rules: OverlayRules, farSafe: Boolean, blurSkip: Boolean, pinRules: PinRules, pinRefine: Boolean, readBoost: Boolean): String =
-    """{"t":"flags","overlayRules":"$rules","outlineFarSafe":$farSafe,"blurSkip":$blurSkip,"pinRules":"$pinRules","pinRefine":$pinRefine,"readBoost":$readBoost}"""
+internal fun flagsLine(
+    rules: OverlayRules,
+    farSafe: Boolean,
+    blurSkip: Boolean,
+    pinRules: PinRules,
+    pinRefine: Boolean,
+    readBoost: Boolean,
+    replayOf: String? = null,
+): String =
+    """{"t":"flags","overlayRules":"$rules","outlineFarSafe":$farSafe,"blurSkip":$blurSkip,"pinRules":"$pinRules","pinRefine":$pinRefine,"readBoost":$readBoost""" +
+        (if (replayOf == null) "}" else ""","replayOf":"${replayOf.replace("\\", "\\\\").replace("\"", "\\\"")}"}""")
 
 /**
  * The GL thread's window ([GlWindow]): its quantiles (p50, p99, max), the measuring's own CPU outside the frames (in

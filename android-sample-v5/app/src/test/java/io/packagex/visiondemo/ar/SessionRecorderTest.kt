@@ -82,7 +82,7 @@ class SessionRecorderTest {
             camLine("0", "REALTIME", floatArrayOf(0.01f, -0.02f, 0f, 0f, 0f), null, intArrayOf(0, 0, 4000, 3000), null),
             arrLine(10 * ms, 31 * ms, 12.5, true),
             hitLine(centred, "A\"1", 43 * ms, 33 * ms, "ok", "Plane", 0.4, 0.4, 1.5, null, listOf(HitSeen("Point", 0.2, null, "width"), HitSeen("Plane", 0.4, true, "ok")), Double.POSITIVE_INFINITY),
-            pinBirthLine(43 * ms, 10 * ms, pin, pin.position, Vec3.ZERO),
+            pinBirthLine(43 * ms, 10 * ms, pin, pin.position, Vec3.ZERO, BirthGate.State.SURFACE.trace),
             pinGoneLine(43 * ms, pin, "merge", pin.position),
             pinClaimLine(43 * ms, 10 * ms, pin, s, null, claim),
             outLine(centred, OutlineSample(drawnRead, 10 * ms, OverlayRules.IOS, OutlineShown.WHERE_READ, 12.0)),
@@ -95,6 +95,7 @@ class SessionRecorderTest {
         ).map { Json.parseToJsonElement(it).jsonObject }
         assertEquals(listOf("cam", "arr", "hit", "pin", "pin", "pin", "out", "gl", "out", "out", "out", "flags", "pin"), all.map { it.str("t") })
         assertEquals("void", all[12].str("ev")); assertEquals("0", all[12].str("badInRow")); assertEquals("false", all[3].str("guessed"))
+        assertEquals("surface", all[3].str("gate"))
         assertEquals("false", all[6].str("carried")); assertEquals("null", all[6].getValue("depthM").toString())
         assertEquals("IOS", all[6].str("rules")); assertEquals("whereRead", all[6].str("shown")); assertEquals("false", all[6].str("farSafe"))
         assertEquals(listOf(1920.0, 1080.0), all[6].getValue("atUV").jsonArray.map { it.jsonPrimitive.double })

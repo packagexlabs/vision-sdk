@@ -10,6 +10,7 @@ import com.google.ar.core.Anchor
 import com.google.ar.core.Camera
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
+import com.google.ar.core.PlaybackStatus
 import com.google.ar.core.Session
 import com.google.ar.core.TrackingState
 import com.google.ar.core.exceptions.CameraNotAvailableException
@@ -21,6 +22,8 @@ import io.packagex.arcount.PoseRecord
 import io.packagex.arcount.Read
 import io.packagex.arcount.SectionState
 import io.packagex.arcount.Tracking
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -68,6 +71,21 @@ class ArCountRenderer(
     @Volatile
     private var resumePending = false
 
+    /** While the session records (Settings › "AR record session"): what reached the app since the last fresh frame, for its sample of the reads track */
+    @Volatile
+    internal var trackOut: TrackQueue? = null
+
+    /**
+     * A replay ([ArSessionController.replay]): the reads come from the recording's reads track, each sample on the frame it
+     * was written on, as the engine posted them; [replay] gets the pins' summary once ARCore says the recording ended
+     */
+    @Volatile
+    var replay: ((String) -> Unit)? = null
+    private var replayEnded = false
+
+    /** How many frames late the replay's reads track samples have come at the most, logged when it grows */
+    private var replayLagFrames = 0
+
     private val background = BackgroundRenderer()
     private val marks = MarkerGlRenderer(density)
     private val outlines = OutlineGlRenderer()
@@ -110,6 +128,9 @@ class ArCountRenderer(
 
     /** P2c, read on the engine worker before every scan: the pins want every shown code read in every frame (refresh 0) */
     val pinsWantFullRate: Boolean get() = pins.wantFullRate
+
+    /** Any thread: the surface gate held a listed read's birth within the last second ([ArPins.holdingBirths]) */
+    val holdingBirths: Boolean get() = pins.holdingBirths
 
     // Phase 0's measurements (GL thread)
     private val costs = FrameCosts()
@@ -180,6 +201,12 @@ class ArCountRenderer(
     override fun onDrawFrame(gl: GL10?) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
         val s = session ?: return
+        val ending = replay
+        if (ending != null && !replayEnded && s.playbackStatus == PlaybackStatus.FINISHED) {
+            replayEnded = true
+            ending(pins.replaySummary())
+            return
+        }
         if (!textureSet) {
             s.setCameraTextureName(background.textureId)
             textureSet = true
@@ -212,6 +239,9 @@ class ArCountRenderer(
         if (fresh) {
             lastTimestampNs = ts
             pins.work.clear()
+            // The reads that reached the app since the last frame: into the recording, or out of it, before this frame's record
+            trackOut?.drain(ts)?.let { recordReads(frame, it) }
+            if (replay != null) replayReads(frame, ts)
             if (resumePending) {
                 resumePending = false
                 mapper.post(ArEvent.Resumed(ts))
@@ -237,6 +267,38 @@ class ArCountRenderer(
             geometry?.let { pins.logIfDue(frame, camera, rec, it, viewportWidth, viewportHeight) }
             if (costs.due(ts)) logCosts(ts)
             costs.diag(Debug.threadCpuTimeNanos() - d0)
+        }
+    }
+
+    /** [sample] ([TrackQueue.drain]) as this frame's sample of the reads track */
+    private fun recordReads(frame: Frame, sample: ByteArray) {
+        val data = ByteBuffer.allocateDirect(sample.size).order(ByteOrder.nativeOrder()).put(sample)
+        data.flip()
+        runCatching { frame.recordTrackData(READS_TRACK, data) }.onFailure { Log.w(TAG, "reads track sample not recorded", it) }
+    }
+
+    /**
+     * The recording's reads track samples that came with this frame ([decodeSample]): the item lists and the engine's
+     * batches go to the mapper, the batches' Camera2 results to [metas], as the engine and the camera thread gave them.
+     * Playback frames keep the recording's timestamps (2026-10-07: 909 of a replay's 981 frames were recorded ones, the
+     * rest frames the recording never drew), so the reads keep theirs; a sample can come a few frames after the frame it
+     * was written on, as reads came after their capture when it was recorded
+     */
+    private fun replayReads(frame: Frame, ts: Long) {
+        for (data in frame.getUpdatedTrackData(READS_TRACK)) {
+            val sample = runCatching { decodeSample(data.data) }.onFailure { Log.w(TAG, "reads track sample not read", it) }.getOrNull() ?: continue
+            val lag = ((ts - sample.frameCameraNs) / 33_000_000L).toInt()
+            if (lag > replayLagFrames) {
+                replayLagFrames = lag
+                Log.i(TAG, "replay: reads track samples come up to $lag frames after the frame they were written on")
+            }
+            for (e in sample.entries) when (e) {
+                is TrackEntry.Items -> mapper.post(ArEvent.Items(e.codes))
+                is TrackEntry.Reads -> {
+                    e.meta?.let(metas::add)
+                    mapper.post(e.event)
+                }
+            }
         }
     }
 

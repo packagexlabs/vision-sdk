@@ -31,6 +31,10 @@ interface ArCount {
      *  [reset] clears it. */
     val seen: StateFlow<List<String>>
 
+    /** AR Item Count: listed reads are waiting for ARCore to find a real surface before they make pins (the pins' surface
+     *  gate held one within the last second); false while no session runs. */
+    val findingSurface: StateFlow<Boolean>
+
     /** Messages to toast (the session or its camera could not start). */
     val errors: Flow<String>
 
@@ -63,6 +67,10 @@ interface ArCount {
     /** Settings › Advanced › "AR read-rate boost" (drift plan P2c, on by default): with refined Android pins, every shown
      *  code is read in every frame while a listed pin waits for its depth (at most 2 s per pin) or a listed read has no pin. */
     var readBoost: Boolean
+
+    /** Settings › Advanced › "AR record session" (off by default): from the next start, each run of the session is recorded
+     *  for replay (ARCore's MP4 with the engine's reads, [RecordingInfo]). */
+    var record: Boolean
 
     /** ARCore is installed and supported. False can also mean "not known yet": then ask for the install. */
     fun installed(): Boolean
@@ -100,6 +108,7 @@ object NoArCount : ArCount {
     override val screen: StateFlow<ArScreen> = MutableStateFlow(ArScreen.NONE)
     override val codesInView: StateFlow<List<String>> = MutableStateFlow(emptyList())
     override val seen: StateFlow<List<String>> = MutableStateFlow(emptyList())
+    override val findingSurface: StateFlow<Boolean> = MutableStateFlow(false)
     override val errors: Flow<String> = emptyFlow()
     override val exits: Flow<String> = emptyFlow()
     override var tracing = false
@@ -109,6 +118,7 @@ object NoArCount : ArCount {
     override var pinRules = PinRules.ANDROID
     override var pinRefine = true
     override var readBoost = true
+    override var record = false
     override fun installed() = true // nothing to install: entering AR just shows no camera
     override fun attach(view: GLSurfaceView) {}
     override fun detach(view: GLSurfaceView?) {}

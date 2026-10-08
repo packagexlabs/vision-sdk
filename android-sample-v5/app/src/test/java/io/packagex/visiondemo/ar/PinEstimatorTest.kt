@@ -118,6 +118,40 @@ class PinEstimatorTest {
         assertTrue("${e.point().norm()} m", e.point().norm() <= 0.61) // 0.3 m · PIN_SIZE_RATIO 2
     }
 
+    @Test fun aPinLockedToItsPlaneStaysOnItWhileRaysPullItBelow() {
+        // 15:03: pins born on the table slid 10-17 cm below it within 0.5 s. Here a label on a table 0.2 m below the camera,
+        // then rays from a 2 cm wander that meet 15 cm farther along, below the table: unlocked the point follows them
+        // down; locked it stays on the table, where the newest ray meets it
+        val label = Vec3(0.0, -0.2, -0.3)
+        val below = label + label.unit() * 0.15
+        fun run(locked: Boolean): Pair<PinEstimator, Vec3> {
+            val e = startedAt(label)
+            if (locked) e.lockToPlane(label.x, label.y, label.z, 0.0, 1.0, 0.0)
+            var from = Vec3(0.0, 0.0, 0.0)
+            for (i in 0..40) {
+                from = Vec3(0.02 * kotlin.math.sin(i * 0.4), 0.0, 0.0)
+                e.see(from, below)
+            }
+            return e to from
+        }
+        val (free, _) = run(false)
+        assertTrue("${free.point()}", free.y < label.y - 0.05)
+        val (held, last) = run(true)
+        assertTrue(held.onPlane)
+        assertEquals(label.y, held.y, 1e-9)
+        assertEquals(0.0, lateral(Ray(last, (below - last).unit()), held.point()), 1e-4) // where the newest image sees it
+    }
+
+    @Test fun aPlaneLockMovesWithItsAnchor() {
+        // Rule 8: re-anchored, the plane moves into the new frame with the rays, so the point stays on the same table
+        val label = Vec3(0.0, -0.2, -0.3)
+        val e = startedAt(label)
+        e.lockToPlane(label.x, label.y, label.z, 0.0, 1.0, 0.0)
+        e.moveBy(Pose(Vec3(0.0, 0.05, 0.0), Quat.IDENTITY)) // the new anchor 5 cm lower: the table at y -0.15 in it
+        e.see(Vec3(0.01, 0.05, 0.0), label + Vec3(0.0, 0.05, 0.0))
+        assertEquals(-0.15, e.y, 1e-9)
+    }
+
     @Test fun theSizeGuardFollowsAPhoneThatBacksAway() {
         // Verified at 0.3 m, then the camera backs to 0.6 m while sliding sideways, the label shrinking from 300 px to 150
         val label = Vec3(0.0, 0.0, -0.3)

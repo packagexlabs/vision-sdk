@@ -51,6 +51,8 @@ data class Prefs(
     val arPinRefine: Boolean = true,
     // AR read-rate boost (Settings › Advanced, drift plan P2c): on by default; off keeps the counter's refresh schedule.
     val arReadBoost: Boolean = true,
+    // AR session recording (Settings › Advanced): each AR Item Count run recorded for replay; off by default (large files).
+    val arRecord: Boolean = false,
 )
 
 interface PreferencesRepository {
@@ -80,6 +82,7 @@ private object PrefKeys {
     val arPinRules = stringPreferencesKey("v5.pref.arPinRules")
     val arPinRefine = booleanPreferencesKey("v5.pref.arPinRefine")
     val arReadBoost = booleanPreferencesKey("v5.pref.arReadBoost")
+    val arRecord = booleanPreferencesKey("v5.pref.arRecord")
 }
 
 internal fun decodePrefs(p: Preferences): Prefs = Prefs(
@@ -101,6 +104,7 @@ internal fun decodePrefs(p: Preferences): Prefs = Prefs(
     arPinRules = p[PrefKeys.arPinRules]?.let { runCatching { PinRules.valueOf(it) }.getOrNull() } ?: PinRules.ANDROID,
     arPinRefine = p[PrefKeys.arPinRefine] ?: true,
     arReadBoost = p[PrefKeys.arReadBoost] ?: true,
+    arRecord = p[PrefKeys.arRecord] ?: false,
 )
 
 @Singleton
@@ -139,4 +143,5 @@ internal fun encodePrefs(p: MutablePreferences, next: Prefs) {
     if (next.arPinRules != cur.arPinRules) p[PrefKeys.arPinRules] = next.arPinRules.name
     if (next.arPinRefine != cur.arPinRefine) p[PrefKeys.arPinRefine] = next.arPinRefine
     if (next.arReadBoost != cur.arReadBoost) p[PrefKeys.arReadBoost] = next.arReadBoost
+    p[PrefKeys.arRecord] = next.arRecord
 }

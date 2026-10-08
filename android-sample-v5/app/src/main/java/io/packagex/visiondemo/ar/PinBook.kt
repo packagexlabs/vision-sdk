@@ -10,6 +10,7 @@ import io.packagex.arcount.Ray
 import io.packagex.arcount.Read
 import io.packagex.arcount.Vec3
 import java.util.Arrays
+import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.hypot
 import kotlin.math.max
@@ -115,8 +116,100 @@ internal const val PIN_RETIRE_WINDOW_NS = 3 * PIN_RETIRE_NS
  */
 internal const val PIN_COUNTED_CLAIMS = 2
 
+// ponytail: 0.3 m, a map correction's reach (11:53: ARCore came back 16 cm off after a lost second). A ceiling: two
+// units of one code over 0.3 m apart that no image shows together keep both pins only if no map correction comes
+/** Rule 7: a single unit's pin left behind by a map correction goes for a newer pin of its code this near */
+internal const val PIN_RELOCATE_M = 0.3
+
 /** Rule 7: an engine box the batch's image did not decode, inflated by this fraction a side, shields at most one pin */
 internal const val PIN_SHIELD_INFLATE = 0.1
+
+// ponytail: from the 2026-10-07 traces. A scan-line decode's quad is far flatter than its code's other reads (15:03,
+// UNIT-T: aspects 0.00-0.20 against 0.30-0.40, and 25 of 53 landed 1.1-1.6 cm off every unit, against 1 of 218 wider ones),
+// but a long label is flat too: PX-0001-2026-ARCOUNT reads at 0.15-0.20 every time, and a fixed 0.2 bore it no pin at all
+// (11:53). So a read is thin against its own code's reads: under [PIN_THIN_SHARE] of their median aspect, or, before
+// [PIN_THIN_MIN_READS] of them, under [PIN_THIN_FLOOR]
+/** Rule 5: a read whose quad's aspect (short side / long side) is under this share of its code's median feeds no candidate */
+internal const val PIN_THIN_SHARE = 0.5
+
+/** Rule 5: before this many reads of a code, a read is thin under [PIN_THIN_FLOOR] */
+internal const val PIN_THIN_MIN_READS = 5
+
+/** Rule 5: the aspect under which a read is thin while its code has fewer than [PIN_THIN_MIN_READS] reads */
+internal const val PIN_THIN_FLOOR = 0.12
+
+/** Rule 5: how many of a code's newest reads' aspects make its median */
+internal const val PIN_THIN_HISTORY = 31
+
+// ponytail: 0.5, from the 2026-10-07 traces: the ghost births of 15:03 lay 0.6-1.9 cm from a pin of their code (pitch
+// 3.2 and 12 cm), real units' births at least 1.8 cm (UNIT-T, 3.2 cm pitch) from the nearest; 0.75 would have stopped two
+// of those. A ceiling: a pin off its label by more than this still lets its label's pin be born beside it
+/** Rule 5: once a code's pitch is known, no pin of it is born nearer than this share of the pitch to one of its pins */
+internal const val PIN_BIRTH_GUARD = 0.5
+
+// ponytail: 1 cm, under the 2 cm a corroborating depth point may lie off a plane; 2026-10-07 (second replay of 15:54's
+// recording) ARCore moved the table from y -0.19 to -0.117 and the pins held at -0.19 landed 172-359 px off their units
+/** A pin held on a plane follows it once ARCore's plane lies more than this off its point, metres ([Pin.followPlane]) */
+internal const val PIN_PLANE_FOLLOW_M = 0.01
+
+/** A plane hit's normal in its pose's frame (ARCore: the hit pose's y axis) */
+private val UP = Vec3(0.0, 1.0, 0.0)
+
+// ponytail: 10 s from the session's first tracked frame. 2026-10-07: the first plane came 4.6, 6.6, 8.9 and 5.2-7.3 s
+// after tracking began in the runs that counted right (21.5 s at 14:46, 29.7 s at 12:34), so 5 s mostly gave up just
+// before it; with none, every pin of 14:07 and 14:10 was born 2-4 s in, at the default depth or the nominal width.
+// Raise it to wait longer for a surface ARCore is slow to find; lower it if a surface it never finds (glass, a plain
+// white desk) keeps the user waiting
+/** Rule 7's cover for a counted pin: the birth guard's radius ([PIN_BIRTH_GUARD] of [pitch]), its label's [widthM] before a pitch is known */
+internal fun takeOverRadius(pitch: Double?, widthM: Double): Double = pitch?.let { PIN_BIRTH_GUARD * it } ?: widthM.takeIf { it > 0.0 } ?: PIN_MERGE_M
+
+/**
+ * Rule 7: whether [q] takes the counted [pin]'s place: a pin of its code born since [pin]'s last good claim, [lateralM] off
+ * the ray its label's reads land on now, within [radius] ([takeOverRadius]); never a neighbouring unit's older pin
+ */
+internal fun takesOver(q: Pin, pin: Pin, lateralM: Double, radius: Double): Boolean =
+    q.code == pin.code && q.bornNs > pin.lastGoodNs && lateralM <= radius
+
+/** Rule 5's surface gate holds births this long after the first tracked frame while no plane tracks, then gives up */
+internal const val GATE_TIMEOUT_NS = 10_000_000_000L
+
+/**
+ * Rule 5's surface gate for a session: births need a real surface ([needsSurface]) once a plane tracks, and before that
+ * until the session has tracked for [GATE_TIMEOUT_NS]; then, with still no plane, the old births return (the nominal
+ * width, the default depth), so a surface ARCore never finds still counts. A plane found later closes it again.
+ */
+class BirthGate {
+    enum class State(val trace: String) { HOLDING("holding"), SURFACE("surface"), FALLBACK("fallback") }
+
+    private var trackedSinceNs = Long.MIN_VALUE
+
+    /** Whether a plane has tracked in this session */
+    var planeSeen = false
+        private set
+
+    var state = State.HOLDING
+        private set
+
+    /** One frame at [timestampNs]: whether it tracks, and whether a plane tracks now ([planeTracks], sticky) */
+    fun frame(timestampNs: Long, tracking: Boolean, planeTracks: Boolean) {
+        if (tracking && trackedSinceNs == Long.MIN_VALUE) trackedSinceNs = timestampNs
+        if (planeTracks) planeSeen = true
+        state = when {
+            planeSeen -> State.SURFACE
+            trackedSinceNs != Long.MIN_VALUE && timestampNs - trackedSinceNs >= GATE_TIMEOUT_NS -> State.FALLBACK
+            else -> State.HOLDING
+        }
+    }
+
+    val needsSurface: Boolean get() = state != State.FALLBACK
+
+    /** A new session */
+    fun reset() {
+        trackedSinceNs = Long.MIN_VALUE
+        planeSeen = false
+        state = State.HOLDING
+    }
+}
 
 /** A pin or candidate never counts as nearer than this to the camera, metres (the label width and pitch at its range, a re-init's depth) */
 internal const val PIN_MIN_RANGE_M = 0.1
@@ -176,7 +269,7 @@ class PinMotion {
  * [centreV], its corners' box inflated by [PIN_BOX_INFLATE] ([minU] .. [maxV]) and [matchRadiusPx]; that image's
  * [camera] and [intrinsics], to project pins into it; whether the hit lies on a plane ([onPlane]) and where its point
  * came from ([source]: a valid hit, the nominal width, the nearest hit, or no hit at all, [guessed]); its quad's width
- * ([Read.widthPx]) and its symbology's nominal width ([nominalWidthM], metres; 0 none).
+ * ([Read.widthPx]), its next side ([heightPx]) and its symbology's nominal width ([nominalWidthM], metres; 0 none).
  */
 data class Sighting(
     val code: String,
@@ -196,9 +289,13 @@ data class Sighting(
     val source: HitSource = HitSource.HIT,
     val widthPx: Double = 0.0,
     val nominalM: Double = 0.0,
+    val heightPx: Double = 0.0,
 ) {
     /** No hit at all: [defaultPick]'s point */
     val guessed: Boolean get() = source == HitSource.DEFAULT
+
+    /** Its quad's short side over its long side; NaN with no size */
+    val aspect: Double get() = if (widthPx > 0.0 && heightPx > 0.0) minOf(widthPx, heightPx) / maxOf(widthPx, heightPx) else Double.NaN
 }
 
 /**
@@ -242,7 +339,7 @@ fun sightingOf(
     val radius = maxOf(maxU - minU, maxV - minV, floorPx)
     return Sighting(
         code, hit, rotation, ray, read.centreU, read.centreV, minU, minV, maxU, maxV, radius, capture.camera, capture.intrinsics,
-        onPlane, source, read.widthPx, nominalM,
+        onPlane, source, read.widthPx, nominalM, hypot(c[4] - c[2], c[5] - c[3]),
     )
 }
 
@@ -369,6 +466,22 @@ class Pin(
         anchors.compose(old.inverse() * to)
     }
 
+    /**
+     * Its plane is now the one through [at] with unit [normal] (world; ARCore re-estimated it): when its point lies more than
+     * [PIN_PLANE_FOLLOW_M] off it, the point is held on the new plane from now on ([PinEstimator.lockToPlane]), sliding
+     * along its newest ray, so it keeps its place in that image. True when it moved. Only a pin held on a plane.
+     */
+    fun followPlane(at: Vec3, normal: Vec3): Boolean {
+        if (!est.onPlane) return false
+        val w = position
+        if (abs((w.x - at.x) * normal.x + (w.y - at.y) * normal.y + (w.z - at.z) * normal.z) <= PIN_PLANE_FOLLOW_M) return false
+        val toAnchor = anchors.pose(anchors.newest).inverse()
+        val c = toAnchor.apply(at)
+        val n = toAnchor.rotate(normal)
+        est.lockToPlane(c.x, c.y, c.z, n.x, n.y, n.z)
+        return true
+    }
+
     /** Rule 6: [other]'s newest rays, carried from its anchor's frame into this one's (their newest poses), refine this point */
     fun absorb(other: Pin) {
         if (!est.started || !other.est.started) return
@@ -469,6 +582,9 @@ class PinBook {
         /** Each sighting's world ray, for the pin's estimator (rule 9) */
         val rays = ArrayList<Ray>()
         var lastRotation = Quat.IDENTITY
+
+        /** The newest plane hit's rotation (its y axis the plane's normal), for a pin born on the plane */
+        var planeRotation: Quat? = null
         var lastSeenNs = 0L
 
         /** The per-axis median of [positions] (rule 5), kept until they change */
@@ -480,6 +596,19 @@ class PinBook {
 
     /** Each code's pitch between identical units, metres, from the newest image that read it twice (rule 2) */
     private val pitches = HashMap<String, Double>()
+
+    /** Each code's newest reads' aspects ([Sighting.aspect]), a ring of [PIN_THIN_HISTORY], for [thin] */
+    private class Aspects {
+        val ring = DoubleArray(PIN_THIN_HISTORY)
+        var count = 0
+        var next = 0
+    }
+    private val aspects = HashMap<String, Aspects>()
+    private val aspectSort = DoubleArray(PIN_THIN_HISTORY)
+
+    /** Which of one place()'s sightings are thin ([thin]), by index, and the others ([place]'s scratch) */
+    private var thinOf = BooleanArray(8)
+    private val kept = ArrayList<Sighting>()
     private var nextId = 1
 
     /** A claim's ray in its pin's anchor frame (scratch) */
@@ -541,6 +670,18 @@ class PinBook {
      */
     var mapMovedNs = Long.MIN_VALUE
 
+    /**
+     * Rule 5's surface gate ([BirthGate.needsSurface], [ArPins] sets it each frame): under [PinRules.ANDROID] only a read
+     * hitting a real surface or a verified pin's depth feeds a candidate; the others are [held] (they still claim)
+     */
+    var birthsNeedSurface = false
+
+    /** The reads the surface gate kept from the candidates so far, the newest captured at [lastHeldNs] */
+    var held = 0
+        private set
+    var lastHeldNs = Long.MIN_VALUE
+        private set
+
     val pins: List<Pin> get() = list
     val candidateCount: Int get() = candidates.size
 
@@ -568,17 +709,34 @@ class PinBook {
      * the stale pin retires.
      */
     fun place(
-        sightings: List<Sighting>,
+        batch: List<Sighting>,
         captureNs: Long,
         nowNs: Long,
         mayCreate: Boolean,
         tracked: List<TrackedBox> = emptyList(),
         anchor: (Pin) -> Boolean,
     ): Placed {
-        if (sightings.isEmpty()) return Placed.NONE
+        if (batch.isEmpty()) return Placed.NONE
         val android = rules == PinRules.ANDROID
         val refining = android && refine
-        if (android) learnPitches(sightings)
+        if (thinOf.size < batch.size) thinOf = BooleanArray(batch.size * 2)
+        var sightings = batch
+        if (android) {
+            var thins = 0
+            for (i in batch.indices) {
+                thinOf[i] = thin(batch[i]) // against the reads before this batch
+                if (thinOf[i]) thins++
+            }
+            for (i in batch.indices) remember(batch[i])
+            if (thins > 0) { // rule 5: a scan-line decode neither claims nor births, nor teaches a pitch
+                kept.clear()
+                for (i in batch.indices) if (!thinOf[i]) kept += batch[i]
+                sightings = kept
+                for (i in sightings.indices) thinOf[i] = false
+                if (sightings.isEmpty()) return Placed.NONE
+            }
+            learnPitches(sightings)
+        }
         val removed = ArrayList<Pin>()
         val claims = ArrayList<Claim>()
         val voided = ArrayList<Claim>(0)
@@ -656,12 +814,12 @@ class PinBook {
         // new pin is born on it
         for (r in reseed.indices) {
             val (run, runNs) = reseed[r]
-            if (accumulate(run, runNs, nowNs, mayCreate, android, anchor)) removed += mergeSiblings()
+            if (accumulate(run, runNs, nowNs, mayCreate, android, android && thin(run), anchor)) removed += mergeSiblings()
         }
         reseed.clear()
         for (i in sightings.indices) {
             if (i in owned) continue
-            if (accumulate(sightings[i], captureNs, nowNs, mayCreate, android, anchor)) removed += mergeSiblings()
+            if (accumulate(sightings[i], captureNs, nowNs, mayCreate, android, android && thinOf[i], anchor)) removed += mergeSiblings()
         }
         val retired = if (android) retire(sightings, good, captureNs, tracked) else emptyList()
         return Placed(removed, claims, retired, voided, reinits ?: emptyList())
@@ -793,27 +951,29 @@ class PinBook {
     /**
      * Rule 2: each code read twice or more in one image learns its pitch, the smallest angle between two of its rays
      * times their range (the mean of its reads' points, within [PIN_MIN_DEPTH_M]..[PIN_MAX_DEPTH_M]), at least
-     * [PIN_MIN_PITCH_M]
+     * [PIN_MIN_PITCH_M]. Thin reads ([thin]) teach nothing: their centre is not their label's (15:03 and 12:34,
+     * UNIT-T: every image that learned under 70 % of the 3.2 cm pitch, 12 and 13 of them, had one).
      */
     private fun learnPitches(sightings: List<Sighting>) {
         if (sightings.size < 2) return
         // Each code once, at its first sighting, its sightings in batch order (as grouping them would give them)
         for (first in sightings.indices) {
+            if (thinOf[first]) continue
             val code = sightings[first].code
             var seen = false
-            for (i in 0 until first) if (sightings[i].code == code) seen = true
+            for (i in 0 until first) if (sightings[i].code == code && !thinOf[i]) seen = true
             if (seen) continue
             var count = 0
-            for (i in first until sightings.size) if (sightings[i].code == code) count++
+            for (i in first until sightings.size) if (sightings[i].code == code && !thinOf[i]) count++
             if (count < 2) continue
             var angle = Double.MAX_VALUE
             var sum = 0.0
             for (i in first until sightings.size) {
                 val a = sightings[i]
-                if (a.code != code) continue
+                if (a.code != code || thinOf[i]) continue
                 for (j in i + 1 until sightings.size) {
                     val b = sightings[j]
-                    if (b.code == code) angle = minOf(angle, acos((a.ray.dir dot b.ray.dir).coerceIn(-1.0, 1.0)))
+                    if (b.code == code && !thinOf[j]) angle = minOf(angle, acos((a.ray.dir dot b.ray.dir).coerceIn(-1.0, 1.0)))
                 }
                 sum += norm(a.hit.x - a.ray.origin.x, a.hit.y - a.ray.origin.y, a.hit.z - a.ray.origin.z)
             }
@@ -822,9 +982,21 @@ class PinBook {
         }
     }
 
-    /** iOS accumulateCandidate; true when a pin was born */
-    private fun accumulate(s: Sighting, captureNs: Long, nowNs: Long, mayCreate: Boolean, android: Boolean, anchor: (Pin) -> Boolean): Boolean {
-        if (!mayCreate) return false
+    /**
+     * iOS accumulateCandidate; true when a pin was born. Android (rule 5) adds: a [thin] read feeds no
+     * candidate, nor, while [birthsNeedSurface], one whose point is no real surface's ([HitSource.HIT]) or a verified
+     * pin's ([HitSource.PIN]): it is [held]; with [refine], a read seen near a pin of its code in its own image
+     * ([nearAPinInItsImage]) feeds none, a candidate confirmed within [PIN_BIRTH_GUARD] of its code's pitch of one of its
+     * pins is dropped, no pin born, and a pin born on a plane is held on it ([PinEstimator.lockToPlane]).
+     */
+    private fun accumulate(s: Sighting, captureNs: Long, nowNs: Long, mayCreate: Boolean, android: Boolean, thin: Boolean, anchor: (Pin) -> Boolean): Boolean {
+        if (!mayCreate || thin) return false
+        if (android && birthsNeedSurface && s.source != HitSource.HIT && s.source != HitSource.PIN) {
+            held++
+            lastHeldNs = captureNs
+            return false
+        }
+        if (android && refine && nearAPinInItsImage(s, captureNs)) return false // frozen, a re-birth is how a pin gets back on its label
         // The stale go, the others keeping their order (no predicate lambda per read)
         var stale = candidates.size - 1
         while (stale >= 0) {
@@ -847,12 +1019,14 @@ class PinBook {
         }
         cand.median = null
         cand.lastRotation = s.rotation
+        if (s.onPlane) cand.planeRotation = s.rotation
         cand.lastSeenNs = captureNs
         if (cand.positions.size < PIN_CONFIRM_COUNT) return false
         candidates.remove(cand)
         // Born at the per-axis median of the agreeing sightings, turned as the last hit (iOS birthTransform); on a
         // plane when most of them were, as the median then lies on it, and a guess when most of them hit nothing
         val at = medianOf(cand)
+        if (android && refine && tooNear(s.code, at)) return false // frozen, a re-birth is how a pin gets back on its label
         val n = cand.positions.size
         val pin = Pin(
             nextId++, s.code, Pose(at, cand.lastRotation),
@@ -861,10 +1035,84 @@ class PinBook {
             bornNs = captureNs,
             widthM = labelWidthM(s, at),
         ).also { it.lastSeenNs = nowNs }
-        if (android && refine) startEstimate(pin, cand, s)
+        if (android && refine) {
+            startEstimate(pin, cand, s)
+            val q = cand.planeRotation
+            if (pin.bornOnPlane && q != null) {
+                val toAnchor = pin.pose.inverse()
+                val c = toAnchor.apply(at)
+                val normal = toAnchor.rotate(q.rotate(UP))
+                pin.est.lockToPlane(c.x, c.y, c.z, normal.x, normal.y, normal.z)
+            }
+        }
         if (!anchor(pin)) return false
         list += pin
         return true
+    }
+
+    /**
+     * Rule 5: whether [s] is a scan-line decode, its centre not its label's: its quad's [Sighting.aspect] under
+     * [PIN_THIN_SHARE] of its code's median (the [PIN_THIN_HISTORY] newest reads [remember] kept), or, before
+     * [PIN_THIN_MIN_READS] of them, under [PIN_THIN_FLOOR]. A quad with no size is not thin.
+     */
+    private fun thin(s: Sighting): Boolean {
+        val a = s.aspect
+        if (a.isNaN()) return false
+        val seen = aspects[s.code]
+        if (seen == null || seen.count < PIN_THIN_MIN_READS) return a < PIN_THIN_FLOOR
+        System.arraycopy(seen.ring, 0, aspectSort, 0, seen.count)
+        Arrays.sort(aspectSort, 0, seen.count)
+        val n = seen.count
+        val median = if (n % 2 == 1) aspectSort[n / 2] else (aspectSort[n / 2 - 1] + aspectSort[n / 2]) / 2
+        return a < PIN_THIN_SHARE * median
+    }
+
+    /** [s]'s aspect into its code's ring, for [thin] */
+    private fun remember(s: Sighting) {
+        val a = s.aspect
+        if (a.isNaN()) return
+        val seen = aspects.getOrPut(s.code) { Aspects() }
+        seen.ring[seen.next] = a
+        seen.next = (seen.next + 1) % PIN_THIN_HISTORY
+        if (seen.count < PIN_THIN_HISTORY) seen.count++
+    }
+
+    /**
+     * Rule 5's guard: whether a pin of [code] lies within [PIN_BIRTH_GUARD] of its pitch of [at] (none until the pitch is
+     * known). On 2026-10-07 (15:03) a read of UNIT-C voided as its pin's neighbour (rule 3), and thin UNIT-T reads,
+     * were born 0.6-1.9 cm from their units' pins and stayed as counted ghosts.
+     */
+    private fun tooNear(code: String, at: Vec3): Boolean {
+        val pitch = pitches[code] ?: return false
+        for (pin in list) if (pin.code == code && apart(pin.position, at) < PIN_BIRTH_GUARD * pitch) return true
+        return false
+    }
+
+    /**
+     * Rule 5's guard in [s]'s own image, whatever the depths: whether a pin of its code, where it stood at the capture,
+     * is seen inside [s]'s quad, or within [PIN_BIRTH_GUARD] of its code's pitch (its label's width before a pitch is
+     * known) of the read's centre, in pixels at that pin's depth. [tooNear] measures in the world, where a read of a
+     * labelled unit whose hit ARCore put on the table re-estimated 6 cm lower is not near that unit's pin (device
+     * replays of 15:54's recording, 2026-10-07: the table at 2-4 heights in one replay, 23 and 24 pins for 17).
+     */
+    private fun nearAPinInItsImage(s: Sighting, captureNs: Long): Boolean {
+        val toCamera = inverses[s.camera]
+        val pitch = pitches[s.code]
+        // The quad's own box: the sighting's is inflated by PIN_BOX_INFLATE a side
+        val padU = PIN_BOX_INFLATE * (s.maxU - s.minU) / (1 + 2 * PIN_BOX_INFLATE)
+        val padV = PIN_BOX_INFLATE * (s.maxV - s.minV) / (1 + 2 * PIN_BOX_INFLATE)
+        for (pin in list) {
+            if (pin.code != s.code) continue
+            val p = pin.positionAt(captureNs)
+            val near = applied(toCamera, p.x, p.y, p.z) { cx, cy, cz ->
+                projected(s.intrinsics, cx, cy, cz, { false }) { u, v ->
+                    val inQuad = u >= s.minU + padU && u <= s.maxU - padU && v >= s.minV + padV && v <= s.maxV - padV
+                    inQuad || hypot(u - s.centreU, v - s.centreV) <= PIN_BIRTH_GUARD * (pitch ?: pin.widthM) * s.intrinsics.fx / -cz
+                }
+            }
+            if (near) return true
+        }
+        return false
     }
 
     /**
@@ -875,7 +1123,21 @@ class PinBook {
     private fun joins(s: Sighting, c: Candidate, android: Boolean): Boolean {
         if (!android) return lateral(s.ray, c.positions.last()) < PIN_CANDIDATE_RADIUS_M
         val m = medianOf(c)
-        return lateral(s.ray, m) < maxOf(PIN_CANDIDATE_MIN_M, labelWidthM(s, m) / 2)
+        return lateral(s.ray, m) < maxOf(PIN_CANDIDATE_MIN_M, labelWidthM(s, m) / 2) && sameDepth(s, m)
+    }
+
+    /**
+     * Rule 5: whether [s]'s point and the candidate's median [m] lie at depths along [s]'s ray within [PIN_SIZE_RATIO]
+     * of each other. On one line of sight the lateral test cannot tell the table from the floor behind it: 2026-10-08
+     * 12:17, a read of a UNIT-T on the table at 0.24 m joined two of its earlier reads' points on the floor at 1.07 m,
+     * and the median of the three bore the pin on the floor.
+     */
+    private fun sameDepth(s: Sighting, m: Vec3): Boolean {
+        val o = s.ray.origin
+        val d = s.ray.dir
+        val a = (s.hit.x - o.x) * d.x + (s.hit.y - o.y) * d.y + (s.hit.z - o.z) * d.z
+        val b = (m.x - o.x) * d.x + (m.y - o.y) * d.y + (m.z - o.z) * d.z
+        return a > 0.0 && b > 0.0 && a <= b * PIN_SIZE_RATIO && b <= a * PIN_SIZE_RATIO
     }
 
     /** [c]'s per-axis median, made once per change of its positions */
@@ -961,6 +1223,11 @@ class PinBook {
                 i++
                 continue
             }
+            if (refine && relocated(pin) && !wellInside(if (refine) pin.positionAt(captureNs) else pin.position, sightings[0].camera, sightings[0].intrinsics, inverses[sightings[0].camera])) {
+                list.removeAt(i)
+                (out ?: ArrayList<Pin>().also { out = it }) += pin
+                continue
+            }
             val s = firstOfCode(sightings, pin.code)
             if (s != null) {
                 if (refine && captureNs - pin.lastSightedNs > PIN_RETIRE_NS) pin.misses = 0
@@ -992,26 +1259,46 @@ class PinBook {
     }
 
     /**
-     * Rule 7 for a counted [pin]: whether a newer pin of its code lies within the merge radius ([PIN_MERGE_M]) or one
-     * pitch of [Pin.landedRay], a claim that missed it since its last good one: its label's reads land there now, and
-     * that pin is on them
+     * Rule 7 for a counted [pin]: whether a pin of its code born since its last good claim lies within the birth guard's
+     * radius ([PIN_BIRTH_GUARD] of its pitch; its label's width before a pitch is known) of [Pin.landedRay], a claim that
+     * missed it since: its label's reads land there now, and that pin was born on them. A neighbouring unit's pin is
+     * neither: 2026-10-07 15:39, EAN pin 6 (86 claims) went at 28.5 s for pin 7, its neighbour one pitch (6 cm) away born
+     * 0.2 s after it, and EAN ended 2 of 3; UNIT-T pins 9, 10 and 15 went for pins 18-20, born at 26.3 s after their last
+     * claims, 1.0-1.3 cm off
      */
     private fun takenOver(pin: Pin, captureNs: Long): Boolean {
         val ray = pin.landedRay ?: return false
         if (pin.landedNs <= pin.lastGoodNs) return false
-        val radius = maxOf(PIN_MERGE_M, pitches[pin.code] ?: 0.0)
+        val radius = takeOverRadius(pitches[pin.code], pin.widthM)
         for (q in list) {
-            if (q === pin || q.code != pin.code || q.bornNs <= pin.bornNs) continue
+            if (q === pin) continue
             val p = if (refine) q.positionAt(captureNs) else q.position
-            if (lateral(ray, p.x, p.y, p.z) <= radius) return true
+            if (takesOver(q, pin, lateral(ray, p.x, p.y, p.z), radius)) return true
+        }
+        return false
+    }
+
+    /**
+     * Rule 7: whether [pin] is a code's one unit (no image read it twice: no pitch) that a map correction since its last
+     * good claim left behind: a newer pin of its code, born since then within [PIN_RELOCATE_M], is its label's now. It
+     * goes while out of the batch's view, where it may stay for good; in view and unread it stays, as a unit the engine
+     * cannot read would (the counted rule). 2026-10-07 11:53: tracking was lost for 1.1 s and ARCore came back 16 cm off;
+     * PX-0001's counted pin stayed 22 cm from its label, out of view, and its new pin stood there.
+     */
+    private fun relocated(pin: Pin): Boolean {
+        if (pitches[pin.code] != null || mapMovedNs <= pin.lastGoodNs) return false
+        for (q in list) {
+            if (q !== pin && q.code == pin.code && q.bornNs > pin.lastGoodNs && apart(q.position, pin.position) <= PIN_RELOCATE_M) return true
         }
         return false
     }
 
     /**
      * The pins the [tracked] boxes shield into [shielded]: each box the one pin of its code (any code, for a box with
-     * none) that lies in it at the capture, in [s]'s image (a batch's sightings share their image), nearest its centre.
-     * One box, one pin: a ghost between two tight identical units is not shielded by its neighbours' boxes.
+     * none) that lies in it at the capture, in [s]'s image (a batch's sightings share their image), nearest its centre,
+     * a counted one ([PIN_COUNTED_CLAIMS]) before any other. One box, one pin: a ghost between two tight identical units
+     * is not shielded by its neighbours' boxes, nor by its own unit's while that unit's counted pin is in it (15:03: a
+     * never-claimed UNIT-T ghost 1.3 cm off a counted unit's pin met rule 7 from 34.2 s and still outlived the run).
      */
     private fun shield(s: Sighting, captureNs: Long, tracked: List<TrackedBox>) {
         shielded.clear()
@@ -1034,6 +1321,8 @@ class PinBook {
             val box = tracked[b]
             var best = -1
             var bestPx = Double.POSITIVE_INFINITY
+            var bestCounted = -1
+            var bestCountedPx = Double.POSITIVE_INFINITY
             for (j in list.indices) {
                 if (box.code != null && list[j].code != box.code) continue
                 val u = shieldU[j]
@@ -1044,7 +1333,12 @@ class PinBook {
                     best = j
                     bestPx = off
                 }
+                if (list[j].goodClaims >= PIN_COUNTED_CLAIMS && off < bestCountedPx) {
+                    bestCounted = j
+                    bestCountedPx = off
+                }
             }
+            if (bestCounted >= 0) best = bestCounted
             if (best >= 0) shielded.add(list[best].id)
         }
     }
@@ -1060,6 +1354,7 @@ class PinBook {
         list.clear()
         candidates.clear()
         pitches.clear()
+        aspects.clear()
     }
 
     /** The per-axis median of [ps], or of those [valid] marks */
