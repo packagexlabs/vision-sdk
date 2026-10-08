@@ -350,7 +350,7 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
     }
     is ScanResult.Ocr -> Triple(result.title, result.subtitle, true)
     is ScanResult.Pending -> Triple(result.title, result.subtitle, false)
-    ScanResult.Price -> Triple("Found ${tags.size} Items", "${tags.count { !it.valid }} invalid", true)
+    ScanResult.Price -> Triple("Found ${tags.size} Items", priceSubtitle(tags), true)
     is ScanResult.Retrieval -> {
         val n = result.rows.count { it.inList }
         Triple(
@@ -380,7 +380,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
             listOf(fields, tables).filter { it.isNotBlank() }.joinToString("\n")
         }
     }
-    ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
+    ScanResult.Price -> priceSummary(tags)
     is ScanResult.Retrieval -> result.rows.joinToString("\n") { r ->
         listOfNotNull(r.code, r.name, if (r.inList) "In list" else "Not in list", r.countText()).joinToString("\t")
     }
@@ -424,6 +424,9 @@ private fun PriceContent(tags: List<PriceTag>, onAction: (ScannerAction) -> Unit
                     Column(horizontalAlignment = Alignment.End) {
                         Text(t.price, style = mono(16.sp), color = PX.Ink)
                         Text("Expected ${t.expected}", style = inter(11.sp), color = PX.Muted)
+                        t.expiryLabel?.let {
+                            Text(it, style = inter(11.sp, if (t.expired) FontWeight.SemiBold else FontWeight.Normal), color = if (t.expired) PX.RedText else PX.Muted)
+                        }
                     }
                     Spacer(Modifier.width(8.dp))
                     Badge(text = if (t.valid) "Valid" else "Invalid", tone = if (t.valid) BadgeTone.Success else BadgeTone.Danger, dot = true)
@@ -932,3 +935,11 @@ private fun TableCard(table: OcrTable) {
 }
 
 // endregion
+
+/** The Price drawer's subtitle: "1 invalid", and " · 2 expired" when any tag is past its printed expiry. */
+internal fun priceSubtitle(tags: List<PriceTag>): String =
+    "${tags.count { !it.valid }} invalid" + tags.count { it.expired }.let { if (it > 0) " · $it expired" else "" }
+
+/** The Price drawer's copy text: one tag per line, SKU, price, validity and the expiry when the tag shows one. */
+internal fun priceSummary(tags: List<PriceTag>): String =
+    tags.joinToString("\n") { listOfNotNull(it.sku, it.price, if (it.valid) "Valid" else "Invalid", it.expiryLabel).joinToString("\t") }

@@ -572,20 +572,30 @@ class ScannerViewModel @Inject constructor(
             }
             is ScanEvent.PriceTag -> {   // iOS codeScannerViewDidCapturePrice: collect unique tags; the shutter shows them
                 if (s.mode != ScanMode.Price) return
-                val tag = PriceTag.from(e.data.productSKU, e.data.productPrice)
+                val tag = PriceTag.from(e.data.productSKU, e.data.productPrice, e.data.expiryDate, e.data.expiryText)
                 // The SDK reports a tag again on every agreeing read while it stays in view: only a tag that
                 // comes back after [TAG_GONE_MS] out of view is a rescan.
                 val rescan = tag.sku !in tagInView
                 tagInView.remove(tag.sku)?.cancel()
                 tagInView[tag.sku] = viewModelScope.launch { delay(TAG_GONE_MS); tagInView.remove(tag.sku) }
-                val listed = s.tags.any { it.sku == tag.sku }
+                val old = s.tags.firstOrNull { it.sku == tag.sku }
+                val listed = old != null
+                // A later read can carry the small expiry line an earlier one missed: the listed tag takes it.
+                if (old != null && tag.expiry != null && tag.expiry != old.expiry) {
+                    _state.update { st -> st.copy(tags = st.tags.map { if (it.sku == tag.sku) it.copy(expiry = tag.expiry, expiryText = tag.expiryText, expired = tag.expired) else it }) }
+                }
+                // Said once per scan of the tag, the first read that shows it expired.
+                if (tag.expired && (old?.expired != true || rescan)) {
+                    toast("This item has expired: ${tag.name} · ${tag.expiryLabel}")
+                    haptic()
+                }
                 if (listed && !rescan) return
                 if (!listed) _state.update { it.copy(tags = it.tags + tag) }
                 // Auto capture: a new tag, or a listed one scanned again, opens the list, as Auto opens a code's result.
                 // Manual keeps collecting for the shutter; a listed tag scanned again says so (its count doesn't change).
                 if (s.prefs.autoCapture && s.result == null && pendingShow == null && s.sheet == null && s.alert == null &&
                     s.phase == Phase.Idle && !s.gated) show(ScanResult.Price)
-                else if (listed && !s.prefs.autoCapture) toast("${tag.name} already in list")
+                else if (listed && !s.prefs.autoCapture && !tag.expired) toast("${tag.name} already in list")   // the expiry said more
             }
             is ScanEvent.Failure -> onFailure(e.e)
             // Vision Scanner's hint text (iOS seesText/seesDocument); DocAcq gets the same fields from its
