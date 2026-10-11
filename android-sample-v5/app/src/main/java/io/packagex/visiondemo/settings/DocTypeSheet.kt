@@ -68,6 +68,23 @@ fun DocTypeSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
         Text(deviceNote(state), style = inter(13.sp), color = PX.Muted)
     }
 
+    // The cloud-only types are the VLM ones; the backend model is "<family>_<size>", e.g. "orion_large".
+    if (!p.docType.onDevice) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SectionLabel("VLM model")
+            Segmented(
+                items = listOf("VScan" to "vscan", "Orion" to "orion"),
+                selection = p.vlmModel.substringBefore('_'),
+                onSelect = { f -> onAction(ScannerAction.UpdatePrefs { it.copy(vlmModel = f + "_" + it.vlmModel.substringAfter('_')) }) },
+            )
+            Segmented(
+                items = listOf("Small" to "small", "Medium" to "medium", "Large" to "large"),
+                selection = p.vlmModel.substringAfter('_'),
+                onSelect = { s -> onAction(ScannerAction.UpdatePrefs { it.copy(vlmModel = it.vlmModel.substringBefore('_') + "_" + s) }) },
+            )
+        }
+    }
+
     PXButton(title = "Done") { onAction(ScannerAction.DismissSheet) }
 }
 

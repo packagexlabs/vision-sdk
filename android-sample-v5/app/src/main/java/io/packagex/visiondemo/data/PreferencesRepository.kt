@@ -26,6 +26,8 @@ data class Prefs(
     val docType: DocType = DocType.SL,
     val modelSize: ModelSize = ModelSize.Micro,
     val processing: Processing = Processing.Cloud,
+    // Backend model for the VLM types, picked in the Document type sheet.
+    val vlmModel: String = "orion_large",
     val autoCapture: Boolean = false,
     val sound: Boolean = true,
     // iOS DemoModel.swift:67-68 default both to true.
@@ -70,6 +72,7 @@ private object PrefKeys {
     val docType = stringPreferencesKey("v5.pref.docType")
     val modelSize = stringPreferencesKey("v5.pref.modelSize")
     val processing = stringPreferencesKey("v5.pref.processing")
+    val vlmModel = stringPreferencesKey("v5.pref.vlmModel")
     val autoCapture = booleanPreferencesKey("v5.pref.autoCapture")
     val sound = booleanPreferencesKey("v5.pref.sound")
     val parseRecipient = booleanPreferencesKey("v5.pref.parseRecipient")
@@ -92,6 +95,7 @@ internal fun decodePrefs(p: Preferences): Prefs = Prefs(
     docType = p[PrefKeys.docType]?.let { runCatching { DocType.valueOf(it) }.getOrNull() } ?: DocType.SL,
     modelSize = p[PrefKeys.modelSize]?.let { runCatching { ModelSize.valueOf(it) }.getOrNull() } ?: ModelSize.Micro,
     processing = p[PrefKeys.processing]?.let { runCatching { Processing.valueOf(it) }.getOrNull() } ?: Processing.Cloud,
+    vlmModel = p[PrefKeys.vlmModel] ?: "orion_large",
     autoCapture = p[PrefKeys.autoCapture] ?: false,
     sound = p[PrefKeys.sound] ?: true,
     parseRecipient = p[PrefKeys.parseRecipient] ?: true,
@@ -131,6 +135,7 @@ internal fun encodePrefs(p: MutablePreferences, next: Prefs) {
     p[PrefKeys.docType] = next.docType.name
     p[PrefKeys.modelSize] = next.modelSize.name
     p[PrefKeys.processing] = next.processing.name
+    p[PrefKeys.vlmModel] = next.vlmModel
     p[PrefKeys.autoCapture] = next.autoCapture
     p[PrefKeys.sound] = next.sound
     p[PrefKeys.parseRecipient] = next.parseRecipient

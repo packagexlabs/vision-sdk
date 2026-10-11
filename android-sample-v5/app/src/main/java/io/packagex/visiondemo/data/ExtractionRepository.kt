@@ -113,9 +113,9 @@ class SdkExtractionRepository @Inject constructor(
     ): String {
         val api = ApiManager()
         return when (type) {
-            DocType.VLM -> api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = null)
+            DocType.VLM -> api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = null, model = vlmModel())
             DocType.Tire, DocType.IdCard, DocType.Plate, DocType.Meter ->
-                api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = VlmPrompts.spec(type)?.prompt)
+                api.vlmApiCallSync(apiKey = secrets.apiKey, bitmap = bitmap, prompt = VlmPrompts.spec(type)?.prompt, model = vlmModel())
             DocType.SL, DocType.BOL, DocType.IL, DocType.DC ->
                 if (processing == Processing.Device) {
                     // iOS activeModel: document classification is always micro, regardless of the
@@ -146,6 +146,9 @@ class SdkExtractionRepository @Inject constructor(
                 }
         }
     }
+
+    /** Backend model for every VLM call (default prompt and custom prompts), picked in the Document type sheet. */
+    private suspend fun vlmModel() = preferences.prefs.first().vlmModel
 
     companion object {
         /** iOS `DemoModel.swift:646-648`'s cloud shipping-label options: recipient/location match,
