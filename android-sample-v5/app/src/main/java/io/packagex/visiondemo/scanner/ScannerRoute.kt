@@ -175,8 +175,9 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                         }
                     },
                 ) {
-                    if (state.mode == ScanMode.Retrieval) {
-                        // AR Item Count: the AR session's view once past the gate and ARCore is installed (spec 5.10)
+                    if (state.mode == ScanMode.Retrieval && state.countStep) {
+                        // AR Item Count counting: the AR session's view once past the gate and ARCore is installed (spec
+                        // 5.10); step 1 reads barcodes on the SDK camera below (design v6)
                         if (state.arOn && !state.permissionDenied) ArSurface(controller = viewModel.ar, paused = state.paused)
                     } else if (state.mode == ScanMode.TextTemplates && state.tt.stream) {
                         TtStreamSurface(state, viewModel)
@@ -196,6 +197,9 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
             overlay = {
                 if (state.mode == ScanMode.Retrieval && state.arOn && !state.permissionDenied && state.result == null && !state.paused) {
                     ArCountOverlay(onTouch = { viewModel.onAction(ScannerAction.UserActive) })
+                }
+                if (state.arBuildTray) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) { ArBuildTray(state, viewModel::onAction) }
                 }
             },
             drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.tt.loaded, state.phase == Phase.Processing, viewModel::onAction) } },

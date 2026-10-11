@@ -78,6 +78,7 @@ import io.packagex.visiondemo.designsystem.glass
 import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
 import io.packagex.visiondemo.document.shown
+import io.packagex.visiondemo.model.DesignRect
 import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.Phase
 import io.packagex.visiondemo.model.ScanMode
@@ -98,7 +99,7 @@ import io.packagex.visiondemo.model.zooms
 @Composable
 fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Chrome")
-    val usesScanner = ownerFor(state.mode, state.tt.stream) == CameraOwner.Scanner
+    val usesScanner = ownerFor(state.mode, state.tt.stream, state.countStep) == CameraOwner.Scanner
     Column(modifier = modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -138,8 +139,16 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
         if (state.prefs.showHints && !state.permissionDenied) {
             HintBar(text = hintFor(state))
         }
+        if (state.arCountHud) ArCountHud(state, onAction)
 
         Spacer(modifier = Modifier.weight(1f))
+
+        if (state.arBuildTray) {
+            // AR Item Count step 1 (design v6): the shutter sits on the SKU tray ([ArBuildTray]), with no chip or zoom
+            ShutterRow(state = state, onAction = onAction, modifier = Modifier.padding(bottom = 12.dp))
+            Spacer(Modifier.height(arTrayHeight()))
+            return@Column
+        }
 
         val chip = chipFor(state)
         val showPill = (state.mode.isCode || state.mode.isDocument) && !state.gated
@@ -185,9 +194,12 @@ private val WindowInsets.Companion.chromeInsets: WindowInsets
 fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Viewfinder")
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val f = state.mode.viewfinder
-        val visible = f != null &&
-            viewfinderBracketsVisible(state.mode, state.prefs.multi, state.result != null, state.gated, state.permissionDenied)
+        // AR Item Count step 1 scans SKUs in single barcode mode: the Barcode frame raised to y 280 (at 318 it would run
+        // into the shutter row above the SKU tray, 414-486 on the artboard), one code at a time
+        val build = state.arBuildTray
+        val f = if (build) DesignRect(x = 20f, y = 280f, width = 350f, height = 122f) else state.mode.viewfinder
+        val visible = f != null && (build ||
+            viewfinderBracketsVisible(state.mode, state.prefs.multi, state.result != null, state.gated, state.permissionDenied))
         if (f != null && visible) {
             val insets = WindowInsets.chromeInsets.asPaddingValues()
             val insetTop = insets.calculateTopPadding()
@@ -412,9 +424,9 @@ private fun chipFor(state: ScannerUiState): Triple<String, String, ScannerAction
         } else {
             Triple(state.prefs.docType.label, "", ScannerAction.OpenSheet(SheetKind.DocType))
         }
-        ScanMode.Retrieval -> Triple(
-            "Item list",
-            "· ${state.items.size} ${if (state.items.size == 1) "code" else "codes"}",
+        ScanMode.Retrieval -> if (!state.countStep) null else Triple(
+            "SKU list",
+            "· ${state.items.size} ${if (state.items.size == 1) "SKU" else "SKUs"}",
             ScannerAction.OpenSheet(SheetKind.Items),
         )
         ScanMode.TextTemplates -> Triple(
@@ -435,7 +447,7 @@ private fun bottomReserveDp(state: ScannerUiState): Dp {
 
 internal fun hintFor(state: ScannerUiState): String {
     if (state.gated) return "Authentication required"
-    if (!state.detectionEnabled && ownerFor(state.mode, state.tt.stream) == CameraOwner.Scanner) return "Detection paused"
+    if (!state.detectionEnabled && ownerFor(state.mode, state.tt.stream, state.countStep) == CameraOwner.Scanner) return "Detection paused"
     when (state.phase) {
         Phase.Scanning -> return "Capturing…"
         Phase.Processing -> return if (state.mode == ScanMode.DocAcq) {
@@ -470,7 +482,11 @@ internal fun hintFor(state: ScannerUiState): String {
         } else {
             "Fit the whole page in view"
         }
-        ScanMode.Retrieval -> return retrievalHint(state.items, state.codesInView, state.arCount, state.findingSurface)   // nothing to capture
+        ScanMode.Retrieval -> return if (state.countStep) {
+            retrievalHint(state.items, state.codesInView, state.arCount, state.findingSurface, state.pinCounts)
+        } else {
+            buildHint(state.codeInFrame)
+        }
         ScanMode.Price -> if (state.tags.isEmpty()) {
             "Point at a price tag"
         } else {

@@ -158,7 +158,7 @@ private fun cardDescription(mode: ScanMode): String = when (mode) {
     ScanMode.Barcode -> "1D codes, one at a time or in bulk."
     ScanMode.QR -> "QR and 2D codes."
     ScanMode.Price -> "Read shelf tags and check prices."
-    ScanMode.Retrieval -> "Find items from a pick list."
+    ScanMode.Retrieval -> "Scan your SKUs, then count them on the shelf."
     ScanMode.Ocr -> "Labels, BOLs, IDs, plates, tires."
     ScanMode.DocAcq -> "Scan pages to a searchable PDF."
     ScanMode.TextTemplates -> "Match text to a saved template."

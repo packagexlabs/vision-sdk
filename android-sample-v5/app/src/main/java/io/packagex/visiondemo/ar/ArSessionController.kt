@@ -90,6 +90,9 @@ class ArSessionController @Inject constructor(
     private val _seen = MutableStateFlow(emptyList<String>())
     override val seen: StateFlow<List<String>> = _seen.asStateFlow()
 
+    private val _pinCounts = MutableStateFlow(emptyMap<String, Int>())
+    override val pinCounts: StateFlow<Map<String, Int>> = _pinCounts.asStateFlow()
+
     private val _findingSurface = MutableStateFlow(false)
     override val findingSurface: StateFlow<Boolean> = _findingSurface.asStateFlow()
 
@@ -260,9 +263,10 @@ class ArSessionController @Inject constructor(
             onView = {
                 _count.value = it.forUi()
                 _findingSurface.value = renderer?.holdingBirths == true // on every view: it also turns off without a code read
+                _pinCounts.value = renderer?.pinCounts ?: emptyMap()
                 if (tick.onView(it, SystemClock.uptimeMillis())) haptics.tick() // spec 5.5 Feedback
             },
-            onCodes = { inView, seen -> _codesInView.value = inView; _seen.value = seen },
+            onCodes = { inView, seen -> _codesInView.value = inView; _seen.value = seen; _pinCounts.value = renderer?.pinCounts ?: emptyMap() },
         )
         m.post(ArEvent.Items(info?.items ?: items))
         val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onFatal = ::onUpdateFailed, poses = poses)
@@ -286,6 +290,7 @@ class ArSessionController @Inject constructor(
         _screen.value = ArScreen.NONE
         _codesInView.value = emptyList()
         _seen.value = emptyList()
+        _pinCounts.value = emptyMap()
         _findingSurface.value = false
         if (replay != null && info != null) {
             val s = createSession(replay) ?: return
@@ -330,6 +335,7 @@ class ArSessionController @Inject constructor(
         _screen.value = ArScreen.NONE
         _codesInView.value = emptyList()
         _seen.value = emptyList()
+        _pinCounts.value = emptyMap()
         _findingSurface.value = false
     }
 

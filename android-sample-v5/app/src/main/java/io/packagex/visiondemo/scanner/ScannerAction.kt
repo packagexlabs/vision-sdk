@@ -59,6 +59,13 @@ sealed interface ScannerAction {
     data class RemoveItem(val sku: String) : ScannerAction
     /** The Items sheet's "Delete" (all). */
     data object ClearItems : ScannerAction
+    /** AR Item Count's "Start count" (design v6): on to step 2 with a fresh count; in step 2 ("Continue counting"),
+     *  only closes the sheet. */
+    data object StartCount : ScannerAction
+    /** The Items sheet's "Scan SKUs": back to step 1, where the shutter adds the SKU in the frame. */
+    data object ScanSkus : ScannerAction
+    /** Names a listed SKU; a blank [name] clears it. */
+    data class NameItem(val sku: String, val name: String) : ScannerAction
 
     // Result screen
     /** "Scan next" / "New Scan": closes the drawer (AR Item Count also starts a fresh count, keeping the list). */

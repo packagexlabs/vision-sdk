@@ -63,6 +63,8 @@ data class ScannerUiState(
     /** AR Item Count: every code the AR session read since it started or New Scan, the most recently first read first,
      *  at most 30 (the item list's "Seen" section). */
     val seen: List<String> = emptyList(),
+    /** AR Item Count: the AR session's live pins per code, its count of each code ([io.packagex.visiondemo.ar.ArCount.pinCounts]). */
+    val pinCounts: Map<String, Int> = emptyMap(),
     /** Item retrieval list: the codes to find (iOS `items`). */
     val items: List<String> = emptyList(),
     /** The items' names, SKU to name (iOS `catalogLookup`); a code may have none. */
@@ -84,6 +86,9 @@ data class ScannerUiState(
     val arCount: CountView = CountView.EMPTY,
     /** AR Item Count: past the entitlement gate with ARCore installed, so the AR session's view is shown and runs. */
     val arOn: Boolean = false,
+    /** AR Item Count (design v6): step 2, counting the list on the shelf; false is step 1, scanning the SKUs into it
+     *  ([arBuildTray]). Every entry into the mode starts at step 1. */
+    val countStep: Boolean = false,
     /** Text Templates: account, templates and integration mode (iOS `model.tt`). */
     val tt: TtState = TtState(),
     /** Text Templates Stream: the session's latest guidance or failure, for the hint (iOS `guidance`). */

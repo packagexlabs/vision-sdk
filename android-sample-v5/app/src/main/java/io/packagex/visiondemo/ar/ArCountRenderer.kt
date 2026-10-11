@@ -132,6 +132,9 @@ class ArCountRenderer(
     /** Any thread: the surface gate held a listed read's birth within the last second ([ArPins.holdingBirths]) */
     val holdingBirths: Boolean get() = pins.holdingBirths
 
+    /** Any thread: the live pins per code ([ArPins.perCode]) */
+    val pinCounts: Map<String, Int> get() = pins.perCode
+
     // Phase 0's measurements (GL thread)
     private val costs = FrameCosts()
     private val outlinesDrawn = DrawnOutlines()

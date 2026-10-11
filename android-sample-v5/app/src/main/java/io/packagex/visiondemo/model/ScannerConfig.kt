@@ -47,7 +47,17 @@ fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean, vlm: B
         showBoxes = false,
         needsEntitlement = true
     )
-    ScanMode.Retrieval, ScanMode.DocAcq -> ScannerConfig(
+    // AR Item Count's step 1 (design v6): single barcode mode — the SDK reads one barcode or QR code inside the frame
+    // per shutter into the SKU list, the app outlining it; step 2 runs on the AR session, which owns the camera then.
+    ScanMode.Retrieval -> ScannerConfig(
+        detection = DetectionMode.BarcodeOrQRCode,
+        multiple = false,
+        nthFrame = 7,
+        restrictToFrame = true,
+        showBoxes = true,
+        needsEntitlement = true
+    )
+    ScanMode.DocAcq -> ScannerConfig(
         detection = null,
         multiple = false,
         nthFrame = 7,

@@ -26,9 +26,10 @@ import java.io.IOException
 
 /** Pure rules behind [ScannerViewModel], ported from iOS `DemoModel`. */
 
-/** [ttStream]: Text Templates in Stream, where `PXScannerView` runs its own CameraX pipeline (iOS usesScanner). */
-internal fun ownerFor(mode: ScanMode, ttStream: Boolean = false) = when (mode) {
-    ScanMode.Retrieval -> CameraOwner.Ar
+/** [ttStream]: Text Templates in Stream, where `PXScannerView` runs its own CameraX pipeline (iOS usesScanner).
+ *  [countStep]: AR Item Count runs the AR session only for counting; its step 1 reads barcodes with the SDK (design v6). */
+internal fun ownerFor(mode: ScanMode, ttStream: Boolean = false, countStep: Boolean = true) = when (mode) {
+    ScanMode.Retrieval -> if (countStep) CameraOwner.Ar else CameraOwner.Scanner
     ScanMode.DocAcq -> CameraOwner.Document
     ScanMode.TextTemplates -> if (ttStream) CameraOwner.TextTemplates else CameraOwner.Scanner
     else -> CameraOwner.Scanner
@@ -160,20 +161,19 @@ internal fun noCodeCopy(mode: ScanMode, torchOn: Boolean): Triple<String, String
  * shows one; else, while the pins wait for a surface ([findingSurface]), to move slowly so ARCore finds it; else what is
  * in view of the list, and the units counted so far ([CountView.items]' lower bounds).
  */
-internal fun retrievalHint(items: List<String>, codesInView: List<String>, view: CountView, findingSurface: Boolean = false): String {
-    if (items.isEmpty()) {
-        val n = codesInView.size
-        return when (n) {
-            0 -> "Add item codes to find"
-            1 -> "1 code in view · add it from Item list"
-            else -> "$n codes in view · add them from Item list"
-        }
-    }
+internal fun retrievalHint(
+    items: List<String>,
+    codesInView: List<String>,
+    view: CountView,
+    findingSurface: Boolean = false,
+    pinCounts: Map<String, Int> = emptyMap(),
+): String {
+    if (items.isEmpty()) return "Add SKUs to count"
     view.prompt?.let { return promptText(it, view.bracket) }
     if (findingSurface) return "Move slowly to find the surface"
     if (codesInView.isEmpty()) return "Pan across the shelf"
     val n = codesInView.count { items.lists(it) }
-    val counted = view.items.sumOf { it.countLow }
+    val counted = items.sumOf { pinsOf(it, pinCounts) }
     return "${if (n == 0) "No" else "$n"} listed item${if (n == 1) "" else "s"} in view · $counted counted"
 }
 
@@ -192,6 +192,27 @@ internal fun retrievalRows(codesInView: List<String>, items: List<String>, count
     val counted = counts.filter { it.countHigh > 0 && items.lists(it.code) && codeKey(it.code) !in inView }.map { it.code }
     return (codesInView + counted).map(::row)
 }
+
+/** AR Item Count step 1's hint (design v6): one SKU at a time, added by the shutter. */
+internal fun buildHint(codeInView: Boolean): String =
+    if (codeInView) "Code in the frame · press the shutter" else "Align one barcode or QR code inside the frame"
+
+/** [code]'s live AR pins, one per unit on the shelf (GTINs compared as 14 digits): AR Item Count's count of it. */
+internal fun pinsOf(code: String, pinCounts: Map<String, Int>): Int =
+    codeKey(code).let { k -> pinCounts.entries.sumOf { (c, n) -> if (codeKey(c) == k) n else 0 } }
+
+/** AR Item Count step 2 (design v6): the listed SKUs read on the shelf since Start count, seen or pinned. */
+internal fun foundSkus(items: List<String>, seen: List<String>, pinCounts: Map<String, Int>): Set<String> {
+    val read = seen.mapTo(HashSet(), ::codeKey)
+    return items.filterTo(mutableSetOf()) { codeKey(it) in read || pinsOf(it, pinCounts) > 0 }
+}
+
+/** AR Item Count step 2's shutter (design v6): a row per listed SKU, Found (in [found]) or Missing, with its pins. */
+internal fun skuRows(items: List<String>, found: Set<String>, pinCounts: Map<String, Int>, names: Map<String, String> = emptyMap()): List<RetrievalRow> =
+    items.map { code ->
+        val n = pinsOf(code, pinCounts)
+        RetrievalRow(code, true, n, n, nameOf(code, names), found = code in found)
+    }
 
 /** [code]'s item name: its own, else that of the listed SKU it matches (GTINs as 14 digits); null when unnamed */
 internal fun nameOf(code: String, names: Map<String, String>): String? =

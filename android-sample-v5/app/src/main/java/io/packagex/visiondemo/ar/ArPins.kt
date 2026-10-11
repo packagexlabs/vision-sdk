@@ -246,6 +246,13 @@ class ArPins internal constructor(
         clearWanted = true
     }
 
+    /** The live pins per code, AR Item Count's count of each code (as [replaySummary] counts them): written on the GL
+     *  thread a frame after a pin is born or goes, read on any thread. */
+    @Volatile
+    var perCode: Map<String, Int> = emptyMap()
+        private set
+    private var pinsChanged = false
+
     /**
      * Rule 5's gate on the frame at [ts]: a new session starts it again; until a plane tracks, ARCore's planes are looked
      * at every [PLANE_POLL_FRAMES] frames (getAllTrackables allocates), and the upward ones kept ([upward])
@@ -360,6 +367,11 @@ class ArPins internal constructor(
             metrics.clearPins()
             reads.clear()
             Log.i(TAG, "pins cleared (New Scan), live=0")
+            pinsChanged = true
+        }
+        if (pinsChanged) {
+            pinsChanged = false
+            perCode = book.pins.groupingBy { it.code }.eachCount()
         }
         keysOf(items)
         frameRules = rules
@@ -610,8 +622,11 @@ class ArPins internal constructor(
             val y = viewXY[1]
             if (x < -0.05f * viewportWidth || x > 1.05f * viewportWidth || y < -0.05f * viewportHeight || y > 1.05f * viewportHeight) continue
             metrics.inView(pin.id, timestampNs)
-            val c = if (colour == PinColour.COUNTED) GREEN else GREY
-            out += if (drawnAsRing(rules, refine, pin)) ScreenMarker(x, y, 0f, null, dp(RING_DP), c) else ScreenMarker(x, y, dp(DOT_DP), c, dp(RING_DP), WHITE)
+            // ponytail: every pin drawn alike for now (2026-10-08): a green dot in a white ring. The styles per state,
+            // to switch back: green (counted) or grey (listed), a ring alone while the depth is unsure.
+            // val c = if (colour == PinColour.COUNTED) GREEN else GREY
+            // out += if (drawnAsRing(rules, refine, pin)) ScreenMarker(x, y, 0f, null, dp(RING_DP), c) else ScreenMarker(x, y, dp(DOT_DP), c, dp(RING_DP), WHITE)
+            out += ScreenMarker(x, y, dp(DOT_DP), GREEN, dp(RING_DP), WHITE)
         }
         return out
     }
@@ -1145,6 +1160,7 @@ class ArPins internal constructor(
         val prior = if (pin.est.started) lines.format(", its point %.3f,%.3f,%.3f (prior ${pin.est.priorSource})", pin.position.x, pin.position.y, pin.position.z) else ""
         // The code is not part of the pattern: a listed Code 128 / Code 39 text may hold a '%'
         Log.i(TAG, "pin ${pin.id} created ${pin.code} at " + lines.format("%.3f,%.3f,%.3f", t.x, t.y, t.z) + "$on$prior, live=${book.pins.size + 1}")
+        pinsChanged = true
         return true
     }
 
@@ -1174,6 +1190,7 @@ class ArPins internal constructor(
             mergedInAll++
         }
         metrics.removed(pin.id)
+        pinsChanged = true
         trace.diag { pinGoneLine(nowNs, pin, event, pin.position, captureNs) }
         Log.i(TAG, "pin ${pin.id} removed ($why) ${pin.code}, live=${book.pins.size}")
     }

@@ -20,7 +20,7 @@ sealed interface ScanResult {
     ) : ScanResult
     /** Price tag drawer; it reads `ScannerUiState.tags` live (iOS `.price`), so ClearTags empties an open drawer. */
     data object Price : ScanResult
-    /** AR Item Count's shutter (spec 5.10): the codes in view, then the listed codes counted so far. */
+    /** AR Item Count's shutter in step 2 (design v6): each listed SKU, Found or Missing, with its count. */
     data class Retrieval(val rows: List<RetrievalRow>) : ScanResult
     /** Every page of the document so far (iOS `.docacq`). */
     data class Document(val pages: List<DocumentPage>) : ScanResult
@@ -40,5 +40,6 @@ sealed interface ScanResult {
     }
 }
 
-/** A row of the AR Item Count drawer: [countLow]..[countHigh] units counted of a listed code; null for an unlisted one. */
-data class RetrievalRow(val code: String, val inList: Boolean, val countLow: Int?, val countHigh: Int?, val name: String? = null)
+/** A row of the AR Item Count drawer: [countLow]..[countHigh] units counted of a listed code; null for an unlisted one.
+ *  [found]: the listed SKU was read on the shelf since Start count (design v6's Found / Missing). */
+data class RetrievalRow(val code: String, val inList: Boolean, val countLow: Int?, val countHigh: Int?, val name: String? = null, val found: Boolean = false)

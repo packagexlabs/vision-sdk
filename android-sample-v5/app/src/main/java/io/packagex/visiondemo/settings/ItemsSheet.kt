@@ -46,6 +46,8 @@ import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visiondemo.scanner.ScannerAction
 import io.packagex.visiondemo.scanner.ScannerUiState
+import io.packagex.visiondemo.scanner.SkuNameDialog
+import io.packagex.visiondemo.scanner.foundSkus
 import io.packagex.visiondemo.scanner.seenRows
 
 /** Ported 1:1 from iOS `UI/Sheets.swift` `ItemsSheet`, plus a manual "Add by code" field for [ScannerAction.AddItem]
@@ -56,11 +58,14 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     var draft by remember { mutableStateOf("") }
     /** The Seen row whose Add was tapped: its code goes into the naming dialog */
     var naming by remember { mutableStateOf<String?>(null) }
+    /** The listed SKU whose name was tapped, to rename */
+    var renaming by remember { mutableStateOf<String?>(null) }
+    val found = foundSkus(state.items, state.seen, state.pinCounts)
 
-    Text("The scanner reports which of these codes are in view. ${state.items.size} in list.", style = inter(13.sp), color = PX.Muted)
+    Text("AR Item Count highlights these SKUs on the shelf and counts what it finds. ${state.items.size} in list.", style = inter(13.sp), color = PX.Muted)
 
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Box(Modifier.weight(1f)) { PXButton(title = "Add Item", height = 44.dp) { onAction(ScannerAction.AddItemsInView) } }
+        Box(Modifier.weight(1f)) { PXButton(title = "Scan SKUs", height = 44.dp) { onAction(ScannerAction.ScanSkus) } }
         Box(Modifier.weight(1f)) {
             PXButton(title = "Delete All", kind = PXButtonKind.Secondary, height = 44.dp) { confirmDeleteAll = true }
         }
@@ -84,22 +89,26 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     }
 
     if (state.items.isEmpty()) {
-        Text("No items. Point at a code in AR Item Count, then tap Add Item.", style = inter(13.sp), color = PX.Muted)
+        Text("No SKUs yet. Scan them one at a time with the camera, or type one above.", style = inter(13.sp), color = PX.Muted)
     }
 
     Column {
         state.items.forEach { code ->
-            val seen = code in state.codesInView
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(vertical = 4.dp),
             ) {
-                Column(Modifier.weight(1f)) {
+                Column(Modifier.weight(1f).clickable { renaming = code }.semantics { contentDescription = "Rename $code" }) {
                     state.itemNames[code]?.let { Text(it, style = inter(14.sp), color = PX.Ink) }
                     Text(code, style = mono(if (code in state.itemNames) 12.sp else 14.sp), color = if (code in state.itemNames) PX.Muted else PX.Ink)
                 }
-                Badge(text = if (seen) "In view" else "Not in view", tone = if (seen) BadgeTone.Success else BadgeTone.Neutral, dot = seen)
+                // Design v6: Not counted before Start count, then Found or Missing
+                when {
+                    !state.countStep -> Badge(text = "Not counted", tone = BadgeTone.Neutral)
+                    code in found -> Badge(text = "Found", tone = BadgeTone.Success, dot = true)
+                    else -> Badge(text = "Missing", tone = BadgeTone.Danger, dot = true)
+                }
                 Box(
                     modifier = Modifier
                         .size(44.dp)
@@ -112,6 +121,10 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             }
             HorizontalDivider(color = PX.Hairline)
         }
+    }
+
+    if (state.items.isNotEmpty()) {
+        PXButton(title = if (state.countStep) "Continue counting" else "Start count (${state.items.size})") { onAction(ScannerAction.StartCount) }
     }
 
     // Every code the AR session read (spec 5.10), so the worker sees what the camera reads and can list it
@@ -138,6 +151,9 @@ fun ItemsSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
     }
 
     naming?.let { code -> AddSeenDialog(code, onSave = { sku, name -> onAction(ScannerAction.AddItem(sku, name)); naming = null }, onDismiss = { naming = null }) }
+    renaming?.let { code ->
+        SkuNameDialog(code, state.itemNames[code].orEmpty(), onSave = { onAction(ScannerAction.NameItem(code, it)); renaming = null }, onDismiss = { renaming = null })
+    }
 
     if (confirmDeleteAll) {
         AlertDialog(

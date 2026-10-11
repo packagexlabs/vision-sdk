@@ -31,6 +31,10 @@ interface ArCount {
      *  [reset] clears it. */
     val seen: StateFlow<List<String>>
 
+    /** AR Item Count: the live pins per code, the count of each code (one pin per unit read on the shelf); empty while
+     *  no session runs. */
+    val pinCounts: StateFlow<Map<String, Int>> get() = NO_PINS
+
     /** AR Item Count: listed reads are waiting for ARCore to find a real surface before they make pins (the pins' surface
      *  gate held one within the last second); false while no session runs. */
     val findingSurface: StateFlow<Boolean>
@@ -100,6 +104,8 @@ interface ArCount {
     /** Tap to focus at ([x], [y]), 0..1 of the view: one AF trigger on the running session, never a repeating request. */
     fun focus(x: Float, y: Float)
 }
+
+private val NO_PINS: StateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
 
 /** Default for ViewModels built without AR (tests, previews). */
 object NoArCount : ArCount {

@@ -352,14 +352,11 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
     is ScanResult.Ocr -> Triple(result.title, result.subtitle, true)
     is ScanResult.Pending -> Triple(result.title, result.subtitle, false)
     ScanResult.Price -> Triple("Found ${tags.size} Items", "${tags.count { !it.valid }} invalid", true)
-    is ScanResult.Retrieval -> {
-        val n = result.rows.count { it.inList }
-        Triple(
-            if (n == 0) "No listed items found" else "$n listed item${if (n == 1) "" else "s"} found",
-            "$itemCount codes in list",
-            true,
-        )
-    }
+    is ScanResult.Retrieval -> Triple(
+        "${result.rows.count { it.found }} of ${result.rows.size} SKUs found",
+        "${result.rows.sumOf { it.countLow ?: 0 }} units counted · $itemCount SKUs in list",
+        true,
+    )
     is ScanResult.Document -> Triple("Document captured", "${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"} · on-device", true)
     is ScanResult.TextTemplate -> result.templateName.let { name ->
         Triple(name ?: "No confident match", "Template match · ${result.path.label} · ${result.fields.size} fields", name != null)
@@ -383,7 +380,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
     }
     ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
     is ScanResult.Retrieval -> result.rows.joinToString("\n") { r ->
-        listOfNotNull(r.code, r.name, if (r.inList) "In list" else "Not in list", r.countText()).joinToString("\t")
+        listOfNotNull(r.code, r.name, if (r.found) "Found" else "Missing", r.countText()).joinToString("\t")
     }
     is ScanResult.Pending -> ""
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
@@ -441,18 +438,18 @@ private fun PriceContent(tags: List<PriceTag>, onAction: (ScannerAction) -> Unit
 @Composable
 private fun RetrievalContent(rows: List<RetrievalRow>, onAction: (ScannerAction) -> Unit) {
     if (rows.isEmpty()) {
-        EmptyNote(text = "No codes in view. Pan across the shelf, then capture.")
+        EmptyNote(text = "No SKUs in the list. Scan them first, then count.")
     } else {
         Column {
             rows.forEach { r ->
-                RowLine(label = r.name ?: "Code", value = r.code) {
-                    r.countText()?.let { Text(it, style = mono(14.sp), color = PX.Text2) }
-                    Badge(text = if (r.inList) "In list" else "Not in list", tone = if (r.inList) BadgeTone.Success else BadgeTone.Neutral, dot = r.inList)
+                RowLine(label = r.name ?: "SKU", value = r.code) {
+                    if ((r.countLow ?: 0) > 0) r.countText()?.let { Text(it, style = mono(14.sp), color = PX.Text2) }
+                    Badge(text = if (r.found) "Found" else "Missing", tone = if (r.found) BadgeTone.Success else BadgeTone.Danger, dot = true)
                 }
             }
         }
     }
-    LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenItemList) }
+    LinkLabel(text = "Edit SKU list") { onAction(ScannerAction.OpenItemList) }
 }
 
 /** Text Templates: one row per predicted field with its confidence and suggestions, the frame's barcodes, and
