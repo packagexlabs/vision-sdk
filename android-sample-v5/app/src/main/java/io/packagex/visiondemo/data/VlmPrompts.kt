@@ -15,15 +15,16 @@ import kotlinx.serialization.json.doubleOrNull
  * `Model/VLMPrompts.swift`'s `VLMDocumentPrompt`.
  */
 object VlmPrompts {
-    /** A custom-prompt VLM type: what it asks, the result title, and its field order. */
-    data class Spec(val prompt: String, val title: String, val order: List<String>, val primaryKey: String? = null)
+    /** A custom-prompt VLM type: what it asks, the result title, its field order, and the keys tried in turn for the big card. */
+    data class Spec(val prompt: String, val title: String, val order: List<String>, val primaryKeys: List<String> = emptyList())
 
     /** iOS `DocType.vlmPrompt`; null for the default-prompt VLM and the non-VLM types. */
     fun spec(type: DocType): Spec? = when (type) {
         DocType.Tire -> Spec(vehicleTire, "Vehicle / Tire ID", vehicleTireOrder)
         DocType.IdCard -> Spec(identityDocument, "Identity Document", identityDocumentOrder)
         DocType.Plate -> Spec(licensePlate, "License Plate", licensePlateOrder)
-        DocType.Meter -> Spec(meterReading, "Meter Reading", meterReadingOrder, primaryKey = "reading")
+        // Prepaid meters showing only their remaining credit have no reading: the credit goes in the big card instead.
+        DocType.Meter -> Spec(meterReading, "Meter Reading", meterReadingOrder, primaryKeys = listOf("reading", "credit"))
         else -> null
     }
 
@@ -46,15 +47,46 @@ object VlmPrompts {
     )
     val licensePlateOrder = listOf("plate_number", "country", "region", "plate_type", "vehicle_make", "vehicle_color", "readable", "confidence")
 
-    val meterReading = "You are reading a photo of a utility meter (electricity, gas, water or heat) taken by a meter reader. " +
-        "Read the main register (the consumption counter) exactly as displayed, digit by digit: keep leading zeros and the decimal point " +
-        "or decimal digits (often red or separated); do not round or guess hidden digits. Respond ONLY with minified JSON, no prose: " +
-        "{\"document_type\":\"METER_READING\",\"meter_type\":\"ELECTRIC\"|\"GAS\"|\"WATER\"|\"HEAT\"|\"OTHER\",\"reading\":string|null,\"unit\":string|null," +
-        "\"meter_serial_number\":string|null,\"register_count\":number|null,\"registers\":[{\"label\":string,\"reading\":string,\"unit\":string|null}]|null," +
-        "\"date_time\":string|null,\"confidence_notes\":string|null} where unit is as printed (kWh, m³, ft³, gal, MWh, GJ, …), " +
-        "registers lists every register only when the meter shows more than one (e.g. multi-tariff T1/T2, day/night, import/export), " +
-        "date_time is the date/time shown on the display if any, and confidence_notes is null unless some digits are illegible (then say which)."
-    val meterReadingOrder = listOf("meter_type", "reading", "unit", "meter_serial_number", "register_count", "registers", "date_time", "confidence_notes")
+    val meterReading = "You are reading a photo of a meter taken by a meter reader: electricity, gas, water, heat (also cooling and district heating) or " +
+        "another counter (hour counter, oil/fuel or flow meter). If several meters are visible, read the most central, fully visible one. " +
+        "Read its main consumption register exactly as shown, digit by digit, only from the register itself (number drums, pointer dials or " +
+        "the display), never from serial numbers, barcodes, nameplates, stickers or printed constants (Kh, Rr, rev/kWh, imp/kWh, V, A, Hz). " +
+        "reading has one character per drum, dial or display digit, leading zeros included, and one '.' where the whole units end: first the " +
+        "whole-unit digits, then '.', then the fraction digits (red, smaller or boxed digits, a red-framed last drum, digits after a decimal " +
+        "point or comma, dials marked ×0.1, ×0.01, …), e.g. five black drums 00012 and three red drums 345 read 00012.345 (red drums are " +
+        "part of the reading, never drop them). A comma between groups of three digits on a gallons or cubic-feet display separates " +
+        "thousands: drop it. Write ? for a hidden or illegible digit, never guess. Number drums: a drum caught between two digits counts as " +
+        "the lower one (between 9 and 0 is 9) unless the drum to its right already shows 0, then the higher one. Pointer dials: one digit " +
+        "per dial, left to right; neighbouring dials turn in opposite directions, so follow each dial's own printed numbers; take the number " +
+        "the pointer has last passed (between 9 and 0 is 9); if a pointer is exactly on a number, take it only if the dial to its right has " +
+        "passed 0, else one less. Skip test dials, sweep hands, flow stars or wheels and any dial that is not part of the register, but keep " +
+        "fraction dials after the drums (water meters: black drums are whole m³, then red drums, then the ×0.1, ×0.01, ×0.001, ×0.0001 " +
+        "dials). Gas meters often have four register dials labelled ONE MILLION, ONE HUNDRED THOUSAND, TEN THOUSAND and ONE THOUSAND (or " +
+        "1,000,000 … 1,000) CUBIC FEET PER REV: read those four left to right as four digits; the small ½ FOOT (HALF FOOT), 1 FOOT and 2 " +
+        "FOOT dials are test dials, skip them. multiplier is null unless a multiplying factor for the register is printed on the meter face " +
+        "(MULT, ×, Multiply by); never apply it to reading. Several registers (two-rate drums such as day/night or low/normal; displays with " +
+        "OBIS 1.8.0 total import, 1.8.1/1.8.2 tariffs T1/T2, 2.8.0 export): reading is the total import register (1.8.0 or TOTAL) if shown, " +
+        "else the first (top or left) one. reading_label is the register code shown beside the reading on an electronic display (an OBIS " +
+        "code or tariff such as T1), null for drums, dials and unlabelled displays. reading is null when the display shows something other " +
+        "than consumption (date, time, ID, voltage, power or demand kW, flow rate, temperature, error code, an all-8 segment test). Heat " +
+        "meters: the energy register (kWh, MWh, GJ), not volume. Flow and fuel meters: the non-resettable total, not a resettable trip " +
+        "counter. Prepaid meters: remaining credit (CREDIT, BAL, balance, money or kWh left) is not a reading; put it with its unit or " +
+        "currency in credit, and give reading only if the cumulative consumption is shown. Respond ONLY with minified JSON, no prose: " +
+        "{\"document_type\":\"METER_READING\",\"unit\":string|null,\"meter_type\":\"ELECTRIC\"|\"GAS\"|\"WATER\"|\"HEAT\"|\"OTHER\"," +
+        "\"display_type\":\"DIGITAL\"|\"ANALOG_DRUM\"|\"ANALOG_DIALS\"|\"MIXED\",\"reading_label\":string|null,\"reading\":string|null," +
+        "\"multiplier\":number|null,\"credit\":string|null,\"meter_serial_number\":string|null,\"register_count\":number|null," +
+        "\"registers\":[{\"label\":string,\"reading\":string,\"unit\":string|null}]|null,\"date_time\":string|null,\"confidence_notes\":string|null} " +
+        "where meter_type follows from the printed unit and the words on the face, never from dials or drums (ft³, CCF, therm or GAS → GAS; " +
+        "gal, litres or WATER → WATER; kWh → ELECTRIC; HEAT for heat, cooling or district heating; OTHER for hour, oil/fuel or other " +
+        "counters), display_type is DIGITAL for an electronic display, ANALOG_DRUM for number drums, ANALOG_DIALS for clock-style pointer " +
+        "dials and MIXED for drums plus fraction dials, unit is as printed for the reading (kWh, MWh, kvarh, m³, ft³, CCF, gal, L, GJ, Gcal, " +
+        "h, …), registers lists every visible register when two or more are visible, else null, date_time is the date/time shown on the " +
+        "display if any, and confidence_notes is null unless a digit is illegible or a rule above was a close call (then say which digit and " +
+        "why)."
+    val meterReadingOrder = listOf(
+        "meter_type", "display_type", "reading_label", "reading", "unit", "multiplier", "credit", "meter_serial_number",
+        "register_count", "registers", "date_time", "confidence_notes",
+    )
 
     /** Canonical plate for lookups: upper-case ASCII letters/digits, 2–10 of them; null otherwise. */
     fun normalizedPlate(raw: String): String? {
