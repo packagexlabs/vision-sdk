@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +26,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -98,6 +98,7 @@ import io.packagex.visiondemo.model.OcrTable
 import io.packagex.visiondemo.model.RetrievalRow
 import io.packagex.visiondemo.model.ScanResult
 import androidx.compose.foundation.layout.union
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -148,7 +149,7 @@ fun ResultDrawer(
         ) {
             DrawerHeader(result = result, tags = tags, itemCount = itemCount, onReport = { reportOpen = true }, onClose = { onAction(ScannerAction.CloseResult) })
 
-            // v6: the captured image sits in its own fixed-height, scrollable frame above the details.
+            // v6: the captured image sits in its own fixed-height frame above the details, centre-cropped to fill it.
             // The photo stays on top once the fields arrive (it was shown while loading): with its field boxes when the
             // result has them, else plain (VLM answers, document classes)
             (result as? ScanResult.Ocr)?.let { ocr ->
@@ -158,19 +159,19 @@ fun ResultDrawer(
                 } else {
                     ocr.image?.let { img ->
                         ResultImage {
-                            Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                            Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                         }
                     }
                 }
             }
             (result as? ScanResult.TextTemplate)?.image?.let { img ->
                 ResultImage {
-                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured label", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured label", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 }
             }
             (result as? ScanResult.Pending)?.image?.let { img ->
                 ResultImage {
-                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 }
             }
 
@@ -696,10 +697,9 @@ private fun boxedOcr(scan: ScanResult.Ocr): Pair<Bitmap, List<OcrField>>? {
     return image to scan.result.fields
 }
 
-/** Design "Result image": a 320 dp frame the image scrolls inside, with a hint while there is more to see. */
+/** Design "Result image": a 320 dp frame the image fills, centre-cropped (the overflow is cut evenly). */
 @Composable
 private fun ResultImage(content: @Composable () -> Unit) {
-    val scroll = rememberScrollState()
     Box(
         modifier = Modifier
             .padding(start = 20.dp, end = 20.dp, top = 12.dp)
@@ -708,62 +708,51 @@ private fun ResultImage(content: @Composable () -> Unit) {
             .clip(RoundedCornerShape(12.dp))
             .background(PX.Ink)
             .border(1.dp, PX.Hairline, RoundedCornerShape(12.dp)),
-    ) {
-        Box(Modifier.fillMaxWidth().verticalScroll(scroll)) { content() }
-        if (scroll.maxValue > 0) {
-            Text(
-                "Scroll to see the full image",
-                style = montserrat(11.sp),
-                color = Color.White,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp)
-                    .background(PX.Ink.copy(alpha = 0.72f), RoundedCornerShape(14.dp))
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-            )
-        }
-    }
+        contentAlignment = Alignment.Center,
+    ) { content() }
 }
 
 @Composable
 private fun BoxedOcrImage(image: Bitmap, fields: List<OcrField>, selected: String?, onSelect: (String?) -> Unit) {
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(image.width.toFloat() / image.height.toFloat())
-            .clip(RoundedCornerShape(12.dp)),
-    ) {
-        Image(bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize())
-        fields.forEachIndexed { i, f ->
-            val rect = fieldBox(f, image.width, image.height) ?: return@forEachIndexed
-            val on = selected == f.id
-            val tint = if (on) PX.Neon else colorFor(f.validatedBy)
-            val boxX = maxWidth * rect.left
-            val boxY = maxHeight * rect.top
-            Box(
-                modifier = Modifier
-                    .offset(x = boxX, y = boxY)
-                    .size(width = maxWidth * (rect.right - rect.left), height = maxHeight * (rect.bottom - rect.top))
-                    .zIndex(if (on) 1f else 0f)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(tint.copy(alpha = if (on) 0.3f else 0.16f))
-                    .border(2.dp, tint, RoundedCornerShape(4.dp))
-                    .clickable { onSelect(if (on) null else f.id) },
-            )
-            // iOS :449-453: the number chip is a separate overlay above-left of the box (offset
-            // -2/-14), always neon/purple — not the box's own validated_by tint — and must sit
-            // outside the box's clip so it isn't cropped.
-            Box(
-                modifier = Modifier
-                    .offset(x = boxX - 2.dp, y = boxY - 14.dp)
-                    .zIndex(if (on) 1f else 0f)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(if (on) PX.Neon else PX.Purple),
-            ) {
-                Text(
-                    "${i + 1}", style = montserrat(9.sp), color = if (on) PX.Ink else Color.White,
-                    modifier = Modifier.padding(horizontal = 4.dp),
+    // Centre crop: the image fills the frame at the larger of the two scales and the overflow is cut evenly by the
+    // frame's clip; the boxes are laid out on the whole image, so they stay on their text.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val scale = max(maxWidth.value / image.width, maxHeight.value / image.height)
+        val imageWidth = (image.width * scale).dp
+        val imageHeight = (image.height * scale).dp
+        Box(Modifier.requiredSize(imageWidth, imageHeight)) {
+            Image(bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize())
+            fields.forEachIndexed { i, f ->
+                val rect = fieldBox(f, image.width, image.height) ?: return@forEachIndexed
+                val on = selected == f.id
+                val tint = if (on) PX.Neon else colorFor(f.validatedBy)
+                val boxX = imageWidth * rect.left
+                val boxY = imageHeight * rect.top
+                Box(
+                    modifier = Modifier
+                        .offset(x = boxX, y = boxY)
+                        .size(width = imageWidth * (rect.right - rect.left), height = imageHeight * (rect.bottom - rect.top))
+                        .zIndex(if (on) 1f else 0f)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(tint.copy(alpha = if (on) 0.3f else 0.16f))
+                        .border(2.dp, tint, RoundedCornerShape(4.dp))
+                        .clickable { onSelect(if (on) null else f.id) },
                 )
+                // iOS :449-453: the number chip is a separate overlay above-left of the box (offset
+                // -2/-14), always neon/purple — not the box's own validated_by tint — and must sit
+                // outside the box's clip so it isn't cropped.
+                Box(
+                    modifier = Modifier
+                        .offset(x = boxX - 2.dp, y = boxY - 14.dp)
+                        .zIndex(if (on) 1f else 0f)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(if (on) PX.Neon else PX.Purple),
+                ) {
+                    Text(
+                        "${i + 1}", style = montserrat(9.sp), color = if (on) PX.Ink else Color.White,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                }
             }
         }
     }
