@@ -10,8 +10,11 @@ hiltNavigationCompose = "1.3.0"
 coroutines = "1.10.2"
 datastore = "1.1.7"
 serialization = "1.9.0"
-# vision-sdk-android published to mavenLocal (README step 1): the build that reads barcodes with BarcodeScannerApp's engine
-visionSdk = "v2.8.0-vlmmodel"
+# vision-sdk-android published to mavenLocal (README step 1): the build that reads barcodes with BarcodeScannerApp's engine.
+# v2.8.0-expiry-vlmmodel = its feature/vlm-model-choice branch with feature/price-tag-expiry merged (the VLM model choice
+# and price tags' printed expiry date), published as
+# ./gradlew -Psdk.version=v2.8.0-expiry-vlmmodel :vision-native:publishToMavenLocal :VisionScanner:publishToMavenLocal
+visionSdk = "v2.8.0-expiry-vlmmodel"
 # BarcodeScannerApp's engine, the one VisionScanner reads with; the AR demo feeds it ARCore frames itself. mavenLocal only for now.
 barcodeScanner = "0.2.20-ar.10"
 arcore = "1.56.0"

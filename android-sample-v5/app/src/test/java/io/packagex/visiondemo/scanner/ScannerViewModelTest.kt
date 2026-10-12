@@ -277,6 +277,36 @@ class ScannerViewModelTest {
         assertEquals(1, v.state.value.tags.size)
     }
 
+    @Test fun anExpiredTagSaysSoOncePerScan() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        val toasts = mutableListOf<String>()
+        val collector = launch { v.effects.collect { if (it is ScannerEffect.Toast) toasts += it.text } }
+        val expired = PriceTagData("9100101", "$3.49", Rect(), "2020-01-31", "EXP 2020-01-31")
+        cam.emit(ScanEvent.PriceTag(expired)); runCurrent()
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(expired)); runCurrent()   // still in view: said once
+        assertEquals(listOf("This item has expired: Fresh Milk 1L · Expired 31 Jan 2020"), toasts)
+        assertTrue(v.state.value.tags.single().expired)
+        advanceTimeBy(3_000); cam.emit(ScanEvent.PriceTag(expired)); runCurrent()   // scanned again: said again
+        assertEquals(2, toasts.count { it.startsWith("This item has expired") })
+        assertTrue(toasts.none { it.endsWith(" already in list") })
+        collector.cancel()
+    }
+
+    @Test fun aLaterReadAddsTheExpiryAnEarlierOneMissed() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        val toasts = mutableListOf<String>()
+        val collector = launch { v.effects.collect { if (it is ScannerEffect.Toast) toasts += it.text } }
+        cam.emit(ScanEvent.PriceTag(PriceTagData("9100102", "$4.29", Rect()))); runCurrent()
+        assertEquals(null, v.state.value.tags.single().expiry)
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(PriceTagData("9100102", "$4.29", Rect(), "2020-08-15", "Best before 15 AUG 2020"))); runCurrent()
+        val tag = v.state.value.tags.single()
+        assertTrue(tag.expired); assertEquals("Best before 15 AUG 2020", tag.expiryText)
+        assertEquals(listOf("This item has expired: Greek Yogurt 500g · Expired 15 Aug 2020"), toasts)
+        collector.cancel()
+    }
+
     @Test fun priceManualSaysWhenAListedTagIsScannedAgain() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
