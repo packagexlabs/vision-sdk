@@ -16,7 +16,7 @@ serialization = "1.9.0"
 # ./gradlew -Psdk.version=v2.8.0-expiry-vlmmodel :vision-native:publishToMavenLocal :VisionScanner:publishToMavenLocal
 visionSdk = "v2.8.0-expiry-vlmmodel"
 # BarcodeScannerApp's engine, the one VisionScanner reads with; the AR demo feeds it ARCore frames itself. mavenLocal only for now.
-barcodeScanner = "0.2.20-ar.10"
+barcodeScanner = "0.2.20-ar.11"
 arcore = "1.56.0"
 camerax = "1.5.1"
 # docscanner-release.aar (vision-sdk-android) bundles the same LiteRT runtime .so files: keep this version aligned
