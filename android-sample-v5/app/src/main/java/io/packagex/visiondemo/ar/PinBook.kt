@@ -27,7 +27,10 @@ import kotlin.math.sqrt
  * [ArPins] feeds it ARCore's hits and anchor poses, and holds the anchors.
  */
 
-/** A new pin needs this many agreeing sightings (iOS candidateConfirmCount) */
+/**
+ * A new pin needs this many agreeing sightings (iOS candidateConfirmCount). 2 was tried for quicker pins (2026-10-12):
+ * the replay of 2026-10-08 12:16:22 ([TraceReplayTest]) then ends with a duplicate UNIT-A pin, so it stays 3.
+ */
 internal const val PIN_CONFIRM_COUNT = 3
 
 /** A sighting joins a candidate whose last position lies this close to its ray, laterally (iOS candidateMatchRadius) */
@@ -51,12 +54,20 @@ internal const val PIN_MAX_HIT_M = 3.0
 /** A read batch older than this, against the newest frame, is dropped (iOS place(): 0.5 s) */
 internal const val PIN_MAX_BATCH_AGE_NS = 500_000_000L
 
-/** Tracked frames before pins are placed (iOS mapReadyMinFrames) */
-internal const val PIN_WARM_UP_FRAMES = 60
+/**
+ * Tracked frames before pins are placed (iOS mapReadyMinFrames): 30, 1 s at 30 fps, for quicker pins (60 before
+ * 2026-10-12; every replayed run of [TraceReplayTest] ends the same with 30)
+ */
+internal const val PIN_WARM_UP_FRAMES = 30
 
-/** Moving moderately: new pins OK (iOS cameraModerate, 0.40 m/s and 60 deg/s) */
-internal const val PIN_MODERATE_MPS = 0.40
-internal const val PIN_MODERATE_DPS = 60.0
+/**
+ * Moving moderately: new pins OK (iOS cameraModerate, 0.40 m/s and 60 deg/s before 2026-10-12): 0.80 m/s and 120 deg/s,
+ * so pins are born while sweeping a shelf faster. 1.0 m/s and 150 deg/s made duplicate pins on the iPhone (2026-10-12),
+ * though every replayed run of [TraceReplayTest] ends the same with any gate from 0.4 to 1.5 m/s: its runs hold little
+ * fast motion.
+ */
+internal const val PIN_MODERATE_MPS = 0.80
+internal const val PIN_MODERATE_DPS = 120.0
 
 /** The read's box is inflated by this fraction of its width and height on each side (iOS viewRect insetBy -0.3) */
 internal const val PIN_BOX_INFLATE = 0.3

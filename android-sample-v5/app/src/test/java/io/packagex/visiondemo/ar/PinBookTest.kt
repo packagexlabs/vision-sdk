@@ -899,11 +899,11 @@ class PinBookTest {
         repeat(PIN_WARM_UP_FRAMES) { m.onFrame(it * 33 * ms, Pose.IDENTITY, true) }
         val t = (PIN_WARM_UP_FRAMES - 1) * 33 * ms
         assertTrue(m.mayCreate(t))
-        // 2 cm in 33 ms: 0.6 m/s, beyond the moderate 0.4 m/s
-        m.onFrame(t + 33 * ms, Pose(Vec3(0.02, 0.0, 0.0), Quat.IDENTITY), true)
+        // 3 cm in 33 ms: 0.9 m/s, beyond the moderate 0.8 m/s
+        m.onFrame(t + 33 * ms, Pose(Vec3(0.03, 0.0, 0.0), Quat.IDENTITY), true)
         assertFalse(m.cameraModerate)
         assertFalse(m.mayCreate(t + 33 * ms))
-        m.onFrame(t + 66 * ms, Pose(Vec3(0.02, 0.0, 0.0), Quat.IDENTITY), true)
+        m.onFrame(t + 66 * ms, Pose(Vec3(0.03, 0.0, 0.0), Quat.IDENTITY), true)
         assertTrue(m.cameraModerate)
         assertFalse(m.mayCreate(t + 33 * ms)) // captured before the camera became moderate again
         assertTrue(m.mayCreate(t + 66 * ms))

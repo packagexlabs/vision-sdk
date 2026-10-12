@@ -9,6 +9,7 @@ import android.media.ImageReader
 import android.util.Log
 import com.example.barcodescanner.BarcodeScanner
 import com.example.barcodescanner.ScannerSettings
+import com.example.barcodescanner.Symbology
 import io.packagex.arcount.Read
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -23,6 +24,19 @@ import java.util.concurrent.RejectedExecutionException
 internal const val AR_REFRESH_AFTER_MS = 0L
 
 /**
+ * The 17 code types AR reads, as iOS's AR (Apple Vision's list of the ar_based_barcode_scanning app; UPC-A apart, which
+ * Vision reads as EAN-13, and ITF for both ITF-14 and interleaved 2 of 5): fewer decoders a frame, and none of the
+ * rarely printed types (MSI, Telepen, DX film edge, MaxiCode, rMQR, MicroPDF417, stacked DataBar, Code 39 extended)
+ * that turn stray stripes into wrong codes.
+ */
+internal val AR_SYMBOLOGIES = setOf(
+    Symbology.QR_CODE, Symbology.MICRO_QR, Symbology.AZTEC, Symbology.DATA_MATRIX, Symbology.PDF_417,
+    Symbology.EAN_13, Symbology.EAN_8, Symbology.UPC_A, Symbology.UPC_E, Symbology.CODE_128, Symbology.CODE_39,
+    Symbology.CODE_93, Symbology.CODABAR, Symbology.ITF, Symbology.DATABAR, Symbology.DATABAR_EXPANDED,
+    Symbology.DATABAR_LIMITED,
+)
+
+/**
  * The engine's settings for AR Count: a shelf of identical units ([ScannerSettings.repeatedPayloads]) and the decoder
  * speed settings of 0.2.20-ar (scan/study/31, steps 2a to 5), off by default in the engine: a box last read as 1D is
  * re-read without the as-is 2D read, a never-read box over 0.5 Mpx (a whole label) takes no frame time, a begun place
@@ -30,6 +44,7 @@ internal const val AR_REFRESH_AFTER_MS = 0L
  * for a new barcode of the localizer, and the detector runs every 250 ms in place of 60 while the picture stands still.
  */
 internal fun arScannerSettings() = ScannerSettings(
+    symbologies = AR_SYMBOLOGIES,
     repeatedPayloads = true,
     skipAsItIsForKnown1D = true,
     limitLargeUnreadBoxes = true,
