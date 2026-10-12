@@ -526,7 +526,7 @@ class ScannerViewModel @Inject constructor(
                 }
                 if (s.items.isEmpty()) return scanSkus()
                 // Step 2: each listed SKU, Found or Missing, with its count; the drawer's New Scan starts a fresh count.
-                show(ScanResult.Retrieval(skuRows(s.items, foundSkus(s.items, s.seen, s.pinCounts), s.pinCounts, s.itemNames)))
+                show(ScanResult.Retrieval(skuRows(s.items, foundSkus(s.items, s.seen, s.pinCounts), s.pinCounts, s.itemNames, s.seen)))
             }
             ScanMode.TextTemplates -> when {
                 !s.tt.hasEmail -> openSheet(SheetKind.TtSetup)

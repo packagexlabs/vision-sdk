@@ -173,7 +173,7 @@ internal fun retrievalHint(
     if (findingSurface) return "Move slowly to find the surface"
     if (codesInView.isEmpty()) return "Pan across the shelf"
     val n = codesInView.count { items.lists(it) }
-    val counted = items.sumOf { pinsOf(it, pinCounts) }
+    val counted = pinCounts.values.sum()   // codes not on the list are pinned and counted too
     return "${if (n == 0) "No" else "$n"} listed item${if (n == 1) "" else "s"} in view · $counted counted"
 }
 
@@ -207,12 +207,33 @@ internal fun foundSkus(items: List<String>, seen: List<String>, pinCounts: Map<S
     return items.filterTo(mutableSetOf()) { codeKey(it) in read || pinsOf(it, pinCounts) > 0 }
 }
 
-/** AR Item Count step 2's shutter (design v6): a row per listed SKU, Found (in [found]) or Missing, with its pins. */
-internal fun skuRows(items: List<String>, found: Set<String>, pinCounts: Map<String, Int>, names: Map<String, String> = emptyMap()): List<RetrievalRow> =
+/**
+ * AR Item Count step 2's shutter (design v6): a row per listed SKU, Found (in [found]) or Missing, with its pins; then a
+ * row per code not on the list that got pins ([unlistedCounts]), not in list.
+ */
+internal fun skuRows(
+    items: List<String>,
+    found: Set<String>,
+    pinCounts: Map<String, Int>,
+    names: Map<String, String> = emptyMap(),
+    seen: List<String> = emptyList(),
+): List<RetrievalRow> =
     items.map { code ->
         val n = pinsOf(code, pinCounts)
         RetrievalRow(code, true, n, n, nameOf(code, names), found = code in found)
-    }
+    } + unlistedCounts(items, pinCounts, seen).map { (code, n) -> RetrievalRow(code, false, n, n, nameOf(code, names), found = true) }
+
+/**
+ * AR Item Count's codes not on the SKU list that have pins (every code read is pinned and counted): each by its value as
+ * read ([seen], else its pins' key), with its live pins, most first.
+ */
+internal fun unlistedCounts(items: List<String>, pinCounts: Map<String, Int>, seen: List<String>): List<Pair<String, Int>> {
+    val listed = items.mapTo(HashSet(), ::codeKey)
+    return pinCounts.entries
+        .filter { (code, n) -> n > 0 && codeKey(code) !in listed }
+        .map { (code, n) -> (seen.firstOrNull { codeKey(it) == codeKey(code) } ?: code) to n }
+        .sortedWith(compareByDescending<Pair<String, Int>> { it.second }.thenBy { it.first })
+}
 
 /** [code]'s item name: its own, else that of the listed SKU it matches (GTINs as 14 digits); null when unnamed */
 internal fun nameOf(code: String, names: Map<String, String>): String? =

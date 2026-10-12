@@ -30,6 +30,8 @@ import com.google.ar.core.exceptions.FatalException
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.packagex.arcount.Command
 import io.packagex.arcount.CountView
+import io.packagex.arcount.ItemCode
+import io.packagex.arcount.Read
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,7 +99,13 @@ class ArSessionController @Inject constructor(
     override val findingSurface: StateFlow<Boolean> = _findingSurface.asStateFlow()
 
     /** AR Item Count's list: sent to every new counter (attach, New Scan) */
+    @Volatile
     private var items: Set<String> = emptySet()
+
+    /** The codes read this session that are not on [items] (engine worker; cleared with every new counter): they join the
+     *  counter's list, so they get pins and a count of their own, by their value, as iOS AR Barcode's codes do */
+    @Volatile
+    private var extras: Set<String> = emptySet()
 
     private val _errors = MutableSharedFlow<String>(extraBufferCapacity = 4)
     override val errors: Flow<String> = _errors
@@ -268,6 +276,7 @@ class ArSessionController @Inject constructor(
             },
             onCodes = { inView, seen -> _codesInView.value = inView; _seen.value = seen; _pinCounts.value = renderer?.pinCounts ?: emptyMap() },
         )
+        extras = emptySet()
         m.post(ArEvent.Items(info?.items ?: items))
         val r = ArCountRenderer(m, metas, ctx.resources.displayMetrics.density, onFatal = ::onUpdateFailed, poses = poses)
         r.overlayRules = overlayRules
@@ -355,14 +364,28 @@ class ArSessionController @Inject constructor(
 
     override fun reset() {
         mapper?.post(ArEvent.Reset(counters.create())) // the mapper gives the new counter the list
+        if (extras.isNotEmpty() && replaying == null) {
+            extras = emptySet()
+            mapper?.post(ArEvent.Items(items)) // the list without the last scan's unlisted codes
+        }
         renderer?.clearPins()
     }
 
     override fun setItems(codes: Set<String>) {
         items = codes
         if (replaying != null) return // a replay counts the recording's list
-        trackOut?.offer(TrackEntry.Items(codes))
-        mapper?.post(ArEvent.Items(codes))
+        trackOut?.offer(TrackEntry.Items(codes + extras))
+        mapper?.post(ArEvent.Items(codes + extras))
+    }
+
+    /** Engine worker: [reads]' codes not on the list yet join the counter's list, with pins and a count of their own */
+    private fun listUnlisted(m: ArMapper, reads: List<Read>) {
+        val known = listedKeys(items + extras)
+        val new = reads.mapNotNullTo(LinkedHashSet()) { r -> r.text.takeIf { it.isNotEmpty() && ItemCode.key(r) !in known } }
+        if (new.isEmpty()) return
+        extras = extras + new
+        trackOut?.offer(TrackEntry.Items(items + extras))
+        m.post(ArEvent.Items(items + extras))
     }
 
     /**
@@ -531,6 +554,7 @@ class ArSessionController @Inject constructor(
             return
         }
         engine.process(image) { t, reads, stats, tracked ->
+            listUnlisted(m, reads)
             val event = ArEvent.Reads(t, reads, stats.copy(pipe = pipeCounters(l)), tracked)
             trackOut?.offer(TrackEntry.Reads(event, metas.at(t)))
             // After the luma copy of the same image, so the counter has the frame's pixels when its reads come

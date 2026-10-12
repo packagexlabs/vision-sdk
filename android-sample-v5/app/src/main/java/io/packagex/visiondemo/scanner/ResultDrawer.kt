@@ -353,7 +353,7 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
     is ScanResult.Pending -> Triple(result.title, result.subtitle, false)
     ScanResult.Price -> Triple("Found ${tags.size} Items", priceSubtitle(tags), true)
     is ScanResult.Retrieval -> Triple(
-        "${result.rows.count { it.found }} of ${result.rows.size} SKUs found",
+        "${result.rows.count { it.inList && it.found }} of ${result.rows.count { it.inList }} SKUs found",
         "${result.rows.sumOf { it.countLow ?: 0 }} units counted · $itemCount SKUs in list",
         true,
     )
@@ -380,7 +380,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
     }
     ScanResult.Price -> priceSummary(tags)
     is ScanResult.Retrieval -> result.rows.joinToString("\n") { r ->
-        listOfNotNull(r.code, r.name, if (r.found) "Found" else "Missing", r.countText()).joinToString("\t")
+        listOfNotNull(r.code, r.name, if (!r.inList) "Not in list" else if (r.found) "Found" else "Missing", r.countText()).joinToString("\t")
     }
     is ScanResult.Pending -> ""
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
@@ -447,7 +447,11 @@ private fun RetrievalContent(rows: List<RetrievalRow>, onAction: (ScannerAction)
             rows.forEach { r ->
                 RowLine(label = r.name ?: "SKU", value = r.code) {
                     if ((r.countLow ?: 0) > 0) r.countText()?.let { Text(it, style = mono(14.sp), color = PX.Text2) }
-                    Badge(text = if (r.found) "Found" else "Missing", tone = if (r.found) BadgeTone.Success else BadgeTone.Danger, dot = true)
+                    when {
+                        !r.inList -> Badge(text = "Not in list", tone = BadgeTone.Brand, dot = true)
+                        r.found -> Badge(text = "Found", tone = BadgeTone.Success, dot = true)
+                        else -> Badge(text = "Missing", tone = BadgeTone.Danger, dot = true)
+                    }
                 }
             }
         }

@@ -204,5 +204,13 @@ internal fun ArCountHud(state: ScannerUiState, onAction: (ScannerAction) -> Unit
                 Box(Modifier.weight(1f).height(4.dp).background(if (c in found) PX.Green else Color.White.copy(alpha = 0.25f), RoundedCornerShape(2.dp)))
             }
         }
+        // Codes not on the list are pinned and counted by their own value, after the list's
+        val unlisted = unlistedCounts(state.items, state.pinCounts, state.seen)
+        if (unlisted.isNotEmpty()) {
+            Text(
+                "Not in list · " + unlisted.take(2).joinToString { (code, n) -> "$code ×$n" } + if (unlisted.size > 2) " +${unlisted.size - 2} more" else "",
+                style = inter(12.sp, FontWeight.Medium), color = Color.White.copy(alpha = 0.8f), maxLines = 1, overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
