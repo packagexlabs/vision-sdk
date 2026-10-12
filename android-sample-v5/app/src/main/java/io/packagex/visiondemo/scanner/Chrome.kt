@@ -39,15 +39,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Cameraswitch
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import io.packagex.visiondemo.data.vlmModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -159,7 +167,10 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (chip != null) {
-                ContextChip(label = chip.first, sub = chip.second, onClick = { onAction(chip.third) })
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ContextChip(label = chip.first, sub = chip.second, onClick = { onAction(chip.third) })
+                    if (state.mode == ScanMode.Ocr && state.prefs.vlm) VlmModelChip(state, onAction)
+                }
             }
             if (showPill || showZoom) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -297,6 +308,34 @@ private fun ContextChip(label: String, sub: String, onClick: () -> Unit) {
         Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = Color.White, modifier = Modifier.size(10.dp))
     }
 }
+
+/** The VLM type in use's backend model, picked on the camera screen; each type keeps its own */
+@Composable
+private fun VlmModelChip(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
+    val type = state.prefs.docType
+    val current = state.prefs.vlmModel(type)
+    var open by remember { mutableStateOf(false) }
+    Box {
+        ContextChip(label = "Model", sub = "· ${vlmModelName(current)}", onClick = { open = true })
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            VLM_MODELS.forEach { m ->
+                DropdownMenuItem(
+                    text = { Text(vlmModelName(m)) },
+                    trailingIcon = { if (m == current) Icon(Icons.Filled.Check, contentDescription = "Selected") },
+                    onClick = {
+                        open = false
+                        onAction(ScannerAction.UpdatePrefs { it.copy(vlmModels = it.vlmModels + (type.name to m)) })
+                    },
+                )
+            }
+        }
+    }
+}
+
+private val VLM_MODELS = listOf("vscan_small", "vscan_medium", "vscan_large", "orion_small", "orion_medium", "orion_large")
+
+/** "orion_large" as "Orion Large", "vscan_small" as "VScan Small" */
+private fun vlmModelName(m: String) = m.split('_').joinToString(" ") { if (it == "vscan") "VScan" else it.replaceFirstChar(Char::uppercase) }
 
 @Composable
 private fun CapturePill(auto: Boolean, onToggle: () -> Unit) {
