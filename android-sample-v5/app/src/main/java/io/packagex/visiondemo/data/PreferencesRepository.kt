@@ -60,6 +60,12 @@ data class Prefs(
 /** VLM type [t]'s backend model; until one is picked for it, "orion_large" for Meter Reading, "vscan_large" otherwise */
 fun Prefs.vlmModel(t: DocType): String = vlmModels[t.name] ?: if (t == DocType.Meter) "orion_large" else "vscan_large"
 
+/** The backend models a VLM type can use */
+val VLM_MODELS = listOf("vscan_small", "vscan_medium", "vscan_large", "orion_small", "orion_medium", "orion_large")
+
+/** "orion_large" as "Orion Large", "vscan_small" as "VScan Small" */
+fun vlmModelName(m: String) = m.split('_').joinToString(" ") { if (it == "vscan") "VScan" else it.replaceFirstChar(Char::uppercase) }
+
 interface PreferencesRepository {
     val prefs: Flow<Prefs>
     suspend fun update(transform: (Prefs) -> Prefs)
