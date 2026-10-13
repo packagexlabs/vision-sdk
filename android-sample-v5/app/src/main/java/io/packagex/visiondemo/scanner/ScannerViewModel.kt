@@ -166,6 +166,7 @@ class ScannerViewModel @Inject constructor(
         viewModelScope.launch { ar.pinCounts.collect { p -> _state.update { it.copy(pinCounts = p) } } }
         // The counter counts the list's codes (spec 5.10); the session keeps the list for its next counters.
         viewModelScope.launch { state.map { it.items }.distinctUntilChanged().collect { ar.setItems(it.toSet()) } }
+        viewModelScope.launch { state.map { it.itemNames }.distinctUntilChanged().collect { ar.setNames(it) } }
         viewModelScope.launch { ar.errors.collect(::toast) }
         viewModelScope.launch { ar.exits.collect(::leaveAr) }
         viewModelScope.launch { tt.state.collect { t -> _state.update { it.copy(tt = t) } } }
@@ -606,7 +607,7 @@ class ScannerViewModel @Inject constructor(
                     haptic()
                 }
                 if (listed && !rescan) return
-                if (!listed) _state.update { it.copy(tags = it.tags + tag) }
+                if (!listed) _state.update { it.copy(tags = listOf(tag) + it.tags) }   // the latest on top
                 // Auto capture: a new tag, or a listed one scanned again, opens the list, as Auto opens a code's result.
                 // Manual keeps collecting for the shutter; a listed tag scanned again says so (its count doesn't change).
                 if (s.prefs.autoCapture && s.result == null && pendingShow == null && s.sheet == null && s.alert == null &&

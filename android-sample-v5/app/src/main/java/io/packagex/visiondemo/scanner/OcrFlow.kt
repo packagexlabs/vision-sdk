@@ -102,6 +102,7 @@ internal fun ocrResult(x: Extraction, bitmap: Bitmap?, p: Prefs, cloudSelected: 
 private fun vlmResult(x: Extraction, bitmap: Bitmap?, spec: VlmPrompts.Spec): OcrOutcome {
     val answer = VlmPrompts.answer(x.json)
         ?: return OcrOutcome.Failed("Nothing recognized", OcrParser.message(x.json) ?: "VLM returned no structured data. Please try again.")
+    if (VlmPrompts.notFound(answer)) return OcrOutcome.Failed("Not found", "No ${spec.title} found in the photo. Point the camera at one and capture again.")
     val fields = VlmPrompts.fields(answer, spec.order, keepDocumentType = x.type == DocType.IdCard).mapIndexed { i, f ->
         OcrField("${f.section ?: ""}|${f.key}|$i", f.key, f.label, f.value, f.section, null, emptyList())
     }

@@ -119,6 +119,13 @@ class ArCountRenderer(
             pins.refine = value
         }
 
+    /** The SKU list's item names by code key, on the pins' labels */
+    var names: Map<String, String>
+        get() = pins.names
+        set(value) {
+            pins.names = value
+        }
+
     /** The read-rate boost under the Android pin rules, refining their pins (drift plan P2c, Settings › Advanced) */
     var readBoost: Boolean
         get() = pins.readBoost

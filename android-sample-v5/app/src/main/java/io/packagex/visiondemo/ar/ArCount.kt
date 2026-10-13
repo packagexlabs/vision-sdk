@@ -101,6 +101,9 @@ interface ArCount {
     /** AR Item Count's list (spec 5.10): the codes counted, by this session's counter and by every later one. */
     fun setItems(codes: Set<String>)
 
+    /** The list's item names (code to name): each pin shows its code's name, else the code */
+    fun setNames(names: Map<String, String>) {}
+
     /** Tap to focus at ([x], [y]), 0..1 of the view: one AF trigger on the running session, never a repeating request. */
     fun focus(x: Float, y: Float)
 }

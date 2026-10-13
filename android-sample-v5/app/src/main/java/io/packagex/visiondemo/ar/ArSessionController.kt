@@ -102,6 +102,10 @@ class ArSessionController @Inject constructor(
     @Volatile
     private var items: Set<String> = emptySet()
 
+    /** The list's item names by code key ([ItemCode.key]), for the pins' labels */
+    @Volatile
+    private var names: Map<String, String> = emptyMap()
+
     /** The codes read this session that are not on [items] (engine worker; cleared with every new counter): they join the
      *  counter's list, so they get pins and a count of their own, by their value, as iOS AR Barcode's codes do */
     @Volatile
@@ -284,6 +288,7 @@ class ArSessionController @Inject constructor(
         r.pinRules = pinRules
         r.pinRefine = pinRefine
         r.readBoost = readBoost
+        r.names = names
         luma = LumaCopier { ts, img -> m.post(ArEvent.Luma(ts, img)) }
         // The renderer must be set before the surface exists; the GL thread waits paused until ARCore runs.
         view.preserveEGLContextOnPause = true
@@ -376,6 +381,11 @@ class ArSessionController @Inject constructor(
         if (replaying != null) return // a replay counts the recording's list
         trackOut?.offer(TrackEntry.Items(codes + extras))
         mapper?.post(ArEvent.Items(codes + extras))
+    }
+
+    override fun setNames(names: Map<String, String>) {
+        this.names = names.mapKeys { ItemCode.key(it.key) }
+        renderer?.names = this.names
     }
 
     /** Engine worker: [reads]' codes not on the list yet join the counter's list, with pins and a count of their own */

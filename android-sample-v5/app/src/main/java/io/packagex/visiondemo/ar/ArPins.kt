@@ -105,6 +105,10 @@ class ArPins internal constructor(
     /** [refine] as this frame's reads are placed under */
     private var frameRefine = true
 
+    /** The SKU list's item names by code key: each pin's label, else its code (iOS `catalogLookup`) */
+    @Volatile
+    var names: Map<String, String> = emptyMap()
+
     /** P2c under [PinRules.ANDROID] with [refine] (Settings › Advanced) */
     @Volatile
     var readBoost = true
@@ -606,6 +610,7 @@ class ArPins internal constructor(
             countedOf = items
         }
         val pins = book.pins
+        val names = this.names
         for (i in pins.indices) {
             val pin = pins[i]
             val colour = pinColour(pin.code, keys, counted) ?: continue
@@ -626,7 +631,7 @@ class ArPins internal constructor(
             // to switch back: green (counted) or grey (listed), a ring alone while the depth is unsure.
             // val c = if (colour == PinColour.COUNTED) GREEN else GREY
             // out += if (drawnAsRing(rules, refine, pin)) ScreenMarker(x, y, 0f, null, dp(RING_DP), c) else ScreenMarker(x, y, dp(DOT_DP), c, dp(RING_DP), WHITE)
-            out += ScreenMarker(x, y, dp(DOT_DP), GREEN, dp(RING_DP), WHITE)
+            out += ScreenMarker(x, y, dp(DOT_DP), GREEN, dp(RING_DP), WHITE, names[pin.code] ?: pin.code)
         }
         return out
     }

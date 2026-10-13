@@ -120,7 +120,7 @@ class VlmPromptsTest {
         assertTrue(s.prompt.contains("leading zeros included"))
         // Same digest in vision-sdk-ios scripts/test_vlm_fields.swift: both apps send the identical prompt.
         val sha = java.security.MessageDigest.getInstance("SHA-256").digest(s.prompt.toByteArray()).joinToString("") { "%02x".format(it) }
-        assertEquals("5df81c00ed185654b78eaef893b2840ce15edaf874e178f7df5a761c514ab7de", sha)
+        assertEquals("027fc8caef63edf86a7609daebe4d9da2a01492a78586b68687e8d8104ff06eb", sha)
         assertNull(VlmPrompts.spec(DocType.VLM))
     }
 

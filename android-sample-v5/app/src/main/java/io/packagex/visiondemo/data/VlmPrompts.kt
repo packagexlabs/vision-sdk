@@ -29,15 +29,15 @@ object VlmPrompts {
     }
 
     val vehicleTire = """
-        You are reading a photo taken by a vehicle inspector. Find every Vehicle Identification Number (VIN, 17 characters, no I/O/Q) and every Tire Identification Number (TIN: the DOT code on a tire sidewall, starting with "DOT", up to 13 characters after it) visible in the image. Respond ONLY with minified JSON, no prose: {"document_type":"VEHICLE_TIRE_ID","vin":string|null,"tin":string|null,"tin_plant_code":string|null,"tin_week_year":string|null,"tire_size":string|null,"tire_brand":string|null,"confidence":number}
+        You are reading a photo taken by a vehicle inspector. Find every Vehicle Identification Number (VIN, 17 characters, no I/O/Q) and every Tire Identification Number (TIN: the DOT code on a tire sidewall, starting with "DOT", up to 13 characters after it) visible in the image. Respond ONLY with minified JSON, no prose: {"document_type":"VEHICLE_TIRE_ID","vin":string|null,"tin":string|null,"tin_plant_code":string|null,"tin_week_year":string|null,"tire_size":string|null,"tire_brand":string|null,"confidence":number} Never make up a value: one that is not visible is null. If the photo shows no VIN and no tire code, respond only {"document_type":"NOT_FOUND"}.
     """.trimIndent()
 
     val identityDocument = """
-        You are reading a photo of a government identity document (national ID card, driver's license, passport, or residence permit). Extract the printed data exactly as written. Dates as YYYY-MM-DD. Respond ONLY with minified JSON, no prose: {"document_type":"ID_CARD"|"PASSPORT"|"DRIVERS_LICENSE"|"RESIDENCE_PERMIT"|"OTHER","issuing_country":string|null,"document_number":string|null,"surname":string|null,"given_names":string|null,"full_name":string|null,"date_of_birth":string|null,"sex":string|null,"nationality":string|null,"place_of_birth":string|null,"issue_date":string|null,"expiry_date":string|null,"address":string|null,"mrz":string|null,"confidence":number}
+        You are reading a photo of a government identity document (national ID card, driver's license, passport, or residence permit). Extract the printed data exactly as written. Dates as YYYY-MM-DD. Respond ONLY with minified JSON, no prose: {"document_type":"ID_CARD"|"PASSPORT"|"DRIVERS_LICENSE"|"RESIDENCE_PERMIT"|"OTHER","issuing_country":string|null,"document_number":string|null,"surname":string|null,"given_names":string|null,"full_name":string|null,"date_of_birth":string|null,"sex":string|null,"nationality":string|null,"place_of_birth":string|null,"issue_date":string|null,"expiry_date":string|null,"address":string|null,"mrz":string|null,"confidence":number} Never make up a value: one that is not printed is null. If the photo shows no identity document, respond only {"document_type":"NOT_FOUND"}.
     """.trimIndent()
 
     val licensePlate = """
-        You are reading a photo of a vehicle taken by an operator. Find the vehicle registration (license) plate. Read the plate number exactly as printed, character by character; do not guess hidden characters. Respond ONLY with minified JSON, no prose: {"document_type":"LICENSE_PLATE","plate_number":string|null,"country":string|null,"region":string|null,"plate_type":string|null,"vehicle_color":string|null,"vehicle_make":string|null,"readable":boolean,"confidence":number}
+        You are reading a photo of a vehicle taken by an operator. Find the vehicle registration (license) plate. Read the plate number exactly as printed, character by character; do not guess hidden characters. Respond ONLY with minified JSON, no prose: {"document_type":"LICENSE_PLATE","plate_number":string|null,"country":string|null,"region":string|null,"plate_type":string|null,"vehicle_color":string|null,"vehicle_make":string|null,"readable":boolean,"confidence":number} Never make up a value: one that is not visible is null. If the photo shows no license plate, respond only {"document_type":"NOT_FOUND"}.
     """.trimIndent()
 
     val vehicleTireOrder = listOf("vin", "tin", "tin_plant_code", "tin_week_year", "tire_size", "tire_brand", "confidence")
@@ -82,7 +82,8 @@ object VlmPrompts {
         "dials and MIXED for drums plus fraction dials, unit is as printed for the reading (kWh, MWh, kvarh, m³, ft³, CCF, gal, L, GJ, Gcal, " +
         "h, …), registers lists every visible register when two or more are visible, else null, date_time is the date/time shown on the " +
         "display if any, and confidence_notes is null unless a digit is illegible or a rule above was a close call (then say which digit and " +
-        "why)."
+        "why). If the photo shows no meter, or its register cannot be read at all, respond only {\"document_type\":\"NOT_FOUND\"}: " +
+        "never make up a reading or reuse the example's digits."
     val meterReadingOrder = listOf(
         "meter_type", "display_type", "reading_label", "reading", "unit", "multiplier", "credit", "meter_serial_number",
         "register_count", "registers", "date_time", "confidence_notes",
@@ -127,6 +128,10 @@ object VlmPrompts {
             ?: ((body["inference"] as? JsonObject)?.get("response_json"))
         return output?.let(::answerFromOutput)
     }
+
+    /** The answer for a photo showing nothing of the type, as the prompts ask: {"document_type":"NOT_FOUND"} */
+    fun notFound(answer: Answer): Boolean =
+        answer is Answer.Obj && (answer.json["document_type"] as? JsonPrimitive)?.content == "NOT_FOUND"
 
     private val fence = Regex("^```[A-Za-z]*\\s*|\\s*```$")
 
