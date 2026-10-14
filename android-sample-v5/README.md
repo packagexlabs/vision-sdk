@@ -35,7 +35,7 @@ Both land under `~/.m2/repository/com/packagexlabs/`.
 
 **The barcode engine (`com.packagexlabs:barcode-scanner:0.2.1`, with `barcode-pipeline(-android)`)**
 is BarcodeScannerApp's scanner: VisionScanner v2.8.0-local reads every barcode with it, and this
-sample's AR Barcode feeds it ARCore frames directly. It isn't produced by the build above either;
+sample's AR Count feeds it the frames of its own camera stream beside ARCore's. It isn't produced by the build above either;
 publish it from a BarcodeScannerApp checkout first
 (`./gradlew :shared:publishToMavenLocal :scanner:publishToMavenLocal`, see its README). It ships
 arm64-v8a only, like this sample.
@@ -121,13 +121,39 @@ over a debug build from the same machine but isn't fit for distribution. Never c
 its passwords; `secrets.properties` is git-ignored and `secrets.properties.example` lists the names
 with empty values.
 
+## Local Models build
+
+The Android counterpart of the iOS "VisionSDK Demo v5 (Local Models)" scheme: the `localRelease` build
+type is `release` plus every on-device OCR model the Models sheet offers (shipping label micro/large,
+BOL large, item label large, document classification micro/large, and the key-value micro model BOL and
+item label use). Nothing is downloaded; the default `release` build is unchanged.
+
+```bash
+./gradlew :app:assembleLocalRelease -PvisionSdkAndroidDir=<vision-sdk-android>   # app/build/outputs/apk/localRelease/app-localRelease.apk
+./gradlew :app:installLocalRelease  -PvisionSdkAndroidDir=<vision-sdk-android>
+```
+
+- **Build time.** `fetchBundledModels` (`app/bundled-models.gradle.kts`) makes the SDK's own
+  `v1/sdk/connect` call per model with `<VISION_ENV>_API_KEY`, decrypts the download link the way the SDK
+  does (with the environment keys in the vision-sdk-android checkout's `VisionSDK.kt`) and downloads the
+  payload as served — still encrypted. Each download is checked against the server's MD5 of the decrypted
+  model. Payloads are cached in `build/bundled-models/` (git-ignored, never commit them) and fetched again
+  only when the server has a new version. Needs network and the API key at build time.
+- **First launch.** `BundledModels.kt` hands each payload to `ModelManager.installBundledModel()`, which
+  unwraps its key and re-encrypts it with the device key exactly like a download, into the same place.
+  This takes a while once; later launches skip installed versions (and put back a model the SDK deleted).
+  The active document type's model is then loaded up front, as `preloadBundledModel()` does on iOS; the
+  Vision Scanner never prompts for a download.
+- The bundled models are a fixed version; "Check for updates" in the Models sheet still works and would
+  download a newer one.
+
 ## Baseline profiles and startup benchmarks
 
 `:baselineprofile` (a `com.android.test` module using the `androidx.baselineprofile` plugin) drives
 the release app with UiAutomator: cold start → module cards → Barcode camera → open and close Settings →
 QR code → Vision Scanner → Price tag → AR Item Count → Document Acquisition → back to Barcode (each from its
 module card, via the camera's back arrow). CAMERA is
-granted with `pm grant` first. **AR Barcode is skipped**: ARCore start-up depends on Google Play
+granted with `pm grant` first. **AR Count is skipped**: ARCore start-up depends on Google Play
 Services for AR being installed and current on the device and is not reliable under automation.
 
 The generated profile is committed at `app/src/release/generated/baselineProfiles/baseline-prof.txt`
@@ -160,7 +186,7 @@ app, replacing whatever build of `io.vision_sdk_android` was on the device.
 ## Modes
 
 The app opens on module cards (design v6): SCAN CODES — Barcode (single/multi), QR, Price tag,
-AR Item Count (item retrieval), AR Barcode; CAPTURE DATA — Vision Scanner (on-device / cloud / hybrid
+AR Item Count (item retrieval), AR Count (ARCore shelf counting); CAPTURE DATA — Vision Scanner (on-device / cloud / hybrid
 OCR — SL, BOL, IL, wild card), Document Acquisition. Each card opens its own camera; the back arrow (or
 system Back) returns to the cards and releases the camera. A single Barcode/QR read shows as a code card
 over the camera; every other result is full screen. Dimensioning and Text Templates are not in this
@@ -169,8 +195,7 @@ sample (see *Known gaps*).
 Barcode and QR code read ~3840x2160 frames with BarcodeScannerApp's engine (VisionSDK v2.8.0-local).
 With Multiple scan and Show boxes on, the SDK draws the boxes itself with the engine's overlay
 (yellow while a code is being read, green with its text once read, gliding with the label and
-fading out); the app draws none there. Vision Scanner's boxes are still the app's own. AR Barcode's
-items list shows the engine's symbology ids (`code128`, `qrcode`, …).
+fading out); the app draws none there. Vision Scanner's boxes are still the app's own.
 
 ## Architecture
 
@@ -187,8 +212,10 @@ items list shows the engine's symbology ids (`code128`, `qrcode`, …).
   `ScannerUiState` but owns a different camera pipeline (CameraX, not the SDK's).
 - **`document/`** — Document Acquisition's own CameraX pipeline, dewarp (UVDoc), enhancement and
   PDF export. Independent of `camera/CameraController` by design (`CameraOwner.Document`).
-- **`ar/`** — AR Barcode: ARCore session, marker rendering, and the thread-safe item catalog used
-  by the Items sheet while AR is scanning.
+- **`ar/`** — AR Count: the ARCore shared-camera session with the app's own stream for the engine
+  (`ArSessionController`), the GL renderer, the engine worker and the mapper thread that feeds the
+  counting core (`:arcount`, `ArCounter`) and publishes its `CountView`; the overlay with the prompt,
+  the count and its buttons.
 - **`data/`** — repositories (`ExtractionRepository`, `ModelRepository`, `ReportRepository`,
   `EntitlementRepository`, `ItemCatalogRepository`, `PreferencesRepository`/DataStore) and the SDK
   response parsers (`OcrParser`, `JsonFields`).

@@ -5,88 +5,113 @@ import android.graphics.Rect
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.media.Image
+import android.media.ImageReader
 import android.util.Log
 import com.example.barcodescanner.BarcodeScanner
-import com.example.barcodescanner.ScanFrame
-import io.packagex.visiondemo.BuildConfig
+import com.example.barcodescanner.ScannerSettings
+import com.example.barcodescanner.Symbology
+import io.packagex.arcount.Read
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
-import java.util.concurrent.atomic.AtomicBoolean
-
-/** Waits until every task queued on single-thread [worker] so far has run, at most [timeoutMs]; false on timeout.
- *  A shut-down worker has nothing left to wait for. */
-internal fun awaitDrained(worker: ExecutorService, timeoutMs: Long): Boolean = try {
-    worker.submit {}.get(timeoutMs, TimeUnit.MILLISECONDS)
-    true
-} catch (e: TimeoutException) {
-    false
-} catch (e: RejectedExecutionException) {
-    true
-}
 
 /**
- * A barcode decoded from an ARCore CPU frame, with its centre expressed in the
- * *raw* (unrotated) image's pixel coordinates — the space ARCore's
- * `Coordinates2d.IMAGE_PIXELS` expects.
+ * The engine's refreshAfterMs while an AR Count session runs, until the counter's first view says otherwise
+ * ([BarcodeProcessor.desiredRefresh], spec 5.3 schedule): 0 re-reads every shown barcode in every frame, as far as
+ * the frame's decode budget goes. Spec 5.3 says 100 while counting, but at 30 fps 100 re-reads only one shown barcode
+ * per frame (engine investigation, 2026-10-02). One constant, for the thermal fallback (spec 6) to raise later.
  */
-data class Detection(
-    val payload: String,
-    val format: String,
-    val rawX: Float,
-    val rawY: Float,
+internal const val AR_REFRESH_AFTER_MS = 0L
+
+/**
+ * The 17 code types AR reads, as iOS's AR (Apple Vision's list of the ar_based_barcode_scanning app; UPC-A apart, which
+ * Vision reads as EAN-13, and ITF for both ITF-14 and interleaved 2 of 5): fewer decoders a frame, and none of the
+ * rarely printed types (MSI, Telepen, DX film edge, MaxiCode, rMQR, MicroPDF417, stacked DataBar, Code 39 extended)
+ * that turn stray stripes into wrong codes.
+ */
+internal val AR_SYMBOLOGIES = setOf(
+    Symbology.QR_CODE, Symbology.MICRO_QR, Symbology.AZTEC, Symbology.DATA_MATRIX, Symbology.PDF_417,
+    Symbology.EAN_13, Symbology.EAN_8, Symbology.UPC_A, Symbology.UPC_E, Symbology.CODE_128, Symbology.CODE_39,
+    Symbology.CODE_93, Symbology.CODABAR, Symbology.ITF, Symbology.DATABAR, Symbology.DATABAR_EXPANDED,
+    Symbology.DATABAR_LIMITED,
 )
 
 /**
- * Feeds ARCore CPU images to the barcode engine VisionSDK reads with (`com.packagexlabs:barcode-scanner`,
- * BarcodeScannerApp's [BarcodeScanner.scanAll] of the planes, the whole frame), on one worker thread,
- * single-flight. Only barcodes whose text shows are reported: the engine shows a text once two frames
- * agree and reports only what it sees in the frame, so no predicted position reaches the AR placement.
+ * The engine's settings for AR Count: a shelf of identical units ([ScannerSettings.repeatedPayloads]) and the decoder
+ * speed settings of 0.2.20-ar (scan/study/31, steps 2a to 5), off by default in the engine: a box last read as 1D is
+ * re-read without the as-is 2D read, a never-read box over 0.5 Mpx (a whole label) takes no frame time, a begun place
+ * stops at the frame's budget (25 ms; 5x for a thorough one, the cap the host replay chose), one place a frame is kept
+ * for a new barcode of the localizer, and the detector runs every 250 ms in place of 60 while the picture stands still.
+ */
+internal fun arScannerSettings() = ScannerSettings(
+    symbologies = AR_SYMBOLOGIES,
+    repeatedPayloads = true,
+    skipAsItIsForKnown1D = true,
+    limitLargeUnreadBoxes = true,
+    stopPlacesAtBudget = true,
+    reserveSlotForNew = true,
+    detectLessWhenStill = true,
+)
+
+/** Runs [task] on single-thread [worker] after every task queued so far; on the caller's thread when it is shut down. */
+internal fun runBehind(worker: ExecutorService, task: () -> Unit) {
+    try {
+        worker.execute(task)
+    } catch (e: RejectedExecutionException) {
+        task()
+    }
+}
+
+/**
+ * The engine worker (spec 5.8), the spike's: images of the app stream go to BarcodeScannerApp's engine
+ * ([BarcodeScanner.scanAll] of the planes, the whole frame, turned upright by the camera's SENSOR_ORIENTATION) on one
+ * worker thread, one at a time. An image that comes while one is decoded waits for the engine, the newest one only
+ * ([LatestWins]), so a decode longer than a frame (4K on the Memor 35, trace of 2026-10-02: 47 ms at p50, 193 at p90;
+ * frames every 33 ms) does not leave the worker idle until the next frame. The engine runs with [arScannerSettings]
+ * and the counter's refresh, set before every scan ([desiredRefresh]; [AR_REFRESH_AFTER_MS] until its first view).
+ * Every decoded image's reads ([readsOf]) and what it took go to the callback, empty ones too: the counter learns
+ * which frames were decoded.
  */
 class BarcodeProcessor(
     private val context: Context,
+    private val refreshAfterMs: Long = AR_REFRESH_AFTER_MS,
 ) {
-    private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "ArBarcodeDecode") }
-    private val busy = AtomicBoolean(false)
+    private val worker = Executors.newSingleThreadExecutor { r -> Thread(r, "ArEngine") }
+    private val intake = LatestWins<Decode>()
 
     @Volatile
     private var closed = false
 
     // Of the worker: loading the detector takes a moment, which the main thread does not have.
-    // Null until it is made, and for good if it cannot be (then AR reads no barcode).
+    // Null until it is made, and for good if it cannot be (then nothing is read).
     private var scanner: BarcodeScanner? = null
 
-    val isBusy: Boolean get() = busy.get()
+    /**
+     * The counter's refresh for the next frames ([io.packagex.arcount.CountView.desiredRefreshMs], spec 5.3), read on
+     * the worker before every scan; null (until the counter's first view) keeps [refreshAfterMs].
+     */
+    @Volatile
+    var desiredRefresh: () -> Int? = { null }
 
-    // Fallback until configureRotation() runs; matches the old hardcoded
-    // value, verified 90 on the Datalogic Memor 35 via `dumpsys media.camera`
-    // (android.sensor.orientation). Devices vary, so this is replaced with
-    // the real SENSOR_ORIENTATION for ARCore's own camera once the session
-    // picks one.
+    /** Clockwise turn that makes the camera's image upright; 90 (the Memor 35's) until [configureRotation]. */
     @Volatile
     private var rotationDegrees = 90
 
     init {
         worker.execute {
             try {
-                scanner = BarcodeScanner.create(context.applicationContext)
+                scanner = BarcodeScanner.create(context.applicationContext, arScannerSettings())
+                    .also { it.refreshAfterMs = refreshAfterMs }
             } catch (t: Throwable) {
-                Log.e(TAG, "the barcode scanner could not be made; AR reads no barcodes", t)
+                Log.e(TAG, "the barcode scanner could not be made; AR Count reads no barcodes", t)
             }
         }
     }
 
-    /**
-     * Reads SENSOR_ORIENTATION for [cameraId] (ARCore's chosen camera) and
-     * uses it for both the scanner's rotation and [uprightCentreToRaw].
-     * Call once the session's camera config is known, after `Session.configure`.
-     */
+    /** Reads SENSOR_ORIENTATION of [cameraId], the camera ARCore runs on. */
     fun configureRotation(cameraId: String) {
         runCatching {
-            val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-            manager.getCameraCharacteristics(cameraId).get(CameraCharacteristics.SENSOR_ORIENTATION)
+            (context.getSystemService(Context.CAMERA_SERVICE) as CameraManager).getCameraCharacteristics(cameraId).get(CameraCharacteristics.SENSOR_ORIENTATION)
         }.onSuccess { orientation ->
             if (orientation != null) rotationDegrees = orientation
         }.onFailure { t ->
@@ -94,62 +119,36 @@ class BarcodeProcessor(
         }
     }
 
-    /** Takes ownership of [image] and closes it when done. */
+    /**
+     * Takes ownership of [image] and closes it when done: decoded now, or after the decode in flight unless a newer
+     * image comes first; [onReads] runs on the worker with the image's timestamp.
+     */
     fun process(
         image: Image,
-        onResult: (List<Detection>) -> Unit,
+        onReads: (timestampNs: Long, reads: List<Read>, stats: EngineStats, tracked: List<Read>) -> Unit,
     ) {
-        if (closed || !busy.compareAndSet(false, true)) {
-            image.close()
-            return
-        }
-        worker.execute {
-            try {
-                val scanner = scanner ?: return@execute
-                val rawW = image.width
-                val rawH = image.height
-                val rotation = rotationDegrees
-                val p = image.planes
-                val frame =
-                    scanner.scanAll(
-                        p[0].buffer,
-                        p[1].buffer,
-                        p[2].buffer,
-                        rawW,
-                        rawH,
-                        p[0].rowStride,
-                        p[1].rowStride,
-                        p[1].pixelStride,
-                        Rect(0, 0, rawW, rawH),
-                        rotation,
-                        image.timestamp,
-                    )
-                val detections = detectionsOf(frame, rotation, rawW, rawH)
-                if (detections.isNotEmpty()) {
-                    if (BuildConfig.DEBUG) Log.d("MarkerDiag", "BATCH dets=${detections.size}")
-                    onResult(detections)
-                }
-            } catch (t: Throwable) {
-                Log.w(TAG, "decode failed", t)
-            } finally {
-                image.close()
-                busy.set(false)
-            }
-        }
+        val d = Decode(image, onReads)
+        if (closed) return d.close()
+        if (intake.offer(d)) submit(d)
     }
 
+    /** Closes the image waiting for the engine, unread: the capture it belongs to has stopped. */
+    fun dropPending() = intake.clear()
+
     /**
-     * Blocks until the decode in flight (if any) has finished, at most [timeoutMs]: its [Image] belongs to
-     * the ARCore session, so the session must not close under it. The single worker runs FIFO, so a no-op
-     * queued behind the decode completes once the decode has.
+     * Closes [reader] on the worker, after the decode in flight: that decode reads the planes of one of its images,
+     * and `ImageReader.close()` frees every image it handed out. The image waiting is closed at once, and one of its
+     * images decoded later is closed by then and throws before the engine reads it.
      */
-    fun awaitIdle(timeoutMs: Long) {
-        if (!awaitDrained(worker, timeoutMs)) Log.w(TAG, "decode still running after $timeoutMs ms")
+    fun closeAfterDecode(reader: ImageReader) {
+        intake.clear()
+        runBehind(worker) { reader.close() }
     }
 
     fun close() {
         if (closed) return
         closed = true
+        intake.clear()
         // After any frame still queued: BarcodeScanner is closed only when no scan is running.
         worker.execute {
             scanner?.close()
@@ -158,49 +157,100 @@ class BarcodeProcessor(
         worker.shutdown()
     }
 
+    // Queued on the worker, behind anything queued meanwhile: a reader's close (closeAfterDecode) runs before the next decode.
+    private fun submit(d: Decode) {
+        try {
+            worker.execute { decode(d) }
+        } catch (e: RejectedExecutionException) { // closed: nothing is decoded any more
+            d.close()
+            while (true) (intake.next() ?: break).close()
+        }
+    }
+
+    /** Worker: [d] through the engine, then the image that came meanwhile, the newest one, at once. */
+    private fun decode(d: Decode) {
+        try {
+            scanner?.let { scan(it, d) }
+        } catch (t: Throwable) {
+            Log.w(TAG, "decode failed", t)
+        } finally {
+            d.close()
+        }
+        // The blur pre-skip (spec 5.6) runs before the intake, on the camera thread: ArSessionController.onImage
+        intake.next()?.let(::submit)
+    }
+
+    private fun scan(scanner: BarcodeScanner, d: Decode) {
+        val image = d.image
+        val w = image.width
+        val h = image.height
+        val ts = image.timestamp
+        val rotation = rotationDegrees
+        val p = image.planes
+        val refresh = refreshFor(desiredRefresh(), refreshAfterMs)
+        scanner.refreshAfterMs = refresh
+        val started = System.nanoTime()
+        val frame = scanner.scanAll(
+            p[0].buffer, p[1].buffer, p[2].buffer, w, h, p[0].rowStride, p[1].rowStride, p[1].pixelStride,
+            Rect(0, 0, w, h), rotation, ts,
+        )
+        val scanMs = (System.nanoTime() - started) / 1e6f
+        d.onReads(ts, readsOf(frame, rotation, w, h, ts), frame.stats.toEngineStats(scanMs, intake.dropped, refresh), trackedOf(frame, rotation, w, h, ts))
+    }
+
+    /** An app-stream image for the engine, and where its reads go */
+    private class Decode(val image: Image, val onReads: (Long, List<Read>, EngineStats, List<Read>) -> Unit) : AutoCloseable {
+        override fun close() = image.close()
+    }
+
     private companion object {
-        const val TAG = "ArBarcodeProcessor"
+        const val TAG = "ArEngine"
     }
 }
 
-/**
- * The barcodes of [frame] whose text shows, with their centres in pixels of the raw
- * [rawWidth] x [rawHeight] frame that [rotationDegrees] clockwise turned upright. A box the
- * engine has not read (or read as nothing) is left out; a read barcode whose symbology the
- * SDK has no name for is kept as "Barcode".
- */
-internal fun detectionsOf(
-    frame: ScanFrame,
-    rotationDegrees: Int,
-    rawWidth: Int,
-    rawHeight: Int,
-): List<Detection> =
-    frame.barcodes.mapNotNull { barcode ->
-        val payload = barcode.text
-        if (payload.isNullOrEmpty()) return@mapNotNull null
-        val (x, y) = uprightCentreToRaw(barcode.corners, frame.cropWidth, frame.cropHeight, rotationDegrees, rawWidth, rawHeight)
-        Detection(payload, barcode.symbology?.id ?: "Barcode", x, y)
-    }
+/** The engine's refresh for the next scan: the counter's [desired] one (none below 0), or [fallback] before it has one. */
+internal fun refreshFor(desired: Int?, fallback: Long): Long = desired?.toLong()?.coerceAtLeast(0L) ?: fallback
 
 /**
- * The centre of a barcode whose [corners] are 0..1 of a [uprightWidth] x [uprightHeight] frame
- * turned upright by [rotationDegrees] clockwise, in pixels of the raw [rawWidth] x [rawHeight]
- * frame.
+ * The engine's intake (spec 5.8 step 1): one item in work and at most one waiting, latest wins. An item that comes
+ * while one is in work waits in the slot; a newer one takes its place, and the one it replaces is closed unread and
+ * counted in [dropped]. Offered on the camera thread, taken on the worker, cleared on teardown.
  */
-internal fun uprightCentreToRaw(
-    corners: FloatArray,
-    uprightWidth: Int,
-    uprightHeight: Int,
-    rotationDegrees: Int,
-    rawWidth: Int,
-    rawHeight: Int,
-): Pair<Float, Float> {
-    val u = (corners[0] + corners[2] + corners[4] + corners[6]) / 4f * uprightWidth
-    val v = (corners[1] + corners[3] + corners[5] + corners[7]) / 4f * uprightHeight
-    return when (rotationDegrees) {
-        90 -> Pair(v, rawHeight - u)
-        180 -> Pair(rawWidth - u, rawHeight - v)
-        270 -> Pair(rawWidth - v, u)
-        else -> Pair(u, v)
+internal class LatestWins<T : AutoCloseable> {
+    private var working = false
+    private var pending: T? = null
+
+    /** Items closed unread because a newer one replaced them in the slot */
+    @Volatile
+    var dropped = 0L
+        private set
+
+    /** [item] came: true when it is to be worked on now (busy until [next] returns null), false when it waits. */
+    @Synchronized
+    fun offer(item: T): Boolean {
+        if (!working) {
+            working = true
+            return true
+        }
+        pending?.let {
+            it.close()
+            dropped++
+        }
+        pending = item
+        return false
+    }
+
+    /** The item in work is done: the waiting one, in work from now on, or null (idle) when none waits. */
+    @Synchronized
+    fun next(): T? = pending.also {
+        pending = null
+        if (it == null) working = false
+    }
+
+    /** Teardown: the waiting item, if any, is closed unread (not counted: nothing newer took its place). */
+    @Synchronized
+    fun clear() {
+        pending?.close()
+        pending = null
     }
 }

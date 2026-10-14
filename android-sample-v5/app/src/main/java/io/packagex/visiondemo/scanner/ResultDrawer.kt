@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +26,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import io.packagex.texttemplates.sdk.PXTemplateInfo
+import io.packagex.visiondemo.data.DocumentFields
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.JsonFields
 import io.packagex.visiondemo.data.OcrParser
@@ -84,6 +85,7 @@ import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.PXButton
 import io.packagex.visiondemo.designsystem.PXButtonKind
 import io.packagex.visiondemo.designsystem.RecomposeLog
+import io.packagex.visiondemo.designsystem.ShimmerRows
 import io.packagex.visiondemo.designsystem.inter
 import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
@@ -93,8 +95,10 @@ import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.OcrField
 import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.OcrTable
+import io.packagex.visiondemo.model.RetrievalRow
 import io.packagex.visiondemo.model.ScanResult
 import androidx.compose.foundation.layout.union
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -112,6 +116,8 @@ fun ResultDrawer(
     itemCount: Int = 0,
     /** Text Templates: the templates loaded into the pool, for "Re-predict as…" (iOS `model.tt`). */
     ttLoaded: List<PXTemplateInfo> = emptyList(),
+    /** [ScanResult.Pending]: its extraction is still running (shimmer), not failed. */
+    loading: Boolean = false,
     onAction: (ScannerAction) -> Unit,
 ) {
     RecomposeLog("ResultDrawer")
@@ -143,13 +149,29 @@ fun ResultDrawer(
         ) {
             DrawerHeader(result = result, tags = tags, itemCount = itemCount, onReport = { reportOpen = true }, onClose = { onAction(ScannerAction.CloseResult) })
 
-            // v6: the captured image sits in its own fixed-height, scrollable frame above the details.
-            (result as? ScanResult.Ocr)?.let { boxedOcr(it) }?.let { (img, fields) ->
-                ResultImage { BoxedOcrImage(image = img, fields = fields, selected = selectedField, onSelect = { selectedField = it }) }
+            // v6: the captured image sits in its own fixed-height frame above the details, centre-cropped to fill it.
+            // The photo stays on top once the fields arrive (it was shown while loading): with its field boxes when the
+            // result has them, else plain (VLM answers, document classes)
+            (result as? ScanResult.Ocr)?.let { ocr ->
+                val boxed = boxedOcr(ocr)
+                if (boxed != null) {
+                    ResultImage { BoxedOcrImage(image = boxed.first, fields = boxed.second, selected = selectedField, onSelect = { selectedField = it }) }
+                } else {
+                    ocr.image?.let { img ->
+                        ResultImage {
+                            Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                }
             }
             (result as? ScanResult.TextTemplate)?.image?.let { img ->
                 ResultImage {
-                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured label", contentScale = ContentScale.FillWidth, modifier = Modifier.fillMaxWidth())
+                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured label", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                }
+            }
+            (result as? ScanResult.Pending)?.image?.let { img ->
+                ResultImage {
+                    Image(bitmap = img.asImageBitmap(), contentDescription = "Captured photo", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 }
             }
 
@@ -162,6 +184,7 @@ fun ResultDrawer(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
                 when (result) {
+                    is ScanResult.Pending -> if (loading) ShimmerRows() else EmptyNote("Nothing was read from this photo.")
                     is ScanResult.Codes -> CodesContent(result.codes, onAction)
                     is ScanResult.Ocr -> OcrContent(
                         scan = result,
@@ -185,8 +208,7 @@ fun ResultDrawer(
                         onSelectedChange = { selectedField = it },
                     )
                     ScanResult.Price -> PriceContent(tags, onAction)
-                    is ScanResult.Retrieval -> RetrievalContent(result.codes, onAction)
-                    is ScanResult.Ar -> ArContent(result)
+                    is ScanResult.Retrieval -> RetrievalContent(result.rows, onAction)
                     is ScanResult.TextTemplate -> TtContent(result, ttLoaded, ttEdits, onEdit = { k, v -> ttEdits = ttEdits + (k to v) }, onAction)
                     is ScanResult.Document -> DocumentReview(
                         pages = result.pages,
@@ -200,7 +222,7 @@ fun ResultDrawer(
                 }
             }
 
-            DrawerFooter(result = result, tags = tags, docEnhanced = docEnhanced, edits = ttEdits, onAction = onAction)
+            if (result is ScanResult.Pending) PendingFooter(onAction) else DrawerFooter(result = result, tags = tags, docEnhanced = docEnhanced, edits = ttEdits, onAction = onAction)
         }
 
         if (reportOpen && result is ScanResult.Ocr) {
@@ -292,10 +314,21 @@ private fun DrawerFooter(result: ScanResult, tags: List<PriceTag>, docEnhanced: 
                     }
                 }
                 Box(Modifier.weight(1f)) {
-                    val label = if (result is ScanResult.Ar) "New Scan" else "Scan next"
+                    val label = if (result is ScanResult.Retrieval) "New Scan" else "Scan next"
                     PXButton(title = label) { onAction(ScannerAction.ScanNext) }
                 }
             }
+        }
+    }
+}
+
+/** While the photo is being read: Cancel stops the extraction and closes (as Close does). */
+@Composable
+private fun PendingFooter(onAction: (ScannerAction) -> Unit) {
+    Column {
+        HorizontalDivider(color = PX.Hairline)
+        Box(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(top = 10.dp, bottom = 20.dp)) {
+            PXButton(title = "Cancel", kind = PXButtonKind.Secondary) { onAction(ScannerAction.CloseResult) }
         }
     }
 }
@@ -317,16 +350,13 @@ private fun titlesFor(result: ScanResult, tags: List<PriceTag>, itemCount: Int):
         }
     }
     is ScanResult.Ocr -> Triple(result.title, result.subtitle, true)
-    ScanResult.Price -> Triple("Found ${tags.size} Items", "${tags.count { !it.valid }} invalid", true)
-    is ScanResult.Retrieval -> {
-        val n = result.codes.count { it.second }
-        Triple(
-            if (n == 0) "No listed items found" else "$n listed item${if (n == 1) "" else "s"} found",
-            "$itemCount codes in list",
-            true,
-        )
-    }
-    is ScanResult.Ar -> Triple("Scan Results", "${result.rows.sumOf { it.count }} barcodes · ${result.rows.size} unique", true)
+    is ScanResult.Pending -> Triple(result.title, result.subtitle, false)
+    ScanResult.Price -> Triple("Found ${tags.size} Items", priceSubtitle(tags), true)
+    is ScanResult.Retrieval -> Triple(
+        "${result.rows.count { it.inList && it.found }} of ${result.rows.count { it.inList }} SKUs found",
+        "${result.rows.sumOf { it.countLow ?: 0 }} units counted · $itemCount SKUs in list",
+        true,
+    )
     is ScanResult.Document -> Triple("Document captured", "${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"} · on-device", true)
     is ScanResult.TextTemplate -> result.templateName.let { name ->
         Triple(name ?: "No confident match", "Template match · ${result.path.label} · ${result.fields.size} fields", name != null)
@@ -339,7 +369,7 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
     is ScanResult.Ocr -> {
         val documentClass = OcrParser.documentClass(result.result.rawJson)
         if (documentClass != null) {
-            documentClass
+            DocumentFields.documentClass(documentClass)
         } else {
             val fields = result.result.fields.joinToString("\n") { f -> "${f.section?.let { "$it · " }.orEmpty()}${f.label}: ${f.value}" }
             val tables = result.result.tables.joinToString("\n") { t ->
@@ -348,9 +378,11 @@ private fun summaryFor(result: ScanResult, tags: List<PriceTag>, edits: Map<Stri
             listOf(fields, tables).filter { it.isNotBlank() }.joinToString("\n")
         }
     }
-    ScanResult.Price -> tags.joinToString("\n") { "${it.sku}\t${it.price}\t${if (it.valid) "Valid" else "Invalid"}" }
-    is ScanResult.Retrieval -> result.codes.joinToString("\n") { "${it.first}\t${if (it.second) "In list" else "Not in list"}" }
-    is ScanResult.Ar -> result.rows.joinToString("\n") { "${it.name?.let { n -> "$n · " }.orEmpty()}${it.value} × ${it.count}" }
+    ScanResult.Price -> priceSummary(tags)
+    is ScanResult.Retrieval -> result.rows.joinToString("\n") { r ->
+        listOfNotNull(r.code, r.name, if (!r.inList) "Not in list" else if (r.found) "Found" else "Missing", r.countText()).joinToString("\t")
+    }
+    is ScanResult.Pending -> ""
     is ScanResult.Document -> "Scanned document · ${result.pages.size} ${if (result.pages.size == 1) "page" else "pages"}"
     is ScanResult.TextTemplate -> result.fields.toSortedMap().entries.joinToString("\n") { (k, f) -> "$k: ${edits[k] ?: f.text}" }
 }
@@ -390,6 +422,9 @@ private fun PriceContent(tags: List<PriceTag>, onAction: (ScannerAction) -> Unit
                     Column(horizontalAlignment = Alignment.End) {
                         Text(t.price, style = mono(16.sp), color = PX.Ink)
                         Text("Expected ${t.expected}", style = inter(11.sp), color = PX.Muted)
+                        t.expiryLabel?.let {
+                            Text(it, style = inter(11.sp, if (t.expired) FontWeight.SemiBold else FontWeight.Normal), color = if (t.expired) PX.RedText else PX.Muted)
+                        }
                     }
                     Spacer(Modifier.width(8.dp))
                     Badge(text = if (t.valid) "Valid" else "Invalid", tone = if (t.valid) BadgeTone.Success else BadgeTone.Danger, dot = true)
@@ -404,30 +439,24 @@ private fun PriceContent(tags: List<PriceTag>, onAction: (ScannerAction) -> Unit
 }
 
 @Composable
-private fun RetrievalContent(codes: List<Pair<String, Boolean>>, onAction: (ScannerAction) -> Unit) {
-    if (codes.isEmpty()) {
-        EmptyNote(text = "No codes in view. Pan across the shelf, then capture.")
+private fun RetrievalContent(rows: List<RetrievalRow>, onAction: (ScannerAction) -> Unit) {
+    if (rows.isEmpty()) {
+        EmptyNote(text = "No SKUs in the list. Scan them first, then count.")
     } else {
         Column {
-            codes.forEach { (code, inList) ->
-                RowLine(label = "Code", value = code) {
-                    Badge(text = if (inList) "In list" else "Not in list", tone = if (inList) BadgeTone.Success else BadgeTone.Neutral, dot = inList)
+            rows.forEach { r ->
+                RowLine(label = r.name ?: "SKU", value = r.code) {
+                    if ((r.countLow ?: 0) > 0) r.countText()?.let { Text(it, style = mono(14.sp), color = PX.Text2) }
+                    when {
+                        !r.inList -> Badge(text = "Not in list", tone = BadgeTone.Brand, dot = true)
+                        r.found -> Badge(text = "Found", tone = BadgeTone.Success, dot = true)
+                        else -> Badge(text = "Missing", tone = BadgeTone.Danger, dot = true)
+                    }
                 }
             }
         }
     }
-    LinkLabel(text = "Open item list") { onAction(ScannerAction.OpenItemList) }
-}
-
-@Composable
-private fun ArContent(result: ScanResult.Ar) {
-    Column {
-        result.rows.forEach { row ->
-            RowLine(label = row.name?.let { "${row.symbology} · $it" } ?: row.symbology, value = row.value) {
-                Text("× ${row.count}", style = mono(14.sp), color = PX.Text2)
-            }
-        }
-    }
+    LinkLabel(text = "Edit SKU list") { onAction(ScannerAction.OpenItemList) }
 }
 
 /** Text Templates: one row per predicted field with its confidence and suggestions, the frame's barcodes, and
@@ -528,7 +557,7 @@ private fun OcrContent(
     val o = scan.result
     val documentClass = remember(o.rawJson) { OcrParser.documentClass(o.rawJson) }
     if (documentClass != null) {
-        DocumentClassCard(documentClass)
+        DocumentClassCard(DocumentFields.documentClass(documentClass))
         return
     }
 
@@ -672,10 +701,9 @@ private fun boxedOcr(scan: ScanResult.Ocr): Pair<Bitmap, List<OcrField>>? {
     return image to scan.result.fields
 }
 
-/** Design "Result image": a 320 dp frame the image scrolls inside, with a hint while there is more to see. */
+/** Design "Result image": a 320 dp frame the image fills, centre-cropped (the overflow is cut evenly). */
 @Composable
 private fun ResultImage(content: @Composable () -> Unit) {
-    val scroll = rememberScrollState()
     Box(
         modifier = Modifier
             .padding(start = 20.dp, end = 20.dp, top = 12.dp)
@@ -684,62 +712,51 @@ private fun ResultImage(content: @Composable () -> Unit) {
             .clip(RoundedCornerShape(12.dp))
             .background(PX.Ink)
             .border(1.dp, PX.Hairline, RoundedCornerShape(12.dp)),
-    ) {
-        Box(Modifier.fillMaxWidth().verticalScroll(scroll)) { content() }
-        if (scroll.maxValue > 0) {
-            Text(
-                "Scroll to see the full image",
-                style = montserrat(11.sp),
-                color = Color.White,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp)
-                    .background(PX.Ink.copy(alpha = 0.72f), RoundedCornerShape(14.dp))
-                    .padding(horizontal = 10.dp, vertical = 6.dp),
-            )
-        }
-    }
+        contentAlignment = Alignment.Center,
+    ) { content() }
 }
 
 @Composable
 private fun BoxedOcrImage(image: Bitmap, fields: List<OcrField>, selected: String?, onSelect: (String?) -> Unit) {
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(image.width.toFloat() / image.height.toFloat())
-            .clip(RoundedCornerShape(12.dp)),
-    ) {
-        Image(bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize())
-        fields.forEachIndexed { i, f ->
-            val rect = fieldBox(f, image.width, image.height) ?: return@forEachIndexed
-            val on = selected == f.id
-            val tint = if (on) PX.Neon else colorFor(f.validatedBy)
-            val boxX = maxWidth * rect.left
-            val boxY = maxHeight * rect.top
-            Box(
-                modifier = Modifier
-                    .offset(x = boxX, y = boxY)
-                    .size(width = maxWidth * (rect.right - rect.left), height = maxHeight * (rect.bottom - rect.top))
-                    .zIndex(if (on) 1f else 0f)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(tint.copy(alpha = if (on) 0.3f else 0.16f))
-                    .border(2.dp, tint, RoundedCornerShape(4.dp))
-                    .clickable { onSelect(if (on) null else f.id) },
-            )
-            // iOS :449-453: the number chip is a separate overlay above-left of the box (offset
-            // -2/-14), always neon/purple — not the box's own validated_by tint — and must sit
-            // outside the box's clip so it isn't cropped.
-            Box(
-                modifier = Modifier
-                    .offset(x = boxX - 2.dp, y = boxY - 14.dp)
-                    .zIndex(if (on) 1f else 0f)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(if (on) PX.Neon else PX.Purple),
-            ) {
-                Text(
-                    "${i + 1}", style = montserrat(9.sp), color = if (on) PX.Ink else Color.White,
-                    modifier = Modifier.padding(horizontal = 4.dp),
+    // Centre crop: the image fills the frame at the larger of the two scales and the overflow is cut evenly by the
+    // frame's clip; the boxes are laid out on the whole image, so they stay on their text.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val scale = max(maxWidth.value / image.width, maxHeight.value / image.height)
+        val imageWidth = (image.width * scale).dp
+        val imageHeight = (image.height * scale).dp
+        Box(Modifier.requiredSize(imageWidth, imageHeight)) {
+            Image(bitmap = image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.FillBounds, modifier = Modifier.fillMaxSize())
+            fields.forEachIndexed { i, f ->
+                val rect = fieldBox(f, image.width, image.height) ?: return@forEachIndexed
+                val on = selected == f.id
+                val tint = if (on) PX.Neon else colorFor(f.validatedBy)
+                val boxX = imageWidth * rect.left
+                val boxY = imageHeight * rect.top
+                Box(
+                    modifier = Modifier
+                        .offset(x = boxX, y = boxY)
+                        .size(width = imageWidth * (rect.right - rect.left), height = imageHeight * (rect.bottom - rect.top))
+                        .zIndex(if (on) 1f else 0f)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(tint.copy(alpha = if (on) 0.3f else 0.16f))
+                        .border(2.dp, tint, RoundedCornerShape(4.dp))
+                        .clickable { onSelect(if (on) null else f.id) },
                 )
+                // iOS :449-453: the number chip is a separate overlay above-left of the box (offset
+                // -2/-14), always neon/purple — not the box's own validated_by tint — and must sit
+                // outside the box's clip so it isn't cropped.
+                Box(
+                    modifier = Modifier
+                        .offset(x = boxX - 2.dp, y = boxY - 14.dp)
+                        .zIndex(if (on) 1f else 0f)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(if (on) PX.Neon else PX.Purple),
+                ) {
+                    Text(
+                        "${i + 1}", style = montserrat(9.sp), color = if (on) PX.Ink else Color.White,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                }
             }
         }
     }
@@ -908,3 +925,11 @@ private fun TableCard(table: OcrTable) {
 }
 
 // endregion
+
+/** The Price drawer's subtitle: "1 invalid", and " · 2 expired" when any tag is past its printed expiry. */
+internal fun priceSubtitle(tags: List<PriceTag>): String =
+    "${tags.count { !it.valid }} invalid" + tags.count { it.expired }.let { if (it > 0) " · $it expired" else "" }
+
+/** The Price drawer's copy text: one tag per line, SKU, price, validity and the expiry when the tag shows one. */
+internal fun priceSummary(tags: List<PriceTag>): String =
+    tags.joinToString("\n") { listOfNotNull(it.sku, it.price, if (it.valid) "Valid" else "Invalid", it.expiryLabel).joinToString("\t") }

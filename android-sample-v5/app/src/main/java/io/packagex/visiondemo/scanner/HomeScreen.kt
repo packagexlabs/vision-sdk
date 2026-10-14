@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.Sell
-import androidx.compose.material.icons.filled.ViewInAr
 import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -58,8 +57,7 @@ import io.packagex.visiondemo.model.gated
 
 /**
  * v6 entry point: one card per module, each opening its own camera ([ScannerAction.SetMode]).
- * Ported from the VisionSDK Demo v6 design's Home screen. AR Barcode, which the design has no card for,
- * sits with the other code modes; Dimensioning is not in this sample.
+ * Ported from the VisionSDK Demo v6 design's Home screen. Dimensioning is not in this sample.
  */
 @Composable
 fun HomeScreen(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
@@ -86,7 +84,7 @@ fun HomeScreen(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifie
 }
 
 /** The design's two sections, in its order. */
-internal val HOME_CODES = listOf(ScanMode.Barcode, ScanMode.QR, ScanMode.Price, ScanMode.Retrieval, ScanMode.Ar)
+internal val HOME_CODES = listOf(ScanMode.Barcode, ScanMode.QR, ScanMode.Price, ScanMode.Retrieval)
 internal val HOME_DATA = listOf(ScanMode.Ocr, ScanMode.DocAcq, ScanMode.TextTemplates)
 
 @Composable
@@ -150,7 +148,6 @@ private fun cardIcon(mode: ScanMode): ImageVector = when (mode) {
     ScanMode.QR -> Icons.Filled.QrCode2
     ScanMode.Price -> Icons.Filled.Sell
     ScanMode.Retrieval -> Icons.Filled.Inventory
-    ScanMode.Ar -> Icons.Filled.ViewInAr
     ScanMode.Ocr -> Icons.Filled.DocumentScanner
     ScanMode.DocAcq -> Icons.Filled.Description
     ScanMode.TextTemplates -> Icons.AutoMirrored.Filled.ListAlt
@@ -161,8 +158,7 @@ private fun cardDescription(mode: ScanMode): String = when (mode) {
     ScanMode.Barcode -> "1D codes, one at a time or in bulk."
     ScanMode.QR -> "QR and 2D codes."
     ScanMode.Price -> "Read shelf tags and check prices."
-    ScanMode.Retrieval -> "Find items from a pick list."
-    ScanMode.Ar -> "Pin markers on every code in view."
+    ScanMode.Retrieval -> "Scan your SKUs, then count them on the shelf."
     ScanMode.Ocr -> "Labels, BOLs, IDs, plates, tires."
     ScanMode.DocAcq -> "Scan pages to a searchable PDF."
     ScanMode.TextTemplates -> "Match text to a saved template."

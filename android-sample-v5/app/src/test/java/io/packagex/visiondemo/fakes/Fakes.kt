@@ -34,9 +34,11 @@ import io.packagex.visiondemo.model.OcrResult
 import io.packagex.visiondemo.model.Processing
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.model.ScannerConfig
+import io.packagex.visionsdk.core.DetectionMode
 import io.packagex.visionsdk.core.ScanningMode
 import io.packagex.visionsdk.dto.BarcodeSymbology
 import io.packagex.visionsdk.dto.ScannedCodeResult
+import io.packagex.visionsdk.exceptions.VisionSDKException
 import io.packagex.visionsdk.ui.views.VisionCameraView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -198,7 +200,12 @@ class FakeCamera : DetectionGatedCamera() {
     override fun sdkApply(config: ScannerConfig, frame: RectF?, scanning: ScanningMode) { lastConfig = config; lastScanning = scanning }
     override fun sdkPauseDetection() { detectionPaused = true }
     override fun sdkResumeDetection() { detectionPaused = false }
-    override fun capture() { captures++ }
+    /** Like the SDK, a capture in OCR detection with no text in view fails with NoTextDetected instead. */
+    var textInView = true
+    override fun capture() {
+        captures++
+        if (lastConfig?.detection == DetectionMode.OCR && !textInView) emit(ScanEvent.Failure(VisionSDKException.NoTextDetected))
+    }
     override fun sdkRescan() { rescans++; running = true; detectionPaused = false }
     override fun torch(on: Boolean) { torchOn = on }
     override fun zoom(ratio: Float) { zoomRatio = ratio }
@@ -259,12 +266,11 @@ class FakeDocument : DocumentCamera {
 }
 
 /** In-memory [ItemCatalogRepository]. */
-class FakeCatalog(initial: Map<String, String> = emptyMap(), items: List<String> = emptyList()) : ItemCatalogRepository {
-    override val names = MutableStateFlow(initial)
-    override suspend fun name(sku: String, name: String) { names.value = names.value + (sku to name) }
-    override suspend fun remove(sku: String) { names.value = names.value - sku }
+class FakeCatalog(items: List<String> = emptyList(), names: Map<String, String> = emptyMap()) : ItemCatalogRepository {
     override val items = MutableStateFlow(items)
     override suspend fun setItems(items: List<String>) { this.items.value = items }
+    override val names = MutableStateFlow(names)
+    override suspend fun setNames(names: Map<String, String>) { this.names.value = names }
 }
 
 /** Swaps Dispatchers.Main for a [StandardTestDispatcher] so viewModelScope runs on runTest's virtual clock. */

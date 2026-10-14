@@ -22,18 +22,16 @@ object DocumentEnhancer {
     /** Blur radius as a fraction of the long edge: wide enough to lose the text. */
     private const val BLUR_FRACTION = 1.0 / 24.0
 
-    private const val SATURATION = 0.85f
-
-    // Ink: black point from the page's own histogram (1st percentile of the
-    // paper-normalised luminance, capped so an ink-less page cannot collapse),
-    // paper white point fixed just under 1, then gamma 1.5 (t·√t) crushes the
-    // mid-greys. Replaces the Core Image port's mild linear contrast 1.18.
-    private const val BLACK_PERCENTILE = 0.01
-    private const val BLACK_POINT_MAX = 0.85f
-    private const val WHITE_POINT = 0.95f
+    // Natural look (CamScanner-like), same values as vision-native document_enhance.cpp:
+    // flat-field lighting, paper to white, ink kept with a mild linear stretch. The
+    // earlier tuning (black cap 0.85, gamma 1.5, ink erosion, sharpen 0.6) stretched
+    // light pages up to 10x and filled in small text.
+    private const val SATURATION = 1.0f
+    // No black-point stretch (it left grey and thin text near white): v / white point, then t^2.5.
+    private const val WHITE_POINT = 0.96f
 
     /** Unsharp mask strength: out = v + k·(v − box3×3(v)). */
-    private const val SHARPEN_K = 0.6f
+    private const val SHARPEN_K = 0.3f
 
     /** NEON path (vision-native) when available; the Kotlin loop below is the reference and fallback. */
     /** [consume]: the caller hands [src] over, so the native path enhances it in place instead of copying it. */
@@ -70,10 +68,8 @@ object DocumentEnhancer {
         height: Int,
     ): IntArray {
         if (width < 2 || height < 2 || source.size < width * height) return source
-        // Thin, faint strokes under-cover their pixels and read lighter than the
-        // ink they are made of; a 3×3 per-channel minimum thickens them ~1 px so
-        // the stretch below catches them (faint date line: darkest-3% 20 → 11).
-        val src = erode3(source, width, height)
+        // No ink erosion (it closed the counters of small type); see the constants.
+        val src = source
         // 1. Illumination: box-downsample, three box blurs (≈ gaussian), per channel.
         val f = max(1, width / FIELD_WIDTH)
         val fw = width / f
@@ -129,24 +125,9 @@ object DocumentEnhancer {
             }
         }
 
-        // 3. Black point from the luminance histogram, then saturation + stretch/gamma.
-        val hist = IntArray(384)
-        for (i in 0 until width * height) {
-            val lum = 0.2126f * norm[i * 3] + 0.7152f * norm[i * 3 + 1] + 0.0722f * norm[i * 3 + 2]
-            hist[(lum * 255f).toInt().coerceIn(0, 383)]++
-        }
-        var black = 0f
-        var acc = 0L
-        val target = (width.toLong() * height * BLACK_PERCENTILE).toLong()
-        for (i in 0 until 384) {
-            acc += hist[i]
-            if (acc >= target) {
-                black = i / 255f
-                break
-            }
-        }
-        black = min(black, BLACK_POINT_MAX)
-        val invRange = 1f / max(WHITE_POINT - black, 0.05f)
+        // 3. Saturation + tone (no black-point stretch, see WHITE_POINT).
+        val black = 0f
+        val invRange = 1f / WHITE_POINT
 
         val out = IntArray(width * height)
         for (i in 0 until width * height) {
@@ -171,34 +152,7 @@ object DocumentEnhancer {
         invRange: Float,
     ): Int {
         val t = ((v - black) * invRange).coerceIn(0f, 1f)
-        return (t * sqrt(t) * 255f).roundToInt().coerceIn(0, 255)
-    }
-
-    /** 3×3 per-channel minimum over the packed channels. */
-    private fun erode3(
-        px: IntArray,
-        width: Int,
-        height: Int,
-    ): IntArray {
-        val out = IntArray(width * height)
-        for (y in 0 until height) {
-            val ym = max(y - 1, 0)
-            val yp = min(y + 1, height - 1)
-            for (x in 0 until width) {
-                val xm = max(x - 1, 0)
-                val xp = min(x + 1, width - 1)
-                var packed = px[y * width + x] and 0xff000000.toInt()
-                var shift = 16
-                while (shift >= 0) {
-                    var m = 255
-                    for (row in intArrayOf(ym, y, yp)) for (col in intArrayOf(xm, x, xp)) m = min(m, px[row * width + col] ushr shift and 0xff)
-                    packed = packed or (m shl shift)
-                    shift -= 8
-                }
-                out[y * width + x] = packed
-            }
-        }
-        return out
+        return (t * t * sqrt(t) * 255f).roundToInt().coerceIn(0, 255)
     }
 
     /** 3×3 unsharp mask over the packed channels, in place. */

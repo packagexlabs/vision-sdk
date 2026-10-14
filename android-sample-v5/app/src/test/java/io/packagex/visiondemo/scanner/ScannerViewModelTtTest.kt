@@ -31,6 +31,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -81,7 +82,12 @@ class ScannerViewModelTtTest {
         assertEquals(CameraOwner.Scanner, cam.owner)
         v.onAction(ScannerAction.Shutter); runCurrent()
         assertEquals(1, cam.captures); assertEquals(Phase.Scanning, v.state.value.phase)
-        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        tt.delayMs = 2_000
+        val photo = fakeBitmap()
+        cam.emit(ScanEvent.Captured(photo, emptyList(), 1f)); runCurrent()
+        val pending = v.state.value.result as ScanResult.Pending   // the result screen opens on the photo at once
+        assertSame(photo, pending.image); assertEquals("Predicting…", pending.subtitle); assertEquals(Phase.Processing, v.state.value.phase)
+        advanceUntilIdle()
         val r = v.state.value.result as ScanResult.TextTemplate
         assertEquals("Shipping label", r.templateName); assertEquals(TtPath.OneShot, r.path); assertEquals(1, tt.predictions)
         v.onAction(ScannerAction.TtRepredict("t2")); advanceUntilIdle()
@@ -118,5 +124,16 @@ class ScannerViewModelTtTest {
         v.onAction(ScannerAction.GoHome); advanceUntilIdle()
         v.onTtEvent(PXScanEvent.Prediction(ttPrediction("Late"))); advanceUntilIdle()
         assertNull(v.state.value.result)
+    }
+
+    @Test fun cancelWhilePredictingClosesTheLoadingScreen() = runTest {
+        val tt = FakeTextTemplates(ready).apply { delayMs = 5_000 }
+        val v = vm(tt); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.TextTemplates)); advanceUntilIdle()
+        v.onAction(ScannerAction.Shutter); runCurrent()
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
+        assertTrue(v.state.value.result is ScanResult.Pending)
+        v.onAction(ScannerAction.CancelProcessing); advanceUntilIdle()
+        assertNull(v.state.value.result); assertEquals(Phase.Idle, v.state.value.phase)
     }
 }

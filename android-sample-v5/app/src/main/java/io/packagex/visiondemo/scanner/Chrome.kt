@@ -44,11 +44,12 @@ import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.outlined.Photo
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import io.packagex.visiondemo.data.vlmModel
+import io.packagex.visiondemo.data.vlmModelName
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,6 +80,7 @@ import io.packagex.visiondemo.designsystem.glass
 import io.packagex.visiondemo.designsystem.mono
 import io.packagex.visiondemo.designsystem.montserrat
 import io.packagex.visiondemo.document.shown
+import io.packagex.visiondemo.model.DesignRect
 import io.packagex.visiondemo.model.Feedback
 import io.packagex.visiondemo.model.Phase
 import io.packagex.visiondemo.model.ScanMode
@@ -99,7 +101,7 @@ import io.packagex.visiondemo.model.zooms
 @Composable
 fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Chrome")
-    val usesScanner = ownerFor(state.mode, state.tt.stream) == CameraOwner.Scanner
+    val usesScanner = ownerFor(state.mode, state.tt.stream, state.countStep) == CameraOwner.Scanner
     Column(modifier = modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -139,8 +141,16 @@ fun Chrome(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: M
         if (state.prefs.showHints && !state.permissionDenied) {
             HintBar(text = hintFor(state))
         }
+        if (state.arCountHud) ArCountHud(state, onAction)
 
         Spacer(modifier = Modifier.weight(1f))
+
+        if (state.arBuildTray) {
+            // AR Item Count step 1 (design v6): the shutter sits on the SKU tray ([ArBuildTray]), with no chip or zoom
+            ShutterRow(state = state, onAction = onAction, modifier = Modifier.padding(bottom = 12.dp))
+            Spacer(Modifier.height(arTrayHeight()))
+            return@Column
+        }
 
         val chip = chipFor(state)
         val showPill = (state.mode.isCode || state.mode.isDocument) && !state.gated
@@ -180,15 +190,18 @@ private val WindowInsets.Companion.chromeInsets: WindowInsets
 /** The viewfinder brackets: the design's 390x844 artboard scaled to the screen, reported to the
  *  ViewModel in camera-view px via [ScannerAction.FrameChanged]. Ported from iOS `viewfinder(sx:sy:)`.
  *  Single-code Barcode/QR only — [ScanMode.viewfinder] is already null for every other mode; the multi
- *  check here hides them for multi-code Barcode/QR. Vision Scanner, Price tag, Item retrieval, Document
- *  Acquisition and AR Barcode never show brackets. */
+ *  check here hides them for multi-code Barcode/QR. Vision Scanner, Price tag, AR Item Count and Document
+ *  Acquisition never show brackets. */
 @Composable
 fun Viewfinder(state: ScannerUiState, onAction: (ScannerAction) -> Unit, modifier: Modifier = Modifier) {
     RecomposeLog("Viewfinder")
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-        val f = state.mode.viewfinder
-        val visible = f != null &&
-            viewfinderBracketsVisible(state.mode, state.prefs.multi, state.result != null, state.gated, state.permissionDenied)
+        // AR Item Count step 1 scans SKUs in single barcode mode: the Barcode frame raised to y 280 (at 318 it would run
+        // into the shutter row above the SKU tray, 414-486 on the artboard), one code at a time
+        val build = state.arBuildTray
+        val f = if (build) DesignRect(x = 20f, y = 280f, width = 350f, height = 122f) else state.mode.viewfinder
+        val visible = f != null && (build ||
+            viewfinderBracketsVisible(state.mode, state.prefs.multi, state.result != null, state.gated, state.permissionDenied))
         if (f != null && visible) {
             val insets = WindowInsets.chromeInsets.asPaddingValues()
             val insetTop = insets.calculateTopPadding()
@@ -287,6 +300,7 @@ private fun ContextChip(label: String, sub: String, onClick: () -> Unit) {
     }
 }
 
+
 @Composable
 private fun CapturePill(auto: Boolean, onToggle: () -> Unit) {
     Row(modifier = Modifier.glass().semantics { contentDescription = "Capture mode" }) {
@@ -345,23 +359,10 @@ private fun ShutterRow(state: ScannerUiState, onAction: (ScannerAction) -> Unit,
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (state.mode == ScanMode.Ocr) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(PX.Glass, RoundedCornerShape(12.dp))
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { onAction(ScannerAction.PickPhoto) }
-                        .semantics { contentDescription = "Import from Photos" },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(Icons.Outlined.Photo, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                }
-            } else {
-                Spacer(Modifier.size(48.dp))
-            }
+            Spacer(Modifier.size(48.dp))
+            // Vision Scanner has no side picture buttons (no Photos import, no last-result thumbnail)
             val last = state.lastResult
-            if (last != null && last.first == state.mode) {
+            if (last != null && last.first == state.mode && state.mode != ScanMode.Ocr) {
                 LastThumb(
                     result = last.second,
                     modifier = Modifier
@@ -424,14 +425,15 @@ private fun chipFor(state: ScannerUiState): Triple<String, String, ScannerAction
         ScanMode.Ocr -> if (state.prefs.wildCard) {
             Triple("Wild card", "", ScannerAction.OpenSheet(SheetKind.Settings))
         } else {
-            Triple(state.prefs.docType.label, "", ScannerAction.OpenSheet(SheetKind.DocType))
+            // A VLM type shows its model; it is picked in the Document type sheet
+            val model = if (state.prefs.vlm) "· ${vlmModelName(state.prefs.vlmModel(state.prefs.docType))}" else ""
+            Triple(state.prefs.docType.label, model, ScannerAction.OpenSheet(SheetKind.DocType))
         }
-        ScanMode.Retrieval -> Triple(
-            "Item list",
-            "· ${state.items.size} ${if (state.items.size == 1) "code" else "codes"}",
+        ScanMode.Retrieval -> if (!state.countStep) null else Triple(
+            "SKU list",
+            "· ${state.items.size} ${if (state.items.size == 1) "SKU" else "SKUs"}",
             ScannerAction.OpenSheet(SheetKind.Items),
         )
-        ScanMode.Ar -> Triple("Items", "· ${state.itemNames.size}", ScannerAction.OpenSheet(SheetKind.ArItems))
         ScanMode.TextTemplates -> Triple(
             "Templates",
             "· ${if (state.tt.syncing) "syncing…" else if (state.tt.loadedIds.isEmpty()) "not loaded" else "${state.tt.loadedIds.size} loaded"}",
@@ -448,9 +450,9 @@ private fun bottomReserveDp(state: ScannerUiState): Dp {
     return 56.dp + 80.dp + (if (pills) 56.dp else 0.dp) + (if (chip != null) 54.dp else 0.dp) + 14.dp
 }
 
-private fun hintFor(state: ScannerUiState): String {
+internal fun hintFor(state: ScannerUiState): String {
     if (state.gated) return "Authentication required"
-    if (!state.detectionEnabled && ownerFor(state.mode, state.tt.stream) == CameraOwner.Scanner) return "Detection paused"
+    if (!state.detectionEnabled && ownerFor(state.mode, state.tt.stream, state.countStep) == CameraOwner.Scanner) return "Detection paused"
     when (state.phase) {
         Phase.Scanning -> return "Capturing…"
         Phase.Processing -> return if (state.mode == ScanMode.DocAcq) {
@@ -466,7 +468,10 @@ private fun hintFor(state: ScannerUiState): String {
     // Text Templates reads the scanner's text/document indications (iOS codeSeen).
     val codeSeen = if (state.mode == ScanMode.TextTemplates) state.seesDocument || state.seesText else state.codeInFrame
     var h = when (state.mode) {
-        ScanMode.Ocr -> if (state.seesDocument) {
+        // A VLM type reads any photo: nothing to wait for in view.
+        ScanMode.Ocr -> if (state.prefs.vlm) {
+            if (auto) "Frame the subject · hold still" else "Frame the subject · tap to capture"
+        } else if (state.seesDocument) {
             if (auto) "Hold Still" else "Hold Still · tap to capture"
         } else {
             "Point camera to document"
@@ -477,22 +482,15 @@ private fun hintFor(state: ScannerUiState): String {
             state.tt.stream -> state.ttGuidance ?: "Point camera at a label"
             else -> if (codeSeen) "Label detected · tap to predict" else "Point camera at a label"
         }
-        ScanMode.Ar -> state.arCounts.sumOf { it.count }.let { n ->
-            if (n > 0) "$n markers pinned · tap the shutter to finish" else "One marker per barcode value, pinned where it was last seen"
-        }
         ScanMode.DocAcq -> if (state.seesDocument) {
             if (auto) "Page edges found · hold still" else "Page edges found · tap to capture"
         } else {
             "Fit the whole page in view"
         }
-        ScanMode.Retrieval -> {
-            val n = state.codesInView.count { it in state.items }
-            when {
-                state.items.isEmpty() -> "Add item codes to find"
-                state.codesInView.isEmpty() -> "Pan across the shelf"
-                n == 0 -> "No listed items in view"
-                else -> "$n listed item${if (n == 1) "" else "s"} in view"
-            }
+        ScanMode.Retrieval -> return if (state.countStep) {
+            retrievalHint(state.items, state.codesInView, state.arCount, state.findingSurface, state.pinCounts)
+        } else {
+            buildHint(state.codeInFrame)
         }
         ScanMode.Price -> if (state.tags.isEmpty()) {
             "Point at a price tag"

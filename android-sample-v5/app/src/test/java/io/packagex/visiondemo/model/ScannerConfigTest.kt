@@ -24,12 +24,12 @@ class ScannerConfigTest {
         assertFalse(scannerConfig(ScanMode.Ocr, multi = false, showBoxesPref = true).sdkDrawsBoxes)
         assertFalse(scannerConfig(ScanMode.Retrieval, multi = true, showBoxesPref = true).sdkDrawsBoxes)
     }
-    @Test fun retrievalEveryOtherFrameAndGated() {
+    @Test fun arItemCountRunsNoSdkDetectionAndIsGated() {
         val c = scannerConfig(ScanMode.Retrieval, false, true)
-        assertEquals(2, c.nthFrame); assertTrue(c.needsEntitlement); assertNull(c.detection)
+        assertTrue(c.needsEntitlement); assertNull(c.detection)
     }
     @Test fun priceTagSeventhFrame() = assertEquals(7, scannerConfig(ScanMode.Price, false, true).nthFrame)
     @Test fun modesHaveNoDimensioning() =
-        assertEquals(listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "AR Item Count", "AR Barcode", "Document Acquisition", "Text Templates"),
+        assertEquals(listOf("Barcode", "QR code", "Vision Scanner", "Price tag", "AR Item Count", "Document Acquisition", "Text Templates"),
                      ScanMode.entries.map { it.label })
 }

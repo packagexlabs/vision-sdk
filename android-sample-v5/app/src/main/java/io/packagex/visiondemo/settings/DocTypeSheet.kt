@@ -2,23 +2,41 @@ package io.packagex.visiondemo.settings
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.packagex.visiondemo.data.VLM_MODELS
+import io.packagex.visiondemo.data.vlmModel
+import io.packagex.visiondemo.data.vlmModelName
 import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.PXButton
 import io.packagex.visiondemo.designsystem.SectionLabel
@@ -37,6 +55,40 @@ import io.packagex.visiondemo.scanner.ScannerUiState
 import io.packagex.visiondemo.scanner.activeModel
 import io.packagex.visiondemo.scanner.onDevice
 
+/** VLM type [d]'s backend [model], as a dropdown on its row: each type keeps its own */
+@Composable
+private fun VlmModelDropdown(d: DocType, model: String, onAction: (ScannerAction) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .heightIn(min = 32.dp)
+                .clip(CircleShape)
+                .border(1.dp, PX.Purple.copy(alpha = 0.4f), CircleShape)
+                .clickable { open = true }
+                .padding(horizontal = 10.dp)
+                .semantics { contentDescription = "${d.label} model, ${vlmModelName(model)}" },
+        ) {
+            Text(vlmModelName(model), style = mono(12.sp), color = PX.Purple)
+            Icon(Icons.Filled.KeyboardArrowDown, contentDescription = null, tint = PX.Purple, modifier = Modifier.size(14.dp))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            VLM_MODELS.forEach { m ->
+                DropdownMenuItem(
+                    text = { Text(vlmModelName(m)) },
+                    trailingIcon = { if (m == model) Icon(Icons.Filled.Check, contentDescription = "Selected") },
+                    onClick = {
+                        open = false
+                        onAction(ScannerAction.UpdatePrefs { it.copy(vlmModels = it.vlmModels + (d.name to m)) })
+                    },
+                )
+            }
+        }
+    }
+}
+
 /** Ported 1:1 from iOS `UI/Sheets.swift` `DocTypeSheet`. */
 @Composable
 fun DocTypeSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
@@ -47,7 +99,11 @@ fun DocTypeSheet(state: ScannerUiState, onAction: (ScannerAction) -> Unit) {
             ChoiceRow(
                 title = d.label,
                 on = p.docType == d,
-                trailing = { Text(if (d.onDevice) "Cloud · On-device" else "Cloud only", style = mono(11.sp), color = PX.Muted) },
+                // A VLM type's row picks its backend model (the cloud-only types are the VLM ones); the others say where they run
+                trailing = {
+                    if (!d.onDevice) VlmModelDropdown(d, p.vlmModel(d), onAction)
+                    else Text("Cloud · On-device", style = mono(11.sp), color = PX.Muted)
+                },
                 onClick = {
                     onAction(ScannerAction.UpdatePrefs { prefs ->
                         prefs.copy(docType = d, processing = if (!d.onDevice) Processing.Cloud else prefs.processing)

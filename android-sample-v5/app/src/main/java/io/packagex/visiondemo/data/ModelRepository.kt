@@ -1,5 +1,8 @@
 package io.packagex.visiondemo.data
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import io.packagex.visiondemo.BuildConfig
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.ModelState
@@ -13,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -88,11 +93,14 @@ interface ModelRepository {
     fun unload(t: DocType, s: ModelSize)
     suspend fun delete(t: DocType, s: ModelSize)
     suspend fun checkUpdates(): String
+    /** Local Models build: loads the type's bundled model if it isn't loaded yet (iOS `preloadBundledModel`). */
+    suspend fun preload(t: DocType, s: ModelSize) {}
 }
 
 @Singleton
 class SdkModelRepository @Inject constructor(
     private val secrets: Secrets,
+    @ApplicationContext private val context: Context,
 ) : ModelRepository {
     // Computed each call (not cached at construction) since ModelManager.initialize() runs in
     // App.onCreate(), which may not have run yet when Hilt constructs this singleton.
@@ -106,7 +114,28 @@ class SdkModelRepository @Inject constructor(
     private val _versions = MutableStateFlow<Map<Pair<DocType, ModelSize>, String>>(emptyMap())
     override val versions: StateFlow<Map<Pair<DocType, ModelSize>, String>> = _versions
 
+    // Local Models build: the models ship in the APK; they're installed (once per process) before any state is read.
+    private val bundled = Mutex()
+    @Volatile private var bundledInstalled = false
+    private val preloading = Mutex()
+
+    private suspend fun installBundled() {
+        if (!BuildConfig.LOCAL_MODELS || bundledInstalled) return
+        bundled.withLock {
+            if (!bundledInstalled) withContext(Dispatchers.IO) { installBundledModels(context, manager) }
+            bundledInstalled = true
+        }
+    }
+
+    override suspend fun preload(t: DocType, s: ModelSize) {
+        if (!BuildConfig.LOCAL_MODELS) return
+        installBundled()
+        val module = ocrModuleFor(t, s) ?: return
+        preloading.withLock { if (!manager.isModelLoaded(module)) load(t, s) }
+    }
+
     override suspend fun refresh() {
+        installBundled()
         val updated = withContext(Dispatchers.IO) {
             modelRows.associateWith { (t, s) ->
                 val module = ocrModuleFor(t, s) ?: return@associateWith ModelState.NotDownloaded

@@ -7,15 +7,11 @@ import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
-import android.net.Uri
 import android.os.PersistableBundle
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -39,7 +35,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +56,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import io.packagex.visiondemo.ar.ArCountOverlay
 import io.packagex.texttemplates.sdk.PXScanConfiguration
 import io.packagex.texttemplates.sdk.PXScannerView
 import io.packagex.visiondemo.ar.ArSurface
@@ -73,13 +69,10 @@ import io.packagex.visiondemo.document.DocumentSurface
 import io.packagex.visiondemo.model.Phase
 import io.packagex.visiondemo.model.ScanMode
 import io.packagex.visiondemo.settings.SheetHost
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
-import kotlin.math.roundToInt
 
 /**
  * Wires [ScannerViewModel] to [ScannerScreen]: camera permission (sent on start even when already
@@ -101,20 +94,6 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         viewModel.onAction(ScannerAction.PermissionResult(granted))
-    }
-
-    // Vision Scanner's Photos button (iOS PhotosPicker): the picked image is extracted like a capture.
-    val scope = rememberCoroutineScope()
-    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) {
-            scope.launch {
-                // iOS returns silently when the image can't be loaded (CameraScreen :76); log it here.
-                val bitmap = withContext(Dispatchers.IO) {
-                    runCatching { decodeBitmap(context, uri) }.onFailure { Log.w("ScannerRoute", "Photo decode failed: $uri", it) }.getOrNull()
-                }
-                if (bitmap != null) viewModel.onAction(ScannerAction.ImportPhoto(bitmap))
-            }
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -153,7 +132,6 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 }
                 ScannerEffect.Haptic -> haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 is ScannerEffect.Copy -> copyToClipboard(context, effect.text)
-                ScannerEffect.PickPhoto -> photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 ScannerEffect.InstallArCore -> activity?.let {
                     requestArInstall(it, userRequested = true, onPending = { arInstallPending = true }, onResult = viewModel::onAction)
                 }
@@ -197,8 +175,10 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                         }
                     },
                 ) {
-                    if (state.mode == ScanMode.Ar) {
-                        if (!state.permissionDenied) ArSurface(controller = viewModel.ar, paused = state.paused)
+                    if (state.mode == ScanMode.Retrieval && state.countStep) {
+                        // AR Item Count counting: the AR session's view once past the gate and ARCore is installed (spec
+                        // 5.10); step 1 reads barcodes on the SDK camera below (design v6)
+                        if (state.arOn && !state.permissionDenied) ArSurface(controller = viewModel.ar, paused = state.paused)
                     } else if (state.mode == ScanMode.TextTemplates && state.tt.stream) {
                         TtStreamSurface(state, viewModel)
                     } else if (cameraViewRaw != null) {
@@ -214,7 +194,15 @@ fun ScannerRoute(viewModel: ScannerViewModel = hiltViewModel()) {
                 }
             },
             boxes = { boxes.value },
-            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.tt.loaded, viewModel::onAction) } },
+            overlay = {
+                if (state.mode == ScanMode.Retrieval && state.arOn && !state.permissionDenied && state.result == null && !state.paused) {
+                    ArCountOverlay(onTouch = { viewModel.onAction(ScannerAction.UserActive) })
+                }
+                if (state.arBuildTray) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) { ArBuildTray(state, viewModel::onAction) }
+                }
+            },
+            drawer = { state.result?.let { ResultDrawer(it, state.tags, state.items.size, state.tt.loaded, state.phase == Phase.Processing, viewModel::onAction) } },
             sheets = { SheetHost(state, viewModel::onAction) },
             onAction = viewModel::onAction,
         )
@@ -263,21 +251,6 @@ private fun TtStreamSurface(state: ScannerUiState, viewModel: ScannerViewModel) 
 
 /** The captured frame rides on each prediction, for the result image and Report (iOS `includeCapturedImage`). */
 private val TtStreamConfig = PXScanConfiguration(includeCapturedImage = true)
-
-/** A picked photo as a software bitmap (the extraction reads its pixels), upright per its EXIF,
- *  with the long edge capped at [MAX_PHOTO_EDGE] px (aspect kept) so a large photo can't exhaust memory. */
-private fun decodeBitmap(context: Context, uri: Uri): Bitmap =
-    ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri)) { decoder, info, _ ->
-        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-        val (w, h) = info.size.width to info.size.height
-        val long = maxOf(w, h)
-        if (long > MAX_PHOTO_EDGE) {
-            val scale = MAX_PHOTO_EDGE.toFloat() / long
-            decoder.setTargetSize((w * scale).roundToInt().coerceAtLeast(1), (h * scale).roundToInt().coerceAtLeast(1))
-        }
-    }
-
-private const val MAX_PHOTO_EDGE = 4000
 
 /** First AR entry (the original ArScannerActivity's `requestInstall`): [onPending] when the Play Store install
  *  was started (ask again on resume), otherwise the outcome as [ScannerAction.ArInstallResult]. */

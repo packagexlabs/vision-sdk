@@ -16,25 +16,24 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * User-assigned item names, keyed by SKU (AR markers and results; iOS `ItemCatalog`), and the item
- * retrieval list of codes to find (iOS `DemoModel.items`, persisted as "v5.items").
+ * The item retrieval list of codes to find (iOS `DemoModel.items`, persisted as "v5.items"), and the items' names,
+ * SKU to name (iOS `catalogLookup`), persisted beside it as "v5.itemNames"; a code may have none.
  */
 interface ItemCatalogRepository {
-    val names: StateFlow<Map<String, String>>
-    suspend fun name(sku: String, name: String)
-    suspend fun remove(sku: String)
     val items: StateFlow<List<String>>
     suspend fun setItems(items: List<String>)
+    val names: StateFlow<Map<String, String>>
+    suspend fun setNames(names: Map<String, String>)
 }
 
-private val itemNamesKey = stringPreferencesKey("v5.pref.itemNames")
 private val itemsKey = stringPreferencesKey("v5.items")
+private val namesKey = stringPreferencesKey("v5.itemNames")
+
+private fun decodeNames(raw: String?): Map<String, String> =
+    raw?.let { runCatching { Json.decodeFromString<Map<String, String>>(it) }.getOrNull() } ?: emptyMap()
 
 private fun decodeItems(raw: String?): List<String> =
     raw?.let { runCatching { Json.decodeFromString<List<String>>(it) }.getOrNull() } ?: emptyList()
-
-private fun decodeItemNames(raw: String?): Map<String, String> =
-    raw?.let { runCatching { Json.decodeFromString<Map<String, String>>(it) }.getOrNull() } ?: emptyMap()
 
 @Singleton
 class DataStoreItemCatalogRepository @Inject constructor(
@@ -42,23 +41,19 @@ class DataStoreItemCatalogRepository @Inject constructor(
     appScope: CoroutineScope,
 ) : ItemCatalogRepository {
 
-    override val names: StateFlow<Map<String, String>> = context.dataStore.data
-        .map { decodeItemNames(it[itemNamesKey]) }
-        .stateIn(appScope, SharingStarted.Eagerly, emptyMap())
-
-    override suspend fun name(sku: String, name: String) {
-        context.dataStore.edit { p -> p[itemNamesKey] = Json.encodeToString(mapOf(sku to name) + (decodeItemNames(p[itemNamesKey]) - sku)) }   // newest first (iOS)
-    }
-
-    override suspend fun remove(sku: String) {
-        context.dataStore.edit { p -> p[itemNamesKey] = Json.encodeToString(decodeItemNames(p[itemNamesKey]) - sku) }
-    }
-
     override val items: StateFlow<List<String>> = context.dataStore.data
         .map { decodeItems(it[itemsKey]) }
         .stateIn(appScope, SharingStarted.Eagerly, emptyList())
 
     override suspend fun setItems(items: List<String>) {
         context.dataStore.edit { p -> p[itemsKey] = Json.encodeToString(items) }
+    }
+
+    override val names: StateFlow<Map<String, String>> = context.dataStore.data
+        .map { decodeNames(it[namesKey]) }
+        .stateIn(appScope, SharingStarted.Eagerly, emptyMap())
+
+    override suspend fun setNames(names: Map<String, String>) {
+        context.dataStore.edit { p -> p[namesKey] = Json.encodeToString(names) }
     }
 }

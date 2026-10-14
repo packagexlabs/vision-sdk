@@ -68,7 +68,7 @@ class DocumentAcquisitionViewModelTest {
     @Test fun leavingReleasesTheDocumentCameraBeforeTheNextOwnerClaims() = runTest {
         doc.ownerProbe = { cam.owner }
         enterDocAcq(); assertEquals(emptyList<CameraOwner?>(), doc.releasedUnder)
-        v.onAction(ScannerAction.SetMode(ScanMode.Ar)); advanceUntilIdle()
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()   // AR Item Count: the AR session's camera
         assertEquals(listOf<CameraOwner?>(CameraOwner.Document), doc.releasedUnder); assertEquals(CameraOwner.Ar, cam.owner)
         v.onAction(ScannerAction.SetMode(ScanMode.DocAcq)); advanceUntilIdle(); assertEquals(CameraOwner.Document, cam.owner)
         v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()

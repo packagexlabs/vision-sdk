@@ -1,6 +1,5 @@
 package io.packagex.visiondemo.scanner
 
-import android.graphics.Bitmap
 import android.graphics.RectF
 import io.packagex.visiondemo.data.ItemLabelFeedback
 import io.packagex.visiondemo.data.Prefs
@@ -53,16 +52,23 @@ sealed interface ScannerAction {
     data object CheckUpdates : ScannerAction
 
     // Item retrieval list (Items sheet)
-    /** Adds one code (typed or picked) to the list. */
-    data class AddItem(val sku: String) : ScannerAction
+    /** Adds one code (typed or picked) to the list, with its item [name] when one is given (blank: unnamed). */
+    data class AddItem(val sku: String, val name: String = "") : ScannerAction
     /** The Items sheet's "Add Item": adds every code currently in view (iOS `addItemsInView`). */
     data object AddItemsInView : ScannerAction
     data class RemoveItem(val sku: String) : ScannerAction
     /** The Items sheet's "Delete" (all). */
     data object ClearItems : ScannerAction
+    /** AR Item Count's "Start count" (design v6): on to step 2 with a fresh count; in step 2 ("Continue counting"),
+     *  only closes the sheet. */
+    data object StartCount : ScannerAction
+    /** The Items sheet's "Scan SKUs": back to step 1, where the shutter adds the SKU in the frame. */
+    data object ScanSkus : ScannerAction
+    /** Names a listed SKU; a blank [name] clears it. */
+    data class NameItem(val sku: String, val name: String) : ScannerAction
 
     // Result screen
-    /** "Scan next" / "New Scan": closes the drawer (AR also resets its markers, Task 11). */
+    /** "Scan next" / "New Scan": closes the drawer (AR Item Count also starts a fresh count, keeping the list). */
     data object ScanNext : ScannerAction
     /** Copies [text] (ScannerEffect.Copy) and toasts "Copied <label>". */
     data class Copy(val label: String, val text: String) : ScannerAction
@@ -90,15 +96,8 @@ sealed interface ScannerAction {
     data object FlipCamera : ScannerAction
     /** Tap on the camera, in view-normalized (0..1) coordinates. */
     data class Focus(val x: Float, val y: Float) : ScannerAction
-    /** Vision Scanner's Photos button: asks the UI to open the picker ([ScannerEffect.PickPhoto]). */
-    data object PickPhoto : ScannerAction
-    /** An image picked from Photos: extracted like a capture (Vision Scanner only). */
-    data class ImportPhoto(val bitmap: Bitmap) : ScannerAction
 
-    // AR Barcode
-    /** AR Items sheet: names [sku] (both trimmed; blank input is ignored). AR keeps running. */
-    data class NameArItem(val sku: String, val name: String) : ScannerAction
-    data class RemoveArItem(val sku: String) : ScannerAction
+    // AR Item Count
     /** Outcome of [ScannerEffect.InstallArCore]. */
     data class ArInstallResult(val result: ArInstall) : ScannerAction
 
@@ -126,8 +125,6 @@ sealed interface ScannerEffect {
     data object Haptic : ScannerEffect
     /** Put [text] on the clipboard with `ClipDescription.EXTRA_IS_SENSITIVE = true` (scanned values can be personal data). */
     data class Copy(val text: String) : ScannerEffect
-    /** Open the system photo picker; send [ScannerAction.ImportPhoto] with the picked image. */
-    data object PickPhoto : ScannerEffect
     /** AR isn't installed yet: `ArCoreApk.requestInstall` from the Activity, then send [ScannerAction.ArInstallResult]. */
     data object InstallArCore : ScannerEffect
     /** Share the exported document PDF (through the app's FileProvider). */

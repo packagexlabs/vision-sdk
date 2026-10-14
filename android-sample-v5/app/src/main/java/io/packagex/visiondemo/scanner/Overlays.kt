@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.VideocamOff
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -144,29 +143,6 @@ fun AlertCard(alert: Alert, onAction: (ScannerAction) -> Unit, modifier: Modifie
             Column(modifier = Modifier.padding(top = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 alert.actions.forEach { a -> PXButton(title = a.label, kind = a.kind) { onAction(a.action) } }
             }
-        }
-    }
-}
-
-/** iOS shows this only while `mode == .ocr && phase == .processing`; [ScannerScreen] gates the call the same way. */
-@Composable
-fun ProcessingSpinner(onCancel: () -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            modifier = Modifier
-                .background(PX.Ink.copy(alpha = 0.75f), RoundedCornerShape(16.dp))
-                .padding(horizontal = 24.dp, vertical = 18.dp)
-                .semantics { contentDescription = "Extracting" },
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            CircularProgressIndicator(color = Color.White)
-            Text(
-                "Cancel",
-                style = montserrat(13.sp),
-                color = PX.Neon,
-                modifier = Modifier.clickable(onClick = onCancel),
-            )
         }
     }
 }

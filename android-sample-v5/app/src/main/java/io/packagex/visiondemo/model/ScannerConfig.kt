@@ -3,9 +3,9 @@ package io.packagex.visiondemo.model
 import io.packagex.visionsdk.core.DetectionMode
 
 data class ScannerConfig(
-    /** The SDK's own box detector to run; null when the mode doesn't use it at all -- Price tag and Item
-     *  retrieval read their own SDK callbacks (price/retrieval events, not box detection), and AR Barcode
-     *  and Document Acquisition run entirely their own camera pipeline (see `CameraOwner`). */
+    /** The SDK's own box detector to run; null when the mode doesn't use it at all -- Price tag reads its own
+     *  SDK callback (price events, not box detection), and AR Item Count and Document Acquisition run entirely
+     *  their own camera pipeline (see `CameraOwner`). */
     val detection: DetectionMode?,
     val multiple: Boolean,
     val nthFrame: Int,
@@ -19,7 +19,9 @@ data class ScannerConfig(
     val sdkDrawsBoxes: Boolean get() = showBoxes && (detection == DetectionMode.Barcode || detection == DetectionMode.QRCode)
 }
 
-fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): ScannerConfig = when (mode) {
+/** [vlm]: Vision Scanner with a cloud VLM type, which captures in Photo mode: the SDK's OCR mode refuses a capture
+ *  with no text in view (NoTextDetected) and auto-captures only on a detected document. */
+fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean, vlm: Boolean = false): ScannerConfig = when (mode) {
     ScanMode.Barcode, ScanMode.QR -> ScannerConfig(
         detection = if (mode == ScanMode.Barcode) DetectionMode.Barcode else DetectionMode.QRCode,
         multiple = multi,
@@ -30,7 +32,7 @@ fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): Scann
     )
     // Text Templates One-Shot captures a still like Vision Scanner (iOS sdkMode .ocr); Stream runs its own camera.
     ScanMode.Ocr, ScanMode.TextTemplates -> ScannerConfig(
-        detection = DetectionMode.OCR,
+        detection = if (mode == ScanMode.Ocr && vlm) DetectionMode.Photo else DetectionMode.OCR,
         multiple = false,
         nthFrame = 7,
         restrictToFrame = false,
@@ -45,20 +47,22 @@ fun scannerConfig(mode: ScanMode, multi: Boolean, showBoxesPref: Boolean): Scann
         showBoxes = false,
         needsEntitlement = true
     )
+    // AR Item Count's step 1 (design v6): single barcode mode — the SDK reads one barcode or QR code inside the frame
+    // per shutter into the SKU list, the app outlining it; step 2 runs on the AR session, which owns the camera then.
     ScanMode.Retrieval -> ScannerConfig(
-        detection = null,
-        multiple = true,
-        nthFrame = 2,
-        restrictToFrame = false,
-        showBoxes = false,
+        detection = DetectionMode.BarcodeOrQRCode,
+        multiple = false,
+        nthFrame = 7,
+        restrictToFrame = true,
+        showBoxes = true,
         needsEntitlement = true
     )
-    ScanMode.Ar, ScanMode.DocAcq -> ScannerConfig(
+    ScanMode.DocAcq -> ScannerConfig(
         detection = null,
         multiple = false,
         nthFrame = 7,
         restrictToFrame = false,
         showBoxes = false,
-        needsEntitlement = false
+        needsEntitlement = mode.gated
     )
 }

@@ -105,8 +105,43 @@ class VlmPromptsTest {
     @Test fun meterSpec() {
         val s = VlmPrompts.spec(DocType.Meter)!!
         assertEquals("Meter Reading", s.title)
-        assertEquals(listOf("meter_type", "reading", "unit", "meter_serial_number", "register_count", "registers", "date_time", "confidence_notes"), s.order)
-        assertTrue(s.prompt.contains("keep leading zeros"))
+        assertEquals(
+            listOf(
+                "meter_type", "display_type", "reading_label", "reading", "unit", "multiplier", "credit", "meter_serial_number",
+                "register_count", "registers", "date_time", "confidence_notes",
+            ),
+            s.order,
+        )
+        assertEquals(listOf("reading", "credit"), s.primaryKeys)
+        // The result lists exactly the keys the prompt asks for, in the prompt's order (registers' own keys aside), except
+        // that the prompt asks for unit first: the model copies the printed unit before it picks meter_type.
+        val schema = s.prompt.substring(s.prompt.indexOf("{\"document_type\""), s.prompt.indexOf("} where") + 1).replace(Regex("\\[\\{.*?\\}\\]"), "")
+        assertEquals(listOf("document_type", "unit") + (s.order - "unit"), Regex("\"(\\w+)\":").findAll(schema).map { it.groupValues[1] }.toList())
+        assertTrue(s.prompt.contains("leading zeros included"))
+        // Same digest in vision-sdk-ios scripts/test_vlm_fields.swift: both apps send the identical prompt.
+        val sha = java.security.MessageDigest.getInstance("SHA-256").digest(s.prompt.toByteArray()).joinToString("") { "%02x".format(it) }
+        assertEquals("027fc8caef63edf86a7609daebe4d9da2a01492a78586b68687e8d8104ff06eb", sha)
         assertNull(VlmPrompts.spec(DocType.VLM))
+    }
+
+    @Test fun anyMeterFieldsInPromptOrder() {
+        val f = fields(response("""{"document_type":"METER_READING","confidence_notes":"dial 3 sits on 5, dial 4 not past 0","multiplier":10,
+            "reading":"04521","credit":null,"display_type":"ANALOG_DIALS","unit":"kWh","reading_label":"TOTAL","meter_type":"ELECTRIC"}"""), DocType.Meter)
+        assertEquals(
+            listOf(
+                "Meter Type" to "ELECTRIC", "Display Type" to "ANALOG_DIALS", "Reading Label" to "TOTAL", "Reading" to "04521", "Unit" to "kWh",
+                "Multiplier" to "10", "Confidence Notes" to "dial 3 sits on 5, dial 4 not past 0",
+            ),
+            f.map { it.label to it.value },
+        )
+    }
+
+    @Test fun prepaidCreditTakesTheBigCardOnlyWithoutAReading() {
+        fun primary(answer: String): Pair<String, String>? {
+            val out = ocrResult(Extraction(DocType.Meter, response(answer)), null, Prefs(docType = DocType.Meter), cloudSelected = true, seconds = 1.0)
+            return (out as OcrOutcome.Done).result.result.primary?.let { it.label to it.value }
+        }
+        assertEquals("Credit" to "45.67 kWh", primary("""{"meter_type":"ELECTRIC","display_type":"DIGITAL","reading":null,"credit":"45.67 kWh"}"""))
+        assertEquals("Reading" to "001234.5", primary("""{"meter_type":"ELECTRIC","reading":"001234.5","credit":"45.67 kWh"}"""))
     }
 }

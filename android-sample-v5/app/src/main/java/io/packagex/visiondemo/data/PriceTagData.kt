@@ -1,25 +1,48 @@
 package io.packagex.visiondemo.data
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 
 /**
  * A price tag read in Price tag mode, checked against the demo price list.
  * Ported from iOS `Model/Types.swift`'s `PriceTag` and `DemoModel.codeScannerViewDidCapturePrice`.
+ * [expiry] is the date printed on the tag (the SDK's `PriceTagData.expiryDate`); [expired] when it is before the day
+ * the tag was read (the expiry day itself is still good).
  */
-data class PriceTag(val sku: String, val price: String, val valid: Boolean) {
+data class PriceTag(
+    val sku: String,
+    val price: String,
+    val valid: Boolean,
+    val expiry: LocalDate? = null,
+    val expiryText: String? = null,
+    val expired: Boolean = false,
+) {
     /** From the demo price list, as the original's PriceTagTableViewCell. */
     val name: String get() = PriceList.productNames[sku] ?: sku
     val expected: String get() = PriceList.prices[sku]?.let { String.format(Locale.US, "\$%.2f", it) } ?: "Not Found"
 
+    /** "Expired 30 Sep 2026" / "Expires 31 Dec 2026", or null when the tag shows no expiry. */
+    val expiryLabel: String? get() = expiry?.let { (if (expired) "Expired " else "Expires ") + it.format(DAY) }
+
     companion object {
+        private val DAY = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.US)
+
         /** SKU "123-45" -> "123"; price "\$1,299.00" -> 1299.00; valid when it matches the list. */
-        fun from(rawSku: String, price: String): PriceTag {
+        fun from(
+            rawSku: String,
+            price: String,
+            expiryDate: String? = null,
+            expiryText: String? = null,
+            today: LocalDate = LocalDate.now(),
+        ): PriceTag {
             val clean = price.filter { it.isDigit() || it == '.' }
             val sku = rawSku.split("-").firstOrNull { it.isNotEmpty() } ?: rawSku
             // ponytail: validity against the demo's price list; a real app checks its own catalog.
             val valid = PriceList.prices[sku]?.let { abs(it - (clean.toDoubleOrNull() ?: -1.0)) < 0.001 } ?: false
-            return PriceTag(sku, price, valid)
+            val expiry = expiryDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            return PriceTag(sku, price, valid, expiry, expiryText.takeIf { expiry != null }, expiry?.isBefore(today) == true)
         }
     }
 }
@@ -286,6 +309,13 @@ object PriceList {
         "985713" to 29.99,
         "2994523" to 239.99,
         "2994526" to 279.99,
+        // Expiry demo tags, printed by scan/device-runs/make_price_tag_expiry_sheet.py (each prints its expiry date)
+        "9100101" to 3.49,
+        "9100102" to 4.29,
+        "9100103" to 2.99,
+        "9100104" to 5.79,
+        "9100105" to 6.49,
+        "9100106" to 4.99,
     )
 
     val productNames: Map<String, String> = mapOf(
@@ -306,5 +336,11 @@ object PriceList {
         "2890909" to "Regular Chips 10 ounces",
         "2890908" to "Juices 250g",
         "24341104" to "Biscuits Ticky Packs",
+        "9100101" to "Fresh Milk 1L",
+        "9100102" to "Greek Yogurt 500g",
+        "9100103" to "Whole Wheat Bread",
+        "9100104" to "Orange Juice 1L",
+        "9100105" to "Cheddar Cheese 200g",
+        "9100106" to "Granola Bars 6 Pack",
     )
 }

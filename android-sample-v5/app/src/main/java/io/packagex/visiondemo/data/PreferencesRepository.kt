@@ -1,12 +1,15 @@
 package io.packagex.visiondemo.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.packagex.visiondemo.ar.OverlayRules
+import io.packagex.visiondemo.ar.PinRules
 import io.packagex.visiondemo.model.DocType
 import io.packagex.visiondemo.model.ModelSize
 import io.packagex.visiondemo.model.Processing
@@ -23,6 +26,8 @@ data class Prefs(
     val docType: DocType = DocType.SL,
     val modelSize: ModelSize = ModelSize.Micro,
     val processing: Processing = Processing.Cloud,
+    // Backend model of each VLM type (DocType name to "<family>_<size>"), picked under the type in the Document type sheet.
+    val vlmModels: Map<String, String> = emptyMap(),
     val autoCapture: Boolean = false,
     val sound: Boolean = true,
     // iOS DemoModel.swift:67-68 default both to true.
@@ -30,7 +35,36 @@ data class Prefs(
     val parseSender: Boolean = true,
     // iOS DemoModel.swift:66.
     val wildCard: Boolean = false,
+    // AR diagnostics (Settings › Advanced › "AR traces"): frame/read/engine traces in app storage; off by default (spec 5.7).
+    val arTrace: Boolean = false,
+    // AR blur pre-skip (Settings › Advanced): on by default (spec 5.6); measurement runs turn it off.
+    val arBlurSkip: Boolean = true,
+    // The drift plan's flags below default to its new behaviour on purpose, ahead of its §5 device gates; each arm is
+    // switched back in Settings › Advanced, and only a flag someone changed is stored ([encodePrefs]).
+    // AR outlines (Settings › Advanced, drift plan Phase 1): carried to the frame shown by default; IOS draws them where read.
+    val arOverlayRules: OverlayRules = OverlayRules.ANDROID,
+    // AR far-safe outline depth (Settings › Advanced): codes other than EAN/UPC carried at 0.8 m; off by default.
+    val arOutlineFarSafe: Boolean = false,
+    // AR pins (Settings › Advanced, drift plan Phases 2-4): seeded by the nearest valid hit, with the §3.4 identity rules,
+    // by default; IOS takes a plane first, keeps the iOS identity rules and never refines.
+    val arPinRules: PinRules = PinRules.ANDROID,
+    // AR pin refinement (Settings › Advanced, drift plan Phase 4): under the Android rules each claim refines its pin, by
+    // default; off freezes pins at birth (Phase 3), for A/B runs in one session.
+    val arPinRefine: Boolean = true,
+    // AR read-rate boost (Settings › Advanced, drift plan P2c): on by default; off keeps the counter's refresh schedule.
+    val arReadBoost: Boolean = true,
+    // AR session recording (Settings › Advanced): each AR Item Count run recorded for replay; off by default (large files).
+    val arRecord: Boolean = false,
 )
+
+/** VLM type [t]'s backend model; until one is picked for it, "orion_large" for Meter Reading, "vscan_large" otherwise */
+fun Prefs.vlmModel(t: DocType): String = vlmModels[t.name] ?: if (t == DocType.Meter) "orion_large" else "vscan_large"
+
+/** The backend models a VLM type can use */
+val VLM_MODELS = listOf("vscan_small", "vscan_medium", "vscan_large", "orion_small", "orion_medium", "orion_large")
+
+/** "orion_large" as "Orion Large", "vscan_small" as "VScan Small" */
+fun vlmModelName(m: String) = m.split('_').joinToString(" ") { if (it == "vscan") "VScan" else it.replaceFirstChar(Char::uppercase) }
 
 interface PreferencesRepository {
     val prefs: Flow<Prefs>
@@ -47,25 +81,43 @@ private object PrefKeys {
     val docType = stringPreferencesKey("v5.pref.docType")
     val modelSize = stringPreferencesKey("v5.pref.modelSize")
     val processing = stringPreferencesKey("v5.pref.processing")
+    fun vlmModel(type: String) = stringPreferencesKey("v5.pref.vlmModel.$type")
     val autoCapture = booleanPreferencesKey("v5.pref.autoCapture")
     val sound = booleanPreferencesKey("v5.pref.sound")
     val parseRecipient = booleanPreferencesKey("v5.pref.parseRecipient")
     val parseSender = booleanPreferencesKey("v5.pref.parseSender")
     val wildCard = booleanPreferencesKey("v5.pref.wildCard")
+    val arTrace = booleanPreferencesKey("v5.pref.arTrace")
+    val arBlurSkip = booleanPreferencesKey("v5.pref.arBlurSkip")
+    val arOverlayRules = stringPreferencesKey("v5.pref.arOverlayRules")
+    val arOutlineFarSafe = booleanPreferencesKey("v5.pref.arOutlineFarSafe")
+    val arPinRules = stringPreferencesKey("v5.pref.arPinRules")
+    val arPinRefine = booleanPreferencesKey("v5.pref.arPinRefine")
+    val arReadBoost = booleanPreferencesKey("v5.pref.arReadBoost")
+    val arRecord = booleanPreferencesKey("v5.pref.arRecord")
 }
 
-private fun decodePrefs(p: Preferences): Prefs = Prefs(
+internal fun decodePrefs(p: Preferences): Prefs = Prefs(
     multi = p[PrefKeys.multi] ?: false,
     showBoxes = p[PrefKeys.showBoxes] ?: true,
     showHints = p[PrefKeys.showHints] ?: true,
     docType = p[PrefKeys.docType]?.let { runCatching { DocType.valueOf(it) }.getOrNull() } ?: DocType.SL,
     modelSize = p[PrefKeys.modelSize]?.let { runCatching { ModelSize.valueOf(it) }.getOrNull() } ?: ModelSize.Micro,
     processing = p[PrefKeys.processing]?.let { runCatching { Processing.valueOf(it) }.getOrNull() } ?: Processing.Cloud,
+    vlmModels = DocType.entries.mapNotNull { t -> p[PrefKeys.vlmModel(t.name)]?.let { t.name to it } }.toMap(),
     autoCapture = p[PrefKeys.autoCapture] ?: false,
     sound = p[PrefKeys.sound] ?: true,
     parseRecipient = p[PrefKeys.parseRecipient] ?: true,
     parseSender = p[PrefKeys.parseSender] ?: true,
     wildCard = p[PrefKeys.wildCard] ?: false,
+    arTrace = p[PrefKeys.arTrace] ?: false,
+    arBlurSkip = p[PrefKeys.arBlurSkip] ?: true,
+    arOverlayRules = p[PrefKeys.arOverlayRules]?.let { runCatching { OverlayRules.valueOf(it) }.getOrNull() } ?: OverlayRules.ANDROID,
+    arOutlineFarSafe = p[PrefKeys.arOutlineFarSafe] ?: false,
+    arPinRules = p[PrefKeys.arPinRules]?.let { runCatching { PinRules.valueOf(it) }.getOrNull() } ?: PinRules.ANDROID,
+    arPinRefine = p[PrefKeys.arPinRefine] ?: true,
+    arReadBoost = p[PrefKeys.arReadBoost] ?: true,
+    arRecord = p[PrefKeys.arRecord] ?: false,
 )
 
 @Singleton
@@ -76,19 +128,34 @@ class DataStorePreferencesRepository @Inject constructor(
     override val prefs: Flow<Prefs> = context.dataStore.data.map(::decodePrefs)
 
     override suspend fun update(transform: (Prefs) -> Prefs) {
-        context.dataStore.edit { p ->
-            val next = transform(decodePrefs(p))
-            p[PrefKeys.multi] = next.multi
-            p[PrefKeys.showBoxes] = next.showBoxes
-            p[PrefKeys.showHints] = next.showHints
-            p[PrefKeys.docType] = next.docType.name
-            p[PrefKeys.modelSize] = next.modelSize.name
-            p[PrefKeys.processing] = next.processing.name
-            p[PrefKeys.autoCapture] = next.autoCapture
-            p[PrefKeys.sound] = next.sound
-            p[PrefKeys.parseRecipient] = next.parseRecipient
-            p[PrefKeys.parseSender] = next.parseSender
-            p[PrefKeys.wildCard] = next.wildCard
-        }
+        context.dataStore.edit { p -> encodePrefs(p, transform(decodePrefs(p))) }
     }
+}
+
+/**
+ * Stores [next] in [p]. The drift plan's rule flags are stored only once changed, so a flag nobody chose keeps
+ * following its default, should a device gate change it.
+ */
+internal fun encodePrefs(p: MutablePreferences, next: Prefs) {
+    val cur = decodePrefs(p)
+    p[PrefKeys.multi] = next.multi
+    p[PrefKeys.showBoxes] = next.showBoxes
+    p[PrefKeys.showHints] = next.showHints
+    p[PrefKeys.docType] = next.docType.name
+    p[PrefKeys.modelSize] = next.modelSize.name
+    p[PrefKeys.processing] = next.processing.name
+    next.vlmModels.forEach { (type, model) -> p[PrefKeys.vlmModel(type)] = model }
+    p[PrefKeys.autoCapture] = next.autoCapture
+    p[PrefKeys.sound] = next.sound
+    p[PrefKeys.parseRecipient] = next.parseRecipient
+    p[PrefKeys.parseSender] = next.parseSender
+    p[PrefKeys.wildCard] = next.wildCard
+    p[PrefKeys.arTrace] = next.arTrace
+    p[PrefKeys.arBlurSkip] = next.arBlurSkip
+    if (next.arOverlayRules != cur.arOverlayRules) p[PrefKeys.arOverlayRules] = next.arOverlayRules.name
+    p[PrefKeys.arOutlineFarSafe] = next.arOutlineFarSafe
+    if (next.arPinRules != cur.arPinRules) p[PrefKeys.arPinRules] = next.arPinRules.name
+    if (next.arPinRefine != cur.arPinRefine) p[PrefKeys.arPinRefine] = next.arPinRefine
+    if (next.arReadBoost != cur.arReadBoost) p[PrefKeys.arReadBoost] = next.arReadBoost
+    p[PrefKeys.arRecord] = next.arRecord
 }

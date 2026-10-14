@@ -1,0 +1,52 @@
+{
+ "data": {
+  "dl_version": "il-large-test", "object": "item_label_inference", "id": "inf_il_TEST", "organization_id": null, "location_id": null,
+  "status": "inferred", "image_url": null, "raw_text": "(raw text removed)",
+  "inference": {
+   "supplier": {"id": null, "name": "Acme Electronics Co., Ltd.", "email": null, "phone": null, "business": null,
+    "address": {"object": "address", "city": null, "state": null, "state_code": null, "postal_code": null, "country": null, "country_code": null, "formatted_address": null, "textarea": null, "coordinates": null, "timezone": null}},
+   "customer": {"id": null, "name": null, "email": null, "phone": null, "business": null,
+    "address": {"object": "address", "city": null, "state": null, "state_code": null, "postal_code": null, "country": null, "country_code": null, "formatted_address": null, "textarea": null, "coordinates": null, "timezone": null},
+    "sku": null, "item_number": null},
+   "item": {
+    "sku": ["900-11234-01"], "name": "AX-2000 Router", "numbers": ["P/N 900-11234-01"], "quantity": [2.0],
+    "dimensions": {"raw": null, "length": {"value": null, "unit": null}, "width": {"value": null, "unit": null}, "height": {"value": null, "unit": null}},
+    "weight": {"raw": "1.2 kg", "value": 1.2, "unit": "kg"},
+    "volume": {"value": null, "unit": null, "raw": null},
+    "color": "Black", "size": null, "model": ["AX-2000"], "upc": "012345678905", "gtin": null, "sscc": null, "clei": null,
+    "version": null, "season": null, "mac_address": ["00:1A:2B:3C:4D:5E"], "price": null, "chemical_formula": null
+   },
+   "package": {
+    "dimensions": {"raw": "30 x 20 x 10 cm", "length": {"value": 30, "unit": "cm"}, "width": {"value": 20, "unit": "cm"}, "height": {"value": 10, "unit": "cm"}},
+    "weight": {"raw": null, "value": null, "unit": null},
+    "volume": {"value": null, "unit": null}
+   },
+   "pallet": {"id": null, "number": null},
+   "carton": {"number": null, "id": null},
+   "lot": {"number": "L2026-09"},
+   "batch": {"number": null},
+   "provider_name": null, "tracking_number": null, "service_level_name": null, "bol_number": null, "invoice_number": null,
+   "recipient": {"business": null, "contact_id": null, "email": null, "name": null, "phone": null, "phone_raw": null,
+    "address": {"id": null, "hash": null, "object": "address", "city": null, "coordinates": null, "country": null, "country_code": null, "postal_code": null, "state": null, "state_code": null, "textarea": null, "timezone": null, "formatted_address": null}},
+   "middle_mile": {"business": null, "contact_id": null, "email": null, "name": null, "phone": null, "phone_raw": null,
+    "address": {"id": null, "hash": null, "object": "address", "city": null, "coordinates": null, "country": null, "country_code": null, "postal_code": null, "state": null, "state_code": null, "textarea": null, "timezone": null, "formatted_address": null}},
+   "sender": {"business": null, "contact_id": null, "email": null, "name": null, "phone": null, "phone_raw": null,
+    "address": {"id": null, "hash": null, "object": "address", "city": null, "coordinates": null, "country": null, "country_code": null, "postal_code": null, "state": null, "state_code": null, "textarea": null, "timezone": null, "formatted_address": null}},
+   "barcode_values": ["012345678905"],
+   "purchase_orders": ["4500295404"],
+   "sales_order": null,
+   "serial_numbers": ["SN8812345XY"],
+   "job_id": null, "reference": null,
+   "origin": {"country": "Taiwan"},
+   "dates": {"manufacturing": {"year": 2026, "month": 3, "day": 15, "raw": "2026-03-15"}, "expiry": {"year": null, "month": null, "day": null, "raw": null}},
+   "additional_attributes": {"VIN Number": null, "Invoice Number": null, "Label": null, "Plan": null, "Carrier": null, "Route": "R-7", "Sequence": null,
+    "Location": null, "Dealer Number": null, "BOL Number": null, "Consignment": null, "PRO Number": null, "Sort Code": null,
+    "provider_name": null, "tracking_number": null, "service_level_name": null, "S/N": "SN8812345XY"}
+  },
+  "created_at": 1790925225, "updated_at": 1790925225, "updated_by": null
+ },
+ "extended_response": [
+  {"item": {"name": {"value": "AX-2000 Router", "confidence": 0.9, "vertices": [[0.1, 0.1], [0.6, 0.1], [0.6, 0.15], [0.1, 0.15]], "validated_by": ["ml"]},
+            "upc": {"value": "012345678905", "confidence": 0.99, "vertices": [[0.1, 0.7], [0.6, 0.7], [0.6, 0.8], [0.1, 0.8]], "validated_by": ["barcode"]}}}
+ ]
+}

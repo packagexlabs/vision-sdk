@@ -28,8 +28,10 @@ import io.packagex.visiondemo.model.SheetKind
 import io.packagex.visiondemo.model.scannerConfig
 import android.graphics.Rect
 import io.packagex.visionsdk.core.pricetag.PriceTagData
+import io.packagex.visionsdk.core.DetectionMode
 import io.packagex.visionsdk.exceptions.VisionSDKException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
@@ -51,13 +53,13 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34])
 class ScannerViewModelTest {
     @get:Rule val main = MainDispatcherRule()
-    private fun vm(extraction: FakeExtraction = FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", 0)) =
+    private fun vm(extraction: FakeExtraction = FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", 0)) =
         ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), extraction, FakeReport(), FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"))
 
     // --- brief tests ---
 
     @Test fun lateResultAfterModeSwitchIsDropped() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000))
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000))
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
         (v.camera as FakeCamera).emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f))
         advanceTimeBy(1_000); v.onAction(ScannerAction.SetMode(ScanMode.Barcode)); advanceUntilIdle()
@@ -131,10 +133,10 @@ class ScannerViewModelTest {
     }
 
     @Test fun cancelProcessingDropsLateResult() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
-        assertEquals(Phase.Processing, v.state.value.phase)
+        assertEquals(Phase.Processing, v.state.value.phase); assertTrue(v.state.value.result is ScanResult.Pending)
         v.effects.test {
             v.onAction(ScannerAction.CancelProcessing)
             assertEquals(ScannerEffect.Toast("Cancelled"), awaitItem())
@@ -171,7 +173,7 @@ class ScannerViewModelTest {
 
     @Test fun entitledModeClearsGate() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
-        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval))
+        v.onAction(ScannerAction.SetMode(ScanMode.Price))
         assertTrue(v.state.value.gated); assertTrue(v.state.value.entitlementChecking)  // default-deny
         advanceUntilIdle()
         assertFalse(v.state.value.gated); assertFalse(v.state.value.entitlementChecking); assertEquals(CameraOwner.Scanner, cam.owner)
@@ -179,7 +181,7 @@ class ScannerViewModelTest {
 
     @Test fun arAndDocumentClaimTheirOwner() = runTest {
         val v = vm(); val cam = v.camera as FakeCamera
-        v.onAction(ScannerAction.SetMode(ScanMode.Ar)); assertEquals(CameraOwner.Ar, cam.owner)
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); assertEquals(CameraOwner.Ar, cam.owner)
         v.onAction(ScannerAction.SetMode(ScanMode.DocAcq)); assertEquals(CameraOwner.Document, cam.owner)
         v.onAction(ScannerAction.SetMode(ScanMode.QR)); assertEquals(CameraOwner.Scanner, cam.owner)
     }
@@ -192,26 +194,6 @@ class ScannerViewModelTest {
         assertNull(v.state.value.alert); assertEquals(SheetKind.Items, v.state.value.sheet)
     }
 
-    @Test fun retrievalReportsCodesInViewFlaggedByList() = runTest {
-        val catalog = FakeCatalog(items = listOf("A", "B"))
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), catalog, Secrets("k", "staging"))
-        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
-        val cam = v.camera as FakeCamera
-        cam.emit(ScanEvent.Retrieved(code("A"))); cam.emit(ScanEvent.Retrieved(code("Z"))); runCurrent()
-        assertEquals(listOf("A", "Z"), v.state.value.codesInView)
-        v.onAction(ScannerAction.Shutter); advanceTimeBy(400)
-        assertEquals(ScanResult.Retrieval(listOf("A" to true, "Z" to false)), v.state.value.result)
-    }
-
-    @Test fun codesLeaveViewAfterASecondWithoutReports() = runTest {
-        val v = vm(); v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
-        (v.camera as FakeCamera).emit(ScanEvent.Retrieved(code("A"))); runCurrent()
-        advanceTimeBy(900); assertEquals(listOf("A"), v.state.value.codesInView)
-        (v.camera as FakeCamera).emit(ScanEvent.Retrieved(code("A"))); runCurrent()
-        advanceTimeBy(900); assertEquals(listOf("A"), v.state.value.codesInView)   // refreshed
-        advanceTimeBy(200); assertEquals(emptyList<String>(), v.state.value.codesInView)
-    }
-
     // --- fix round 1 ---
 
     @Test fun wildCardSkipsModelPrompt() = runTest {
@@ -222,7 +204,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun wildCardResultUsesRoutedType() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"item_name":"Bolt"}}}""", routedType = DocType.IL)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"inference":{"item":{"name":"Bolt"}}}}""", routedType = DocType.IL)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
         val r = v.state.value.result as ScanResult.Ocr
@@ -270,13 +252,74 @@ class ScannerViewModelTest {
         v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
         v.onAction(ScannerAction.ToggleAuto); advanceUntilIdle()
         assertTrue(v.state.value.prefs.autoCapture)
-        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
         assertEquals(ScanResult.Price, v.state.value.result)
-        v.onAction(ScannerAction.CloseResult); advanceUntilIdle()
+        v.onAction(ScannerAction.CloseResult); runCurrent()
         cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceUntilIdle()
-        assertNull(v.state.value.result)   // a tag already listed doesn't reopen it
+        assertNull(v.state.value.result)   // a listed tag still in view doesn't reopen it
         cam.emit(ScanEvent.PriceTag(PriceTagData("999", "$1.00", Rect()))); advanceUntilIdle()
         assertEquals(ScanResult.Price, v.state.value.result)
+    }
+
+    @Test fun priceAutoCaptureReopensTheListWhenAListedTagIsScannedAgain() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        v.onAction(ScannerAction.ToggleAuto); advanceUntilIdle()
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
+        assertEquals(ScanResult.Price, v.state.value.result)
+        v.onAction(ScannerAction.CloseResult); runCurrent()
+        // Still in view (the SDK keeps reporting it): closing the list sticks.
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
+        assertNull(v.state.value.result)
+        // Out of view, then scanned again: the list opens on it.
+        advanceTimeBy(3_000); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); advanceTimeBy(400)
+        assertEquals(ScanResult.Price, v.state.value.result)
+        assertEquals(1, v.state.value.tags.size)
+    }
+
+    @Test fun anExpiredTagSaysSoOncePerScan() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        val toasts = mutableListOf<String>()
+        val collector = launch { v.effects.collect { if (it is ScannerEffect.Toast) toasts += it.text } }
+        val expired = PriceTagData("9100101", "$3.49", Rect(), "2020-01-31", "EXP 2020-01-31")
+        cam.emit(ScanEvent.PriceTag(expired)); runCurrent()
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(expired)); runCurrent()   // still in view: said once
+        assertEquals(listOf("This item has expired: Fresh Milk 1L · Expired 31 Jan 2020"), toasts)
+        assertTrue(v.state.value.tags.single().expired)
+        advanceTimeBy(3_000); cam.emit(ScanEvent.PriceTag(expired)); runCurrent()   // scanned again: said again
+        assertEquals(2, toasts.count { it.startsWith("This item has expired") })
+        assertTrue(toasts.none { it.endsWith(" already in list") })
+        collector.cancel()
+    }
+
+    @Test fun aLaterReadAddsTheExpiryAnEarlierOneMissed() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        val toasts = mutableListOf<String>()
+        val collector = launch { v.effects.collect { if (it is ScannerEffect.Toast) toasts += it.text } }
+        cam.emit(ScanEvent.PriceTag(PriceTagData("9100102", "$4.29", Rect()))); runCurrent()
+        assertEquals(null, v.state.value.tags.single().expiry)
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(PriceTagData("9100102", "$4.29", Rect(), "2020-08-15", "Best before 15 AUG 2020"))); runCurrent()
+        val tag = v.state.value.tags.single()
+        assertTrue(tag.expired); assertEquals("Best before 15 AUG 2020", tag.expiryText)
+        assertEquals(listOf("This item has expired: Greek Yogurt 500g · Expired 15 Aug 2020"), toasts)
+        collector.cancel()
+    }
+
+    @Test fun priceManualSaysWhenAListedTagIsScannedAgain() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Price)); advanceUntilIdle()
+        assertFalse(v.state.value.prefs.autoCapture)
+        val toasts = mutableListOf<String>()
+        val collector = launch { v.effects.collect { if (it is ScannerEffect.Toast) toasts += it.text } }
+        cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); runCurrent()
+        advanceTimeBy(500); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); runCurrent()
+        assertTrue(toasts.isEmpty())   // the same scan, still in view
+        advanceTimeBy(3_000); cam.emit(ScanEvent.PriceTag(PriceTagData("14438", "$28.99", Rect()))); runCurrent()
+        assertEquals(1, toasts.count { it.endsWith(" already in list") })
+        assertEquals(1, v.state.value.tags.size)
+        collector.cancel()
     }
 
     @Test fun priceShutterWithNoTagsShowsEmptyDrawer() = runTest {
@@ -365,22 +408,6 @@ class ScannerViewModelTest {
         }
         v.onAction(ScannerAction.RemoveItem("A")); advanceUntilIdle(); assertEquals(listOf("B"), catalog.items.value)
         v.onAction(ScannerAction.ClearItems); advanceUntilIdle(); assertEquals(emptyList<String>(), catalog.items.value)
-    }
-
-    @Test fun addItemsInViewAddsNewCodesWithIosToasts() = runTest {
-        val v = ScannerViewModel(FakeCamera(), FakePreferences(), FakeModels(), FakeExtraction("{}", 0), FakeReport(), FakeEntitlement(true), FakeCatalog(items = listOf("A")), Secrets("k", "staging"))
-        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); runCurrent()
-        v.effects.test {
-            v.onAction(ScannerAction.AddItemsInView)
-            assertEquals(ScannerEffect.Toast("Point the camera at a code, then tap Add Item"), awaitItem())
-            val cam = v.camera as FakeCamera
-            cam.emit(ScanEvent.Retrieved(code("A"))); cam.emit(ScanEvent.Retrieved(code("B"))); runCurrent()
-            v.onAction(ScannerAction.AddItemsInView)
-            assertEquals(ScannerEffect.Toast("Scanned and added B"), awaitItem())
-            v.onAction(ScannerAction.AddItemsInView)
-            assertEquals(ScannerEffect.Toast("Code already in list"), awaitItem())
-        }
-        assertEquals(listOf("A", "B"), v.state.value.items)
     }
 
     // --- v6 module cards ---
@@ -574,11 +601,11 @@ class ScannerViewModelTest {
         val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); advanceUntilIdle()
         v.onAction(ScannerAction.Shutter); advanceTimeBy(400)
-        assertTrue(v.state.value.result is ScanResult.Retrieval); assertTrue(cam.detectionPaused)
+        assertTrue(v.state.value.result is ScanResult.Retrieval)
         val rescans = cam.rescans
         v.onAction(ScannerAction.OpenItemList)
         assertNull(v.state.value.result); assertEquals(SheetKind.Items, v.state.value.sheet)
-        assertEquals(rescans, cam.rescans); assertFalse(cam.detectionPaused)   // the list reads codes in view
+        assertEquals(rescans, cam.rescans)
     }
 
     @Test fun ocrResultCarriesTheProcessingUsed() = runTest {
@@ -586,7 +613,7 @@ class ScannerViewModelTest {
         cloud.onAction(ScannerAction.SetMode(ScanMode.Ocr)); cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
         assertTrue((cloud.state.value.result as ScanResult.Ocr).result.cloud)
 
-        val wild = vm(FakeExtraction("""{"data":{"inference":{"item_name":"Bolt"}}}""", routedType = DocType.IL)); val cam2 = wild.camera as FakeCamera
+        val wild = vm(FakeExtraction("""{"data":{"inference":{"item":{"name":"Bolt"}}}}""", routedType = DocType.IL)); val cam2 = wild.camera as FakeCamera
         wild.onAction(ScannerAction.UpdatePrefs { it.copy(wildCard = true) }); wild.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam2.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
         assertFalse((wild.state.value.result as ScanResult.Ocr).result.cloud)   // wild card read the item label on-device
@@ -627,7 +654,7 @@ class ScannerViewModelTest {
         val report = FakeReport()
         val v = ScannerViewModel(
             FakeCamera(), FakePreferences(), FakeModels(),
-            FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", 0),
+            FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", 0),
             report, FakeEntitlement(true), FakeCatalog(), Secrets("k", "staging"),
         )
         v.onAction(ScannerAction.UpdatePrefs { it.copy(modelSize = ModelSize.Large) })
@@ -643,7 +670,7 @@ class ScannerViewModelTest {
         assertEquals(0.25f to 0.5f, cam.focusPoint); assertEquals(FocusTap(0.25f, 0.5f, 1), v.state.value.focus)
         v.onAction(ScannerAction.OpenSheet(SheetKind.Settings)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
         assertEquals(0.25f to 0.5f, cam.focusPoint); assertEquals(1, v.state.value.focus?.id)
-        v.onAction(ScannerAction.SetMode(ScanMode.Ar)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
+        v.onAction(ScannerAction.SetMode(ScanMode.Retrieval)); v.onAction(ScannerAction.Focus(0.9f, 0.9f))
         assertEquals(0.25f to 0.5f, cam.focusPoint)
     }
 
@@ -651,20 +678,6 @@ class ScannerViewModelTest {
         val v = vm()
         v.onAction(ScannerAction.Shutter); assertTrue(v.state.value.flash)
         advanceTimeBy(151); assertFalse(v.state.value.flash)
-    }
-
-    @Test fun photoImportRunsOcrOnlyInVisionScanner() = runTest {
-        val x = FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}"""); val v = vm(x)
-        v.effects.test {
-            v.onAction(ScannerAction.PickPhoto); v.onAction(ScannerAction.ImportPhoto(fakeBitmap()))
-            expectNoEvents()
-            v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
-            v.onAction(ScannerAction.PickPhoto); assertEquals(ScannerEffect.PickPhoto, awaitItem())
-            v.onAction(ScannerAction.ImportPhoto(fakeBitmap())); assertEquals(ScannerEffect.Toast("Image picked from Photos"), awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-        advanceUntilIdle()
-        assertEquals(1, x.calls); assertEquals("1Z", (v.state.value.result as ScanResult.Ocr).result.primary?.value)
     }
 
     /** Barcode/QR multiple scan: the SDK's engine overlay draws the boxes, so the app draws none (no code outlined
@@ -750,7 +763,7 @@ class ScannerViewModelTest {
     }
 
     @Test fun cancelProcessingWhilePausedKeepsCameraStopped() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
         cam.pause(); runCurrent()
@@ -781,10 +794,109 @@ class ScannerViewModelTest {
     }
 
     @Test fun processingMarksCameraBusy() = runTest {
-        val v = vm(FakeExtraction("""{"data":{"inference":{"tracking_number":"1Z"}}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
         v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
         cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
         assertEquals(listOf(false, true), cam.busy)
         advanceUntilIdle(); assertEquals(listOf(false, true, false), cam.busy)
+    }
+
+    // --- VLM types capture with no text in view ---
+
+    @Test fun vlmTypeCapturesWithNoTextInView() = runTest {
+        for (t in listOf(DocType.VLM, DocType.Tire, DocType.IdCard, DocType.Plate, DocType.Meter)) {
+            val v = vm(); val cam = v.camera as FakeCamera
+            cam.textInView = false
+            v.onAction(ScannerAction.UpdatePrefs { it.copy(docType = t) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+            assertEquals(DetectionMode.Photo, cam.lastConfig!!.detection)
+            assertFalse(v.state.value.seesText); assertFalse(v.state.value.seesDocument)
+            assertEquals("Frame the subject · tap to capture", hintFor(v.state.value))
+            v.onAction(ScannerAction.Shutter); runCurrent()
+            assertEquals(1, cam.captures); assertNull(v.state.value.alert); assertEquals(Phase.Scanning, v.state.value.phase)
+        }
+    }
+
+    @Test fun nonVlmTypeStillNeedsTextInView() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        cam.textInView = false
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); advanceUntilIdle()
+        assertEquals(DetectionMode.OCR, cam.lastConfig!!.detection)
+        assertEquals("Point camera to document", hintFor(v.state.value))
+        v.onAction(ScannerAction.Shutter); runCurrent()
+        assertEquals("No Text Found", v.state.value.alert?.title)
+        // Wild card picks its own type, so a VLM doc type behind it still needs text.
+        v.onAction(ScannerAction.DismissAlert)
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(docType = DocType.Plate, wildCard = true) }); advanceUntilIdle()
+        assertEquals(DetectionMode.OCR, cam.lastConfig!!.detection)
+    }
+
+    @Test fun vlmAutoCapturesWithoutWaitingForText() = runTest {
+        val v = vm(); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(docType = DocType.Meter, autoCapture = true) })
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); runCurrent()
+        assertFalse(v.state.value.seesText); assertFalse(v.state.value.seesDocument)
+        advanceTimeBy(VLM_AUTO_MS - 100); assertEquals(0, cam.captures)
+        advanceTimeBy(200); assertEquals(1, cam.captures)
+
+        // A non-VLM type leaves Auto to the SDK's document detection.
+        val sl = vm(); val cam2 = sl.camera as FakeCamera
+        sl.onAction(ScannerAction.UpdatePrefs { it.copy(autoCapture = true) }); sl.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        advanceTimeBy(10_000); assertEquals(0, cam2.captures)
+    }
+
+    // --- the result screen opens on the photo while it is read ---
+
+    @Test fun captureOpensTheResultAtOnceWithThePhotoLoading() = runTest {
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr)); v.onAction(ScannerAction.Shutter)
+        val photo = fakeBitmap()
+        cam.emit(ScanEvent.Captured(photo, emptyList(), 1f)); runCurrent()
+        val r = v.state.value.result as ScanResult.Pending
+        assertSame(photo, r.image); assertEquals("Shipping label", r.title); assertEquals("Extracting · Cloud", r.subtitle)
+        assertEquals(Phase.Processing, v.state.value.phase); assertNull(v.state.value.feedback); assertTrue(cam.detectionPaused)
+        assertNull(v.state.value.lastResult)   // the loading screen is never the last result
+
+        advanceUntilIdle()   // the result replaces the loading
+        val done = v.state.value.result as ScanResult.Ocr
+        assertSame(photo, done.image); assertEquals("1Z", done.result.primary?.value)
+        assertEquals(Phase.Idle, v.state.value.phase); assertSame(done, v.state.value.lastResult?.second)
+    }
+
+    @Test fun vlmCaptureLoadsUnderTheTypesTitle() = runTest {
+        val v = vm(FakeExtraction("{}", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.UpdatePrefs { it.copy(docType = DocType.Meter) }); v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); runCurrent()
+        val r = v.state.value.result as ScanResult.Pending
+        assertEquals("Meter Reading", r.title); assertEquals(Phase.Processing, v.state.value.phase)
+    }
+
+    @Test fun failureShowsTheErrorOverTheCapture() = runTest {
+        val x = FakeExtraction("{}", delayMs = 1_000, error = IllegalStateException("boom")); val v = vm(x); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceUntilIdle()
+        assertEquals("Cloud request failed", v.state.value.alert?.title)
+        assertTrue(v.state.value.result is ScanResult.Pending); assertEquals(Phase.Idle, v.state.value.phase)
+        // Try again reads the same photo again, loading on the same screen.
+        v.onAction(ScannerAction.Retry); runCurrent()
+        assertTrue(v.state.value.result is ScanResult.Pending); assertEquals(Phase.Processing, v.state.value.phase); assertNull(v.state.value.alert)
+        advanceUntilIdle(); assertEquals(2, x.calls)
+        // Cancel closes the alert and the failed capture, back to the live camera.
+        val rescans = cam.rescans
+        v.onAction(ScannerAction.DismissAlert)
+        assertNull(v.state.value.alert); assertNull(v.state.value.result)
+        assertFalse(cam.detectionPaused); assertEquals(rescans + 1, cam.rescans)
+    }
+
+    @Test fun closeWhileLoadingCancelsAndCloses() = runTest {
+        val v = vm(FakeExtraction("""{"data":{"tracking_number":"1Z"}}""", delayMs = 5_000)); val cam = v.camera as FakeCamera
+        v.onAction(ScannerAction.SetMode(ScanMode.Ocr))
+        cam.emit(ScanEvent.Captured(fakeBitmap(), emptyList(), 1f)); advanceTimeBy(1_000)
+        v.effects.test {
+            v.onAction(ScannerAction.CloseResult)
+            assertEquals(ScannerEffect.Toast("Cancelled"), awaitItem())
+        }
+        assertNull(v.state.value.result); assertEquals(Phase.Idle, v.state.value.phase); assertFalse(cam.detectionPaused)
+        advanceUntilIdle()
+        assertNull(v.state.value.result); assertNull(v.state.value.lastResult)   // the late result is dropped
     }
 }

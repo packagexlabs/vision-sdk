@@ -39,8 +39,6 @@ import io.packagex.visiondemo.designsystem.PX
 import io.packagex.visiondemo.designsystem.RecomposeLog
 import io.packagex.visiondemo.designsystem.VisionTheme
 import io.packagex.visiondemo.model.DetectedCode
-import io.packagex.visiondemo.model.Phase
-import io.packagex.visiondemo.model.ScanMode
 import kotlinx.coroutines.launch
 
 /**
@@ -64,6 +62,8 @@ fun ScannerScreen(
     cameraView: @Composable () -> Unit,
     /** Live detection boxes, read only while drawing (see [BoxesOverlay]); [ScannerRoute] passes them apart from [state]. */
     boxes: () -> List<DetectedCode> = { state.boxes },
+    /** A mode's own layer over the camera: above the scrim, below the chrome (AR Item Count's touch reporting). */
+    overlay: @Composable () -> Unit = {},
     drawer: @Composable () -> Unit = {},
     sheets: @Composable () -> Unit = {},
     onAction: (ScannerAction) -> Unit,
@@ -101,15 +101,13 @@ fun ScannerScreen(
 
         Viewfinder(state = state, onAction = onAction)
 
+        overlay()
+
         if (state.result == null || hud != null) {
             Chrome(state = state, onAction = onAction)
         }
 
         hud?.let { CodeHud(code = it, onAction = onAction) }
-
-        if ((state.mode == ScanMode.Ocr || state.mode == ScanMode.TextTemplates) && state.phase == Phase.Processing) {
-            ProcessingSpinner(onCancel = { onAction(ScannerAction.CancelProcessing) })
-        }
 
         // White capture flash (iOS :44).
         if (state.flash) Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.6f)))

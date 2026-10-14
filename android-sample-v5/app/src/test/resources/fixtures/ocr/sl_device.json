@@ -1,0 +1,47 @@
+{
+ "data": {
+  "dl_version": "sl-large-test",
+  "id": null, "image_url": null, "object": null,
+  "account_id": "ACCT-4471",
+  "organization_id": null,
+  "purchase_order": "PO-778812",
+  "provider_name": "FedEx",
+  "raw_text": "(raw text removed)",
+  "reference_number": null,
+  "tracking_number": "771234567890",
+  "barcode_values": ["771234567890", "9622001900000000000000771234567890"],
+  "invoice_number": null,
+  "type": null,
+  "rma_number": "",
+  "service_level_name": "Priority Overnight",
+  "weight": 2.2046,
+  "location_id": null,
+  "special_handling_labels": ["signature_required"],
+  "extracted_labels": [],
+  "tags": null,
+  "recipient": {
+   "business": "Example Corp", "contact_id": null, "email": null, "name": "Ada Lovelace", "phone": "+15550100000", "phone_raw": "555-0100",
+   "address": {"id": null, "hash": null, "object": "address", "city": "SPRINGFIELD", "coordinates": null, "country": "United States", "country_code": "US",
+    "postal_code": "00000", "state": "IL", "state_code": "IL", "textarea": null, "timezone": null, "formatted_address": "100 Main St, Springfield, IL 00000", "line1": "100 Main St", "line2": "Suite 2"}
+  },
+  "middle_mile": {
+   "business": null, "contact_id": null, "email": null, "name": null, "phone": null, "phone_raw": null,
+   "address": {"id": null, "hash": null, "object": "address", "city": null, "coordinates": null, "country": null, "country_code": null,
+    "postal_code": null, "state": null, "state_code": null, "textarea": null, "timezone": null, "formatted_address": null}
+  },
+  "sender": {
+   "business": "Example Parts Co", "contact_id": null, "email": null, "name": null, "phone": null, "phone_raw": null,
+   "address": {"id": null, "hash": null, "object": "address", "city": "Riverton", "coordinates": null, "country": "United States", "country_code": "US",
+    "postal_code": "00000", "state": "TX", "state_code": "TX", "textarea": null, "timezone": null, "formatted_address": "200 Oak Ave, Riverton, TX 00000", "line1": "200 Oak Ave", "line2": null}
+  },
+  "dimensions": {"length": 12.0, "width": 10.0, "height": 4.0, "unit": "in"},
+  "additional_attributes": {"shipment_date": "09/30/2026", "box_id": "BX-12"}
+ },
+ "extended_response": [
+  {
+   "tracking_number": {"value": "771234567890", "confidence": 0.98, "vertices": [[0.1, 0.2], [0.5, 0.2], [0.5, 0.25], [0.1, 0.25]], "validated_by": ["barcode", "apriori"]},
+   "provider_name": {"value": "FedEx", "confidence": 0.9, "vertices": [[0.6, 0.05], [0.9, 0.05], [0.9, 0.1], [0.6, 0.1]], "validated_by": ["apriori"]},
+   "recipient": {"name": {"value": "Ada Lovelace", "confidence": 0.8, "vertices": [[0.1, 0.4], [0.4, 0.4], [0.4, 0.44], [0.1, 0.44]], "validated_by": ["ml"]}}
+  }
+ ]
+}

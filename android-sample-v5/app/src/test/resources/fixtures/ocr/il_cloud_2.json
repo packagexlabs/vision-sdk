@@ -1,0 +1,287 @@
+{
+ "status": 201,
+ "message": "Item Label Inference created successfully",
+ "errors": [],
+ "code": null,
+ "pagination": null,
+ "search": null,
+ "data": {
+  "object": "item_label_inference",
+  "id": "TEST_id",
+  "organization_id": "org_TEST",
+  "location_id": null,
+  "status": "inferred",
+  "image_url": "https://example.com/image.jpg",
+  "raw_text": "(raw text removed)",
+  "inference": {
+   "supplier": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": null,
+    "address": {
+     "id": null,
+     "uuid": null,
+     "object": "address",
+     "line1": null,
+     "line2": null,
+     "city": null,
+     "state": null,
+     "state_code": null,
+     "postal_code": null,
+     "country": null,
+     "country_code": null,
+     "formatted_address": null,
+     "textarea": null,
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": null,
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "sender": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": null,
+    "address": {
+     "id": null,
+     "uuid": null,
+     "object": "address",
+     "line1": null,
+     "line2": null,
+     "city": null,
+     "state": null,
+     "state_code": null,
+     "postal_code": null,
+     "country": null,
+     "country_code": null,
+     "formatted_address": null,
+     "textarea": null,
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": null,
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "transit": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": null,
+    "address": {
+     "id": null,
+     "uuid": null,
+     "object": "address",
+     "line1": null,
+     "line2": null,
+     "city": null,
+     "state": null,
+     "state_code": null,
+     "postal_code": null,
+     "country": null,
+     "country_code": null,
+     "formatted_address": null,
+     "textarea": null,
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": null,
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "recipient": {
+    "contact_id": null,
+    "name": null,
+    "email": null,
+    "phone": null,
+    "business": null,
+    "address": {
+     "id": null,
+     "uuid": null,
+     "object": "address",
+     "line1": null,
+     "line2": null,
+     "city": null,
+     "state": null,
+     "state_code": null,
+     "postal_code": null,
+     "country": null,
+     "country_code": null,
+     "formatted_address": null,
+     "textarea": null,
+     "coordinates": null,
+     "timezone": null,
+     "verified": false,
+     "usps_cass": null,
+     "usps_cass_checked": false,
+     "hash": null,
+     "duplicate_id": null,
+     "updated_by": null,
+     "created_at": null,
+     "updated_at": null,
+     "deleted_at": null
+    },
+    "notes": null,
+    "groups": null
+   },
+   "customer": {
+    "sku": null
+   },
+   "item": {
+    "sku": null,
+    "name": "HPE C13-C14 WW 250V 10A 1.4m Jpr Cord",
+    "numbers": [
+     "142257-006"
+    ],
+    "quantity": 2,
+    "dimensions": {
+     "raw": null,
+     "length": {
+      "value": null,
+      "unit": null
+     },
+     "width": {
+      "value": null,
+      "unit": null
+     },
+     "height": {
+      "value": null,
+      "unit": null
+     }
+    },
+    "weight": {
+     "value": null,
+     "unit": null
+    },
+    "volume": {
+     "value": null,
+     "unit": null
+    },
+    "color": null,
+    "model": null,
+    "upc": "1332626879",
+    "gtin": null,
+    "version": "AR",
+    "season": null,
+    "mac_address": null
+   },
+   "package": {
+    "dimensions": {
+     "raw": null,
+     "length": {
+      "value": null,
+      "unit": null
+     },
+     "width": {
+      "value": null,
+      "unit": null
+     },
+     "height": {
+      "value": null,
+      "unit": null
+     }
+    },
+    "weight": {
+     "value": null,
+     "unit": null
+    },
+    "volume": {
+     "value": null,
+     "unit": null
+    }
+   },
+   "pallet": {
+    "id": null,
+    "number": null
+   },
+   "carton": {
+    "number": null
+   },
+   "lot": {
+    "number": "000140856146"
+   },
+   "barcode_values": null,
+   "purchase_orders": [
+    "0015766831",
+    "4500295404"
+   ],
+   "sales_orders": [
+    "13326"
+   ],
+   "serial_numbers": null,
+   "origin": {
+    "country": "Austria"
+   },
+   "dates": {
+    "manufacturing": {
+     "year": 2022,
+     "month": 1,
+     "day": 28
+    },
+    "expiry": {
+     "year": null,
+     "month": null,
+     "day": null
+    }
+   },
+   "additional_attributes": [
+    {
+     "upc": "26879",
+     "cartonId": "OP-D0533719"
+    },
+    {
+     "cartonId": "OP-D0533719"
+    },
+    {
+     "QTY": "2, 2",
+     "REV": "AR",
+     "UPC": "13326 26879",
+     "/EAN": "948382 246219",
+     "Product No": "142257-006",
+     "PRON ORDER:": "000140856146",
+     "OverPack ID:": "OP-D0533719",
+     "Sales Order:": "0015766831",
+     "HPE Order No:": "4500295404"
+    }
+   ]
+  },
+  "metadata": {},
+  "created_at": 1790925367,
+  "created_by": "key_TEST",
+  "updated_at": 1790925368,
+  "updated_by": "key_TEST",
+  "checksum": "TEST_checksum",
+  "_search": null
+ },
+ "endpoint": null
+}

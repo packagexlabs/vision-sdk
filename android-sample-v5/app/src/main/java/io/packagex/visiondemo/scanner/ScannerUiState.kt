@@ -1,7 +1,7 @@
 package io.packagex.visiondemo.scanner
 
 import androidx.compose.runtime.Immutable
-import io.packagex.visiondemo.ar.PayloadCount
+import io.packagex.arcount.CountView
 import io.packagex.visiondemo.data.Prefs
 import io.packagex.visiondemo.data.PriceTag
 import io.packagex.visiondemo.data.TtState
@@ -56,10 +56,19 @@ data class ScannerUiState(
     val feedback: Feedback? = null,
     /** Price tag: unique tags read so far; cleared only by ClearTags (iOS). The Price drawer renders these. */
     val tags: List<PriceTag> = emptyList(),
-    /** Item retrieval: codes reported in view within the last second. */
+    /** AR Item Count: the codes the AR session read within the last second ([io.packagex.visiondemo.ar.ArCount.codesInView]). */
     val codesInView: List<String> = emptyList(),
+    /** AR Item Count: listed reads wait for ARCore to find a surface ([io.packagex.visiondemo.ar.ArCount.findingSurface]). */
+    val findingSurface: Boolean = false,
+    /** AR Item Count: every code the AR session read since it started or New Scan, the most recently first read first,
+     *  at most 30 (the item list's "Seen" section). */
+    val seen: List<String> = emptyList(),
+    /** AR Item Count: the AR session's live pins per code, its count of each code ([io.packagex.visiondemo.ar.ArCount.pinCounts]). */
+    val pinCounts: Map<String, Int> = emptyMap(),
     /** Item retrieval list: the codes to find (iOS `items`). */
     val items: List<String> = emptyList(),
+    /** The items' names, SKU to name (iOS `catalogLookup`); a code may have none. */
+    val itemNames: Map<String, String> = emptyMap(),
     /** Zoom preset in use (reset to 1 on mode switch). */
     val zoom: Float = 1f,
     /** Settings › Advanced "Detection enabled"; not persisted (iOS `detectionEnabled`). */
@@ -72,10 +81,14 @@ data class ScannerUiState(
     val frontCamera: Boolean = false,
     /** Last tap-to-focus point, for the focus ring; a new [FocusTap.id] restarts the ring. */
     val focus: FocusTap? = null,
-    /** AR Barcode: marked instances per payload, most first (the chip, hint, shutter and Items sheet). */
-    val arCounts: List<PayloadCount> = emptyList(),
-    /** AR item catalog, SKU -> name, newest first (iOS `ItemCatalog`). */
-    val itemNames: Map<String, String> = emptyMap(),
+    /** AR Item Count: what Compose shows of the counter's newest view (prompt, per-item counts), without the
+     *  per-frame geometry the GL thread draws ([io.packagex.visiondemo.ar.forUi]). */
+    val arCount: CountView = CountView.EMPTY,
+    /** AR Item Count: past the entitlement gate with ARCore installed, so the AR session's view is shown and runs. */
+    val arOn: Boolean = false,
+    /** AR Item Count (design v6): step 2, counting the list on the shelf; false is step 1, scanning the SKUs into it
+     *  ([arBuildTray]). Every entry into the mode starts at step 1. */
+    val countStep: Boolean = false,
     /** Text Templates: account, templates and integration mode (iOS `model.tt`). */
     val tt: TtState = TtState(),
     /** Text Templates Stream: the session's latest guidance or failure, for the hint (iOS `guidance`). */

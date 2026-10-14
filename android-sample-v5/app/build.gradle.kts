@@ -23,6 +23,8 @@ android {
         buildConfigField("String", "PRODUCTION_API_KEY", secret("PRODUCTION_API_KEY").toJavaStringLiteral())
         // Text Templates (pxtexttemplates): sent as X-API-Key; empty omits the header (iOS MOBILE_API_KEY).
         buildConfigField("String", "MOBILE_API_KEY", secret("MOBILE_API_KEY").toJavaStringLiteral())
+        // localRelease: every on-device OCR model ships in the APK (iOS VSDK_LOCAL_MODELS).
+        buildConfigField("boolean", "LOCAL_MODELS", "false")
         buildConfigField("String", "IL_FEEDBACK_URL", secret("IL_FEEDBACK_URL").ifEmpty { "https://lvlm-api-567462092481.us-east1.run.app" }.toJavaStringLiteral())
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -55,7 +57,18 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
+        // "Local Models" (iOS scheme "VisionSDK Demo v5 (Local Models)"): release with every on-device OCR model
+        // in the APK, installed on first launch with nothing to download. Build: assembleLocalRelease / installLocalRelease.
+        create("localRelease") {
+            initWith(getByName("release"))
+            matchingFallbacks += "release"
+            buildConfigField("boolean", "LOCAL_MODELS", "true")
+        }
     }
+    // The bundled models are encrypted payloads: compressing them gains nothing and slows the first-launch install.
+    androidResources { noCompress += "bin" }
+    sourceSets["localRelease"].assets.srcDir(rootProject.layout.buildDirectory.dir("bundled-models"))
+    sourceSets["localRelease"].baselineProfiles.srcDir("src/release/generated/baselineProfiles")
     buildFeatures { compose = true; buildConfig = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     sourceSets["main"].assets.srcDir(layout.buildDirectory.dir("generated/uvdoc"))
@@ -65,6 +78,9 @@ android {
         jniLibs.pickFirsts += listOf("**/libtensorflowlite_jni.so", "**/libtensorflowlite_gpu_jni.so")
     }
     testOptions { unitTests.isIncludeAndroidResources = true }
+    // lintVitalAnalyzeRelease crashes in lint itself on this project's build scripts ("Cannot find a KaModule for the
+    // VirtualFile", LintDriver.checkBuildScripts), failing every assembleRelease; run lint on its own (./gradlew lint).
+    lint { checkReleaseBuilds = false }
 }
 kotlin { jvmToolchain(17) }
 
@@ -95,6 +111,14 @@ tasks.named("preBuild") {
     }
 }
 
+// Models for localRelease: fetched by bundled-models.gradle.kts with this environment's API key (never logged).
+val visionEnv = secret("VISION_ENV").ifEmpty { "staging" }
+extra["bundledModels.env"] = visionEnv
+extra["bundledModels.apiKey"] = secret("${visionEnv.uppercase()}_API_KEY")
+extra["bundledModels.sdkSource"] = visionSdkAndroidDir.resolve("VisionScanner/src/main/java/io/packagex/visionsdk/VisionSDK.kt")
+apply(from = "bundled-models.gradle.kts")
+tasks.matching { it.name == "preLocalReleaseBuild" }.configureEach { dependsOn("fetchBundledModels") }
+
 dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui); implementation(libs.compose.material3); implementation(libs.compose.material.icons)
@@ -106,7 +130,7 @@ dependencies {
     implementation(libs.coroutines.android); implementation(libs.datastore.preferences); implementation(libs.serialization.json)
     implementation(libs.vision.sdk); implementation(libs.barcode.scanner)
     implementation(project(":pxtexttemplates"))
-    implementation(libs.arcore)
+    implementation(libs.arcore); implementation(project(":arcount"))
     implementation(libs.camerax.core); implementation(libs.camerax.camera2); implementation(libs.camerax.lifecycle); implementation(libs.camerax.view)
     implementation(libs.litert); implementation(libs.litert.gpu); implementation(libs.litert.gpu.api); implementation(libs.mlkit.text)
     implementation(files(visionSdkAndroidDir.resolve("app/libs/docscanner-release.aar")))

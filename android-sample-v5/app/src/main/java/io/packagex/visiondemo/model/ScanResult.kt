@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import io.packagex.texttemplates.sdk.PXField
 import io.packagex.texttemplates.sdk.PXPredictionResult
 import io.packagex.texttemplates.sdk.PXQuickResult
-import io.packagex.visiondemo.ar.ArRow
 import io.packagex.visiondemo.data.TtPath
 import io.packagex.visiondemo.document.DocumentPage
 
@@ -21,12 +20,13 @@ sealed interface ScanResult {
     ) : ScanResult
     /** Price tag drawer; it reads `ScannerUiState.tags` live (iOS `.price`), so ClearTags empties an open drawer. */
     data object Price : ScanResult
-    /** Codes in view when the shutter was pressed, each flagged when it is in the item list (iOS `.retrieval`). */
-    data class Retrieval(val codes: List<Pair<String, Boolean>>) : ScanResult
-    /** One row per AR payload: value, symbology, marked instances and catalog name (iOS `.ar`). */
-    data class Ar(val rows: List<ArRow>) : ScanResult
+    /** AR Item Count's shutter in step 2 (design v6): each listed SKU, Found or Missing, with its count. */
+    data class Retrieval(val rows: List<RetrievalRow>) : ScanResult
     /** Every page of the document so far (iOS `.docacq`). */
     data class Document(val pages: List<DocumentPage>) : ScanResult
+    /** The photo just taken while its extraction runs (or after it failed), with the header's [title]/[subtitle]
+     *  meanwhile; the result replaces it. Never kept as the last result. */
+    data class Pending(val image: Bitmap, val title: String, val subtitle: String) : ScanResult
     /** A Text Templates prediction (iOS `.tt`): the captured [image] (One-Shot's still, Stream's grayscale frame),
      *  the [path] it came from, and [repredicted] once the user re-ran it against another loaded template. */
     data class TextTemplate(
@@ -39,3 +39,7 @@ sealed interface ScanResult {
         val fields: Map<String, PXField> get() = repredicted?.predictions ?: prediction.predictions
     }
 }
+
+/** A row of the AR Item Count drawer: [countLow]..[countHigh] units counted of a listed code; null for an unlisted one.
+ *  [found]: the listed SKU was read on the shelf since Start count (design v6's Found / Missing). */
+data class RetrievalRow(val code: String, val inList: Boolean, val countLow: Int?, val countHigh: Int?, val name: String? = null, val found: Boolean = false)

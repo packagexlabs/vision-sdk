@@ -14,8 +14,9 @@ import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonPrimitive
 
 /**
- * Turns raw extraction JSON (cloud or on-device) into a field list.
- * ponytail: generic flattening instead of per-type models; the SDK returns raw JSON either way.
+ * Turns raw extraction JSON (cloud or on-device) into a field list. Shipping labels, item labels and bills of
+ * lading list only the original demos' fields ([DocumentFields]); everything else (the default-prompt VLM
+ * answer) is flattened generically.
  * Ported from iOS `Model/OCRParser.swift`.
  */
 object OcrParser {
@@ -27,7 +28,7 @@ object OcrParser {
     )
 
     /**
-     * Field order and labels per document type, following the original demo's response views
+     * Generic-path field order and labels (a default-prompt VLM answer read as a shipping label), following the original demo's response views
      * (e.g. SLResponseView: account -> tracking -> courier -> weight -> RMA -> dimensions -> tags ->
      * receiver -> middle mile -> sender -> PO -> reference -> shipment type). Keys not listed follow
      * alphabetically.
@@ -73,7 +74,42 @@ object OcrParser {
      */
     fun parse(json: String, type: DocType): OcrResult {
         val top = parseJsonObject(json) ?: return OcrResult(type, emptyList(), emptyList(), null, json)
-        return parse(top["data"] as? JsonObject ?: top, top, type, json)
+        val body = top["data"] as? JsonObject ?: top
+        val (rows, tables) = when (type) {
+            DocType.SL -> DocumentFields.shippingLabel(body) to emptyList()
+            DocType.IL -> DocumentFields.itemLabel(body) to emptyList()
+            DocType.BOL -> DocumentFields.billOfLading(body)
+            else -> return parse(body, top, type, json)
+        }
+        return documentResult(rows, tables, top, type, json)
+    }
+
+    /**
+     * Shipping label, item label and bill of lading (cloud or on-device): only the fields the original demos showed,
+     * in their sections and order ([DocumentFields]), each linked to its on-device box when there is one.
+     */
+    private fun documentResult(
+        rows: List<DocumentFields.Row>,
+        tables: List<DocumentFields.Table>,
+        top: JsonObject,
+        type: DocType,
+        rawJson: String,
+    ): OcrResult {
+        val entities = boxedEntities(top)
+        val fields = rows.mapIndexed { index, row ->
+            val entity = entities[row.value]
+            OcrField(
+                id = "${row.section ?: ""}|${row.key}|$index",
+                key = row.key,
+                label = row.label,
+                value = row.value,
+                section = row.section,
+                vertices = entity?.second,
+                validatedBy = entity?.first ?: emptyList()
+            )
+        }
+        val primary = fields.firstOrNull { it.key == primaryKey[type] } ?: fields.firstOrNull()
+        return OcrResult(type, fields, tables.map { OcrTable(it.title, it.headers, it.rows) }, primary, rawJson)
     }
 
     /** [root] is the object to list; [top] the whole response, searched for on-device boxes; [rawJson] is kept on the result. */
