@@ -19,8 +19,10 @@ jobs:
           VERSION="${{ github.event.client_payload.version }}"
           ASSET_URL="${{ github.event.client_payload.asset_url }}"
           DIM_URL="${{ github.event.client_payload.dimensioning_asset_url }}"
-          if [[ -z "$VERSION" || -z "$ASSET_URL" ]]; then
-            echo "Error: Missing version or asset_url in payload"
+          BSK_URL="${{ github.event.client_payload.barcodescannerkit_asset_url }}"
+          # VisionSDK (2.10+) links BarcodeScannerKit dynamically, so it must ship beside it
+          if [[ -z "$VERSION" || -z "$ASSET_URL" || -z "$BSK_URL" ]]; then
+            echo "Error: Missing version, asset_url or barcodescannerkit_asset_url in payload"
             exit 1
           fi
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -36,9 +38,14 @@ jobs:
             echo "Error: dimensioning_asset_url must be a GitHub API URL under packagexlabs org"
             exit 1
           fi
+          if [[ ! "$BSK_URL" =~ ^https://api\.github\.com/repos/packagexlabs/ ]]; then
+            echo "Error: barcodescannerkit_asset_url must be a GitHub API URL under packagexlabs org"
+            exit 1
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "asset_url=$ASSET_URL" >> "$GITHUB_OUTPUT"
           echo "dimensioning_asset_url=$DIM_URL" >> "$GITHUB_OUTPUT"
+          echo "barcodescannerkit_asset_url=$BSK_URL" >> "$GITHUB_OUTPUT"
           echo "has_dimensioning=$([ -n "$DIM_URL" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Checkout
@@ -73,7 +80,24 @@ jobs:
           plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
             | grep -q '"ios-arm64"' && echo "Device slice OK" || { echo "Error: ios-arm64 device slice missing"; exit 1; }
           plutil -extract AvailableLibraries json -o - Sources/VisionSDK.xcframework/Info.plist \
-            | grep -q 'ios-arm64_x86_64-simulator' && echo "Simulator slice OK" || { echo "Error: Simulator slice missing"; exit 1; }
+            | grep -qE 'ios-arm64(_x86_64)?-simulator' && echo "Simulator slice OK" || { echo "Error: Simulator slice missing"; exit 1; }
+
+      - name: Download and replace BarcodeScannerKit xcframework
+        run: |
+          set -euo pipefail
+          curl -L \
+            -H "Authorization: Bearer ${{ secrets.VISION_SDK_IOS_PAT }}" \
+            -H "Accept: application/octet-stream" \
+            "${{ steps.payload.outputs.barcodescannerkit_asset_url }}" \
+            -o BarcodeScannerKit.xcframework.zip
+          rm -rf Sources/BarcodeScannerKit.xcframework
+          if unzip -l BarcodeScannerKit.xcframework.zip | grep -q '\.\.'; then
+            echo "Error: Zip contains path traversal entries"
+            exit 1
+          fi
+          unzip BarcodeScannerKit.xcframework.zip 'BarcodeScannerKit.xcframework/*' -d Sources/
+          plutil -extract AvailableLibraries json -o - Sources/BarcodeScannerKit.xcframework/Info.plist \
+            | grep -q '"ios-arm64"' || { echo "Error: BarcodeScannerKit ios-arm64 device slice missing"; exit 1; }
 
       - name: Download and unpack dimensioning bundle
         if: steps.payload.outputs.has_dimensioning == 'true'
@@ -174,12 +198,13 @@ jobs:
           xcodebuild build \
             -workspace .swiftpm/xcode/package.xcworkspace \
             -scheme VisionSDK \
-            -destination 'generic/platform=iOS Simulator'
+            -destination 'generic/platform=iOS Simulator' \
+            ARCHS="arm64"
 
       - name: Commit and tag
         run: |
           VERSION="${{ steps.payload.outputs.version }}"
-          git add Sources/VisionSDK.xcframework VisionSDK.podspec
+          git add Sources/VisionSDK.xcframework Sources/BarcodeScannerKit.xcframework VisionSDK.podspec
           if [ "${{ steps.payload.outputs.has_dimensioning }}" = "true" ]; then
             # Stage both xcframeworks + the model key. The .swift source dir
             # may also be staged for backwards compatibility but isn't required
