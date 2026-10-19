@@ -27,6 +27,7 @@ import SwiftUI
 import SystemConfiguration
 import TensorFlowLiteC
 import UIKit
+import VideoToolbox
 import Vision
 import VisionKit
 @_exported import VisionSDK
@@ -224,6 +225,7 @@ import zlib
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withbarCodes barcodes: [Swift.String])
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didCaptureOCRImage image: UIKit.UIImage, withCroppedImge croppedImage: UIKit.UIImage?, withBarcodes barcodes: [VisionSDK.DetectedCode], imageSharpnessScore: Swift.Float)
   @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect) -> Swift.Bool
+  @objc optional func codeScannerViewDidCapturePrice(_ price: Swift.String, withSKU sKU: Swift.String, withBoundingBox boundingBox: CoreFoundation.CGRect, expiryDate: Swift.String?, expiryText: Swift.String?) -> Swift.Bool
   @objc optional func codeScannerViewDidCaptureItemCodesWith(_ codes: [VisionSDK.DetectedCode]) -> [Swift.String : Swift.Bool]
   @objc optional func codeScannerViewdidUpdateSceneWithSharpness(_ imageSharpnessScore: Swift.Float, onCameraLiveGuidance: VisionSDK.CameraLiveGuidance)
   @objc optional func codeScannerView(_ scannerView: VisionSDK.CodeScannerView, didChangeCameraState state: VisionSDK.VSDKCameraState)
@@ -265,6 +267,8 @@ extension VisionSDK.CodeScannerViewDelegate {
     public var secondsToWaitBeforeDocumentCapture: Swift.Double
     public var selectedTemplate: Foundation.Data?
     public var isImageSharpnessIndicationOn: Swift.Bool
+    public var useNativeBarcodeDecoder: Swift.Bool
+    public var useAppleVisionBarcodeReader: Swift.Bool
     @objc public static var `default`: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
       @objc get
     }
@@ -331,6 +335,7 @@ extension VisionSDK.CodeScannerViewDelegate {
   @objc @_Concurrency.MainActor @preconcurrency final public func setLinearZoom(_ zoomLevel: Swift.Float)
   @objc @_Concurrency.MainActor @preconcurrency final public func rampZoomRatio(_ ratio: Swift.Float, durationMs: Swift.Int)
   @objc @_Concurrency.MainActor @preconcurrency final public func setFlashTurnedOn(_ enabled: Swift.Bool)
+  @objc @_Concurrency.MainActor @preconcurrency final public func setTorchLevel(_ level: Swift.Float)
   @objc @_Concurrency.MainActor @preconcurrency final public func getCurrentZoomRatio() -> Swift.Float
   @objc @_Concurrency.MainActor @preconcurrency final public func getMinZoomRatioAvailable() -> Swift.Float
   @objc @_Concurrency.MainActor @preconcurrency final public func getMaxZoomRatioAvailable() -> Swift.Float
@@ -345,6 +350,13 @@ extension VisionSDK.CodeScannerViewDelegate {
   @objc @_Concurrency.MainActor @preconcurrency final public func disableTapToFocus()
   @objc @_Concurrency.MainActor @preconcurrency final public func enablePinchPanToZoom()
   @objc @_Concurrency.MainActor @preconcurrency final public func disablePinchPanToZoom()
+  @_Concurrency.MainActor @preconcurrency final public var decoderStats: VisionSDK.CodeScannerView.DecoderStats {
+    get
+  }
+  @_Concurrency.MainActor @preconcurrency final public var showDecoderStats: Swift.Bool
+  @_Concurrency.MainActor @preconcurrency final public var showsDecoderInBoxCaption: Swift.Bool
+  @available(*, deprecated, message: "Unused: barcode modes draw with the PackageX overlay")
+  @_Concurrency.MainActor @preconcurrency final public var nativeBoxInset: CoreFoundation.CGFloat
   @_Concurrency.MainActor @preconcurrency @objc override final public func layoutSubviews()
   @objc deinit
   @_Concurrency.MainActor @preconcurrency @objc override dynamic public init(frame: CoreFoundation.CGRect)
@@ -388,8 +400,27 @@ extension AVFoundation.AVCaptureDevice {
   @objc final public let extractedData: [Swift.String : Swift.String]?
   @objc final public let boundingBox: CoreFoundation.CGRect
   @objc final public let normalizedBoundingBox: CoreFoundation.CGRect
-  public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero, normalizedBoundingBox: CoreFoundation.CGRect = .zero)
+  @objc final public let decoder: Swift.String
+  public init(stringValue: Swift.String, symbology: VisionSDK.BarcodeSymbology, extractedData: [Swift.String : Swift.String]? = nil, boundingBox: CoreFoundation.CGRect = .zero, normalizedBoundingBox: CoreFoundation.CGRect = .zero, decoder: Swift.String = "Apple Vision")
   @objc deinit
+}
+extension VisionSDK.CodeScannerView {
+  public struct DecoderStats {
+    public var visionFrames: Swift.Int
+    public var nativeFrames: Swift.Int
+    public var nativeFramesDropped: Swift.Int
+    public var visionReads: Swift.Int
+    public var nativeReads: Swift.Int
+    public var nativeMsEma: Swift.Double
+    public var nativeMsMax: Swift.Double
+    public var frameSize: CoreFoundation.CGSize
+    public var visionFramesSkipped: Swift.Int
+    public var visionMsEma: Swift.Double
+    public var nativeStageMs: (pre: Swift.Double, model: Swift.Double, decode: Swift.Double, track: Swift.Double)
+    public var rotationDegrees: Swift.Int
+    public var nativeLastTracks: (all: Swift.Int, withContent: Swift.Int, confirmed: Swift.Int)
+    public var nativeMLReady: Swift.Bool
+  }
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc(VisionAPIManager) public class VisionAPIManager : ObjectiveC.NSObject {
   @objc public static let shared: VisionSDK.VisionAPIManager
@@ -403,7 +434,7 @@ extension VisionSDK.VisionAPIManager {
   @objc dynamic public func callItemLabelsAPIWith(_ image: UIKit.UIImage, andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
   @objc dynamic public func callMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, andLocationId locationId: Swift.String? = nil, andOptions options: [Swift.String : Any], andMetaData metaData: [Swift.String : Any] = [:], andRecipient recipient: [Swift.String : Any]? = nil, andSender sender: [Swift.String : Any]? = nil, withImageResizing shouldResizeImage: Swift.Bool = true, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
   @objc dynamic public func callItemLabelsMatchingAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withResponseData responseData: Foundation.Data, withImageResizing shouldResizeImage: Swift.Bool = true, andMetaData metaData: [Swift.String : Any] = [:], _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
-  @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = false, _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
+  @objc dynamic public func callVLMCloudAPIWith(_ image: UIKit.UIImage, andBarcodes barcodes: [Swift.String], andApiKey apiKey: Swift.String? = nil, andToken token: Swift.String? = nil, withImageResizing shouldResizeImage: Swift.Bool = false, prompt: Swift.String? = nil, model: Swift.String = "vscan_large", _ completion: @escaping (_ data: Foundation.Data?, _ error: Foundation.NSError?) -> Swift.Void)
 }
 public enum Runtime {
   public static var version: Swift.String {
@@ -939,6 +970,7 @@ public let VSDKCameraErrorDomain: Swift.String
   @objc final public let minZoomRatio: Swift.Float
   @objc final public let maxZoomRatio: Swift.Float
   @objc final public let isTorchEnabled: Swift.Bool
+  @objc final public let torchLevel: Swift.Float
   @objc final public let focusMode: VisionSDK.VSDKFocusMode
   @objc final public let isPreviewActive: Swift.Bool
   @objc final public let isReleased: Swift.Bool
@@ -970,6 +1002,7 @@ public let VSDKCameraErrorDomain: Swift.String
   @objc public func rampZoom(_ ratio: Swift.Float, durationMs: Swift.Int)
   @objc public func setLinearZoom(_ linear: Swift.Float)
   @objc public func currentLinearZoom() -> Swift.Float
+  @objc public func setTorchLevel(_ level: Swift.Float)
   @objc public func setTorchEnabled(_ enabled: Swift.Bool)
   @objc public func setFocusPoint(_ point: CoreFoundation.CGPoint)
   @objc public func setFocusMode(_ mode: VisionSDK.VSDKFocusMode)

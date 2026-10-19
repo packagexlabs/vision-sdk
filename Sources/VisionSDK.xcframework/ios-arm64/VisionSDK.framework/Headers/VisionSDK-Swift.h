@@ -507,6 +507,9 @@ SWIFT_CLASS_NAMED("CodeScannerView")
 /// <code>VSDKCameraController.setTorchEnabled(_:)</code>, same persistence discipline as the zoom setters
 /// above (desired value stored in <code>RuntimeSettingsStore</code>, re-applied on every bind).
 - (void)setFlashTurnedOn:(BOOL)enabled;
+/// Sets torch brightness 0…1. 0 = off; values outside 0…1 are clamped. Persists across
+/// bind/unbind/rebind cycles exactly like <code>setFlashTurnedOn</code>.
+- (void)setTorchLevel:(float)level;
 /// Android parity: <code>VisionCameraView.getCurrentZoomRatio(): Float?</code>. Reads the session’s
 /// current LIVE state (not the desired-but-not-yet-applied value) – <code>1.0</code> pre-bind/idle,
 /// matching <code>VSDKCameraState.idle(facing:)</code>’s nominal default.
@@ -707,6 +710,11 @@ SWIFT_PROTOCOL_NAMED("CodeScannerViewDelegate")
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withbarCodes:(NSArray<NSString *> * _Nonnull)barcodes SWIFT_AVAILABILITY(ios,introduced=15.0,deprecated=17.0);
 - (void)codeScannerView:(CodeScannerView * _Nonnull)scannerView didCaptureOCRImage:(UIImage * _Nonnull)image withCroppedImge:(UIImage * _Nullable)croppedImage withBarcodes:(NSArray<DetectedCode *> * _Nonnull)barcodes imageSharpnessScore:(float)imageSharpnessScore;
 - (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU withBoundingBox:(CGRect)boundingBox SWIFT_WARN_UNUSED_RESULT;
+/// A price tag as codeScannerViewDidCapturePrice(_:withSKU:withBoundingBox:) reports it, with the expiry date
+/// printed on it: <code>expiryDate</code> ISO-8601 (yyyy-MM-dd) and <code>expiryText</code> the keyword and date as the tag reads
+/// (“Best before 15 AUG 2026”), both nil when the tag shows none. Called in place of the 3-argument method when
+/// implemented.
+- (BOOL)codeScannerViewDidCapturePrice:(NSString * _Nonnull)price withSKU:(NSString * _Nonnull)sKU withBoundingBox:(CGRect)boundingBox expiryDate:(NSString * _Nullable)expiryDate expiryText:(NSString * _Nullable)expiryText SWIFT_WARN_UNUSED_RESULT;
 - (NSDictionary<NSString *, NSNumber *> * _Nonnull)codeScannerViewDidCaptureItemCodesWith:(NSArray<DetectedCode *> * _Nonnull)codes SWIFT_WARN_UNUSED_RESULT;
 - (void)codeScannerViewdidUpdateSceneWithSharpness:(float)imageSharpnessScore onCameraLiveGuidance:(enum CameraLiveGuidance)onCameraLiveGuidance;
 /// RN camera-controls Phase 3 bridge: fires on EVERY <code>VSDKCameraState</code> transition (not just
@@ -731,6 +739,10 @@ SWIFT_CLASS_NAMED("DetectedCode")
 /// Bounding box normalized to 0-1 range with top-left origin.
 /// Use this when you need device/resolution-independent coordinates.
 @property (nonatomic, readonly) CGRect normalizedBoundingBox;
+/// Which decoder read this code: “Apple Vision”, “PackageX” (the PackageX engine,
+/// BarcodeScannerKit, in barcode modes) or “Apple Vision + PackageX” when both read the
+/// same value.
+@property (nonatomic, readonly, copy) NSString * _Nonnull decoder;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -898,6 +910,7 @@ SWIFT_CLASS("_TtC9VisionSDK20VSDKCameraController")
 - (void)rampZoom:(float)ratio durationMs:(NSInteger)durationMs;
 - (void)setLinearZoom:(float)linear;
 - (float)currentLinearZoom SWIFT_WARN_UNUSED_RESULT;
+- (void)setTorchLevel:(float)level;
 - (void)setTorchEnabled:(BOOL)enabled;
 - (void)setFocusPoint:(CGPoint)point;
 - (void)setFocusMode:(enum VSDKFocusMode)mode;
@@ -974,6 +987,8 @@ SWIFT_CLASS("_TtC9VisionSDK15VSDKCameraState")
 @property (nonatomic, readonly) float minZoomRatio;
 @property (nonatomic, readonly) float maxZoomRatio;
 @property (nonatomic, readonly) BOOL isTorchEnabled;
+/// Desired torch brightness (0…1). 0 when torch is off or the device has no torch.
+@property (nonatomic, readonly) float torchLevel;
 @property (nonatomic, readonly) enum VSDKFocusMode focusMode;
 /// First-frame-landed lifecycle signal (additive, cross-platform parity with Android’s
 /// <code>CameraState.isPreviewActive</code>): <code>true</code> once the CURRENTLY-bound camera has delivered at
@@ -1103,7 +1118,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) VisionAPIMan
 - (void)callItemLabelsAPIWith:(UIImage * _Nonnull)image andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)callMatchingAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withResponseData:(NSData * _Nonnull)responseData andLocationId:(NSString * _Nullable)locationId andOptions:(NSDictionary<NSString *, id> * _Nonnull)options andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData andRecipient:(NSDictionary<NSString *, id> * _Nullable)recipient andSender:(NSDictionary<NSString *, id> * _Nullable)sender withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 - (void)callItemLabelsMatchingAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withResponseData:(NSData * _Nonnull)responseData withImageResizing:(BOOL)shouldResizeImage andMetaData:(NSDictionary<NSString *, id> * _Nonnull)metaData :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
-- (void)callVLMCloudAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
+- (void)callVLMCloudAPIWith:(UIImage * _Nonnull)image andBarcodes:(NSArray<NSString *> * _Nonnull)barcodes andApiKey:(NSString * _Nullable)apiKey andToken:(NSString * _Nullable)token withImageResizing:(BOOL)shouldResizeImage prompt:(NSString * _Nullable)prompt model:(NSString * _Nonnull)model :(void (^ _Nonnull)(NSData * _Nullable, NSError * _Nullable))completion;
 @end
 
 #endif // defined(__OBJC__)

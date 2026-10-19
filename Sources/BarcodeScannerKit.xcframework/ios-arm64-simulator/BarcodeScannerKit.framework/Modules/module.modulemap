@@ -1,0 +1,3 @@
+framework module BarcodeScannerKit {
+  header "BarcodeScannerKit-Swift.h"
+}
