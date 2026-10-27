@@ -267,7 +267,6 @@ extension VisionSDK.CodeScannerViewDelegate {
     public var secondsToWaitBeforeDocumentCapture: Swift.Double
     public var selectedTemplate: Foundation.Data?
     public var isImageSharpnessIndicationOn: Swift.Bool
-    public var useNativeBarcodeDecoder: Swift.Bool
     public var useAppleVisionBarcodeReader: Swift.Bool
     @objc public static var `default`: VisionSDK.CodeScannerView.ObjectDetectionConfiguration {
       @objc get

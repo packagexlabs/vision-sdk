@@ -740,7 +740,7 @@ SWIFT_CLASS_NAMED("DetectedCode")
 /// Use this when you need device/resolution-independent coordinates.
 @property (nonatomic, readonly) CGRect normalizedBoundingBox;
 /// Which decoder read this code: “Apple Vision”, “PackageX” (the PackageX engine,
-/// BarcodeScannerKit, in barcode modes) or “Apple Vision + PackageX” when both read the
+/// the engine, in barcode modes) or “Apple Vision + PackageX” when both read the
 /// same value.
 @property (nonatomic, readonly, copy) NSString * _Nonnull decoder;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
