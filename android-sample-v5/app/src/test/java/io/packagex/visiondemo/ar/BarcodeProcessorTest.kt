@@ -13,14 +13,15 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34])
 class BarcodeProcessorTest {
     @Test
-    fun `vision-barcode-scanner is gone and the engine is BarcodeScannerApp's`() {
+    fun `the engine is not on the classpath, only the SDK's frame reader is`() {
         assertFalse(onClasspath("com.packagexlabs.visionbarcodescanner.VisionBarcodeScanner"))
-        assertTrue(onClasspath("com.example.barcodescanner.BarcodeScanner"))
+        assertFalse(onClasspath("com.example.barcodescanner.BarcodeScanner"))
+        assertTrue(onClasspath("io.packagex.visionsdk.ar.ArBarcodeScanner"))
     }
 
     @Test
     fun `a scanner that cannot be made leaves the processor closable`() {
-        // The JVM has no libbarcode_decoder.so: BarcodeScanner.create throws on the worker, which logs it.
+        // The JVM has no native decoder: ArBarcodeScanner.create throws on the worker, which logs it.
         val processor = BarcodeProcessor(RuntimeEnvironment.getApplication())
         processor.close()
         processor.close() // a second close is harmless

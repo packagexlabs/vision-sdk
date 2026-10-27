@@ -7,10 +7,10 @@ import android.hardware.camera2.CameraManager
 import android.media.Image
 import android.media.ImageReader
 import android.util.Log
-import com.example.barcodescanner.BarcodeScanner
-import com.example.barcodescanner.ScannerSettings
-import com.example.barcodescanner.Symbology
 import io.packagex.arcount.Read
+import io.packagex.visionsdk.ar.ArBarcodeScanner
+import io.packagex.visionsdk.ar.ArScanOptions
+import io.packagex.visionsdk.dto.BarcodeSymbology
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
@@ -30,20 +30,20 @@ internal const val AR_REFRESH_AFTER_MS = 0L
  * that turn stray stripes into wrong codes.
  */
 internal val AR_SYMBOLOGIES = setOf(
-    Symbology.QR_CODE, Symbology.MICRO_QR, Symbology.AZTEC, Symbology.DATA_MATRIX, Symbology.PDF_417,
-    Symbology.EAN_13, Symbology.EAN_8, Symbology.UPC_A, Symbology.UPC_E, Symbology.CODE_128, Symbology.CODE_39,
-    Symbology.CODE_93, Symbology.CODABAR, Symbology.ITF, Symbology.DATABAR, Symbology.DATABAR_EXPANDED,
-    Symbology.DATABAR_LIMITED,
+    BarcodeSymbology.qr, BarcodeSymbology.microQR, BarcodeSymbology.aztec, BarcodeSymbology.dataMatrix, BarcodeSymbology.pdf417,
+    BarcodeSymbology.ean13, BarcodeSymbology.ean8, BarcodeSymbology.upca, BarcodeSymbology.upce, BarcodeSymbology.code128, BarcodeSymbology.code39,
+    BarcodeSymbology.code93, BarcodeSymbology.codabar, BarcodeSymbology.I2of5, BarcodeSymbology.gs1DataBar, BarcodeSymbology.gs1DataBarExpanded,
+    BarcodeSymbology.gs1DataBarLimited,
 )
 
 /**
- * The engine's settings for AR Count: a shelf of identical units ([ScannerSettings.repeatedPayloads]) and the decoder
+ * The reader's options for AR Count: a shelf of identical units ([ArScanOptions.repeatedPayloads]) and the decoder
  * speed settings of 0.2.20-ar (scan/study/31, steps 2a to 5), off by default in the engine: a box last read as 1D is
  * re-read without the as-is 2D read, a never-read box over 0.5 Mpx (a whole label) takes no frame time, a begun place
  * stops at the frame's budget (25 ms; 5x for a thorough one, the cap the host replay chose), one place a frame is kept
  * for a new barcode of the localizer, and the detector runs every 250 ms in place of 60 while the picture stands still.
  */
-internal fun arScannerSettings() = ScannerSettings(
+internal fun arScanOptions() = ArScanOptions(
     symbologies = AR_SYMBOLOGIES,
     repeatedPayloads = true,
     skipAsItIsForKnown1D = true,
@@ -63,8 +63,8 @@ internal fun runBehind(worker: ExecutorService, task: () -> Unit) {
 }
 
 /**
- * The engine worker (spec 5.8), the spike's: images of the app stream go to BarcodeScannerApp's engine
- * ([BarcodeScanner.scanAll] of the planes, the whole frame, turned upright by the camera's SENSOR_ORIENTATION) on one
+ * The engine worker (spec 5.8), the spike's: images of the app stream go to the SDK's frame reader
+ * ([ArBarcodeScanner.scan] of the planes, the whole frame, turned upright by the camera's SENSOR_ORIENTATION) on one
  * worker thread, one at a time. An image that comes while one is decoded waits for the engine, the newest one only
  * ([LatestWins]), so a decode longer than a frame (4K on the Memor 35, trace of 2026-10-02: 47 ms at p50, 193 at p90;
  * frames every 33 ms) does not leave the worker idle until the next frame. The engine runs with [arScannerSettings]
@@ -84,7 +84,7 @@ class BarcodeProcessor(
 
     // Of the worker: loading the detector takes a moment, which the main thread does not have.
     // Null until it is made, and for good if it cannot be (then nothing is read).
-    private var scanner: BarcodeScanner? = null
+    private var scanner: ArBarcodeScanner? = null
 
     /**
      * The counter's refresh for the next frames ([io.packagex.arcount.CountView.desiredRefreshMs], spec 5.3), read on
@@ -100,7 +100,7 @@ class BarcodeProcessor(
     init {
         worker.execute {
             try {
-                scanner = BarcodeScanner.create(context.applicationContext, arScannerSettings())
+                scanner = ArBarcodeScanner.create(context.applicationContext, arScanOptions())
                     .also { it.refreshAfterMs = refreshAfterMs }
             } catch (t: Throwable) {
                 Log.e(TAG, "the barcode scanner could not be made; AR Count reads no barcodes", t)
@@ -149,7 +149,7 @@ class BarcodeProcessor(
         if (closed) return
         closed = true
         intake.clear()
-        // After any frame still queued: BarcodeScanner is closed only when no scan is running.
+        // After any frame still queued: The scanner is closed only when no scan is running.
         worker.execute {
             scanner?.close()
             scanner = null
@@ -180,7 +180,7 @@ class BarcodeProcessor(
         intake.next()?.let(::submit)
     }
 
-    private fun scan(scanner: BarcodeScanner, d: Decode) {
+    private fun scan(scanner: ArBarcodeScanner, d: Decode) {
         val image = d.image
         val w = image.width
         val h = image.height
@@ -190,7 +190,7 @@ class BarcodeProcessor(
         val refresh = refreshFor(desiredRefresh(), refreshAfterMs)
         scanner.refreshAfterMs = refresh
         val started = System.nanoTime()
-        val frame = scanner.scanAll(
+        val frame = scanner.scan(
             p[0].buffer, p[1].buffer, p[2].buffer, w, h, p[0].rowStride, p[1].rowStride, p[1].pixelStride,
             Rect(0, 0, w, h), rotation, ts,
         )

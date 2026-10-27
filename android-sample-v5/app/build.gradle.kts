@@ -128,7 +128,7 @@ dependencies {
     implementation(libs.hilt.android); ksp(libs.hilt.compiler); implementation(libs.hilt.navigation.compose)
     implementation(libs.profileinstaller); baselineProfile(project(":baselineprofile"))
     implementation(libs.coroutines.android); implementation(libs.datastore.preferences); implementation(libs.serialization.json)
-    implementation(libs.vision.sdk); implementation(libs.barcode.scanner)
+    implementation(libs.vision.sdk)
     implementation(project(":pxtexttemplates"))
     implementation(libs.arcore); implementation(project(":arcount"))
     implementation(libs.camerax.core); implementation(libs.camerax.camera2); implementation(libs.camerax.lifecycle); implementation(libs.camerax.view)

@@ -1,9 +1,9 @@
 package io.packagex.visiondemo.ar
 
-import com.example.barcodescanner.FrameBarcode
-import com.example.barcodescanner.FrameStats
-import com.example.barcodescanner.ScanFrame
-import com.example.barcodescanner.Symbology
+import io.packagex.visionsdk.ar.ArBarcode
+import io.packagex.visionsdk.ar.ArFrame
+import io.packagex.visionsdk.ar.ArStats
+import io.packagex.visionsdk.dto.BarcodeSymbology
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -38,15 +38,15 @@ class ReadsTest {
 
     @Test fun onlyWhatTheFrameDecodedIsARead() {
         val box = floatArrayOf(0.4f, 0.4f, 0.6f, 0.4f, 0.6f, 0.5f, 0.4f, 0.5f)
-        val frame = ScanFrame(
+        val frame = ArFrame(
             listOf(
-                FrameBarcode(1, null, null, box),                                           // a detector box
-                FrameBarcode(2, "TRACK", Symbology.CODE_128, box),                          // a track this frame did not decode
-                FrameBarcode(3, "B", Symbology.EAN_13, box, raw = box, rawText = "A"),      // shows B, decoded A here
-                FrameBarcode(4, null, null, box, raw = box, rawText = null),
-                FrameBarcode(5, "", null, box, raw = box, rawText = ""),
+                ArBarcode(1, null, BarcodeSymbology.unknown, null, box, null, null),                                           // a detector box
+                ArBarcode(2, "TRACK", BarcodeSymbology.code128, "code128", box, null, null),                          // a track this frame did not decode
+                ArBarcode(3, "B", BarcodeSymbology.ean13, "ean13", box, rawCorners = box, rawText = "A"),      // shows B, decoded A here
+                ArBarcode(4, null, BarcodeSymbology.unknown, null, box, rawCorners = box, rawText = null),
+                ArBarcode(5, "", BarcodeSymbology.unknown, null, box, rawCorners = box, rawText = ""),
             ),
-            2160, 3840, FrameStats(30f, 5, 1, 1f, 10f, 5f),
+            2160, 3840, ArStats(30f, 5, 1, 1f, 10f, 5f),
         )
         val reads = readsOf(frame, rotationDegrees = 90, rawWidth = 3840, rawHeight = 2160, timestampNs = 77L)
         assertEquals(1, reads.size)
@@ -66,7 +66,7 @@ class ReadsTest {
 
     @Test fun aQuadAtTheBorderIsFlagged() {
         val cut = floatArrayOf(0.0003f, 0.4f, 0.1f, 0.4f, 0.1f, 0.5f, 0.0003f, 0.5f)   // tl x = 0.0003 * 3840 = 1.2 px
-        val frame = ScanFrame(listOf(FrameBarcode(1, "A", Symbology.CODE_128, cut, raw = cut, rawText = "A")), 3840, 2160, FrameStats(30f, 1, 1, 1f, 1f, 1f))
+        val frame = ArFrame(listOf(ArBarcode(1, "A", BarcodeSymbology.code128, "code128", cut, rawCorners = cut, rawText = "A")), 3840, 2160, ArStats(30f, 1, 1, 1f, 1f, 1f))
         assertTrue(readsOf(frame, 0, 3840, 2160, 1L).single().touchesBorder)
     }
 
@@ -81,6 +81,6 @@ class ReadsTest {
     }
 
     @Test fun engineStatsCarryTheFrameStats() {
-        assertEquals(EngineStats(12f, 5f, 20f, 18f, 4, 3, 47f, 9L), FrameStats(12f, 4, 3, 5f, 20f, 18f).toEngineStats(47f, 9L))
+        assertEquals(EngineStats(12f, 5f, 20f, 18f, 4, 3, 47f, 9L), ArStats(12f, 4, 3, 5f, 20f, 18f).toEngineStats(47f, 9L))
     }
 }

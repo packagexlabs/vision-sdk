@@ -1,14 +1,14 @@
 package io.packagex.visiondemo.ar
 
-import com.example.barcodescanner.FrameStats
-import com.example.barcodescanner.ScanFrame
 import io.packagex.arcount.Read
+import io.packagex.visionsdk.ar.ArFrame
+import io.packagex.visionsdk.ar.ArStats
 
 /** A corner this close to the image border, in pixels, marks a cut symbol: its corners are guessed (spec 5.3). */
 internal const val BORDER_PX = 2.0
 
 /**
- * What the engine took for one app-stream image, to explain slow 4K frames: its [ScanFrame.stats] ([fps] the engine's
+ * What the engine took for one app-stream image, to explain slow 4K frames: its [ArFrame.stats] ([fps] the engine's
  * frame rate; [prepareMs] picture motion and handing the frame to the detector, [detectMs] the detector's last look,
  * [decodeMs] localizer and decoder; [barcodes] boxes, [decoded] of them with a text shown) and [scanMs], the whole
  * `scanAll` call on the worker; [droppedImages], the images so far that waited for the engine and were replaced by a
@@ -42,7 +42,7 @@ data class PipeCounters(
     val blurSkipped: Long = 0,
 )
 
-internal fun FrameStats.toEngineStats(scanMs: Float, droppedImages: Long, refreshAfterMs: Long = -1L) =
+internal fun ArStats.toEngineStats(scanMs: Float, droppedImages: Long, refreshAfterMs: Long = -1L) =
     EngineStats(framesPerSecond, prepareMs, detectMs, decodeMs, barcodes, decoded, scanMs, droppedImages, refreshAfterMs)
 
 /**
@@ -82,14 +82,14 @@ internal fun touchesBorder(corners: List<Double>, width: Int, height: Int): Bool
     }
 
 /**
- * The counter's reads of one engine frame (spec 5.3): only what this frame decoded ([com.example.barcodescanner.FrameBarcode.raw]
- * and its `rawText`, engine 0.2.18), with the decoded corners in pixels of the unrotated [rawWidth] x [rawHeight] frame and
+ * The counter's reads of one engine frame (spec 5.3): only what this frame decoded ([io.packagex.visionsdk.ar.ArBarcode.rawCorners]
+ * and its `rawText`), with the decoded corners in pixels of the unrotated [rawWidth] x [rawHeight] frame and
  * the text read there, which may differ from the text the engine's track shows. Detector and localizer boxes (no `raw`) are
  * left out; a read whose corners touch the border is kept and flagged, for the counter to leave out.
  */
-internal fun readsOf(frame: ScanFrame, rotationDegrees: Int, rawWidth: Int, rawHeight: Int, timestampNs: Long): List<Read> =
+internal fun readsOf(frame: ArFrame, rotationDegrees: Int, rawWidth: Int, rawHeight: Int, timestampNs: Long): List<Read> =
     frame.barcodes.mapNotNull { b ->
-        val raw = b.raw ?: return@mapNotNull null
+        val raw = b.rawCorners ?: return@mapNotNull null
         val text = b.rawText?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
         val corners = uprightQuadToRaw(raw, frame.cropWidth, frame.cropHeight, rotationDegrees, rawWidth, rawHeight).toList()
         Read(
@@ -97,7 +97,7 @@ internal fun readsOf(frame: ScanFrame, rotationDegrees: Int, rawWidth: Int, rawH
             text = text,
             corners = corners,
             engineId = b.id,
-            symbology = b.symbology?.id,
+            symbology = b.symbologyId,
             touchesBorder = touchesBorder(corners, rawWidth, rawHeight),
         )
     }
@@ -108,9 +108,9 @@ internal fun readsOf(frame: ScanFrame, rotationDegrees: Int, rawWidth: Int, rawH
  * pixels as [readsOf]'s. For rule 7 only: a pin in one is seen, not missed (a batch reads 1 of 4 identical units, the
  * other 3 are still there; small tight codes are boxed before they are read).
  */
-internal fun trackedOf(frame: ScanFrame, rotationDegrees: Int, rawWidth: Int, rawHeight: Int, timestampNs: Long): List<Read> =
+internal fun trackedOf(frame: ArFrame, rotationDegrees: Int, rawWidth: Int, rawHeight: Int, timestampNs: Long): List<Read> =
     frame.barcodes.mapNotNull { b ->
-        if (b.raw != null) return@mapNotNull null
+        if (b.rawCorners != null) return@mapNotNull null
         val corners = uprightQuadToRaw(b.corners, frame.cropWidth, frame.cropHeight, rotationDegrees, rawWidth, rawHeight).toList()
-        Read(timestampNs, b.text.orEmpty(), corners, b.id, b.symbology?.id)
+        Read(timestampNs, b.text.orEmpty(), corners, b.id, b.symbologyId)
     }
