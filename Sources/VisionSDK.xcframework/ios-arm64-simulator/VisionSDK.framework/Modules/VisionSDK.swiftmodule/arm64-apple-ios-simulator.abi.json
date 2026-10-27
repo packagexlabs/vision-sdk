@@ -57620,63 +57620,63 @@
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "IntegerLiteral",
-      "offset": 26397,
+      "offset": 26255,
       "length": 1,
       "value": "4"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "IntegerLiteral",
-      "offset": 26521,
+      "offset": 26379,
       "length": 3,
       "value": "150"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "IntegerLiteral",
-      "offset": 26654,
+      "offset": 26512,
       "length": 4,
       "value": "1000"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "FloatLiteral",
-      "offset": 26779,
+      "offset": 26637,
       "length": 4,
       "value": "0.25"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "Dictionary",
-      "offset": 26830,
+      "offset": 26688,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "Array",
-      "offset": 26870,
+      "offset": 26728,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "Array",
-      "offset": 31570,
+      "offset": 31428,
       "length": 2,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "Dictionary",
-      "offset": 31617,
+      "offset": 31475,
       "length": 3,
       "value": "[]"
     },
     {
       "filePath": "\/Users\/runner\/work\/vision-sdk-ios\/vision-sdk-ios\/VisionSDK\/VisionSDK\/SDKFiles\/BarcodeMerge.swift",
       "kind": "Array",
-      "offset": 32396,
+      "offset": 32254,
       "length": 2,
       "value": "[]"
     },
