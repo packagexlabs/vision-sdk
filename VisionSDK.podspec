@@ -23,11 +23,9 @@ Pod::Spec.new do |s|
     c.ios.deployment_target = '16.0'
     c.vendored_frameworks   = [
       'Sources/VisionSDK.xcframework',
-      'Sources/TensorFlowLiteC.xcframework',
-      # VisionSDK links it dynamically; the app embeds it next to VisionSDK
-      'Sources/BarcodeScannerKit.xcframework'
+      'Sources/TensorFlowLiteC.xcframework'
     ]
-    # VisionSDK and BarcodeScannerKit have no x86_64 simulator slice
+    # VisionSDK has no x86_64 simulator slice
     c.pod_target_xcconfig   = { 'OTHER_LDFLAGS' => '-lc++', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
     c.user_target_xcconfig  = { 'OTHER_LDFLAGS' => '-lc++', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
   end
