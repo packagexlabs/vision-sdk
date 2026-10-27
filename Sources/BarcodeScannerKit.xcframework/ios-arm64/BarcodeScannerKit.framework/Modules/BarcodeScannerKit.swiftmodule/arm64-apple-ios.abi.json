@@ -8141,623 +8141,623 @@
   },
   "ConstValues": [
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeDetector.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeDetector.swift",
       "kind": "IntegerLiteral",
       "offset": 7465,
       "length": 1,
       "value": "4"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
       "kind": "Array",
       "offset": 448,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
       "kind": "Dictionary",
       "offset": 1636,
       "length": 3,
       "value": "[]"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
       "kind": "IntegerLiteral",
       "offset": 4500,
       "length": 1,
       "value": "2"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
       "kind": "FloatLiteral",
       "offset": 4538,
       "length": 3,
       "value": "1.5"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
       "kind": "FloatLiteral",
       "offset": 4584,
       "length": 3,
       "value": "2.5"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
       "kind": "FloatLiteral",
       "offset": 4597,
       "length": 4,
       "value": "1.25"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeOverlayView.swift",
       "kind": "FloatLiteral",
       "offset": 4664,
       "length": 3,
       "value": "7.5"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeScanner.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeScanner.swift",
       "kind": "IntegerLiteral",
       "offset": 1238,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeScannerView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeScannerView.swift",
       "kind": "Array",
       "offset": 1897,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/BarcodeScannerView.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/BarcodeScannerView.swift",
       "kind": "BooleanLiteral",
       "offset": 2033,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Camera.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Camera.swift",
       "kind": "StringLiteral",
       "offset": 1857,
       "length": 35,
       "value": "\"com.example.barcodescanner.frames\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Camera.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Camera.swift",
       "kind": "BooleanLiteral",
       "offset": 2201,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Camera.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Camera.swift",
       "kind": "FloatLiteral",
       "offset": 2258,
       "length": 3,
       "value": "0.0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Camera.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Camera.swift",
       "kind": "FloatLiteral",
       "offset": 2283,
       "length": 3,
       "value": "0.0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Camera.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Camera.swift",
       "kind": "StringLiteral",
       "offset": 2433,
       "length": 35,
       "value": "\"com.example.barcodescanner.camera\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Camera.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Camera.swift",
       "kind": "BooleanLiteral",
       "offset": 2748,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Camera.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Camera.swift",
       "kind": "Array",
       "offset": 2802,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/CameraFrame.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/CameraFrame.swift",
       "kind": "IntegerLiteral",
       "offset": 509,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "BooleanLiteral",
       "offset": 1004,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1449,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1462,
       "length": 1,
       "value": "2"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1475,
       "length": 1,
       "value": "4"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1488,
       "length": 1,
       "value": "6"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1494,
       "length": 1,
       "value": "4"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1532,
       "length": 1,
       "value": "1"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1545,
       "length": 1,
       "value": "3"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1558,
       "length": 1,
       "value": "5"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1571,
       "length": 1,
       "value": "7"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1577,
       "length": 1,
       "value": "4"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1877,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameAnalyzer.swift",
       "kind": "IntegerLiteral",
       "offset": 1940,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2712,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2732,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2756,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2781,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2810,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2832,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2862,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2887,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2908,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2939,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2964,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 2984,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "BooleanLiteral",
       "offset": 3001,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 3034,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/FrameStats.swift",
       "kind": "IntegerLiteral",
       "offset": 3066,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
       "kind": "Array",
       "offset": 8210,
       "length": 2,
       "value": "[]"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
       "kind": "BooleanLiteral",
       "offset": 8243,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
       "kind": "IntegerLiteral",
       "offset": 8276,
       "length": 1,
       "value": "0"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
       "kind": "BooleanLiteral",
       "offset": 9920,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/NativeEngine.swift",
       "kind": "StringLiteral",
       "offset": 10420,
       "length": 5,
       "value": "\"aab\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/PipelineAnalyzer.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/PipelineAnalyzer.swift",
       "kind": "BooleanLiteral",
       "offset": 1222,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerLog.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerLog.swift",
       "kind": "StringLiteral",
       "offset": 170,
       "length": 28,
       "value": "\"com.example.barcodescanner\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerLog.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerLog.swift",
       "kind": "StringLiteral",
       "offset": 210,
       "length": 16,
       "value": "\"BarcodeScanner\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "BooleanLiteral",
       "offset": 3831,
       "length": 4,
       "value": "true"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "BooleanLiteral",
       "offset": 3903,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "BooleanLiteral",
       "offset": 3947,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "BooleanLiteral",
       "offset": 3992,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "BooleanLiteral",
       "offset": 4034,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "BooleanLiteral",
       "offset": 4075,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "BooleanLiteral",
       "offset": 4118,
       "length": 5,
       "value": "false"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/ScannerSettings.swift",
       "kind": "IntegerLiteral",
       "offset": 4156,
       "length": 1,
       "value": "4"
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 309,
       "length": 9,
       "value": "\"code128\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 336,
       "length": 7,
       "value": "\"ean13\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 360,
       "length": 6,
       "value": "\"ean8\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 383,
       "length": 6,
       "value": "\"upca\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 406,
       "length": 6,
       "value": "\"upce\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 431,
       "length": 8,
       "value": "\"code39\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 563,
       "length": 11,
       "value": "\"code39ext\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 593,
       "length": 8,
       "value": "\"code93\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 621,
       "length": 9,
       "value": "\"codabar\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 646,
       "length": 5,
       "value": "\"itf\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 667,
       "length": 5,
       "value": "\"msi\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 692,
       "length": 9,
       "value": "\"databar\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 728,
       "length": 17,
       "value": "\"databar_limited\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 773,
       "length": 18,
       "value": "\"databar_expanded\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 818,
       "length": 17,
       "value": "\"databar_stacked\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 870,
       "length": 26,
       "value": "\"databar_expanded_stacked\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 916,
       "length": 9,
       "value": "\"telepen\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 948,
       "length": 12,
       "value": "\"dxfilmedge\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 979,
       "length": 8,
       "value": "\"pdf417\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 1011,
       "length": 13,
       "value": "\"micropdf417\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 1043,
       "length": 8,
       "value": "\"qrcode\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 1071,
       "length": 9,
       "value": "\"microqr\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 1097,
       "length": 6,
       "value": "\"rmqr\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 1126,
       "length": 12,
       "value": "\"datamatrix\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 1156,
       "length": 7,
       "value": "\"aztec\""
     },
     {
-      "filePath": "\/tmp\/bsa-ios\/iosApp\/BarcodeScannerKit\/Symbology.swift",
+      "filePath": "\/Users\/kashif\/Downloads\/monorepo\/BarcodeScannerApp\/iosApp\/BarcodeScannerKit\/Symbology.swift",
       "kind": "StringLiteral",
       "offset": 1184,
       "length": 10,
